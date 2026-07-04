@@ -600,14 +600,13 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .login-box .btn { width:100%; padding:12px; font-size:14px; margin-top:8px; border-radius:var(--radius-xs); background:linear-gradient(135deg, var(--accent), var(--accent-dim)); color:#fff; border:none; cursor:pointer; letter-spacing:1px; box-shadow:0 4px 12px rgba(153,47,72,0.25); transition:var(--transition); }
 .login-box .btn:hover { opacity:.92; transform:translateY(-1px); box-shadow:0 6px 20px rgba(153,47,72,0.35); }
 .login-err { font-size:11px; color:var(--danger-text); margin-top:8px; min-height:18px; }
-.sidebar-user { padding:10px 14px; border-top:1px solid var(--border-subtle); display:flex; align-items:center; gap:8px; font-size:11px; position:relative; }
-.sidebar-user .user-avatar { width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
-.sidebar-user .user-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); }
-.sidebar-user .btn-gear { width:24px; height:24px; border:none; background:none; cursor:pointer; color:var(--text-muted); border-radius:50%; display:flex; align-items:center; justify-content:center; transition:var(--transition); }
-.sidebar-user .btn-gear:hover { background:var(--bg-surface-alt); color:var(--text); }
-.sidebar-login-btn { width:100%; padding:8px 12px; border:none; background:var(--accent); color:#fff; border-radius:var(--radius-xs); font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:var(--transition); }
-.sidebar-login-btn:hover { background:var(--accent-dim); }
-.user-dropdown { position:absolute; bottom:100%; right:0; margin-bottom:4px; background:var(--card); border-radius:var(--radius-sm); box-shadow:var(--shadow-lg); min-width:140px; overflow:hidden; z-index:100; display:none; }
+.top-bar .top-user { display:flex; align-items:center; gap:8px; font-size:11px; position:relative; cursor:pointer; padding:4px 8px; border-radius:var(--radius-xs); transition:var(--transition); }
+.top-bar .top-user:hover { background:var(--bg-surface-hover); }
+.top-bar .top-user .user-avatar { width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
+.top-bar .top-user .user-name { color:var(--text); font-size:11px; }
+.top-bar .top-login-btn { padding:6px 14px; border:none; background:var(--accent); color:#fff; border-radius:20px; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:6px; transition:var(--transition); }
+.top-bar .top-login-btn:hover { background:var(--accent-dim); }
+.top-bar .user-dropdown { position:absolute; top:100%; right:0; margin-top:8px; background:var(--card); border-radius:var(--radius-sm); box-shadow:var(--shadow-lg); min-width:140px; overflow:hidden; z-index:100; display:none; }
 .user-dropdown.show { display:block; }
 .user-dropdown button { display:block; width:100%; text-align:left; padding:10px 16px; font-size:11px; color:var(--text); background:none; border:none; cursor:pointer; transition:background .1s; }
 .user-dropdown button:hover { background:var(--bg-surface-hover); }
@@ -1080,6 +1079,22 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
         <div class="nd-body" id="notifyBody"></div>
       </div>
     </div>
+    <div class="top-user" id="sidebarUser" onclick="toggleUserMenu()">
+      <button class="top-login-btn" id="sidebarLoginBtn" onclick="showLogin()" style="display:none">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        登录
+      </button>
+      <div id="sidebarUserInfo" style="display:none;align-items:center;gap:8px;font-size:10px">
+        <div class="user-avatar" id="userAvatar">杜</div>
+        <span class="user-name" id="userName"></span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <button id="sidebarAdminBtn" onclick="openAdminSettings()" style="display:none">权限设置</button>
+        <button onclick="openSettings()">个人设置</button>
+        <div class="divider"></div>
+        <button onclick="doLogout()" style="color:var(--danger)">退出登录</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1098,26 +1113,6 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
     <button class="btn btn-primary" id="sidebarBtn" onclick="handleNew()">+ 新建目标</button>
     <button class="btn btn-outline" onclick="exportAllData()" title="同步数据到云端" style="margin-top:4px;width:100%;font-size:10px;padding:7px 12px;border-radius:var(--radius-xs);">☁️ 同步到云端</button>
   </div>
-  <div class="sidebar-user" id="sidebarUser">
-    <button class="sidebar-login-btn" id="sidebarLoginBtn" onclick="showLogin()" style="display:none">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-      登录
-    </button>
-    <div id="sidebarUserInfo" style="display:none;align-items:center;gap:8px;font-size:10px;flex:1;min-width:0">
-      <div class="user-avatar" id="userAvatar">杜</div>
-      <span class="user-name" id="userName"></span>
-      <button class="btn-gear" onclick="event.stopPropagation();toggleUserMenu()" title="个人设置">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      </button>
-    </div>
-    <div class="user-dropdown" id="userDropdown">
-      <button id="sidebarAdminBtn" onclick="openAdminSettings()" style="display:none">权限设置</button>
-      <button onclick="openSettings()">个人设置</button>
-      <div class="divider"></div>
-      <button onclick="doLogout()" style="color:var(--danger)">退出登录</button>
-    </div>
-  </div>
-
 </aside>
 
 <!-- Main Content -->
