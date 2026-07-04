@@ -99,9 +99,15 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .sidebar-nav button { display:flex; align-items:center; gap:8px; padding:9px 12px; border:none; background:none; font-size:11.5px; cursor:pointer; color:var(--text-dim); text-align:left; transition:var(--transition); border-radius:var(--radius-xs); border-left:3px solid transparent; }
 .sidebar-nav button:hover { background:var(--accent-wash); color:var(--text); border-left-color:var(--accent-light); }
 .sidebar-nav button.active { color:var(--accent); background:var(--accent-wash); font-weight:400; box-shadow:none; border-left:3px solid var(--accent); border-radius:0 var(--radius-xs) var(--radius-xs) 0; }
-.sidebar-nav .nav-icon { width:16px; height:16px; flex-shrink:0; opacity:.55; display:flex; align-items:center; justify-content:center; }
+.sidebar-nav .nav-icon { width:16px; height:16px; flex-shrink:0; opacity:.65; display:flex; align-items:center; justify-content:center; }
 .sidebar-nav button.active .nav-icon { opacity:1; }
 .sidebar-nav .nav-icon svg { width:15px; height:15px; }
+.sidebar-nav button:nth-child(1) .nav-icon { color:#8BA89C; }
+.sidebar-nav button:nth-child(2) .nav-icon { color:var(--accent); }
+.sidebar-nav button:nth-child(3) .nav-icon { color:#7B8FC0; }
+.sidebar-nav button:nth-child(4) .nav-icon { color:var(--warning); }
+.sidebar-nav button:nth-child(5) .nav-icon { color:#A09DB5; }
+.sidebar-nav button:nth-child(6) .nav-icon { color:#D4A76A; }
 .sidebar-footer { padding:10px 10px; }
 .sidebar-footer .btn { width:100%; font-size:10px; padding:7px 12px; border-radius:var(--radius-xs); }
 
