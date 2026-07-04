@@ -205,7 +205,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .notify-wrap { position:relative; z-index:150; }
 .notify-bell { width:36px; height:36px; border-radius:var(--radius-xs); background:transparent; border:none; cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; position:relative; transition:var(--transition); color:var(--text-dim); }
 .notify-bell:hover { background:var(--bg-surface-hover); color:var(--text); }
-.notify-bell .bell-badge { position:absolute; top:-2px; right:-4px; background:var(--danger); color:#fff; font-size:9px; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px; border:2px solid var(--bg-surface); }
+.notify-bell .bell-badge { position:absolute; top:-2px; right:-4px; background:var(--accent-dim); color:#fff; font-size:9px; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px; border:2px solid var(--bg-surface); }
 .notify-bell .bell-badge:empty { width:8px; height:8px; min-width:0; padding:0; border-radius:50%; font-size:0; }
 /* Notify dropdown */
 .notify-drop { display:none; position:absolute; top:44px; right:0; width:380px; max-height:420px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-lg); overflow:hidden; }
@@ -604,8 +604,8 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .top-bar .top-user:hover { background:var(--bg-surface-hover); }
 .top-bar .top-user .user-avatar { width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
 .top-bar .top-user .user-name { color:var(--text); font-size:11px; }
-.top-bar .top-login-btn { padding:6px 14px; border:none; background:var(--accent); color:#fff; border-radius:20px; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:6px; transition:var(--transition); }
-.top-bar .top-login-btn:hover { background:var(--accent-dim); }
+.top-bar .top-login-btn { padding:7px 16px; border:none; background:var(--accent); color:#fff; border-radius:20px; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:6px; transition:var(--transition); letter-spacing:.3px; box-shadow:0 2px 8px rgba(153,47,72,0.25); }
+.top-bar .top-login-btn:hover { background:var(--accent-dim); box-shadow:0 4px 14px rgba(153,47,72,0.35); transform:translateY(-1px); }
 .top-bar .user-dropdown { position:absolute; top:100%; right:0; margin-top:8px; background:var(--card); border-radius:var(--radius-sm); box-shadow:var(--shadow-lg); min-width:140px; overflow:hidden; z-index:100; display:none; }
 .user-dropdown.show { display:block; }
 .user-dropdown button { display:block; width:100%; text-align:left; padding:10px 16px; font-size:11px; color:var(--text); background:none; border:none; cursor:pointer; transition:background .1s; }
@@ -1073,15 +1073,9 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
       <input type="text" id="globalSearch" placeholder="搜索..." oninput="globalSearch(this.value)" onkeydown="if(event.key==='Escape'){this.value='';closeSearchResults();}" onfocus="globalSearch(this.value)" />
       <div class="search-results" id="searchResults"></div>
     </div>
-    <div class="notify-wrap" id="notifyWrap">
-      <button class="notify-bell" onclick="toggleNotify()" title="待办提醒"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bellBadge"></span></button>
-      <div class="notify-drop" id="notifyDrop">
-        <div class="nd-body" id="notifyBody"></div>
-      </div>
-    </div>
     <div class="top-user" id="sidebarUser" onclick="toggleUserMenu()">
-      <button class="top-login-btn" id="sidebarLoginBtn" onclick="showLogin()" style="display:none">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      <button class="top-login-btn" id="sidebarLoginBtn" onclick="event.stopPropagation();showLogin()" style="display:none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1.5c0-3 3.5-6 8-6s8 3 8 6V21"/></svg>
         登录
       </button>
       <div id="sidebarUserInfo" style="display:none;align-items:center;gap:8px;font-size:10px">
@@ -1093,6 +1087,12 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
         <button onclick="openSettings()">个人设置</button>
         <div class="divider"></div>
         <button onclick="doLogout()" style="color:var(--danger)">退出登录</button>
+      </div>
+    </div>
+    <div class="notify-wrap" id="notifyWrap">
+      <button class="notify-bell" onclick="toggleNotify()" title="待办提醒"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bellBadge"></span></button>
+      <div class="notify-drop" id="notifyDrop">
+        <div class="nd-body" id="notifyBody"></div>
       </div>
     </div>
   </div>
