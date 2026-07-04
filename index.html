@@ -6135,6 +6135,10 @@ function renderOrgAttachments() {
 const LOCAL_DATA_VER_KEY = 'okr_sync_version';
 const DATA_KEYS = ['okr_users','okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version'];
 
+let _isImporting = false;
+let _autoUploadTimer = null;
+let _autoUploadBusy = false;
+
 function collectLocalData(){
   var data = {};
   DATA_KEYS.forEach(function(k){
@@ -6147,18 +6151,86 @@ function collectLocalData(){
 }
 
 function importDataToLocal(data){
+  _isImporting = true;
   var imported = 0;
   Object.keys(data).forEach(function(k){
     if(k[0]==='_') return;
     localStorage.setItem(k, typeof data[k]==='string'?data[k]:JSON.stringify(data[k]));
     imported++;
   });
+  _isImporting = false;
   return imported;
 }
 
+// 自动上传：数据变更后 3 秒防抖，自动推送到 Supabase
+function scheduleAutoUpload(){
+  if (_isImporting || _autoUploadBusy) return;
+  clearTimeout(_autoUploadTimer);
+  _autoUploadTimer = setTimeout(async function(){
+    _autoUploadBusy = true;
+    try{
+      var data = collectLocalData();
+      var version = Math.floor(Date.now() / 1000);
+      const { error } = await supabaseClient
+        .from('team_data')
+        .upsert({ id: 1, data: data, version: version, updated_at: new Date().toISOString() });
+      if(!error){
+        localStorage.setItem(LOCAL_DATA_VER_KEY, version);
+        console.log('🔄 已自动同步到云端 v'+version);
+      }
+    }catch(e){ console.log('自动同步失败:', e.message); }
+    _autoUploadBusy = false;
+  }, 3000);
+}
+
+// 自动下载：每 30 秒静默检查云端是否有新数据
+async function autoCheckRemote(){
+  try{
+    const { data: row, error } = await supabaseClient
+      .from('team_data')
+      .select('version')
+      .eq('id', 1)
+      .single();
+    if(error || !row) return;
+    const remoteVer = row.version || 0;
+    const localVer = parseInt(localStorage.getItem(LOCAL_DATA_VER_KEY)) || 0;
+    if(remoteVer <= localVer) return;
+
+    // 有新数据，静默同步
+    const { data: fullRow } = await supabaseClient
+      .from('team_data')
+      .select('data, version')
+      .eq('id', 1)
+      .single();
+    if(!fullRow) return;
+    importDataToLocal(fullRow.data);
+    localStorage.setItem(LOCAL_DATA_VER_KEY, fullRow.version);
+    console.log('🔄 已从云端同步 v'+fullRow.version+'，刷新页面生效');
+    // 非侵入式提示
+    var toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#4caf50;color:#fff;padding:10px 20px;border-radius:8px;z-index:99999;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,0.2);animation:fadeInOut 4s forwards;';
+    toast.textContent = '☁️ 云端数据已更新，刷新页面查看最新内容';
+    document.body.appendChild(toast);
+    setTimeout(function(){ toast.remove(); }, 4000);
+  }catch(e){ /* silent */ }
+}
+
+// 劫持 localStorage.setItem，数据变更自动触发上传
+(function(){
+  var _orig = localStorage.setItem.bind(localStorage);
+  localStorage.setItem = function(key, value){
+    _orig(key, value);
+    if(!_isImporting && DATA_KEYS.indexOf(key) !== -1){
+      scheduleAutoUpload();
+    }
+  };
+})();
+
+// 启动自动同步：每 30 秒检查一次云端更新
+setInterval(autoCheckRemote, 30000);
+
 async function syncFromRemote(){
   try{
-    // 从 Supabase 拉取最新数据
     const { data: row, error } = await supabaseClient
       .from('team_data')
       .select('data, version')
@@ -6197,7 +6269,6 @@ async function exportAllData(){
     alert('✅ 数据已同步到云端！(v'+version+')\n\n其他团队成员刷新页面即可获取最新数据，\n无需再手动复制 data.json 文件。');
   }catch(e){
     console.log('Supabase 上传失败，回退到文件导出:', e.message);
-    // 回退：导出为文件
     data._version = version;
     data._updated = new Date().toISOString();
     var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
@@ -6210,9 +6281,14 @@ async function exportAllData(){
   }
 }
 
+// 自动同步动画样式
+var _autoSyncStyle = document.createElement('style');
+_autoSyncStyle.textContent = '@keyframes fadeInOut{0%{opacity:0;transform:translateY(-10px)}15%{opacity:1;transform:translateY(0)}75%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-10px)}}';
+document.head.appendChild(_autoSyncStyle);
+
 function initApp(){
   restoreOkrFilters();
-  syncFromRemote(); // async - fetch latest shared data
+  syncFromRemote();
   switchTab('org');
 }
 initApp();
