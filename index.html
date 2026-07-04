@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -6484,6 +6485,12 @@ function renderWorkspace(){
   }catch(e){}
 
 }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://jnjsweczmbegmtfpdepi.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGlzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpuanN3ZWN6bWJlZ210ZnBkZXBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjY5MjksImV4cCI6MjA5ODc0MjkyOX0.FSHAZvScCtqz21RTNGmcgGxLm9riFBaNtmDFDsFqp9o";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 </script>
 </body>
 </html>
