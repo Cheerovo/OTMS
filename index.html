@@ -1883,63 +1883,60 @@ let kpis = loadKPIs();
 // ===== Supabase File Store =====
 const fileStore = (()=>{
   const BUCKET = 'org_files';
-  const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB per chunk
 
-  // 小文件直接上传，大文件用 TUS 分块上传
   async function put(id, file) {
-    if (file.size <= CHUNK_SIZE) {
+    if (file.size <= 5 * 1024 * 1024) {
       const { error } = await supabaseClient.storage
         .from(BUCKET)
         .upload(id, file, { upsert: true });
       if (error) throw new Error(error.message);
       return;
     }
-    // 大文件：TUS 分块上传
-    await uploadLargeFile(id, file);
-  }
 
-  async function uploadLargeFile(path, file) {
-    const uploadUrl = SUPABASE_URL + '/storage/v1/upload/resumable';
-    const res = await fetch(uploadUrl, {
+    // 大文件：TUS 分块上传
+    const SUPABASE_URL = 'https://jnjsweczmbegmtfpdepi.supabase.co';
+    const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpuanN3ZWN6bWJlZ210ZnBkZXBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjY5MjksImV4cCI6MjA5ODc0MjkyOX0.FSHAZvScCtqz21RTNGmcgGxLm9riFBaNtmDFDsFqp9o';
+
+    // Step 1: 创建上传会话
+    const res = await fetch(SUPABASE_URL + '/storage/v1/upload/resumable', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + ANON_KEY,
+        'Content-Type': 'application/json',
         'x-upsert': 'true'
       },
       body: JSON.stringify({
         bucketName: BUCKET,
-        objectName: path,
+        objectName: id,
         contentType: file.type || 'application/octet-stream',
         upsert: true
       })
     });
     if (!res.ok) {
-      const err = await res.json().catch(()=>({message:'上传失败'}));
-      throw new Error(err.message || err.error || '上传失败');
+      const e = await res.json().catch(()=>({}));
+      throw new Error(e.message || e.error || '创建上传会话失败');
     }
-    const session = await res.json();
-    const tusUrl = SUPABASE_URL + '/storage/v1/upload/resumable/upload/' + session.key;
 
+    // Step 2: 分块上传（用返回的 URL）
+    const { url: tusUrl } = await res.json();
+    const CHUNK = 5 * 1024 * 1024;
     let offset = 0;
     while (offset < file.size) {
-      const end = Math.min(offset + CHUNK_SIZE, file.size);
-      const chunk = file.slice(offset, end);
+      const chunk = file.slice(offset, offset + CHUNK);
       const chunkRes = await fetch(tusUrl, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
-          'Content-Type': file.type || 'application/octet-stream',
+          'Content-Type': 'application/offset+octet-stream',
           'Upload-Offset': String(offset),
-          'Tus-Resumable': '1.0.0',
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-          'x-source': 'supabase-js/2'
+          'Tus-Resumable': '1.0.0'
         },
         body: chunk
       });
       if (!chunkRes.ok) {
-        const errBody = await chunkRes.json().catch(()=>({message:'分块上传失败'}));
-        throw new Error(errBody.message || errBody.error || '分块上传失败');
+        const e = await chunkRes.json().catch(()=>({}));
+        throw new Error(e.message || e.error || '分块上传失败');
       }
-      offset = end;
+      offset += chunk.size;
     }
   }
 
