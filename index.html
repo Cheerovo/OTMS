@@ -1393,7 +1393,6 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
   <div id="orgBUFuncView" style="display:none;"></div>
   <div id="orgAttendView" style="display:none;"></div>
   <div id="orgEditView" style="display:none;">
-    <div class="emp-stats" id="empStats"></div>
     <div class="filter-row">
       <input id="empSearchInput" placeholder="搜索姓名..." oninput="renderEmployeeTable()" style="width:130px">
       <select id="empBUFilter" onchange="renderEmployeeTable()">
@@ -1410,7 +1409,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
       </select>
       <button class="btn btn-outline btn-sm" onclick="clearEmpFilters()" title="清除所有筛选">✕ 清除</button>
       <button class="btn btn-primary btn-sm" id="btnAddEmp" onclick="openEmployeeModal()" style="display:none">+ 新增员工</button>
-      <button class="btn btn-outline btn-sm" id="btnBatchImport" onclick="openBatchImportModal()" style="display:none">📥 批量导入</button>
+      <button class="btn btn-outline btn-sm" id="btnBatchImport" onclick="openBatchImportModal()">📥 批量导入</button>
       <button class="btn btn-outline btn-sm" id="btnDeptMgmt" onclick="openDeptManageModal()" style="display:none">管理部门</button>
     </div>
     <div class="emp-table-wrap">
@@ -5101,27 +5100,6 @@ function renderEmployeeTable(){
   const btnBatch=document.getElementById('btnBatchImport');
   if(btnAdd)btnAdd.style.display=isAdmin?'':'none';
   if(btnDept)btnDept.style.display=isAdmin?'':'none';
-  if(btnBatch)btnBatch.style.display=isAdmin?'':'none';
-
-  // Stats summary
-  const empStatsEl=document.getElementById('empStats');
-  if(empStatsEl){
-    const buSetAll=[...new Set(empList.map(e=>e.bu).filter(Boolean))];
-    const internalRanks=['I','II','III','IV','V','VI','VII','管培'];
-    const internalCount=empList.filter(e=>internalRanks.includes(e.rank)).length;
-    const extCount=empList.filter(e=>e.rank==='外部').length;
-    const outCount=empList.filter(e=>e.rank==='外包').length;
-    const deptCounts={};
-    empList.forEach(e=>{const d=e.department||'未知';deptCounts[d]=(deptCounts[d]||0)+1;});
-    let maxDept='',maxCount=0;
-    Object.entries(deptCounts).forEach(([d,c])=>{if(c>maxCount){maxDept=d;maxCount=c;}});
-    empStatsEl.innerHTML=
-      `<div class="emp-stat-card"><div class="label">总人数</div><div class="value">${empList.length}</div><div class="sub">员工花名册总数</div></div>
-      <div class="emp-stat-card"><div class="label">BU 数量</div><div class="value">${buSetAll.length}</div><div class="sub">${buSetAll.map(b=>esc(b)).join('、')}</div></div>
-      <div class="emp-stat-card"><div class="label">用工构成</div><div class="value">${internalCount}<span class="value-small"> / ${extCount} / ${outCount}</span></div><div class="sub">在职 / 外部 / 外包</div></div>
-      <div class="emp-stat-card"><div class="label">人数最多部门</div><div class="value">${esc(maxDept||'-')}</div><div class="sub">${maxDept?maxCount+' 人':''}</div></div>`;
-  }
-
   if(!deptList.length){deptList=['总经办'];saveDepts(deptList);}
   const q=(document.getElementById('empSearchInput').value||'').trim().toLowerCase();
   const buFilter=document.getElementById('empBUFilter').value;
