@@ -1883,12 +1883,64 @@ let kpis = loadKPIs();
 // ===== Supabase File Store =====
 const fileStore = (()=>{
   const BUCKET = 'org_files';
+  const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB per chunk
 
+  // 小文件直接上传，大文件用 TUS 分块上传
   async function put(id, file) {
-    const { error } = await supabaseClient.storage
-      .from(BUCKET)
-      .upload(id, file, { upsert: true });
-    if (error) throw error;
+    if (file.size <= CHUNK_SIZE) {
+      const { error } = await supabaseClient.storage
+        .from(BUCKET)
+        .upload(id, file, { upsert: true });
+      if (error) throw new Error(error.message);
+      return;
+    }
+    // 大文件：TUS 分块上传
+    await uploadLargeFile(id, file);
+  }
+
+  async function uploadLargeFile(path, file) {
+    const uploadUrl = SUPABASE_URL + '/storage/v1/upload/resumable';
+    const res = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'x-upsert': 'true'
+      },
+      body: JSON.stringify({
+        bucketName: BUCKET,
+        objectName: path,
+        contentType: file.type || 'application/octet-stream',
+        upsert: true
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({message:'上传失败'}));
+      throw new Error(err.message || err.error || '上传失败');
+    }
+    const session = await res.json();
+    const tusUrl = SUPABASE_URL + '/storage/v1/upload/resumable/upload/' + session.key;
+
+    let offset = 0;
+    while (offset < file.size) {
+      const end = Math.min(offset + CHUNK_SIZE, file.size);
+      const chunk = file.slice(offset, end);
+      const chunkRes = await fetch(tusUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream',
+          'Upload-Offset': String(offset),
+          'Tus-Resumable': '1.0.0',
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'x-source': 'supabase-js/2'
+        },
+        body: chunk
+      });
+      if (!chunkRes.ok) {
+        const errBody = await chunkRes.json().catch(()=>({message:'分块上传失败'}));
+        throw new Error(errBody.message || errBody.error || '分块上传失败');
+      }
+      offset = end;
+    }
   }
 
   async function get(id) {
@@ -1896,7 +1948,6 @@ const fileStore = (()=>{
       .from(BUCKET)
       .download(id);
     if (error) throw error;
-    // 从附件记录中找回原始文件名
     const attachments = (() => {
       try { return JSON.parse(localStorage.getItem('org_attachments')||'[]'); } catch(e) { return []; }
     })();
@@ -2194,7 +2245,7 @@ function uploadFile(rptId,key){
   inp.onchange=async()=>{
     const file=inp.files[0]; if(!file)return;
     const fileId=rptId+'_'+key+'_'+Date.now();
-    try{await fileStore.put(fileId,file);}catch(e){alert('文件过大，请压缩后重试（建议<5MB）');return;}
+    try{await fileStore.put(fileId,file);}catch(e){alert('上传失败：'+e.message);return;}
     const r=reports.find(x=>x.id===rptId);
     if(!r.subs)r.subs={};
     const sub=r.subs[key];
@@ -2226,7 +2277,7 @@ async function replaceFile(rptId,key,fileIndex){
     const file=inp.files[0]; if(!file)return;
     const oldFileId=files[fileIndex].fileId;
     const newFileId=rptId+'_'+key+'_'+Date.now();
-    try{await fileStore.put(newFileId,file);}catch(e){alert('文件过大');return;}
+    try{await fileStore.put(newFileId,file);}catch(e){alert('上传失败：'+e.message);return;}
     try{await fileStore.del(oldFileId);}catch(e){}
     files[fileIndex]={fileId:newFileId,fileName:file.name,date:new Date().toISOString().slice(0,10),uploader:currentUser};
     saveReports(reports); renderReports();
@@ -2372,7 +2423,7 @@ async function replaceGroupFile(groupName,key,fileIndex){
     const file=inp.files[0]; if(!file)return;
     const oldFileId=gSub.files[fileIndex].fileId;
     const newFileId=key+'_'+Date.now();
-    try{await fileStore.put(newFileId,file);}catch(e){alert('文件过大');return;}
+    try{await fileStore.put(newFileId,file);}catch(e){alert('上传失败：'+e.message);return;}
     try{await fileStore.del(oldFileId);}catch(e){}
     gSub.files[fileIndex]={fileId:newFileId,fileName:file.name,date:new Date().toISOString().slice(0,10),uploader:currentUser};
     saveGroupSubs(gs);
@@ -6080,7 +6131,7 @@ async function uploadOrgAttachment(e) {
   try{
     for(const file of Array.from(files)){
       const fileId = 'org_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
-      try{await fileStore.put(fileId, file);}catch(err){alert('文件 '+file.name+' 过大，请压缩后重试（建议<5MB）');continue;}
+      try{await fileStore.put(fileId, file);}catch(err){alert('文件 '+file.name+' 上传失败：'+err.message);continue;}
       attachments.push({
         id: fileId,
         name: file.name, size: file.size, type: file.type,
