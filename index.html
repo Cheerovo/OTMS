@@ -6593,55 +6593,10 @@ const fileStore = (()=>{
   const BUCKET = 'org_files';
 
   async function put(id, file) {
-    if (file.size <= 5 * 1024 * 1024) {
-      const { error } = await supabaseClient.storage
-        .from(BUCKET)
-        .upload(id, file, { upsert: true });
-      if (error) throw new Error(error.message);
-      return;
-    }
-
-    // 大文件：TUS 分块上传
-    const res = await fetch(SUPABASE_URL + '/storage/v1/upload/resumable', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'apikey': SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json',
-        'x-upsert': 'true'
-      },
-      body: JSON.stringify({
-        bucketName: BUCKET,
-        objectName: id,
-        contentType: file.type || 'application/octet-stream',
-        upsert: true
-      })
-    });
-    if (!res.ok) {
-      const e = await res.json().catch(()=>({}));
-      throw new Error(e.message || e.error || '创建上传会话失败');
-    }
-
-    const { url: tusUrl } = await res.json();
-    const CHUNK = 5 * 1024 * 1024;
-    let offset = 0;
-    while (offset < file.size) {
-      const chunk = file.slice(offset, offset + CHUNK);
-      const chunkRes = await fetch(tusUrl, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/offset+octet-stream',
-          'Upload-Offset': String(offset),
-          'Tus-Resumable': '1.0.0'
-        },
-        body: chunk
-      });
-      if (!chunkRes.ok) {
-        const e = await chunkRes.json().catch(()=>({}));
-        throw new Error(e.message || e.error || '分块上传失败');
-      }
-      offset += chunk.size;
-    }
+    const { error } = await supabaseClient.storage
+      .from(BUCKET)
+      .upload(id, file, { upsert: true });
+    if (error) throw new Error(error.message);
   }
 
   async function get(id) {
