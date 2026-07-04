@@ -67,12 +67,16 @@
 body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg-base); color:var(--text); min-height:100vh; }
 
 /* Top bar */
-.top-bar { position:fixed; top:0; left:0; right:0; height:48px; background:var(--bg-surface); display:flex; align-items:center; justify-content:space-between; padding:0 28px; z-index:110; box-shadow:0 1px 0 var(--border-subtle); }
-.top-bar .top-logo { font-size:13px; font-weight:400; letter-spacing:.5px; color:var(--accent); }
-.top-bar .top-right { display:flex; align-items:center; gap:12px; }
+.top-bar { position:fixed; top:0; left:0; right:0; height:56px; background:var(--bg-surface); display:flex; align-items:center; justify-content:space-between; padding:0 28px; z-index:110; box-shadow:0 1px 0 var(--border-subtle); gap:24px; }
+.top-bar .top-logo { font-size:14px; font-weight:400; letter-spacing:.5px; color:var(--accent); flex-shrink:0; }
+.top-bar .top-search { flex:1; max-width:360px; position:relative; }
+.top-bar .top-search input { width:100%; padding:8px 14px 8px 34px; background:var(--bg-base); border:none; border-radius:20px; color:var(--text); font-size:12px; outline:none; box-shadow:var(--shadow-xs); transition:var(--transition); }
+.top-bar .top-search input:focus { box-shadow:0 0 0 3px rgba(201,79,102,0.12); background:var(--card); }
+.top-bar .top-search svg { position:absolute; left:12px; top:50%; transform:translateY(-50%); pointer-events:none; }
+.top-bar .top-right { display:flex; align-items:center; gap:12px; flex-shrink:0; }
 
 /* Sidebar */
-.sidebar { width:var(--sidebar-w); height:calc(100vh - 48px); background:var(--bg-sidebar); display:flex; flex-direction:column; position:fixed; top:48px; left:0; bottom:0; z-index:100; box-shadow:1px 0 0 var(--border-subtle); }
+.sidebar { width:var(--sidebar-w); height:calc(100vh - 56px); background:var(--bg-sidebar); display:flex; flex-direction:column; position:fixed; top:56px; left:0; bottom:0; z-index:100; box-shadow:1px 0 0 var(--border-subtle); }
 .sidebar .logo { padding:14px 14px 10px; font-size:10px; font-weight:400; letter-spacing:.5px; color:var(--text-muted); }
 .sidebar-nav { flex:1; display:flex; flex-direction:column; padding:4px 6px; gap:1px; }
 .sidebar-nav button { display:flex; align-items:center; gap:8px; padding:9px 12px; border:none; background:none; font-size:11.5px; cursor:pointer; color:var(--text-dim); text-align:left; transition:var(--transition); border-radius:var(--radius-xs); border-left:2px solid transparent; }
@@ -84,7 +88,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .sidebar-footer .btn { width:100%; font-size:10px; padding:7px 12px; border-radius:var(--radius-xs); }
 
 /* Main area */
-.main-area { margin-left:var(--sidebar-w); margin-top:48px; min-width:0; background:transparent; }
+.main-area { margin-left:var(--sidebar-w); margin-top:56px; min-width:0; background:transparent; }
 .tab-content { display:none; animation: fadeIn .25s ease; }
 .tab-content.active { display:block; }
 @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
@@ -1023,6 +1027,10 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 <!-- Top Bar -->
 <div class="top-bar">
   <div class="top-logo">HRO 时代开弈集团</div>
+  <div class="top-search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+    <input type="text" id="globalSearch" placeholder="搜索员工、目标..." oninput="globalSearch(this.value)" onkeydown="if(event.key==='Escape')this.value='';globalSearch('')" />
+  </div>
   <div class="top-right">
     <div class="notify-wrap" id="notifyWrap">
       <button class="notify-bell" onclick="toggleNotify()" title="待办提醒"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bellBadge"></span></button>
@@ -6467,6 +6475,39 @@ function initApp(){
   updateBellBadge();
 }
 initApp();
+
+// ===== Global Search =====
+function globalSearch(q){
+  q=(q||'').trim().toLowerCase();
+  if(!q) return;
+  // Search employees
+  const emps=JSON.parse(localStorage.getItem('okr_employees')||'[]');
+  const matched=emps.filter(e=>(e.name||'').toLowerCase().includes(q)||(e.position||'').toLowerCase().includes(q)||(e.bu||'').toLowerCase().includes(q));
+  if(matched.length===1){
+    switchTab('org');
+    switchOrgSubView('edit');
+    setTimeout(()=>{
+      document.getElementById('empSearchInput').value=matched[0].name;
+      renderEmployeeTable();
+    },200);
+  }else if(matched.length>1){
+    switchTab('org');
+    switchOrgSubView('edit');
+    setTimeout(()=>{
+      document.getElementById('empSearchInput').value=q;
+      renderEmployeeTable();
+    },200);
+  }
+  // Also search OKRs
+  const okrMatch=okrs.filter(o=>(o.title||'').toLowerCase().includes(q)||getOwners(o.owner).some(u=>u.toLowerCase().includes(q)));
+  if(okrMatch.length>0&&matched.length===0){
+    switchTab('okr');
+    setTimeout(()=>{
+      document.getElementById('searchInput').value=q;
+      renderOKR();
+    },200);
+  }
+}
 
 // ===== My Workspace =====
 function renderWorkspace(){
