@@ -1880,7 +1880,6 @@ function loadKPIs(){try{return JSON.parse(localStorage.kpi_data)||defaultKPIs()}
 function saveKPIs(d){try{localStorage.kpi_data=JSON.stringify(d)}catch(e){alert('存储空间不足，请清理旧数据后重试。\n错误：'+e.message);throw e}}
 let kpis = loadKPIs();
 
-// fileStore moved to end of file (near supabaseClient init)
 
 // ===== Multi-File Helpers =====
 function getSubFiles(sub){
