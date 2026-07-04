@@ -1007,6 +1007,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
   </nav>
   <div class="sidebar-footer">
     <button class="btn btn-primary" id="sidebarBtn" onclick="handleNew()">+ 新建目标</button>
+    <button class="btn btn-outline" onclick="exportAllData()" title="同步数据到云端" style="margin-top:4px;width:100%;font-size:10px;padding:7px 12px;border-radius:var(--radius-xs);">☁️ 同步到云端</button>
   </div>
   <div class="sidebar-user" id="sidebarUser">
     <button class="sidebar-login-btn" id="sidebarLoginBtn" onclick="showLogin()" style="display:none">
@@ -6059,6 +6060,7 @@ async function uploadOrgAttachment(e) {
     const keep = attachments.slice(-50);
     try{localStorage.setItem('org_attachments', JSON.stringify(keep));}catch(e){alert('附件列表存储失败，请清理旧附件');}
     renderOrgAttachments();
+    scheduleAutoUpload(); // 上传后立即触发同步
   }
   e.target.value = '';
 }
@@ -6143,8 +6145,10 @@ function scheduleAutoUpload(){
       if(!error){
         localStorage.setItem(LOCAL_DATA_VER_KEY, version);
         console.log('🔄 已自动同步到云端 v'+version);
+      } else {
+        console.error('自动同步数据库错误:', error.message, error);
       }
-    }catch(e){ console.log('自动同步失败:', e.message); }
+    }catch(e){ console.error('自动同步异常:', e.message, e); }
     _autoUploadBusy = false;
   }, 3000);
 }
