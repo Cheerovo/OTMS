@@ -68,7 +68,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 
 /* Sidebar */
 .sidebar { width:var(--sidebar-w); min-height:100vh; background:var(--bg-sidebar); display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; z-index:100; box-shadow:1px 0 0 var(--border-subtle); }
-.sidebar .logo { padding:18px 14px 14px; font-size:13px; font-weight:400; letter-spacing:.5px; color:var(--accent); display:flex; align-items:center; justify-content:space-between; }
+.sidebar .logo { padding:18px 14px 14px; font-size:13px; font-weight:400; letter-spacing:.5px; color:var(--accent); }
 .sidebar-nav { flex:1; display:flex; flex-direction:column; padding:4px 6px; gap:1px; }
 .sidebar-nav button { display:flex; align-items:center; gap:8px; padding:9px 12px; border:none; background:none; font-size:11.5px; cursor:pointer; color:var(--text-dim); text-align:left; transition:var(--transition); border-radius:var(--radius-xs); border-left:2px solid transparent; }
 .sidebar-nav button:hover { background:var(--accent-wash); color:var(--text); }
@@ -152,13 +152,13 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .stat-card .sub { font-size:10px; color:var(--text-dim); margin-top:4px; }
 
 /* Notify bell */
-.notify-wrap { position:relative; z-index:150; }
-.notify-bell { width:32px; height:32px; border-radius:50%; background:transparent; border:none; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; position:relative; transition:var(--transition); color:var(--text-dim); }
-.notify-bell:hover { color:var(--accent); background:var(--accent-wash); }
+.notify-wrap { position:fixed; top:20px; right:28px; z-index:150; }
+.notify-bell { width:38px; height:38px; border-radius:50%; background:var(--card); border:none; cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-sm); position:relative; transition:var(--transition); }
+.notify-bell:hover { box-shadow:var(--shadow-md); }
 .notify-bell .bell-badge { position:absolute; top:-3px; right:-3px; background:var(--danger-text); color:#fff; font-size:8px; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px; }
 .notify-bell .bell-badge:empty { display:none; }
 /* Notify dropdown */
-.notify-drop { display:none; position:fixed; top:56px; left:calc(var(--sidebar-w) + 16px); width:380px; max-height:420px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-lg); overflow:hidden; z-index:200; }
+.notify-drop { display:none; position:absolute; top:44px; right:0; width:380px; max-height:420px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-lg); overflow:hidden; }
 .notify-drop.show { display:block; }
 .notify-drop .nd-search { padding:12px 16px; border-bottom:1px solid var(--border-subtle); }
 .notify-drop .nd-search input { width:100%; padding:9px 12px; border:none; border-radius:var(--radius-xs); font-size:12px; background:var(--bg-base); box-shadow:inset 0 1px 3px rgba(30,25,18,0.06); }
@@ -1017,7 +1017,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 
 <!-- Sidebar -->
 <aside class="sidebar">
-  <div class="logo"><span>HRO 时代开弈集团</span><div class="notify-wrap" id="notifyWrap"><button class="notify-bell" onclick="toggleNotify()" title="待办提醒"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bellBadge"></span></button><div class="notify-drop" id="notifyDrop"><div class="nd-body" id="notifyBody"></div></div></div></div>
+  <div class="logo">HRO 时代开弈集团</div>
   <nav class="sidebar-nav" id="sidebarNav">
     <button onclick="switchTab('org')" title="管理部门、团队和人员架构"><span class="nav-icon">○</span> 组织管理</button>
     <button onclick="switchTab('okr')" title="制定季度目标与关键结果，跟踪执行进度"><span class="nav-icon">○</span> OKR 目标管理</button>
@@ -1438,6 +1438,12 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 
 
 
+<div class="notify-wrap" id="notifyWrap">
+  <button class="notify-bell" onclick="toggleNotify()" title="待办提醒 · 全局搜索"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bellBadge"></span></button>
+  <div class="notify-drop" id="notifyDrop">
+    <div class="nd-body" id="notifyBody"></div>
+  </div>
+</div>
 </div><!-- /main-area -->
 
 <!-- Modal -->
