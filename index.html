@@ -48,13 +48,14 @@
   --border-light: #E5E2DC;
   --border-subtle: #EDEAE5;
   /* Shadows — soft, warm, layered elevation */
-  --shadow-xs: 0 1px 2px rgba(30,25,18,0.03);
-  --shadow: 0 1px 3px rgba(30,25,18,0.04), 0 2px 8px rgba(30,25,18,0.03);
-  --shadow-sm: 0 1px 3px rgba(30,25,18,0.04), 0 2px 8px rgba(30,25,18,0.03);
-  --shadow-md: 0 2px 6px rgba(30,25,18,0.05), 0 6px 20px rgba(30,25,18,0.04);
-  --shadow-lg: 0 4px 12px rgba(30,25,18,0.06), 0 10px 32px rgba(30,25,18,0.05);
-  --shadow-card: 0 1px 2px rgba(30,25,18,0.03), 0 3px 8px rgba(30,25,18,0.04);
-  --shadow-elevated: 0 2px 6px rgba(30,25,18,0.05), 0 8px 18px rgba(30,25,18,0.06);
+  --shadow-xs: 0 1px 2px rgba(30,25,18,0.04);
+  --shadow: 0 1px 3px rgba(30,25,18,0.05), 0 2px 8px rgba(30,25,18,0.04);
+  --shadow-sm: 0 1px 3px rgba(30,25,18,0.05), 0 2px 8px rgba(30,25,18,0.04);
+  --shadow-md: 0 2px 8px rgba(30,25,18,0.06), 0 6px 20px rgba(30,25,18,0.05);
+  --shadow-lg: 0 4px 16px rgba(30,25,18,0.08), 0 10px 32px rgba(30,25,18,0.06);
+  --shadow-card: 0 1px 3px rgba(30,25,18,0.04), 0 4px 12px rgba(30,25,18,0.05);
+  --shadow-card-hover: 0 2px 8px rgba(30,25,18,0.06), 0 8px 24px rgba(30,25,18,0.07);
+  --shadow-elevated: 0 2px 8px rgba(30,25,18,0.06), 0 8px 24px rgba(30,25,18,0.07);
   /* Radius */
   --radius: 14px;
   --radius-sm: 10px;
@@ -67,7 +68,7 @@
 body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg-base); color:var(--text); min-height:100vh; }
 
 /* Top bar */
-.top-bar { position:fixed; top:0; left:0; right:0; height:56px; background:var(--bg-surface); display:flex; align-items:center; justify-content:space-between; padding:0 28px; z-index:110; box-shadow:0 1px 0 var(--border-subtle); gap:24px; }
+.top-bar { position:fixed; top:0; left:0; right:0; height:56px; background:rgba(242,240,237,0.85); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); display:flex; align-items:center; justify-content:space-between; padding:0 28px; z-index:110; box-shadow:0 1px 0 var(--border-subtle); gap:24px; }
 .top-bar .top-logo { font-size:14px; font-weight:400; letter-spacing:.5px; color:var(--accent); flex-shrink:0; }
 .top-bar .top-search { width:260px; position:relative; }
 .top-bar .top-search input { width:100%; padding:8px 14px 8px 34px; background:var(--bg-base); border:none; border-radius:20px; color:var(--text); font-size:12px; outline:none; box-shadow:var(--shadow-xs); transition:var(--transition); }
@@ -93,13 +94,14 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 
 /* Sidebar */
 .sidebar { width:var(--sidebar-w); height:calc(100vh - 56px); background:var(--bg-sidebar); display:flex; flex-direction:column; position:fixed; top:56px; left:0; bottom:0; z-index:100; box-shadow:1px 0 0 var(--border-subtle); }
-.sidebar .logo { padding:14px 14px 10px; font-size:10px; font-weight:400; letter-spacing:.5px; color:var(--text-muted); }
+.sidebar .logo { padding:14px 14px 10px; font-size:10px; font-weight:400; letter-spacing:.5px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); margin-bottom:4px; }
 .sidebar-nav { flex:1; display:flex; flex-direction:column; padding:4px 6px; gap:1px; }
-.sidebar-nav button { display:flex; align-items:center; gap:8px; padding:9px 12px; border:none; background:none; font-size:11.5px; cursor:pointer; color:var(--text-dim); text-align:left; transition:var(--transition); border-radius:var(--radius-xs); border-left:2px solid transparent; }
-.sidebar-nav button:hover { background:var(--accent-wash); color:var(--text); }
+.sidebar-nav button { display:flex; align-items:center; gap:8px; padding:9px 12px; border:none; background:none; font-size:11.5px; cursor:pointer; color:var(--text-dim); text-align:left; transition:var(--transition); border-radius:var(--radius-xs); border-left:3px solid transparent; }
+.sidebar-nav button:hover { background:var(--accent-wash); color:var(--text); border-left-color:var(--accent-light); }
 .sidebar-nav button.active { color:var(--accent); background:var(--accent-wash); font-weight:400; box-shadow:none; border-left:3px solid var(--accent); border-radius:0 var(--radius-xs) var(--radius-xs) 0; }
-.sidebar-nav .nav-icon { font-size:12px; width:16px; text-align:center; flex-shrink:0; opacity:.7; }
+.sidebar-nav .nav-icon { width:16px; height:16px; flex-shrink:0; opacity:.55; display:flex; align-items:center; justify-content:center; }
 .sidebar-nav button.active .nav-icon { opacity:1; }
+.sidebar-nav .nav-icon svg { width:15px; height:15px; }
 .sidebar-footer { padding:10px 10px; }
 .sidebar-footer .btn { width:100%; font-size:10px; padding:7px 12px; border-radius:var(--radius-xs); }
 
@@ -163,12 +165,12 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .checkin-warning { font-size:10px; color:var(--danger-text); }
 
 /* Layout */
-.main { max-width:1160px; margin:0 auto; padding:32px 36px; }
+.main { max-width:1160px; margin:0 auto; padding:28px 36px 40px; }
 
 /* Stats */
 .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:var(--shadow-sm); margin-bottom:24px; }
-.stat-card { background:var(--bg-surface); border-radius:var(--radius); padding:20px 24px; box-shadow:var(--shadow-sm); border-top:4px solid var(--accent); transition:var(--transition); position:relative; overflow:hidden; }
-.stat-card:hover { box-shadow:var(--shadow-elevated); transform:translateY(-2px); }
+.stat-card { background:var(--card); border-radius:var(--radius); padding:20px 24px; box-shadow:var(--shadow-card); border-top:4px solid var(--accent); transition:var(--transition); position:relative; overflow:hidden; }
+.stat-card:hover { box-shadow:var(--shadow-card-hover); transform:translateY(-2px); }
 .stat-card:nth-child(2) { border-top-color:#7B8FC0; }
 .stat-card:nth-child(3) { border-top-color:#8D9A9E; }
 .stat-card:nth-child(4) { border-top-color:var(--warning); }
@@ -210,9 +212,9 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .nd-ding-log.show { display:block; }
 
 /* Filter row */
-.filter-row { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center; }
-.filter-row select, .filter-row input { padding:8px 14px; border:none; border-radius:var(--radius-xs); font-size:11px; background:var(--bg-surface); color:var(--text); box-shadow:var(--shadow-xs); transition:var(--transition); }
-.filter-row select:focus, .filter-row input:focus { outline:none; box-shadow:0 0 0 3px rgba(201,79,102,0.12); }
+.filter-row { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center; padding:12px 16px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-card); }
+.filter-row select, .filter-row input { padding:8px 14px; border:none; border-radius:var(--radius-xs); font-size:11px; background:var(--bg-base); color:var(--text); box-shadow:inset 0 1px 3px rgba(30,25,18,0.04); transition:var(--transition); }
+.filter-row select:focus, .filter-row input:focus { outline:none; box-shadow:0 0 0 3px rgba(201,79,102,0.12); background:var(--card); }
 .filter-row input { width:200px; }
 .filter-chips { display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; align-items:center; min-height:0; }
 .filter-chips:empty { margin-bottom:0; }
@@ -232,8 +234,8 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 
 /* OKR Cards */
 .okr-list { display:flex; flex-direction:column; gap:12px; }
-.okr-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden; transition:var(--transition); }
-.okr-card:hover { box-shadow:var(--shadow-elevated); }
+.okr-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-card); overflow:hidden; transition:var(--transition); }
+.okr-card:hover { box-shadow:var(--shadow-card-hover); transform:translateY(-1px); }
 .okr-card.archived { opacity:0.5; }
 .okr-card-header { padding:16px 20px; display:flex; align-items:flex-start; gap:12px; cursor:pointer; transition:background .15s; }
 .okr-card-header:hover { background:var(--bg-surface-hover); }
@@ -351,8 +353,8 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 
 /* KPI list */
 .kpi-list { display:flex; flex-direction:column; gap:12px; }
-.kpi-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden; display:flex; flex-direction:column; cursor:pointer; transition:var(--transition); }
-.kpi-card:hover { box-shadow:var(--shadow-elevated); transform:translateY(-1px); }
+.kpi-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-card); overflow:hidden; display:flex; flex-direction:column; cursor:pointer; transition:var(--transition); }
+.kpi-card:hover { box-shadow:var(--shadow-card-hover); transform:translateY(-2px); }
 .kpi-card-header { padding:12px 16px; display:flex; flex-direction:column; gap:8px; flex:1; }
 .kpi-dot-row { display:flex; align-items:center; gap:6px; }
 .kpi-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; background:var(--border-light); }
@@ -405,8 +407,8 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 
 /* Meeting */
 .meeting-list { display:flex; flex-direction:column; gap:12px; }
-.meeting-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden; transition:var(--transition); }
-.meeting-card:hover { box-shadow:var(--shadow-elevated); }
+.meeting-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-card); overflow:hidden; transition:var(--transition); }
+.meeting-card:hover { box-shadow:var(--shadow-card-hover); transform:translateY(-1px); }
 .meeting-card-header { padding:16px 20px; display:flex; align-items:flex-start; gap:12px; cursor:pointer; }
 .meeting-card-header:hover { background:var(--bg-surface-hover); }
 .meeting-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:6px; background:var(--border-light); }
@@ -448,8 +450,8 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .report-list.cols2 { grid-template-columns:repeat(2,1fr); }
 .report-list.cols4 { grid-template-columns:repeat(4,1fr); }
 @media (max-width:900px) { .report-list.cols4 { grid-template-columns:repeat(2,1fr); } }
-.report-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden; transition:var(--transition); }
-.report-card:hover { box-shadow:var(--shadow-elevated); }
+.report-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-card); overflow:hidden; transition:var(--transition); }
+.report-card:hover { box-shadow:var(--shadow-card-hover); transform:translateY(-1px); }
 .report-card-header { padding:14px 18px; display:flex; align-items:flex-start; gap:10px; cursor:pointer; }
 .report-card-header:hover { background:var(--bg-surface-hover); }
 .rpt-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:6px; background:var(--border-light); }
@@ -1062,12 +1064,12 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 <aside class="sidebar">
   <div class="logo">OTMS</div>
   <nav class="sidebar-nav" id="sidebarNav">
-    <button onclick="switchTab('org')" title="管理部门、团队和人员架构"><span class="nav-icon">○</span> 组织管理</button>
-    <button onclick="switchTab('okr')" title="制定季度目标与关键结果，跟踪执行进度"><span class="nav-icon">○</span> OKR 目标管理</button>
-    <button onclick="switchTab('kpi')" title="追踪收入、效率、质量等量化指标"><span class="nav-icon">○</span> KPI 指标看板</button>
-    <button onclick="switchTab('report')" title="月度/年度财务报表的提交与汇总"><span class="nav-icon">○</span> 报表提交</button>
-    <button onclick="switchTab('meeting')" title="记录例会纪要、决议事项和临时任务"><span class="nav-icon">○</span> 例会管理</button>
-    <button class="active" onclick="switchTab('workspace')" title="个人待办、我的目标、个人设置"><span class="nav-icon">○</span> 个人工作台</button>
+    <button onclick="switchTab('org')" title="管理部门、团队和人员架构"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="2.5"/><path d="M3 20v-1.5c0-2 2.5-4 6-4s6 2 6 4V20"/><circle cx="18" cy="7" r="2"/><path d="M14 19v-1c0-1.5 2-3 4.5-3s4.5 1.5 4.5 3v1"/></svg></span> 组织管理</button>
+    <button onclick="switchTab('okr')" title="制定季度目标与关键结果，跟踪执行进度"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> OKR 目标管理</button>
+    <button onclick="switchTab('kpi')" title="追踪收入、效率、质量等量化指标"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="13" width="4" height="8" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg></span> KPI 指标看板</button>
+    <button onclick="switchTab('report')" title="月度/年度财务报表的提交与汇总"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> 报表提交</button>
+    <button onclick="switchTab('meeting')" title="记录例会纪要、决议事项和临时任务"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> 例会管理</button>
+    <button class="active" onclick="switchTab('workspace')" title="个人待办、我的目标、个人设置"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span> 个人工作台</button>
   </nav>
   <div class="sidebar-footer">
     <button class="btn btn-primary" id="sidebarBtn" onclick="handleNew()">+ 新建目标</button>
