@@ -6202,7 +6202,7 @@ async function autoCheckRemote(){
       .from('team_data')
       .select('version')
       .eq('id', 1)
-      .single();
+      .maybeSingle();
     if(error || !row) return;
     const remoteVer = row.version || 0;
     const localVer = parseInt(localStorage.getItem(LOCAL_DATA_VER_KEY)) || 0;
@@ -6213,7 +6213,7 @@ async function autoCheckRemote(){
       .from('team_data')
       .select('data, version')
       .eq('id', 1)
-      .single();
+      .maybeSingle();
     if(!fullRow) return;
     importDataToLocal(fullRow.data);
     localStorage.setItem(LOCAL_DATA_VER_KEY, fullRow.version);
@@ -6247,7 +6247,7 @@ async function syncFromRemote(){
       .from('team_data')
       .select('data, version')
       .eq('id', 1)
-      .single();
+      .maybeSingle();
 
     if(error) throw error;
     if(!row) return console.log('云端暂无数据，使用本地数据');
