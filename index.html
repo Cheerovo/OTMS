@@ -1427,6 +1427,48 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 <!-- Modal -->
 <div class="modal-overlay" id="modalOverlay"><div class="modal" id="modal"></div></div>
 
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://jnjsweczmbegmtfpdepi.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpuanN3ZWN6bWJlZ210ZnBkZXBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjY5MjksImV4cCI6MjA5ODc0MjkyOX0.FSHAZvScCtqz21RTNGmcgGxLm9riFBaNtmDFDsFqp9o";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ===== Supabase File Store =====
+const fileStore = (()=>{
+  const BUCKET = 'org_files';
+
+  async function put(id, file) {
+    const { error } = await supabaseClient.storage
+      .from(BUCKET)
+      .upload(id, file, { upsert: true });
+    if (error) throw new Error(error.message);
+  }
+
+  async function get(id) {
+    const { data, error } = await supabaseClient.storage
+      .from(BUCKET)
+      .download(id);
+    if (error) throw error;
+    const attachments = (() => {
+      try { return JSON.parse(localStorage.getItem('org_attachments')||'[]'); } catch(e) { return []; }
+    })();
+    const att = attachments.find(a => a.id === id);
+    const name = att ? att.name : id;
+    return { id, name, data, ts: Date.now() };
+  }
+
+  async function del(id) {
+    const { error } = await supabaseClient.storage
+      .from(BUCKET)
+      .remove([id]);
+    if (error) throw error;
+  }
+
+  return { put, get, del };
+})();
+</script>
+
 <script>
 // ===== User & Auth =====
 const MODULES = ['org','okr','kpi','report','meeting'];
@@ -6584,46 +6626,6 @@ function renderWorkspace(){
   }catch(e){}
 
 }
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL = "https://jnjsweczmbegmtfpdepi.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpuanN3ZWN6bWJlZ210ZnBkZXBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjY5MjksImV4cCI6MjA5ODc0MjkyOX0.FSHAZvScCtqz21RTNGmcgGxLm9riFBaNtmDFDsFqp9o";
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// ===== Supabase File Store =====
-const fileStore = (()=>{
-  const BUCKET = 'org_files';
-
-  async function put(id, file) {
-    const { error } = await supabaseClient.storage
-      .from(BUCKET)
-      .upload(id, file, { upsert: true });
-    if (error) throw new Error(error.message);
-  }
-
-  async function get(id) {
-    const { data, error } = await supabaseClient.storage
-      .from(BUCKET)
-      .download(id);
-    if (error) throw error;
-    const attachments = (() => {
-      try { return JSON.parse(localStorage.getItem('org_attachments')||'[]'); } catch(e) { return []; }
-    })();
-    const att = attachments.find(a => a.id === id);
-    const name = att ? att.name : id;
-    return { id, name, data, ts: Date.now() };
-  }
-
-  async function del(id) {
-    const { error } = await supabaseClient.storage
-      .from(BUCKET)
-      .remove([id]);
-    if (error) throw error;
-  }
-
-  return { put, get, del };
-})();
 </script>
 </body>
 </html>
