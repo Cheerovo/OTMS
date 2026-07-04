@@ -73,6 +73,13 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .top-bar .top-search input { width:100%; padding:8px 14px 8px 34px; background:var(--bg-base); border:none; border-radius:20px; color:var(--text); font-size:12px; outline:none; box-shadow:var(--shadow-xs); transition:var(--transition); }
 .top-bar .top-search input:focus { box-shadow:0 0 0 3px rgba(201,79,102,0.12); background:var(--card); }
 .top-bar .top-search svg { position:absolute; left:12px; top:50%; transform:translateY(-50%); pointer-events:none; }
+.search-results { display:none; position:absolute; top:44px; left:0; right:0; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-lg); max-height:360px; overflow-y:auto; z-index:200; }
+.search-results.show { display:block; }
+.search-results .sr-cat { font-size:9px; color:var(--text-muted); padding:10px 16px 4px; letter-spacing:.5px; }
+.search-results .sr-item { display:block; width:100%; padding:8px 16px; border:none; background:none; cursor:pointer; font-size:11px; color:var(--text); text-align:left; transition:background .12s; }
+.search-results .sr-item:hover { background:var(--bg-surface-hover); }
+.search-results .sr-item .sr-sub { font-size:9px; color:var(--text-muted); }
+.search-results .sr-empty { padding:16px; text-align:center; font-size:10px; color:var(--text-muted); }
 .top-bar .top-right { display:flex; align-items:center; gap:12px; flex-shrink:0; }
 
 /* Sidebar */
@@ -1030,7 +1037,8 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
   <div class="top-right">
     <div class="top-search">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
-      <input type="text" id="globalSearch" placeholder="搜索..." onkeydown="if(event.key==='Escape'){this.value='';}if(event.key==='Enter')globalSearch(this.value)" />
+      <input type="text" id="globalSearch" placeholder="搜索..." oninput="globalSearch(this.value)" onkeydown="if(event.key==='Escape'){this.value='';closeSearchResults();}" onfocus="globalSearch(this.value)" />
+      <div class="search-results" id="searchResults"></div>
     </div>
     <div class="notify-wrap" id="notifyWrap">
       <button class="notify-bell" onclick="toggleNotify()" title="待办提醒"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bellBadge"></span></button>
@@ -6479,42 +6487,70 @@ initApp();
 // ===== Global Search =====
 function globalSearch(q){
   q=(q||'').trim().toLowerCase();
-  if(!q) return;
-  // 1. Employees
+  const el=document.getElementById('searchResults');
+  if(!q){el.innerHTML='';el.classList.remove('show');return;}
+
+  const results=[];
+  // Employees
   const emps=JSON.parse(localStorage.getItem('okr_employees')||'[]');
-  const empMatch=emps.filter(e=>(e.name||'').toLowerCase().includes(q)||(e.position||'').toLowerCase().includes(q)||(e.bu||'').toLowerCase().includes(q)||(e.buDept||'').toLowerCase().includes(q));
-  if(empMatch.length>0){
-    switchTab('org');
-    switchOrgSubView('edit');
-    setTimeout(()=>{document.getElementById('empSearchInput').value=q;renderEmployeeTable();},200);
-    return;
+  emps.forEach(e=>{
+    if((e.name||'').toLowerCase().includes(q)||(e.position||'').toLowerCase().includes(q)||(e.bu||'').toLowerCase().includes(q)||(e.buDept||'').toLowerCase().includes(q)){
+      results.push({cat:'员工',text:e.name,sub:e.position+' · '+e.bu,action:()=>{switchTab('org');switchOrgSubView('edit');setTimeout(()=>{document.getElementById('empSearchInput').value=e.name;renderEmployeeTable();},200);}});
+    }
+  });
+  // OKRs
+  okrs.forEach(o=>{
+    const owners=getOwners(o.owner);
+    if((o.title||'').toLowerCase().includes(q)||owners.some(u=>u.toLowerCase().includes(q))||(o.krs||[]).some(k=>(k.title||'').toLowerCase().includes(q))){
+      results.push({cat:'OKR',text:o.title,sub:owners.join(', '),action:()=>{switchTab('okr');setTimeout(()=>{document.getElementById('searchInput').value=o.title.slice(0,20);renderOKR();},200);}});
+    }
+  });
+  // KPIs
+  kpis.forEach(k=>{
+    if((k.title||'').toLowerCase().includes(q)||(k.owner||'').toLowerCase().includes(q)){
+      results.push({cat:'KPI',text:k.title,sub:k.owner,action:()=>{switchTab('kpi');}});
+    }
+  });
+  // Reports
+  reports.forEach(r=>{
+    const owners=getOwners(r.owner);
+    if((r.title||'').toLowerCase().includes(q)||owners.some(u=>u.toLowerCase().includes(q))){
+      results.push({cat:'报表',text:r.title,sub:owners.join(', '),action:()=>{switchTab('report');}});
+    }
+  });
+  // Meetings
+  meetings.forEach(m=>{
+    if((m.title||'').toLowerCase().includes(q)||(m.notes||'').toLowerCase().includes(q)){
+      results.push({cat:'例会',text:m.title,sub:(m.date||''),action:()=>{switchTab('meeting');}});
+    }
+  });
+
+  // Render dropdown
+  if(results.length===0){
+    el.innerHTML='<div class="sr-empty">无匹配结果</div>';
+  }else{
+    let html='', lastCat='';
+    results.slice(0,20).forEach((r,i)=>{
+      if(r.cat!==lastCat){html+='<div class="sr-cat">'+r.cat+'</div>';lastCat=r.cat;}
+      html+='<div class="sr-item" onclick="document.getElementById(\'searchResults\').__actions['+i+']();closeSearchResults();">'+r.text+'<div class="sr-sub">'+r.sub+'</div></div>';
+    });
+    el.innerHTML=html;
+    el.__actions=results.slice(0,20).map(r=>r.action);
   }
-  // 2. OKRs
-  const okrMatch=okrs.filter(o=>(o.title||'').toLowerCase().includes(q)||getOwners(o.owner).some(u=>u.toLowerCase().includes(q))||(o.krs||[]).some(k=>(k.title||'').toLowerCase().includes(q)));
-  if(okrMatch.length>0){
-    switchTab('okr');
-    setTimeout(()=>{document.getElementById('searchInput').value=q;renderOKR();},200);
-    return;
-  }
-  // 3. KPIs
-  const kpiMatch=kpis.filter(k=>(k.title||'').toLowerCase().includes(q)||(k.owner||'').toLowerCase().includes(q));
-  if(kpiMatch.length>0){
-    switchTab('kpi');
-    return;
-  }
-  // 4. Reports
-  const rptMatch=reports.filter(r=>(r.title||'').toLowerCase().includes(q)||getOwners(r.owner).some(u=>u.toLowerCase().includes(q)));
-  if(rptMatch.length>0){
-    switchTab('report');
-    return;
-  }
-  // 5. Meetings
-  const mtgMatch=meetings.filter(m=>(m.title||'').toLowerCase().includes(q)||(m.notes||'').toLowerCase().includes(q));
-  if(mtgMatch.length>0){
-    switchTab('meeting');
-    return;
-  }
+  el.classList.add('show');
 }
+
+function closeSearchResults(){
+  const el=document.getElementById('searchResults');
+  el.innerHTML=''; el.classList.remove('show');
+}
+
+// Close search results when clicking outside
+document.addEventListener('click',function(e){
+  const sr=document.getElementById('searchResults');
+  const gs=document.getElementById('globalSearch');
+  if(sr&&gs&&!gs.contains(e.target)&&!sr.contains(e.target))closeSearchResults();
+});
 
 // ===== My Workspace =====
 function renderWorkspace(){
