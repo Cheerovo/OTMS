@@ -111,6 +111,19 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .tab-content.active { display:block; }
 @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
 
+/* Page header */
+.page-hd { display:flex; align-items:flex-start; gap:12px; margin-bottom:24px; }
+.page-hd .ph-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:6px; }
+.page-hd .ph-dot.c1 { background:var(--accent); }
+.page-hd .ph-dot.c2 { background:#7B8FC0; }
+.page-hd .ph-dot.c3 { background:#8BA89C; }
+.page-hd .ph-dot.c4 { background:var(--warning); }
+.page-hd .ph-dot.c5 { background:#A09DB5; }
+.page-hd .ph-dot.c6 { background:#D4A76A; }
+.page-hd .ph-body { line-height:1.4; }
+.page-hd .ph-title { font-size:20px; font-weight:400; color:var(--text); letter-spacing:.3px; }
+.page-hd .ph-sub { font-size:10px; color:var(--text-muted); letter-spacing:.8px; text-transform:uppercase; }
+
 /* Buttons */
 .btn { padding:8px 18px; border:none; border-radius:var(--radius-xs); font-size:12px; cursor:pointer; font-weight:400; transition:var(--transition); letter-spacing:.3px; }
 .btn-primary { background:var(--accent); color:#fff; box-shadow:0 2px 8px rgba(153,47,72,0.2); }
@@ -1103,6 +1116,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 <!-- ==================== OKR TAB ==================== -->
 <div class="tab-content" id="tabOKR">
 <div class="main">
+  <div class="page-hd"><span class="ph-dot c1"></span><div class="ph-body"><div class="ph-title">目标与关键结果</div><div class="ph-sub">Objectives &amp; Key Results</div></div></div>
   <div class="filter-row" id="okrFilters">
     <span style="position:relative;display:inline-flex;align-items:center">
       <svg style="position:absolute;left:10px;width:14px;height:14px;pointer-events:none" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
@@ -1160,6 +1174,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 <!-- ==================== KPI TAB ==================== -->
 <div class="tab-content" id="tabKPI">
 <div class="main">
+  <div class="page-hd"><span class="ph-dot c2"></span><div class="ph-body"><div class="ph-title">关键绩效指标</div><div class="ph-sub">Key Performance Indicators</div></div></div>
   <div class="filter-row" id="kpiFilterRow">
     <select id="kpiBuFilter" onchange="renderKPI()">
       <option value="all">全部BU</option>
@@ -1297,6 +1312,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 <!-- ==================== REPORT TAB ==================== -->
 <div class="tab-content" id="tabRPT">
 <div class="main">
+  <div class="page-hd"><span class="ph-dot c4"></span><div class="ph-body"><div class="ph-title">报表提交</div><div class="ph-sub">Monthly Reports</div></div></div>
   <div class="stats" id="rptStats"></div>
   <div class="filter-row">
     <select id="rptOwnerFilter" onchange="renderReports()"><option value="all">全部负责人</option></select>
@@ -1314,6 +1330,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 <!-- ==================== MEETING TAB ==================== -->
 <div class="tab-content" id="tabMET">
 <div class="main">
+  <div class="page-hd"><span class="ph-dot c5"></span><div class="ph-body"><div class="ph-title">例会管理</div><div class="ph-sub">Meeting Minutes</div></div></div>
   <div class="stats" id="meetingStats"></div>
   <div class="filter-row">
     <select id="meetingOwnerFilter" onchange="renderMeetings()"><option value="all">全部参会人</option></select>
@@ -1427,6 +1444,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 <!-- ==================== ORG TAB ==================== -->
 <div class="tab-content active" id="tabORG">
 <div class="main">
+  <div class="page-hd"><span class="ph-dot c3"></span><div class="ph-body"><div class="ph-title">组织管理</div><div class="ph-sub">Organization &amp; People</div></div></div>
   <div class="oc-sub-tabs">
     <button class="oc-sub-tab active" onclick="switchOrgSubView('tree',this)">树状架构图</button>
     <button class="oc-sub-tab" onclick="switchOrgSubView('edit',this)">员工花名册</button>
