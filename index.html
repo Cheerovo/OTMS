@@ -1604,7 +1604,7 @@ function openAdminSettings(){
   html+='<div style="font-size:8px;color:var(--text2);margin-top:6px">编辑权限可查看和修改该模块；查看权限仅可查看。移除编辑权限时自动取消查看权限。</div>';
   html+='<div style="margin-top:12px;padding-top:10px;border-top:1px solid #f0eeed;display:flex;gap:8px;flex-wrap:wrap">';
   html+='<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();syncFromRemote()" title="从服务器拉取最新共享数据">🔄 同步最新数据</button>';
-  html+='<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();exportAllData()" title="导出所有数据为 data.json，推送到 GitHub 后全团队共享">📦 导出数据文件</button>';
+  html+='<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();exportAllData()" title="同步数据到 Supabase 云端，全团队自动共享">☁️ 同步到云端</button>';
   html+='</div>';
   html+='</div>';
   document.getElementById('modal').innerHTML=html;
@@ -6111,50 +6111,83 @@ function renderOrgAttachments() {
 
 
 // ===== Init =====
-// ===== Remote Data Sync =====
-const REMOTE_DATA_URL = 'data.json';
+// ===== Remote Data Sync (Supabase) =====
 const LOCAL_DATA_VER_KEY = 'okr_sync_version';
-async function syncFromRemote(){
-  try{
-    const resp = await fetch(REMOTE_DATA_URL + '?t=' + Date.now());
-    if(!resp.ok) return console.log('远程数据不可用，使用本地数据');
-    const remote = await resp.json();
-    const remoteVer = remote._version || 0;
-    const localVer = parseInt(localStorage.getItem(LOCAL_DATA_VER_KEY)) || 0;
-    if(remoteVer <= localVer) return console.log('本地数据已是最新 (v'+localVer+' >= v'+remoteVer+')');
-    // Import remote data into localStorage
-    var imported = 0;
-    Object.keys(remote).forEach(function(k){
-      if(k[0]==='_') return; // skip meta fields
-      localStorage.setItem(k, typeof remote[k]==='string'?remote[k]:JSON.stringify(remote[k]));
-      imported++;
-    });
-    localStorage.setItem(LOCAL_DATA_VER_KEY, remoteVer);
-    console.log('已从远程同步 v'+remoteVer+'，导入 '+imported+' 个数据项。刷新页面生效。');
-    alert('数据已更新至 v'+remoteVer+'，即将刷新页面。');
-    location.reload();
-  }catch(e){
-    console.log('远程同步失败，使用本地数据:', e.message);
-  }
-}
-function exportAllData(){
-  var data = {_version: Date.now(), _updated: new Date().toISOString()};
-  // Collect all localStorage keys used by the app
-  var keys = ['okr_users','okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version'];
-  keys.forEach(function(k){
+const DATA_KEYS = ['okr_users','okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version'];
+
+function collectLocalData(){
+  var data = {};
+  DATA_KEYS.forEach(function(k){
     var v = localStorage.getItem(k);
     if(v !== null){
       try{data[k] = JSON.parse(v);}catch(e){data[k] = v;}
     }
   });
-  data._version = Math.floor(data._version / 1000); // use timestamp as version
-  var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'data.json';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
-  alert('数据已导出为 data.json，请将其放入 otms-pages 文件夹并 git push 即可同步给全团队。\n新版本号: '+data._version);
+  return data;
+}
+
+function importDataToLocal(data){
+  var imported = 0;
+  Object.keys(data).forEach(function(k){
+    if(k[0]==='_') return;
+    localStorage.setItem(k, typeof data[k]==='string'?data[k]:JSON.stringify(data[k]));
+    imported++;
+  });
+  return imported;
+}
+
+async function syncFromRemote(){
+  try{
+    // 从 Supabase 拉取最新数据
+    const { data: row, error } = await supabaseClient
+      .from('team_data')
+      .select('data, version')
+      .eq('id', 1)
+      .single();
+
+    if(error) throw error;
+    if(!row) return console.log('云端暂无数据，使用本地数据');
+
+    const remoteVer = row.version || 0;
+    const localVer = parseInt(localStorage.getItem(LOCAL_DATA_VER_KEY)) || 0;
+    if(remoteVer <= localVer) return console.log('本地数据已是最新 (v'+localVer+' >= v'+remoteVer+')');
+
+    var imported = importDataToLocal(row.data);
+    localStorage.setItem(LOCAL_DATA_VER_KEY, remoteVer);
+    console.log('已从 Supabase 云端同步 v'+remoteVer+'，导入 '+imported+' 个数据项。刷新页面生效。');
+    alert('数据已更新至 v'+remoteVer+'，即将刷新页面。');
+    location.reload();
+  }catch(e){
+    console.log('Supabase 同步失败，使用本地数据:', e.message);
+  }
+}
+
+async function exportAllData(){
+  var data = collectLocalData();
+  var version = Math.floor(Date.now() / 1000);
+
+  try{
+    const { error } = await supabaseClient
+      .from('team_data')
+      .upsert({ id: 1, data: data, version: version, updated_at: new Date().toISOString() });
+
+    if(error) throw error;
+
+    localStorage.setItem(LOCAL_DATA_VER_KEY, version);
+    alert('✅ 数据已同步到云端！(v'+version+')\n\n其他团队成员刷新页面即可获取最新数据，\n无需再手动复制 data.json 文件。');
+  }catch(e){
+    console.log('Supabase 上传失败，回退到文件导出:', e.message);
+    // 回退：导出为文件
+    data._version = version;
+    data._updated = new Date().toISOString();
+    var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'data.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    alert('⚠️ 云端同步失败，已导出为 data.json 文件。\n错误: '+e.message);
+  }
 }
 
 function initApp(){
