@@ -1880,88 +1880,7 @@ function loadKPIs(){try{return JSON.parse(localStorage.kpi_data)||defaultKPIs()}
 function saveKPIs(d){try{localStorage.kpi_data=JSON.stringify(d)}catch(e){alert('存储空间不足，请清理旧数据后重试。\n错误：'+e.message);throw e}}
 let kpis = loadKPIs();
 
-// ===== Supabase File Store =====
-const fileStore = (()=>{
-  const BUCKET = 'org_files';
-
-  async function put(id, file) {
-    if (file.size <= 5 * 1024 * 1024) {
-      const { error } = await supabaseClient.storage
-        .from(BUCKET)
-        .upload(id, file, { upsert: true });
-      if (error) throw new Error(error.message);
-      return;
-    }
-
-    // 大文件：TUS 分块上传
-    const SUPABASE_URL = 'https://jnjsweczmbegmtfpdepi.supabase.co';
-    const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpuanN3ZWN6bWJlZ210ZnBkZXBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjY5MjksImV4cCI6MjA5ODc0MjkyOX0.FSHAZvScCtqz21RTNGmcgGxLm9riFBaNtmDFDsFqp9o';
-
-    // Step 1: 创建上传会话
-    const res = await fetch(SUPABASE_URL + '/storage/v1/upload/resumable', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + ANON_KEY,
-        'Content-Type': 'application/json',
-        'x-upsert': 'true'
-      },
-      body: JSON.stringify({
-        bucketName: BUCKET,
-        objectName: id,
-        contentType: file.type || 'application/octet-stream',
-        upsert: true
-      })
-    });
-    if (!res.ok) {
-      const e = await res.json().catch(()=>({}));
-      throw new Error(e.message || e.error || '创建上传会话失败');
-    }
-
-    // Step 2: 分块上传（用返回的 URL）
-    const { url: tusUrl } = await res.json();
-    const CHUNK = 5 * 1024 * 1024;
-    let offset = 0;
-    while (offset < file.size) {
-      const chunk = file.slice(offset, offset + CHUNK);
-      const chunkRes = await fetch(tusUrl, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/offset+octet-stream',
-          'Upload-Offset': String(offset),
-          'Tus-Resumable': '1.0.0'
-        },
-        body: chunk
-      });
-      if (!chunkRes.ok) {
-        const e = await chunkRes.json().catch(()=>({}));
-        throw new Error(e.message || e.error || '分块上传失败');
-      }
-      offset += chunk.size;
-    }
-  }
-
-  async function get(id) {
-    const { data, error } = await supabaseClient.storage
-      .from(BUCKET)
-      .download(id);
-    if (error) throw error;
-    const attachments = (() => {
-      try { return JSON.parse(localStorage.getItem('org_attachments')||'[]'); } catch(e) { return []; }
-    })();
-    const att = attachments.find(a => a.id === id);
-    const name = att ? att.name : id;
-    return { id, name, data, ts: Date.now() };
-  }
-
-  async function del(id) {
-    const { error } = await supabaseClient.storage
-      .from(BUCKET)
-      .remove([id]);
-    if (error) throw error;
-  }
-
-  return { put, get, del };
-})();
+// fileStore moved to end of file (near supabaseClient init)
 
 // ===== Multi-File Helpers =====
 function getSubFiles(sub){
@@ -6668,6 +6587,85 @@ function renderWorkspace(){
 const SUPABASE_URL = "https://jnjsweczmbegmtfpdepi.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGlzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpuanN3ZWN6bWJlZ210ZnBkZXBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjY5MjksImV4cCI6MjA5ODc0MjkyOX0.FSHAZvScCtqz21RTNGmcgGxLm9riFBaNtmDFDsFqp9o";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ===== Supabase File Store =====
+const fileStore = (()=>{
+  const BUCKET = 'org_files';
+
+  async function put(id, file) {
+    if (file.size <= 5 * 1024 * 1024) {
+      const { error } = await supabaseClient.storage
+        .from(BUCKET)
+        .upload(id, file, { upsert: true });
+      if (error) throw new Error(error.message);
+      return;
+    }
+
+    // 大文件：TUS 分块上传
+    const res = await fetch(SUPABASE_URL + '/storage/v1/upload/resumable', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'apikey': SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'x-upsert': 'true'
+      },
+      body: JSON.stringify({
+        bucketName: BUCKET,
+        objectName: id,
+        contentType: file.type || 'application/octet-stream',
+        upsert: true
+      })
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(()=>({}));
+      throw new Error(e.message || e.error || '创建上传会话失败');
+    }
+
+    const { url: tusUrl } = await res.json();
+    const CHUNK = 5 * 1024 * 1024;
+    let offset = 0;
+    while (offset < file.size) {
+      const chunk = file.slice(offset, offset + CHUNK);
+      const chunkRes = await fetch(tusUrl, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/offset+octet-stream',
+          'Upload-Offset': String(offset),
+          'Tus-Resumable': '1.0.0'
+        },
+        body: chunk
+      });
+      if (!chunkRes.ok) {
+        const e = await chunkRes.json().catch(()=>({}));
+        throw new Error(e.message || e.error || '分块上传失败');
+      }
+      offset += chunk.size;
+    }
+  }
+
+  async function get(id) {
+    const { data, error } = await supabaseClient.storage
+      .from(BUCKET)
+      .download(id);
+    if (error) throw error;
+    const attachments = (() => {
+      try { return JSON.parse(localStorage.getItem('org_attachments')||'[]'); } catch(e) { return []; }
+    })();
+    const att = attachments.find(a => a.id === id);
+    const name = att ? att.name : id;
+    return { id, name, data, ts: Date.now() };
+  }
+
+  async function del(id) {
+    const { error } = await supabaseClient.storage
+      .from(BUCKET)
+      .remove([id]);
+    if (error) throw error;
+  }
+
+  return { put, get, del };
+})();
 </script>
 </body>
 </html>
