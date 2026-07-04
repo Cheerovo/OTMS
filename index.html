@@ -69,7 +69,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 /* Top bar */
 .top-bar { position:fixed; top:0; left:0; right:0; height:56px; background:var(--bg-surface); display:flex; align-items:center; justify-content:space-between; padding:0 28px; z-index:110; box-shadow:0 1px 0 var(--border-subtle); gap:24px; }
 .top-bar .top-logo { font-size:14px; font-weight:400; letter-spacing:.5px; color:var(--accent); flex-shrink:0; }
-.top-bar .top-search { flex:1; max-width:360px; position:relative; }
+.top-bar .top-search { width:260px; position:relative; }
 .top-bar .top-search input { width:100%; padding:8px 14px 8px 34px; background:var(--bg-base); border:none; border-radius:20px; color:var(--text); font-size:12px; outline:none; box-shadow:var(--shadow-xs); transition:var(--transition); }
 .top-bar .top-search input:focus { box-shadow:0 0 0 3px rgba(201,79,102,0.12); background:var(--card); }
 .top-bar .top-search svg { position:absolute; left:12px; top:50%; transform:translateY(-50%); pointer-events:none; }
@@ -1027,11 +1027,11 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 <!-- Top Bar -->
 <div class="top-bar">
   <div class="top-logo">HRO 时代开弈集团</div>
-  <div class="top-search">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
-    <input type="text" id="globalSearch" placeholder="搜索员工、目标..." oninput="globalSearch(this.value)" onkeydown="if(event.key==='Escape')this.value='';globalSearch('')" />
-  </div>
   <div class="top-right">
+    <div class="top-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+      <input type="text" id="globalSearch" placeholder="万能搜索..." oninput="globalSearch(this.value)" onkeydown="if(event.key==='Escape'){this.value='';globalSearch('');}if(event.key==='Enter')globalSearch(this.value)" />
+    </div>
     <div class="notify-wrap" id="notifyWrap">
       <button class="notify-bell" onclick="toggleNotify()" title="待办提醒"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="bell-badge" id="bellBadge"></span></button>
       <div class="notify-drop" id="notifyDrop">
@@ -6480,32 +6480,39 @@ initApp();
 function globalSearch(q){
   q=(q||'').trim().toLowerCase();
   if(!q) return;
-  // Search employees
+  // 1. Employees
   const emps=JSON.parse(localStorage.getItem('okr_employees')||'[]');
-  const matched=emps.filter(e=>(e.name||'').toLowerCase().includes(q)||(e.position||'').toLowerCase().includes(q)||(e.bu||'').toLowerCase().includes(q));
-  if(matched.length===1){
+  const empMatch=emps.filter(e=>(e.name||'').toLowerCase().includes(q)||(e.position||'').toLowerCase().includes(q)||(e.bu||'').toLowerCase().includes(q)||(e.buDept||'').toLowerCase().includes(q));
+  if(empMatch.length>0){
     switchTab('org');
     switchOrgSubView('edit');
-    setTimeout(()=>{
-      document.getElementById('empSearchInput').value=matched[0].name;
-      renderEmployeeTable();
-    },200);
-  }else if(matched.length>1){
-    switchTab('org');
-    switchOrgSubView('edit');
-    setTimeout(()=>{
-      document.getElementById('empSearchInput').value=q;
-      renderEmployeeTable();
-    },200);
+    setTimeout(()=>{document.getElementById('empSearchInput').value=q;renderEmployeeTable();},200);
+    return;
   }
-  // Also search OKRs
-  const okrMatch=okrs.filter(o=>(o.title||'').toLowerCase().includes(q)||getOwners(o.owner).some(u=>u.toLowerCase().includes(q)));
-  if(okrMatch.length>0&&matched.length===0){
+  // 2. OKRs
+  const okrMatch=okrs.filter(o=>(o.title||'').toLowerCase().includes(q)||getOwners(o.owner).some(u=>u.toLowerCase().includes(q))||(o.krs||[]).some(k=>(k.title||'').toLowerCase().includes(q)));
+  if(okrMatch.length>0){
     switchTab('okr');
-    setTimeout(()=>{
-      document.getElementById('searchInput').value=q;
-      renderOKR();
-    },200);
+    setTimeout(()=>{document.getElementById('searchInput').value=q;renderOKR();},200);
+    return;
+  }
+  // 3. KPIs
+  const kpiMatch=kpis.filter(k=>(k.title||'').toLowerCase().includes(q)||(k.owner||'').toLowerCase().includes(q));
+  if(kpiMatch.length>0){
+    switchTab('kpi');
+    return;
+  }
+  // 4. Reports
+  const rptMatch=reports.filter(r=>(r.title||'').toLowerCase().includes(q)||getOwners(r.owner).some(u=>u.toLowerCase().includes(q)));
+  if(rptMatch.length>0){
+    switchTab('report');
+    return;
+  }
+  // 5. Meetings
+  const mtgMatch=meetings.filter(m=>(m.title||'').toLowerCase().includes(q)||(m.notes||'').toLowerCase().includes(q));
+  if(mtgMatch.length>0){
+    switchTab('meeting');
+    return;
   }
 }
 
