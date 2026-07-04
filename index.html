@@ -1880,19 +1880,39 @@ function loadKPIs(){try{return JSON.parse(localStorage.kpi_data)||defaultKPIs()}
 function saveKPIs(d){try{localStorage.kpi_data=JSON.stringify(d)}catch(e){alert('存储空间不足，请清理旧数据后重试。\n错误：'+e.message);throw e}}
 let kpis = loadKPIs();
 
-// ===== IndexedDB File Store =====
+// ===== Supabase File Store =====
 const fileStore = (()=>{
-  const DB='okr_files_v1', ST='files';
-  function open(){return new Promise((resolve,reject)=>{
-    const r=indexedDB.open(DB,1);
-    r.onupgradeneeded=()=>{r.result.createObjectStore(ST);};
-    r.onsuccess=()=>resolve(r.result);
-    r.onerror=()=>reject(r.error);
-  });}
-  async function put(id,file){const db=await open();return new Promise((resolve,reject)=>{const tx=db.transaction(ST,'readwrite');tx.objectStore(ST).put({id,name:file.name,data:file,ts:Date.now()},id);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
-  async function get(id){const db=await open();return new Promise((resolve,reject)=>{const tx=db.transaction(ST,'readonly');const r=tx.objectStore(ST).get(id);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
-  async function del(id){const db=await open();return new Promise((resolve,reject)=>{const tx=db.transaction(ST,'readwrite');tx.objectStore(ST).delete(id);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
-  return {put,get,del};
+  const BUCKET = 'org_files';
+
+  async function put(id, file) {
+    const { error } = await supabaseClient.storage
+      .from(BUCKET)
+      .upload(id, file, { upsert: true });
+    if (error) throw error;
+  }
+
+  async function get(id) {
+    const { data, error } = await supabaseClient.storage
+      .from(BUCKET)
+      .download(id);
+    if (error) throw error;
+    // 从附件记录中找回原始文件名
+    const attachments = (() => {
+      try { return JSON.parse(localStorage.getItem('org_attachments')||'[]'); } catch(e) { return []; }
+    })();
+    const att = attachments.find(a => a.id === id);
+    const name = att ? att.name : id;
+    return { id, name, data, ts: Date.now() };
+  }
+
+  async function del(id) {
+    const { error } = await supabaseClient.storage
+      .from(BUCKET)
+      .remove([id]);
+    if (error) throw error;
+  }
+
+  return { put, get, del };
 })();
 
 // ===== Multi-File Helpers =====
