@@ -75,10 +75,19 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .top-bar .top-search svg { position:absolute; left:12px; top:50%; transform:translateY(-50%); pointer-events:none; }
 .search-results { display:none; position:absolute; top:44px; left:0; right:0; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-lg); max-height:360px; overflow-y:auto; z-index:200; }
 .search-results.show { display:block; }
-.search-results .sr-cat { font-size:9px; color:var(--text-muted); padding:10px 16px 4px; letter-spacing:.5px; }
-.search-results .sr-item { display:block; width:100%; padding:8px 16px; border:none; background:none; cursor:pointer; font-size:11px; color:var(--text); text-align:left; transition:background .12s; }
+.search-results .sr-cat { font-size:9px; color:var(--text-muted); padding:12px 16px 6px; letter-spacing:.5px; border-top:1px solid var(--border-subtle); }
+.search-results .sr-cat:first-child { border-top:none; padding-top:8px; }
+.search-results .sr-item { display:flex; align-items:center; gap:10px; width:100%; padding:8px 16px; border:none; background:none; cursor:pointer; font-size:11px; color:var(--text); text-align:left; transition:background .12s; }
 .search-results .sr-item:hover { background:var(--bg-surface-hover); }
-.search-results .sr-item .sr-sub { font-size:9px; color:var(--text-muted); }
+.search-results .sr-item .sr-tag { display:inline-block; padding:1px 6px; border-radius:3px; font-size:8px; font-weight:400; flex-shrink:0; letter-spacing:.3px; }
+.sr-tag.emp { background:#EBF0FA; color:#4B6FBF; }
+.sr-tag.okr { background:#FDE8EC; color:#992F48; }
+.sr-tag.kpi { background:#E8F0EC; color:#5A7868; }
+.sr-tag.rpt { background:#F9F2E7; color:#9A7D3E; }
+.sr-tag.mtg { background:#EEECF2; color:#7B7495; }
+.search-results .sr-item .sr-body { flex:1; min-width:0; }
+.search-results .sr-item .sr-body .sr-text { line-height:1.4; }
+.search-results .sr-item .sr-body .sr-sub { font-size:9px; color:var(--text-muted); }
 .search-results .sr-empty { padding:16px; text-align:center; font-size:10px; color:var(--text-muted); }
 .top-bar .top-right { display:flex; align-items:center; gap:12px; flex-shrink:0; }
 
@@ -6495,33 +6504,33 @@ function globalSearch(q){
   const emps=JSON.parse(localStorage.getItem('okr_employees')||'[]');
   emps.forEach(e=>{
     if((e.name||'').toLowerCase().includes(q)||(e.position||'').toLowerCase().includes(q)||(e.bu||'').toLowerCase().includes(q)||(e.buDept||'').toLowerCase().includes(q)){
-      results.push({cat:'员工',text:e.name,sub:e.position+' · '+e.bu,action:()=>{switchTab('org');switchOrgSubView('edit');setTimeout(()=>{document.getElementById('empSearchInput').value=e.name;renderEmployeeTable();},200);}});
+      results.push({cat:'员工',tag:'emp',text:e.name,sub:e.position+' · '+e.bu,action:()=>{switchTab('org');switchOrgSubView('edit');setTimeout(()=>{document.getElementById('empSearchInput').value=e.name;renderEmployeeTable();},200);}});
     }
   });
   // OKRs
   okrs.forEach(o=>{
     const owners=getOwners(o.owner);
     if((o.title||'').toLowerCase().includes(q)||owners.some(u=>u.toLowerCase().includes(q))||(o.krs||[]).some(k=>(k.title||'').toLowerCase().includes(q))){
-      results.push({cat:'OKR',text:o.title,sub:owners.join(', '),action:()=>{switchTab('okr');setTimeout(()=>{document.getElementById('searchInput').value=o.title.slice(0,20);renderOKR();},200);}});
+      results.push({cat:'OKR',tag:'okr',text:o.title,sub:owners.join(', '),action:()=>{switchTab('okr');setTimeout(()=>{document.getElementById('searchInput').value=o.title.slice(0,20);renderOKR();},200);}});
     }
   });
   // KPIs
   kpis.forEach(k=>{
     if((k.title||'').toLowerCase().includes(q)||(k.owner||'').toLowerCase().includes(q)){
-      results.push({cat:'KPI',text:k.title,sub:k.owner,action:()=>{switchTab('kpi');}});
+      results.push({cat:'KPI',tag:'kpi',text:k.title,sub:k.owner,action:()=>{switchTab('kpi');}});
     }
   });
   // Reports
   reports.forEach(r=>{
     const owners=getOwners(r.owner);
     if((r.title||'').toLowerCase().includes(q)||owners.some(u=>u.toLowerCase().includes(q))){
-      results.push({cat:'报表',text:r.title,sub:owners.join(', '),action:()=>{switchTab('report');}});
+      results.push({cat:'报表',tag:'rpt',text:r.title,sub:owners.join(', '),action:()=>{switchTab('report');}});
     }
   });
   // Meetings
   meetings.forEach(m=>{
     if((m.title||'').toLowerCase().includes(q)||(m.notes||'').toLowerCase().includes(q)){
-      results.push({cat:'例会',text:m.title,sub:(m.date||''),action:()=>{switchTab('meeting');}});
+      results.push({cat:'例会',tag:'mtg',text:m.title,sub:(m.date||''),action:()=>{switchTab('meeting');}});
     }
   });
 
@@ -6532,7 +6541,7 @@ function globalSearch(q){
     let html='', lastCat='';
     results.slice(0,20).forEach((r,i)=>{
       if(r.cat!==lastCat){html+='<div class="sr-cat">'+r.cat+'</div>';lastCat=r.cat;}
-      html+='<div class="sr-item" onclick="document.getElementById(\'searchResults\').__actions['+i+']();closeSearchResults();">'+r.text+'<div class="sr-sub">'+r.sub+'</div></div>';
+      html+='<div class="sr-item" onclick="document.getElementById(\'searchResults\').__actions['+i+']();closeSearchResults();"><span class="sr-tag '+r.tag+'">'+r.cat+'</span><div class="sr-body"><div class="sr-text">'+r.text+'</div><div class="sr-sub">'+r.sub+'</div></div></div>';
     });
     el.innerHTML=html;
     el.__actions=results.slice(0,20).map(r=>r.action);
