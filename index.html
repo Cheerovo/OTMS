@@ -634,7 +634,28 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .oc-attach { margin-top:24px; padding:16px 20px; background:var(--bg-surface); border-radius:var(--radius); box-shadow:var(--shadow-sm); }
 
 /* Employee Table */
-.emp-table-wrap { background:var(--bg-surface); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden; }
+.emp-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+.emp-stat-card { background:var(--card); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow-sm); border-top:4px solid var(--accent); transition:var(--transition); }
+.emp-stat-card:hover { box-shadow:var(--shadow-elevated); transform:translateY(-2px); }
+.emp-stat-card:nth-child(2) { border-top-color:#7B8FC0; }
+.emp-stat-card:nth-child(3) { border-top-color:#8D9A9E; }
+.emp-stat-card:nth-child(4) { border-top-color:var(--warning); }
+.emp-stat-card .label { font-size:11px; color:var(--text-muted); margin-bottom:6px; font-weight:400; letter-spacing:1.2px; }
+.emp-stat-card .value { font-size:22px; font-weight:400; letter-spacing:-.5px; color:var(--accent); line-height:1.3; }
+.emp-stat-card .value-small { font-size:14px; color:var(--text-dim); }
+.emp-stat-card .sub { font-size:10px; color:var(--text-dim); margin-top:3px; }
+.emp-table-wrap { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden; }
+.emp-table { width:100%; border-collapse:collapse; font-size:11px; }
+.emp-table thead th { background:var(--bg-surface-alt); padding:10px 14px; text-align:left; font-size:10px; color:var(--text-muted); font-weight:400; border-bottom:1px solid var(--border-subtle); cursor:pointer; user-select:none; transition:background .15s; white-space:nowrap; }
+.emp-table thead th:hover { background:var(--bg-surface-hover); color:var(--text-dim); }
+.emp-table thead th.sorted { color:var(--accent); }
+.emp-table thead th .sort-arrow { font-size:9px; margin-left:3px; color:var(--text-muted); }
+.emp-table thead th.sorted .sort-arrow { color:var(--accent); }
+.emp-table tbody td { padding:10px 14px; border-bottom:1px solid var(--border-subtle); color:var(--text); font-size:11px; }
+.emp-table tbody tr { transition:background .15s; }
+.emp-table tbody tr:hover { background:var(--bg-row-hover); }
+.emp-table tbody tr:last-child td { border-bottom:none; }
+.rank-badge { display:inline-block; padding:3px 9px; border-radius:4px; font-size:10px; font-weight:400; line-height:1.4; }
 
 /* Attendance */
 .attend-topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -1372,34 +1393,36 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
   <div id="orgBUFuncView" style="display:none;"></div>
   <div id="orgAttendView" style="display:none;"></div>
   <div id="orgEditView" style="display:none;">
+    <div class="emp-stats" id="empStats"></div>
     <div class="filter-row">
       <input id="empSearchInput" placeholder="搜索姓名..." oninput="renderEmployeeTable()" style="width:130px">
-      <select id="empBUFilter" onchange="renderEmployeeTable()" style="padding:7px 10px;border-radius:6px;font-size:9px;border:1px solid #e8e5e3">
+      <select id="empBUFilter" onchange="renderEmployeeTable()">
         <option value="all">全部BU</option>
       </select>
-      <select id="empBUDeptFilter" onchange="renderEmployeeTable()" style="padding:7px 10px;border-radius:6px;font-size:9px;border:1px solid #e8e5e3">
+      <select id="empBUDeptFilter" onchange="renderEmployeeTable()">
         <option value="all">全部BU/部门</option>
       </select>
-      <select id="empReportsToFilter" onchange="renderEmployeeTable()" style="padding:7px 10px;border-radius:6px;font-size:9px;border:1px solid #e8e5e3">
+      <select id="empReportsToFilter" onchange="renderEmployeeTable()">
         <option value="all">全部汇报人</option>
       </select>
-      <select id="empRankFilter" onchange="renderEmployeeTable()" style="padding:7px 10px;border-radius:6px;font-size:9px;border:1px solid #e8e5e3">
+      <select id="empRankFilter" onchange="renderEmployeeTable()">
         <option value="all">全部职级</option>
       </select>
       <button class="btn btn-outline btn-sm" onclick="clearEmpFilters()" title="清除所有筛选">✕ 清除</button>
       <button class="btn btn-primary btn-sm" id="btnAddEmp" onclick="openEmployeeModal()" style="display:none">+ 新增员工</button>
+      <button class="btn btn-outline btn-sm" id="btnBatchImport" onclick="openBatchImportModal()" style="display:none">📥 批量导入</button>
       <button class="btn btn-outline btn-sm" id="btnDeptMgmt" onclick="openDeptManageModal()" style="display:none">管理部门</button>
     </div>
     <div class="emp-table-wrap">
       <table class="emp-table">
         <thead>
           <tr>
-            <th onclick="sortEmployees('buDept')" style="width:18%">BU/部门 <span class="sort-arrow">↕</span></th>
+            <th onclick="sortEmployees('buDept')" style="width:20%">BU/部门 <span class="sort-arrow">↕</span></th>
             <th onclick="sortEmployees('name')" style="width:10%">姓名 <span class="sort-arrow">↕</span></th>
-            <th onclick="sortEmployees('reportsTo')" style="width:10%">汇报人 <span class="sort-arrow">↕</span></th>
-            <th onclick="sortEmployees('position')" style="width:14%">职位 <span class="sort-arrow">↕</span></th>
-            <th onclick="sortEmployees('rank')" style="width:7%">职级 <span class="sort-arrow">↕</span></th>
-            <th style="width:9%">操作</th>
+            <th onclick="sortEmployees('reportsTo')" style="width:12%">汇报人 <span class="sort-arrow">↕</span></th>
+            <th onclick="sortEmployees('position')" style="width:20%">职位 <span class="sort-arrow">↕</span></th>
+            <th onclick="sortEmployees('rank')" style="width:8%">职级 <span class="sort-arrow">↕</span></th>
+            <th style="width:10%">操作</th>
           </tr>
         </thead>
         <tbody id="empTableBody"></tbody>
@@ -5075,8 +5098,30 @@ function renderEmployeeTable(){
   const isAdmin=canEditModule(currentUser,'org');
   const btnAdd=document.getElementById('btnAddEmp');
   const btnDept=document.getElementById('btnDeptMgmt');
+  const btnBatch=document.getElementById('btnBatchImport');
   if(btnAdd)btnAdd.style.display=isAdmin?'':'none';
   if(btnDept)btnDept.style.display=isAdmin?'':'none';
+  if(btnBatch)btnBatch.style.display=isAdmin?'':'none';
+
+  // Stats summary
+  const empStatsEl=document.getElementById('empStats');
+  if(empStatsEl){
+    const buSetAll=[...new Set(empList.map(e=>e.bu).filter(Boolean))];
+    const internalRanks=['I','II','III','IV','V','VI','VII','管培'];
+    const internalCount=empList.filter(e=>internalRanks.includes(e.rank)).length;
+    const extCount=empList.filter(e=>e.rank==='外部').length;
+    const outCount=empList.filter(e=>e.rank==='外包').length;
+    const deptCounts={};
+    empList.forEach(e=>{const d=e.department||'未知';deptCounts[d]=(deptCounts[d]||0)+1;});
+    let maxDept='',maxCount=0;
+    Object.entries(deptCounts).forEach(([d,c])=>{if(c>maxCount){maxDept=d;maxCount=c;}});
+    empStatsEl.innerHTML=
+      `<div class="emp-stat-card"><div class="label">总人数</div><div class="value">${empList.length}</div><div class="sub">员工花名册总数</div></div>
+      <div class="emp-stat-card"><div class="label">BU 数量</div><div class="value">${buSetAll.length}</div><div class="sub">${buSetAll.map(b=>esc(b)).join('、')}</div></div>
+      <div class="emp-stat-card"><div class="label">用工构成</div><div class="value">${internalCount}<span class="value-small"> / ${extCount} / ${outCount}</span></div><div class="sub">在职 / 外部 / 外包</div></div>
+      <div class="emp-stat-card"><div class="label">人数最多部门</div><div class="value">${esc(maxDept||'-')}</div><div class="sub">${maxDept?maxCount+' 人':''}</div></div>`;
+  }
+
   if(!deptList.length){deptList=['总经办'];saveDepts(deptList);}
   const q=(document.getElementById('empSearchInput').value||'').trim().toLowerCase();
   const buFilter=document.getElementById('empBUFilter').value;
@@ -5184,15 +5229,15 @@ function openEmployeeModal(id){
   html+=`<div class="modal-body">`;
   html+=`<div class="form-group"><label>员工姓名 *</label><input id="empName" value="${esc(e?e.name:'')}" placeholder="例如：张三"></div>`;
   html+=`<div class="form-group"><label>BU</label><input id="empBU" value="${esc(e?e.bu:'')}" placeholder="例如：人力资源BU"></div>`;
-  html+=`<div class="form-group"><label>部门 *</label><div style="display:flex;gap:6px"><select id="empDept" style="flex:1;padding:8px;border:none;box-shadow:inset 0 0 0 1px var(--border);border-radius:6px;font-size:11px">${deptList.map(d=>`<option value="${esc(d)}" ${e&&e.department===d?'selected':''}>${esc(d)}</option>`).join('')}</select><button class="btn btn-outline btn-sm" onclick="quickAddDept()" title="快速添加部门" style="flex-shrink:0">+</button></div></div>`;
+  html+=`<div class="form-group"><label>部门 *</label><div style="display:flex;gap:6px"><select id="empDept" style="flex:1">${deptList.map(d=>`<option value="${esc(d)}" ${e&&e.department===d?'selected':''}>${esc(d)}</option>`).join('')}</select><button class="btn btn-outline btn-sm" onclick="quickAddDept()" title="快速添加部门" style="flex-shrink:0">+</button></div></div>`;
 	  html+=`<div class="form-group"><label>办公地点</label><input id="empLocation" value="${esc(e?e.location||'':'')}" placeholder="例如：A栋3楼 / 远程"></div>`;
   html+=`<div class="form-group"><label>汇报人</label><input id="empReportsTo" value="${esc(e?e.reportsTo:'')}" placeholder="例如：杜宪"></div>`;
   html+=`<div class="form-group"><label>职位</label><input id="empPosition" value="${esc(e?e.position:'')}" placeholder="例如：部门经理"></div>`;
-  html+=`<div class="form-group"><label>职级</label><select id="empRank" style="width:100%;padding:8px;border:none;box-shadow:inset 0 0 0 1px var(--border);border-radius:6px;font-size:11px"><option value="">-- 无 --</option>${Object.entries(RANK_LABELS).map(([k,v])=>`<option value="${k}" ${e&&e.rank===k?'selected':''}>${['外部','外包','管培'].includes(k)?v:v+'级'}</option>`).join('')}</select></div>`;
+  html+=`<div class="form-group"><label>职级</label><select id="empRank"><option value="">-- 无 --</option>${Object.entries(RANK_LABELS).map(([k,v])=>`<option value="${k}" ${e&&e.rank===k?'selected':''}>${['外部','外包','管培'].includes(k)?v:v+'级'}</option>`).join('')}</select></div>`;
 
-  html+=`<div class="form-group"><label>钉钉 UserID</label><input id="empDingId" value="${esc(e?e.dingId||'':'')}" placeholder="同步钉钉考勤用，选填" style="width:100%;padding:8px;border:none;box-shadow:inset 0 0 0 1px var(--border);border-radius:6px;font-size:11px"></div>`;
-  html+=`<div class="form-group"><label>入职日期</label><input id="empHireDate" type="date" value="${esc(e?e.hireDate:'')}" style="width:100%;padding:8px;border:none;box-shadow:inset 0 0 0 1px var(--border);border-radius:6px;font-size:11px"></div>`;
-  html+=`<div class="form-group"><label>手机号</label><input id="empPhone" value="${esc(e?e.phone:'')}" placeholder="选填" style="width:100%;padding:8px;border:none;box-shadow:inset 0 0 0 1px var(--border);border-radius:6px;font-size:11px"></div>`;
+  html+=`<div class="form-group"><label>钉钉 UserID</label><input id="empDingId" value="${esc(e?e.dingId||'':'')}" placeholder="同步钉钉考勤用，选填"></div>`;
+  html+=`<div class="form-group"><label>入职日期</label><input id="empHireDate" type="date" value="${esc(e?e.hireDate:'')}"></div>`;
+  html+=`<div class="form-group"><label>手机号</label><input id="empPhone" value="${esc(e?e.phone:'')}" placeholder="选填"></div>`;
   html+=`</div><div class="modal-footer">`;
   html+=`<button class="btn btn-outline" onclick="closeModal()">取消</button>`;
   html+=`<button class="btn btn-primary" id="empSave">${e?'保存':'添加'}</button></div>`;
@@ -5275,6 +5320,133 @@ function quickAddDept(){
   // Refresh the dropdown in the employee modal
   let sel=document.getElementById('empDept');
   if(sel){sel.innerHTML=deptList.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('');sel.value=nm;}
+}
+
+// --- Batch Import ---
+function openBatchImportModal(){
+  if(!canEditModule(currentUser,'org')){alert('没有编辑权限');return;}
+  let html=`<div class="modal-header"><h2>批量导入员工</h2><button class="btn-icon" onclick="closeModal()">✕</button></div>`;
+  html+=`<div class="modal-body">`;
+  html+=`<div class="form-group"><label>粘贴数据或上传 CSV 文件</label>`;
+  html+=`<textarea id="batchImportData" oninput="previewBatchImport(this.value)" placeholder="每行一条记录，支持逗号或 Tab 分隔&#10;列顺序：姓名,部门,BU,汇报人,职位,职级&#10;&#10;示例：&#10;张三,客户服务部,人力资源BU,杜宪,客服专员,I" style="min-height:130px;font-size:11px;font-family:'SF Mono','Monaco','Consolas',monospace;line-height:1.6;resize:vertical"></textarea></div>`;
+  html+=`<div class="form-group" style="margin-bottom:4px">`;
+  html+=`<input type="file" id="batchImportFile" accept=".csv,.txt" onchange="handleBatchImportFile(this)" style="padding:8px;font-size:11px">`;
+  html+=`</div>`;
+  html+=`<div style="font-size:10px;color:var(--text-muted);margin-bottom:14px">支持格式：逗号分隔 (.csv) 或 Tab 分隔（可从 Excel 直接粘贴）。列顺序：姓名, 部门, BU, 汇报人, 职位, 职级。部门列必填，其他可选。</div>`;
+  html+=`<div id="batchPreview" style="max-height:240px;overflow-y:auto;"></div>`;
+  html+=`</div>`;
+  html+=`<div class="modal-footer">`;
+  html+=`<button class="btn btn-outline" onclick="closeModal()">取消</button>`;
+  html+=`<button class="btn btn-outline btn-sm" onclick="downloadEmpTemplate()" style="margin-right:auto">📋 下载导入模板</button>`;
+  html+=`<button class="btn btn-primary" id="btnConfirmBatch" onclick="confirmBatchImport()" disabled>确认导入</button></div>`;
+  document.getElementById('modal').innerHTML=html;
+  document.getElementById('modal').classList.add('wide');
+  document.getElementById('modalOverlay').classList.add('show');
+  window._batchPreviewData=[];
+  document.getElementById('modalOverlay').onclick=function(ev){if(ev.target===this)closeModal();};
+}
+
+function parseBatchData(raw){
+  const lines=raw.split(/[\r\n]+/).filter(l=>l.trim());
+  const results=[];
+  lines.forEach(line=>{
+    const sep=line.includes('\t')?'\t':',';
+    const cols=line.split(sep).map(c=>c.trim().replace(/^"|"$/g,''));
+    if(cols.length>=2&&cols[0]){
+      results.push({
+        name:cols[0]||'',
+        department:cols[1]||'',
+        bu:cols[2]||cols[1]||'',
+        reportsTo:cols[3]||'',
+        position:cols[4]||'',
+        rank:cols[5]||''
+      });
+    }
+  });
+  return results;
+}
+
+function previewBatchImport(raw){
+  if(!raw||!raw.trim()){
+    document.getElementById('batchPreview').innerHTML='';
+    const btn=document.getElementById('btnConfirmBatch');
+    if(btn)btn.disabled=true;
+    return;
+  }
+  const data=parseBatchData(raw);
+  window._batchPreviewData=data;
+  const preview=document.getElementById('batchPreview');
+  const btn=document.getElementById('btnConfirmBatch');
+  if(!data.length){
+    preview.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:11px">未能解析到有效数据，请检查格式（至少需要：姓名,部门）</div>';
+    if(btn)btn.disabled=true;
+    return;
+  }
+  let html=`<div style="font-size:11px;margin-bottom:8px;color:var(--text-dim)">预览：共 <b>${data.length}</b> 条记录</div>`;
+  html+=`<div style="overflow-x:auto;border:1px solid var(--border-subtle);border-radius:var(--radius-xs)"><table style="width:100%;border-collapse:collapse;font-size:10px">`;
+  html+=`<thead><tr style="background:var(--bg-surface-alt);text-align:left">`;
+  ['#','姓名','部门','BU','汇报人','职位','职级'].forEach(h=>{
+    html+=`<th style="padding:6px 10px;font-weight:400;color:var(--text-muted);border-bottom:1px solid var(--border-subtle);white-space:nowrap">${h}</th>`;
+  });
+  html+=`</tr></thead><tbody>`;
+  data.forEach((r,i)=>{
+    html+=`<tr style="border-bottom:1px solid var(--border-subtle)">`;
+    [i+1,r.name,r.department,r.bu,r.reportsTo,r.position,r.rank].forEach(v=>{
+      html+=`<td style="padding:5px 10px;white-space:nowrap;font-size:10px">${esc(String(v||''))}</td>`;
+    });
+    html+=`</tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  preview.innerHTML=html;
+  if(btn)btn.disabled=false;
+}
+
+function handleBatchImportFile(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    document.getElementById('batchImportData').value=e.target.result;
+    previewBatchImport(e.target.result);
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+function confirmBatchImport(){
+  const data=window._batchPreviewData;
+  if(!data||!data.length){alert('没有可导入的数据');return;}
+  const newDepts=[...new Set(data.map(r=>r.department).filter(Boolean))];
+  newDepts.forEach(d=>{if(!deptList.includes(d))deptList.push(d);});
+  saveDepts(deptList);
+  const now=Date.now();
+  const toAdd=data.map((r,i)=>({
+    id:'emp'+(now+i)+Math.random().toString(36).slice(2,6),
+    name:r.name,
+    bu:r.bu,
+    department:r.department,
+    reportsTo:r.reportsTo,
+    position:r.position,
+    rank:r.rank,
+    hireDate:'',
+    phone:'',
+    location:'',
+    dingId:''
+  }));
+  empList=[...empList,...toAdd];
+  saveEmployees(empList);
+  closeModal();
+  renderEmployeeTable();
+  alert('成功导入 '+toAdd.length+' 名员工');
+}
+
+function downloadEmpTemplate(){
+  const csv='\uFEFF姓名,部门,BU,汇报人,职位,职级\n张三,客户服务部,人力资源BU,杜宪,客服专员,I';
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='员工导入模板.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
 }
 
 // --- Sub-View Switching ---
