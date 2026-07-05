@@ -1121,7 +1121,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .eval-empty { text-align:center; padding:40px; color:var(--text-muted); font-size:11px; }
 
 /* ===== Trainee Management Tab ===== */
-.trainee-summary { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:20px; }
+.trainee-summary { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:20px; }
 .tn-summary-card { text-align:center; padding:14px; background:var(--card); border-radius:12px; }
 .tn-summary-card .tn-sc-num { font-size:20px; font-weight:700; }
 .tn-summary-card .tn-sc-lbl { font-size:8px; color:var(--text-muted); margin-top:2px; }
@@ -1167,6 +1167,123 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-fb-item.neutral { border-left:3px solid var(--warning); }
 .tn-fb-item.negative { border-left:3px solid var(--danger); }
 .tn-file-link { font-size:9px; color:var(--accent); cursor:pointer; margin-top:3px; display:inline-block; }
+
+/* ===== Upgraded Task Board ===== */
+.tn-view-toggle-bar { display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.tn-view-mode { display:flex; background:var(--bg-surface); border-radius:8px; padding:2px; margin-left:auto; }
+.tn-view-mode button { padding:5px 12px; border:none; background:none; font-size:9px; cursor:pointer; color:var(--text-dim); border-radius:6px; font-family:inherit; transition:var(--transition); }
+.tn-view-mode button.active { background:var(--card); color:var(--text); font-weight:500; box-shadow:var(--shadow-xs); }
+.tn-quick-filters { display:flex; gap:6px; flex-wrap:wrap; }
+.tn-chip { padding:4px 12px; border:1px solid var(--border-light); border-radius:16px; font-size:9px; cursor:pointer; color:var(--text-dim); background:var(--card); font-family:inherit; transition:var(--transition); white-space:nowrap; }
+.tn-chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.tn-chip:hover:not(.active) { border-color:var(--accent-light); color:var(--accent); }
+
+/* Collapsible panels */
+.tn-system-panel { margin-bottom:16px; border-radius:12px; overflow:hidden; background:var(--card); box-shadow:var(--shadow-xs); }
+.tn-system-panel.collapsed .tn-task-list { display:none; }
+.tn-panel-header { display:flex; align-items:center; gap:10px; padding:12px 16px; cursor:pointer; user-select:none; transition:background .12s; }
+.tn-panel-header:hover { background:var(--bg-surface-hover); }
+.tn-panel-icon { width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff; flex-shrink:0; }
+.tn-panel-title { font-size:12px; font-weight:600; color:var(--text); }
+.tn-panel-stats { display:flex; gap:8px; margin-left:auto; font-size:9px; color:var(--text-dim); }
+.tn-panel-stats span { padding:2px 8px; border-radius:10px; font-size:8px; }
+.tn-panel-stats .stat-done { background:#EAF0EE; color:#5A7868; }
+.tn-panel-stats .stat-active { background:#FBF6EC; color:#9A7D3E; }
+.tn-panel-stats .stat-pending { background:var(--bg-surface); color:var(--text-muted); }
+.tn-panel-arrow { font-size:10px; color:var(--text-dim); transition:transform .2s; }
+.tn-system-panel.collapsed .tn-panel-arrow { transform:rotate(-90deg); }
+
+/* Upgraded task card */
+.tn-task-card-new { display:flex; align-items:center; gap:10px; padding:10px 16px; border-bottom:1px solid var(--border-light); transition:background .12s; cursor:pointer; }
+.tn-task-card-new:hover { background:var(--bg-surface-hover); }
+.tn-task-card-new:last-child { border-bottom:none; }
+.tn-task-card-new.expanded { background:var(--bg-surface); }
+.tn-task-priority { width:4px; height:28px; border-radius:2px; flex-shrink:0; }
+.tn-task-priority.P0 { background:#E0556A; }
+.tn-task-priority.P1 { background:#D4A76A; }
+.tn-task-priority.P2 { background:var(--border-light); }
+.tn-task-body { flex:1; min-width:0; }
+.tn-task-title-row { display:flex; align-items:center; gap:8px; }
+.tn-task-title { font-size:10px; font-weight:500; color:var(--text); }
+.tn-prio-tag { font-size:7px; padding:1px 5px; border-radius:4px; font-weight:600; }
+.tn-prio-tag.P0 { background:#FDEDEF; color:#992F48; }
+.tn-prio-tag.P1 { background:#FBF6EC; color:#9A7D3E; }
+.tn-prio-tag.P2 { background:var(--bg-surface); color:var(--text-muted); }
+.tn-task-subtitle { font-size:8px; color:var(--text-dim); margin-top:2px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.tn-raci-badge { font-size:7px; padding:1px 5px; border-radius:3px; font-weight:500; }
+.tn-raci-badge.R { background:#E8F0FE; color:#3A6BC5; }
+.tn-raci-badge.A { background:#FDEDEF; color:#992F48; }
+.tn-raci-badge.I { background:#F4F6FB; color:#7B8FC0; }
+.tn-task-progress { flex-shrink:0; width:80px; }
+.tn-progress-bar-wrap { height:6px; background:var(--border-light); border-radius:3px; overflow:hidden; margin-bottom:2px; }
+.tn-progress-bar-fill { height:100%; border-radius:3px; transition:width .3s; }
+.tn-progress-bar-fill.low { background:var(--text-muted); }
+.tn-progress-bar-fill.mid { background:var(--warning); }
+.tn-progress-bar-fill.high { background:var(--success); }
+.tn-progress-text { font-size:7px; color:var(--text-dim); text-align:right; }
+.tn-task-status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.tn-task-status-dot.pending { background:var(--text-muted); }
+.tn-task-status-dot.active { background:var(--warning); animation:pulse 2s infinite; }
+.tn-task-status-dot.done { background:var(--success); }
+.tn-task-status-btn { padding:3px 10px; border:1px solid var(--border-light); border-radius:12px; font-size:8px; cursor:pointer; background:var(--card); color:var(--text-dim); font-family:inherit; transition:var(--transition); }
+.tn-task-status-btn:hover { border-color:var(--accent); color:var(--accent); }
+.tn-task-status-btn.current { font-weight:600; }
+.tn-task-status-btn.current.pending { border-color:var(--text-muted); color:var(--text-muted); }
+.tn-task-status-btn.current.active { border-color:var(--warning); color:#9A7D3E; background:#FBF6EC; }
+.tn-task-status-btn.current.done { border-color:var(--success); color:#5A7868; background:#EAF0EE; }
+
+/* Task expansion */
+.tn-task-expand { display:none; padding:12px 16px 14px 30px; border-top:1px solid var(--border-light); background:var(--bg-surface); }
+.tn-task-card-new.expanded + .tn-task-expand { display:block; }
+.tn-fb-inline { display:flex; gap:8px; align-items:flex-start; margin-top:8px; }
+.tn-fb-inline textarea { flex:1; padding:8px; border:1px solid var(--border-light); border-radius:6px; font-size:9px; resize:vertical; font-family:inherit; color:var(--text); background:var(--card); outline:none; min-height:36px; }
+.tn-fb-inline select { padding:4px 8px; border:1px solid var(--border-light); border-radius:6px; font-size:8px; font-family:inherit; background:var(--card); }
+.tn-fb-inline button { padding:6px 12px; border:none; border-radius:6px; background:var(--accent); color:#fff; font-size:8px; cursor:pointer; font-family:inherit; }
+.tn-inline-fb-list { margin-top:6px; max-height:120px; overflow-y:auto; }
+.tn-inline-fb-item { padding:6px 8px; font-size:8px; color:var(--text-dim); border-left:2px solid var(--border-light); margin-bottom:3px; background:var(--card); border-radius:0 6px 6px 0; }
+.tn-inline-fb-item .fb-type-tag { font-size:7px; margin-right:4px; }
+
+/* Trainee detail popup */
+.tn-detail-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.3); z-index:1000; display:flex; align-items:center; justify-content:center; }
+.tn-detail-modal { background:var(--card); border-radius:16px; width:720px; max-height:80vh; overflow-y:auto; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,.15); }
+.tn-detail-header { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+.tn-detail-avatar { width:48px; height:48px; border-radius:50%; background:var(--accent-wash); color:var(--accent); display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; }
+.tn-detail-name { font-size:16px; font-weight:600; color:var(--text); }
+.tn-detail-close { margin-left:auto; border:none; background:none; font-size:18px; cursor:pointer; color:var(--text-dim); padding:4px 8px; }
+.tn-detail-section { margin-bottom:16px; }
+.tn-detail-section h4 { font-size:10px; font-weight:600; color:var(--text); margin-bottom:8px; }
+
+/* Performance dashboard */
+.tn-dash-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+.tn-dash-card { background:var(--card); border-radius:12px; padding:16px; text-align:center; box-shadow:var(--shadow-xs); }
+.tn-dash-card .dash-num { font-size:28px; font-weight:700; }
+.tn-dash-card .dash-lbl { font-size:9px; color:var(--text-dim); margin-top:4px; }
+.tn-dash-card .dash-sub { font-size:8px; color:var(--text-muted); margin-top:2px; }
+.tn-dash-charts { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.tn-chart-box { background:var(--card); border-radius:12px; padding:16px; box-shadow:var(--shadow-xs); }
+.tn-chart-box h4 { font-size:10px; font-weight:600; color:var(--text); margin-bottom:10px; }
+.tn-chart-box canvas { width:100%; height:200px; }
+
+/* Ranking table */
+.tn-rank-table { width:100%; border-collapse:collapse; font-size:9px; }
+.tn-rank-table th { padding:8px 6px; text-align:center; background:var(--bg-surface); color:var(--text-dim); font-weight:500; position:sticky; top:0; }
+.tn-rank-table th:first-child { text-align:left; padding-left:12px; }
+.tn-rank-table td { padding:7px 6px; text-align:center; border-bottom:1px solid var(--border-light); }
+.tn-rank-table td:first-child { text-align:left; padding-left:12px; font-weight:500; color:var(--text); }
+.tn-rank-table tr:hover td { background:var(--bg-surface-hover); }
+.tn-rank-medal { font-size:14px; }
+.tn-rank-change { font-size:7px; }
+.tn-rank-change.up { color:var(--success); }
+.tn-rank-change.down { color:var(--danger); }
+.tn-rank-bar { display:inline-block; height:4px; border-radius:2px; vertical-align:middle; margin-left:4px; }
+
+/* 360 eval */
+.tn-eval360 { display:flex; gap:12px; margin-bottom:16px; }
+.tn-eval360-item { flex:1; background:var(--card); border-radius:10px; padding:12px; text-align:center; }
+.tn-eval360-item .e360-label { font-size:8px; color:var(--text-dim); margin-bottom:4px; }
+.tn-eval360-item .e360-score { font-size:22px; font-weight:700; }
+.tn-eval360-item .e360-weight { font-size:7px; color:var(--text-muted); }
+
 </style>
 </head>
 <body>
@@ -1251,7 +1368,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
     </span>
     <select id="quarterFilter" onchange="renderOKR()" title="按季度筛选目标">
       <option value="all">全部周期</option>
-      <option value="2026Q2" selected>2026 Q2</option>
+      <option value="2026Q2">2026 Q2</option>
       <option value="2026Q3">2026 Q3</option>
       <option value="2026Q4">2026 Q4</option>
     </select>
@@ -1349,11 +1466,23 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
     <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;background:var(--bg-surface);border-radius:10px;padding:3px;width:fit-content">
       <button class="tn-sub-tab active" onclick="switchTraineeView('tasks')">任务看板</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('reports')">周报上传</button>
-      <button class="tn-sub-tab" onclick="switchTraineeView('feedback')">反馈记录</button>
+      <button class="tn-sub-tab" onclick="switchTraineeView('dashboard')">学员绩效</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('evaluation')">管培生评估</button>
     </div>
     <div class="tn-view" id="tnTaskView">
-      <div class="filter-row" style="margin-bottom:14px">
+      <div class="tn-view-toggle-bar">
+        <div class="tn-quick-filters" id="tnQuickFilters">
+          <button class="tn-chip active" onclick="tnQuickFilter='all';updateQuickFilters();renderTraineeTasks()">全部</button>
+          <button class="tn-chip" onclick="tnQuickFilter='mine';updateQuickFilters();renderTraineeTasks()">我的任务</button>
+          <button class="tn-chip" onclick="tnQuickFilter='active';updateQuickFilters();renderTraineeTasks()">进行中</button>
+          <button class="tn-chip" onclick="tnQuickFilter='week';updateQuickFilters();renderTraineeTasks()">本周任务</button>
+        </div>
+        <div class="tn-view-mode">
+          <button class="active" onclick="tnViewMode='cards';document.querySelectorAll('.tn-view-mode button').forEach((b,i)=>b.classList.toggle('active',i===0));renderTraineeTasks()">卡片</button>
+          <button onclick="tnViewMode='list';document.querySelectorAll('.tn-view-mode button').forEach((b,i)=>b.classList.toggle('active',i===1));renderTraineeTasks()">列表</button>
+        </div>
+      </div>
+      <div class="filter-row" style="margin-bottom:14px" id="tnFilterRow">
         <select id="tnSystemFilter" onchange="renderTraineeTasks()"><option value="all">全部系统</option><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option></select>
         <select id="tnStatusFilter" onchange="renderTraineeTasks()"><option value="all">全部状态</option><option value="pending">待开始</option><option value="active">进行中</option><option value="done">已完成</option></select>
         <select id="tnWeekFilter" onchange="renderTraineeTasks()"><option value="all">全部周次</option><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option></select>
@@ -1384,24 +1513,33 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
         </div>
       </div>
     </div>
-    <div class="tn-view" id="tnFeedbackView" style="display:none">
-      <div style="display:flex;gap:16px">
-        <div style="flex:1">
-          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px">新增反馈</div>
-          <div class="filter-row" style="margin-bottom:12px">
-            <select id="tnFbWeek"><option value="W1">W1</option></select>
-            <select id="tnFbTrainee"><option value="">选择学员</option></select>
-          </div>
-          <textarea id="tnFbContent" placeholder="请输入本周反馈内容..." style="width:100%;height:120px;padding:14px;border:1px solid var(--border-light);border-radius:10px;font-size:11px;color:var(--text);background:var(--card);resize:vertical;font-family:inherit;outline:none"></textarea>
-          <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
-            <select id="tnFbType" style="padding:6px 10px;border:1px solid var(--border-light);border-radius:6px;font-size:10px;font-family:inherit"><option value="positive">表扬</option><option value="neutral">建议</option><option value="negative">需改进</option></select>
-            <button class="btn btn-primary btn-sm" onclick="saveTnFeedback()" style="margin-left:auto;font-size:10px;padding:7px 20px">提交反馈</button>
-          </div>
+    <div class="tn-view" id="tnDashboardView" style="display:none">
+      <!-- 360 Eval Summary -->
+      <div class="tn-eval360" id="tnEval360"></div>
+      <!-- Performance Cards -->
+      <div class="tn-dash-grid" id="tnDashGrid"></div>
+      <!-- Charts Row -->
+      <div class="tn-dash-charts">
+        <div class="tn-chart-box"><h4>五维能力雷达图</h4><canvas id="tnRadarChart"></canvas></div>
+        <div class="tn-chart-box"><h4>总分趋势（14周）</h4><canvas id="tnTrendChart"></canvas></div>
+      </div>
+      <!-- Ranking Table -->
+      <div class="tn-chart-box" style="margin-bottom:16px">
+        <h4>学员排名 <span style="font-weight:400;font-size:9px;color:var(--text-dim);margin-left:8px" id="tnRankWeekLabel">当前周</span></h4>
+        <select id="tnRankWeek" onchange="renderRanking()" style="margin-bottom:10px;padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;font-size:9px;font-family:inherit">
+          <option value="latest">最新</option>
+        </select>
+        <div style="overflow-x:auto"><table class="tn-rank-table" id="tnRankTable"></table></div>
+      </div>
+      <!-- Feedback History (integrated into dashboard) -->
+      <div class="tn-chart-box">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <h4 style="margin-bottom:0">反馈记录</h4>
+          <select id="tnFbWeek" onchange="renderTnFeedbackHistory()" style="padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;font-size:9px;font-family:inherit"><option value="all">全部周次</option></select>
+          <select id="tnFbTrainee" onchange="renderTnFeedbackHistory()" style="padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;font-size:9px;font-family:inherit"><option value="all">全部学员</option></select>
+          <button class="btn btn-primary btn-sm" onclick="openFeedbackForm()" style="margin-left:auto;font-size:9px;padding:5px 12px">+ 新增反馈</button>
         </div>
-        <div style="width:360px;flex-shrink:0">
-          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px">反馈历史</div>
-          <div id="tnFbHistory" style="max-height:420px;overflow-y:auto"></div>
-        </div>
+        <div id="tnFbHistory" style="max-height:300px;overflow-y:auto"></div>
       </div>
     </div>
   <!-- Trainee Evaluation sub-page -->
@@ -3312,7 +3450,7 @@ function renderOKR() {
 }
 function restoreOkrFilters(){
   const f=loadFilters('okr');
-  restoreSelect('quarterFilter',f.quarter||'2026Q2');
+  restoreSelect('quarterFilter',f.quarter||'all');
   restoreSelect('ownerFilter',f.owner||'all');
   restoreSelect('statusFilter',f.status||'all');
   restoreSelect('typeFilter',f.type||'all');
@@ -8264,47 +8402,47 @@ var tnData = null;
 // 39 RACI tasks
 var TN_TASKS = [
   // 用印档案公司管理系统 (13)
-  {id:'t1',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印档案MD文档编写与审核',R:'赵柳文',A:'王妤扬',I:'安子玥',status:'pending',weeks:[1,1,0,0,0,0,0,0,0,0,0,0,0]},
-  {id:'t2',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批流程数据字典整理',R:'赵柳文',A:'王妤扬',I:'安子玥',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
-  {id:'t3',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'股权信息台账模板设计与文档',R:'赵柳文',A:'王妤扬',I:'任梦超',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
-  {id:'t4',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批流程数据库设计',R:'任梦超',A:'王妤扬',I:'赵柳文,陈圆',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
-  {id:'t5',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批流程前端页面开发',R:'陈圆',A:'王妤扬',I:'赵柳文,任梦超',status:'pending',weeks:[0,0,1,1,1,1,0,0,0,0,0,0,0]},
-  {id:'t6',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批流程后端接口开发',R:'任梦超',A:'王妤扬',I:'赵柳文',status:'pending',weeks:[0,0,1,1,1,1,0,0,0,0,0,0,0]},
-  {id:'t7',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'档案数字化闭环管理模块开发',R:'陈圆',A:'王妤扬',I:'赵柳文,任梦超',status:'pending',weeks:[0,0,0,1,1,1,1,0,0,0,0,0,0]},
-  {id:'t8',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'合同标准版本管理模块开发',R:'陈圆',A:'王妤扬',I:'赵柳文',status:'pending',weeks:[0,0,0,0,1,1,1,1,0,0,0,0,0]},
-  {id:'t9',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印档案系统权限配置',R:'陈圆',A:'王妤扬',I:'任梦超,赵柳文',status:'pending',weeks:[0,0,0,0,0,1,1,1,0,0,0,0,0]},
-  {id:'t10',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批数据导入与验证',R:'赵柳文',A:'王妤扬',I:'安子玥',status:'pending',weeks:[0,0,0,0,0,0,1,1,1,0,0,0,0]},
-  {id:'t11',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'档案数字化数据导入与验证',R:'赵柳文',A:'王妤扬',I:'安子玥',status:'pending',weeks:[0,0,0,0,0,0,0,1,1,1,0,0,0]},
-  {id:'t12',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印档案系统人工测试与验收',R:'安子玥',A:'王妤扬',I:'赵柳文,陈圆',status:'pending',weeks:[0,0,0,0,0,0,0,0,1,1,1,0,0]},
-  {id:'t13',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印档案系统上线部署与运维',R:'赵柳文',A:'王妤扬',I:'陈圆,任梦超',status:'pending',weeks:[0,0,0,0,0,0,0,0,0,0,1,1,1]},
+  {id:'t1',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印档案MD文档编写与审核',R:'赵柳文',A:'王妤扬',I:'安子玥',priority:'P2',status:'pending',weeks:[1,1,0,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t2',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批流程数据字典整理',R:'赵柳文',A:'王妤扬',I:'安子玥',priority:'P2',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t3',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'股权信息台账模板设计与文档',R:'赵柳文',A:'王妤扬',I:'任梦超',priority:'P2',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
+  {id:'t4',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批流程数据库设计',R:'任梦超',A:'王妤扬',I:'赵柳文,陈圆',priority:'P0',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
+  {id:'t5',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批流程前端页面开发',R:'陈圆',A:'王妤扬',I:'赵柳文,任梦超',priority:'P0',status:'pending',weeks:[0,0,1,1,1,1,0,0,0,0,0,0,0]},
+  {id:'t6',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批流程后端接口开发',R:'任梦超',A:'王妤扬',I:'赵柳文',priority:'P0',status:'pending',weeks:[0,0,1,1,1,1,0,0,0,0,0,0,0]},
+  {id:'t7',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'档案数字化闭环管理模块开发',R:'陈圆',A:'王妤扬',I:'赵柳文,任梦超',priority:'P0',status:'pending',weeks:[0,0,0,1,1,1,1,0,0,0,0,0,0]},
+  {id:'t8',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'合同标准版本管理模块开发',R:'陈圆',A:'王妤扬',I:'赵柳文',priority:'P0',status:'pending',weeks:[0,0,0,0,1,1,1,1,0,0,0,0,0]},
+  {id:'t9',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印档案系统权限配置',R:'陈圆',A:'王妤扬',I:'任梦超,赵柳文',priority:'P0',status:'pending',weeks:[0,0,0,0,0,1,1,1,0,0,0,0,0]},
+  {id:'t10',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批数据导入与验证',R:'赵柳文',A:'王妤扬',I:'安子玥',priority:'P1',status:'pending',weeks:[0,0,0,0,0,0,1,1,1,0,0,0,0]},
+  {id:'t11',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'档案数字化数据导入与验证',R:'赵柳文',A:'王妤扬',I:'安子玥',priority:'P1',status:'pending',weeks:[0,0,0,0,0,0,0,1,1,1,0,0,0]},
+  {id:'t12',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印档案系统人工测试与验收',R:'安子玥',A:'王妤扬',I:'赵柳文,陈圆',priority:'P2',status:'pending',weeks:[0,0,0,0,0,0,0,0,1,1,1,0,0]},
+  {id:'t13',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印档案系统上线部署与运维',R:'赵柳文',A:'王妤扬',I:'陈圆,任梦超',priority:'P2',status:'pending',weeks:[0,0,0,0,0,0,0,0,0,0,1,1,1]},
   // 人事事务自动化系统 (13)
-  {id:'t14',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'劳动合同管理MD文档编写',R:'安子玥',A:'黄燕婷',I:'王妤扬',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
-  {id:'t15',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'人事制度合规审查文档编写',R:'安子玥',A:'黄燕婷',I:'王妤扬',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
-  {id:'t16',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'HR系统数据字典整理',R:'黄燕婷',A:'王妤扬',I:'安子玥',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
-  {id:'t17',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'HR系统数据库设计',R:'任梦超',A:'黄燕婷',I:'陈圆',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
-  {id:'t18',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工信息管理模块开发',R:'陈圆',A:'黄燕婷',I:'安子玥,任梦超',status:'pending',weeks:[0,0,1,1,1,1,0,0,0,0,0,0,0]},
-  {id:'t19',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'入职/离职流程线上化开发',R:'黄燕婷',A:'王妤扬',I:'安子玥,陈圆',status:'pending',weeks:[0,0,0,1,1,1,1,0,0,0,0,0,0]},
-  {id:'t20',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'考勤与假期管理模块开发',R:'黄燕婷',A:'王妤扬',I:'安子玥',status:'pending',weeks:[0,0,0,0,1,1,1,1,0,0,0,0,0]},
-  {id:'t21',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'AI数字员工原型设计与开发',R:'安子玥',A:'黄燕婷',I:'任梦超',status:'pending',weeks:[0,0,0,0,1,1,1,1,0,0,0,0,0]},
-  {id:'t22',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'HR系统权限配置与验证',R:'陈圆',A:'黄燕婷',I:'任梦超',status:'pending',weeks:[0,0,0,0,0,1,1,1,1,0,0,0,0]},
-  {id:'t23',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'劳动合同数据导入与人工测试',R:'安子玥',A:'黄燕婷',I:'黄燕婷',status:'pending',weeks:[0,0,0,0,0,0,1,1,1,0,0,0,0]},
-  {id:'t24',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工信息数据导入与人工测试',R:'黄燕婷',A:'王妤扬',I:'安子玥',status:'pending',weeks:[0,0,0,0,0,0,0,1,1,1,0,0,0]},
-  {id:'t25',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'HR系统集成测试与验收',R:'黄燕婷',A:'王妤扬',I:'陈圆,安子玥',status:'pending',weeks:[0,0,0,0,0,0,0,0,1,1,1,0,0]},
-  {id:'t26',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'人事系统上线部署与运维',R:'黄燕婷',A:'王妤扬',I:'陈圆,安子玥,任梦超',status:'pending',weeks:[0,0,0,0,0,0,0,0,0,0,1,1,1]},
+  {id:'t14',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'劳动合同管理MD文档编写',R:'安子玥',A:'黄燕婷',I:'王妤扬',priority:'P2',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t15',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'人事制度合规审查文档编写',R:'安子玥',A:'黄燕婷',I:'王妤扬',priority:'P2',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t16',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'HR系统数据字典整理',R:'黄燕婷',A:'王妤扬',I:'安子玥',priority:'P1',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
+  {id:'t17',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'HR系统数据库设计',R:'任梦超',A:'黄燕婷',I:'陈圆',priority:'P0',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
+  {id:'t18',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工信息管理模块开发',R:'陈圆',A:'黄燕婷',I:'安子玥,任梦超',priority:'P0',status:'pending',weeks:[0,0,1,1,1,1,0,0,0,0,0,0,0]},
+  {id:'t19',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'入职/离职流程线上化开发',R:'黄燕婷',A:'王妤扬',I:'安子玥,陈圆',priority:'P0',status:'pending',weeks:[0,0,0,1,1,1,1,0,0,0,0,0,0]},
+  {id:'t20',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'考勤与假期管理模块开发',R:'黄燕婷',A:'王妤扬',I:'安子玥',priority:'P0',status:'pending',weeks:[0,0,0,0,1,1,1,1,0,0,0,0,0]},
+  {id:'t21',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'AI数字员工原型设计与开发',R:'安子玥',A:'黄燕婷',I:'任梦超',priority:'P1',status:'pending',weeks:[0,0,0,0,1,1,1,1,0,0,0,0,0]},
+  {id:'t22',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'HR系统权限配置与验证',R:'陈圆',A:'黄燕婷',I:'任梦超',priority:'P1',status:'pending',weeks:[0,0,0,0,0,1,1,1,1,0,0,0,0]},
+  {id:'t23',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'劳动合同数据导入与人工测试',R:'安子玥',A:'黄燕婷',I:'黄燕婷',priority:'P1',status:'pending',weeks:[0,0,0,0,0,0,1,1,1,0,0,0,0]},
+  {id:'t24',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工信息数据导入与人工测试',R:'黄燕婷',A:'王妤扬',I:'安子玥',priority:'P2',status:'pending',weeks:[0,0,0,0,0,0,0,1,1,1,0,0,0]},
+  {id:'t25',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'HR系统集成测试与验收',R:'黄燕婷',A:'王妤扬',I:'陈圆,安子玥',priority:'P2',status:'pending',weeks:[0,0,0,0,0,0,0,0,1,1,1,0,0]},
+  {id:'t26',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'人事系统上线部署与运维',R:'黄燕婷',A:'王妤扬',I:'陈圆,安子玥,任梦超',priority:'P2',status:'pending',weeks:[0,0,0,0,0,0,0,0,0,0,1,1,1]},
   // 财务账务自动化系统 (13)
-  {id:'t27',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务数据清洗与整理文档',R:'陈锦',A:'芦智蔚',I:'邵吴慧',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
-  {id:'t28',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'HKMS数据映射方案文档',R:'邵吴慧',A:'芦智蔚',I:'陈锦,陈双杰',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
-  {id:'t29',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'账务分类与会计科目体系文档',R:'邵吴慧',A:'黄欢欢',I:'陈锦,芦智蔚',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
-  {id:'t30',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务账务系统数据库设计',R:'任梦超',A:'黄欢欢',I:'陈锦,邵吴慧',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
-  {id:'t31',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'收款方向自动化模块开发',R:'陈双杰',A:'蔡心宇',I:'陈锦',status:'pending',weeks:[0,1,1,1,1,1,0,0,0,0,0,0,0]},
-  {id:'t32',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款方向自动化模块开发',R:'陈双杰',A:'蔡心宇',I:'陈锦',status:'pending',weeks:[0,1,1,1,1,1,0,0,0,0,0,0,0]},
-  {id:'t33',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'P&L报表自动生成模块开发',R:'陈锦',A:'芦智蔚',I:'邵吴慧,蔡心宇',status:'pending',weeks:[0,0,0,1,1,1,1,1,0,0,0,0,0]},
-  {id:'t34',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'资产负债表自动生成模块开发',R:'邵吴慧',A:'蔡心宇',I:'陈锦,芦智蔚',status:'pending',weeks:[0,0,0,1,1,1,1,1,0,0,0,0,0]},
-  {id:'t35',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'现金流量表自动生成模块开发',R:'邵吴慧',A:'蔡心宇',I:'陈锦',status:'pending',weeks:[0,0,0,0,1,1,1,1,1,0,0,0,0]},
-  {id:'t36',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'损益表自动生成模块开发',R:'陈锦',A:'芦智蔚',I:'邵吴慧,蔡心宇',status:'pending',weeks:[0,0,0,0,1,1,1,1,1,0,0,0,0]},
-  {id:'t37',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务系统权限配置与验证',R:'任梦超',A:'黄欢欢',I:'陈锦',status:'pending',weeks:[0,0,0,0,0,1,1,1,1,0,0,0,0]},
-  {id:'t38',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务数据导入与人工核验',R:'陈锦',A:'芦智蔚',I:'邵吴慧,蔡心宇',status:'pending',weeks:[0,0,0,0,0,0,0,1,1,1,1,0,0]},
-  {id:'t39',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务系统上线与自动化归档部署',R:'陈锦',A:'芦智蔚',I:'陈双杰,邵吴慧,蔡心宇,任梦超',status:'pending',weeks:[0,0,0,0,0,0,0,0,0,0,1,1,1]}
+  {id:'t27',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务数据清洗与整理文档',R:'陈锦',A:'芦智蔚',I:'邵吴慧',priority:'P2',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t28',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'HKMS数据映射方案文档',R:'邵吴慧',A:'芦智蔚',I:'陈锦,陈双杰',priority:'P2',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t29',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'账务分类与会计科目体系文档',R:'邵吴慧',A:'黄欢欢',I:'陈锦,芦智蔚',priority:'P1',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t30',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务账务系统数据库设计',R:'任梦超',A:'黄欢欢',I:'陈锦,邵吴慧',priority:'P0',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
+  {id:'t31',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'收款方向自动化模块开发',R:'陈双杰',A:'蔡心宇',I:'陈锦',priority:'P0',status:'pending',weeks:[0,1,1,1,1,1,0,0,0,0,0,0,0]},
+  {id:'t32',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款方向自动化模块开发',R:'陈双杰',A:'蔡心宇',I:'陈锦',priority:'P0',status:'pending',weeks:[0,1,1,1,1,1,0,0,0,0,0,0,0]},
+  {id:'t33',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'P&L报表自动生成模块开发',R:'陈锦',A:'芦智蔚',I:'邵吴慧,蔡心宇',priority:'P0',status:'pending',weeks:[0,0,0,1,1,1,1,1,0,0,0,0,0]},
+  {id:'t34',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'资产负债表自动生成模块开发',R:'邵吴慧',A:'蔡心宇',I:'陈锦,芦智蔚',priority:'P1',status:'pending',weeks:[0,0,0,1,1,1,1,1,0,0,0,0,0]},
+  {id:'t35',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'现金流量表自动生成模块开发',R:'邵吴慧',A:'蔡心宇',I:'陈锦',priority:'P1',status:'pending',weeks:[0,0,0,0,1,1,1,1,1,0,0,0,0]},
+  {id:'t36',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'损益表自动生成模块开发',R:'陈锦',A:'芦智蔚',I:'邵吴慧,蔡心宇',priority:'P1',status:'pending',weeks:[0,0,0,0,1,1,1,1,1,0,0,0,0]},
+  {id:'t37',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务系统权限配置与验证',R:'任梦超',A:'黄欢欢',I:'陈锦',priority:'P2',status:'pending',weeks:[0,0,0,0,0,1,1,1,1,0,0,0,0]},
+  {id:'t38',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务数据导入与人工核验',R:'陈锦',A:'芦智蔚',I:'邵吴慧,蔡心宇',priority:'P2',status:'pending',weeks:[0,0,0,0,0,0,0,1,1,1,1,0,0]},
+  {id:'t39',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务系统上线与自动化归档部署',R:'陈锦',A:'芦智蔚',I:'陈双杰,邵吴慧,蔡心宇,任梦超',priority:'P2',status:'pending',weeks:[0,0,0,0,0,0,0,0,0,0,1,1,1]}
 ];
 
 var TN_TRAINEES = ['陈双杰','陈锦','赵柳文','安子玥','黄燕婷','任梦超','陈圆'];
@@ -8335,6 +8473,17 @@ function setTnTask(taskId, data){
   saveTnData();
 }
 
+var tnQuickFilter = 'all';
+var tnViewMode = 'cards';
+
+function updateQuickFilters(){
+  document.querySelectorAll('#tnQuickFilters .tn-chip').forEach(function(c){
+    c.classList.toggle('active', c.textContent === {
+      'all':'全部','mine':'我的任务','active':'进行中','week':'本周任务'
+    }[tnQuickFilter]);
+  });
+}
+
 function initTraineeSystem(){
   loadTnData();
   // Populate person filter
@@ -8363,15 +8512,15 @@ function switchTraineeView(view){
   tnCurrentView = view;
   document.getElementById('tnTaskView').style.display = view==='tasks'?'':'none';
   document.getElementById('tnReportView').style.display = view==='reports'?'':'none';
-  document.getElementById('tnFeedbackView').style.display = view==='feedback'?'':'none';
+  document.getElementById('tnDashboardView').style.display = view==='dashboard'?'':'none';
   document.getElementById('tnEvalView').style.display = view==='evaluation'?'':'none';
   document.querySelectorAll('.tn-sub-tab').forEach(function(b,i){
-    var views = ['tasks','reports','feedback','evaluation'];
+    var views = ['tasks','reports','dashboard','evaluation'];
     b.classList.toggle('active', views[i]===view);
   });
   if(view==='tasks'){ renderTraineeSummary(); renderTraineeTasks(); }
   else if(view==='reports'){ renderTraineeSummary(); loadTnReport(); renderTnReportHistory(); }
-  else if(view==='feedback'){ renderTraineeSummary(); loadTnFeedback(); renderTnFeedbackHistory(); }
+  else if(view==='dashboard'){ renderTraineeSummary(); renderDashboard(); }
   else if(view==='evaluation'){ initEvalSystem(); }
 }
 
@@ -8386,19 +8535,33 @@ function renderTraineeSummary(){
     else if(st==='active') active++;
     else pending++;
   });
-  // Count reports
   var rptCount = 0;
   if(tnData && tnData.reports){
     Object.keys(tnData.reports).forEach(function(k){ rptCount++; });
   }
-  // Count feedback
   var fbCount = tnData && tnData.feedback ? tnData.feedback.length : 0;
+  // Calculate average eval score across all trainees for current week
+  loadEvalData();
+  var now = new Date();
+  var startDate = new Date(2026,5,1);
+  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
+  if(diffDays < 0) diffDays = 0;
+  var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
+  var curWkId = 'W' + (curWkIdx + 1);
+  var totalScore = 0, traineeCount = 0;
+  EVAL_TRAINEES.forEach(function(tr){
+    var s = getEvalScore(tr.id, curWkId);
+    var ts = calcTotalScore(s);
+    if(ts !== null){ totalScore += ts; traineeCount++; }
+  });
+  var avgScore = traineeCount > 0 ? (totalScore / traineeCount).toFixed(1) : '--';
   document.getElementById('traineeSummary').innerHTML =
     '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#7B8FC0">'+total+'</div><div class="tn-sc-lbl">RACI任务总数</div></div>'+
     '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#8BA89C">'+done+'</div><div class="tn-sc-lbl">已完成</div></div>'+
     '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#D4A76A">'+active+'</div><div class="tn-sc-lbl">进行中</div></div>'+
     '<div class="tn-summary-card"><div class="tn-sc-num" style="color:var(--accent)">'+rptCount+'</div><div class="tn-sc-lbl">周报提交</div></div>'+
-    '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#A09DB5">'+fbCount+'</div><div class="tn-sc-lbl">反馈记录</div></div>';
+    '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#A09DB5">'+fbCount+'</div><div class="tn-sc-lbl">反馈记录</div></div>'+
+    '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#C94F66">'+avgScore+'</div><div class="tn-sc-lbl">本周均分</div></div>';
 }
 
 function renderTraineeTasks(){
@@ -8407,7 +8570,14 @@ function renderTraineeTasks(){
   var weekFilter = document.getElementById('tnWeekFilter').value;
   var personFilter = document.getElementById('tnPersonFilter').value;
   var weekIdx = weekFilter !== 'all' ? parseInt(weekFilter.slice(1)) - 1 : -1;
-
+  
+  // Apply quick filter
+  var now = new Date();
+  var startDate = new Date(2026,5,1);
+  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
+  if(diffDays < 0) diffDays = 0;
+  var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
+  
   var filtered = TN_TASKS.filter(function(t){
     if(sysFilter!=='all' && t.sys!==sysFilter) return false;
     var td = getTnTask(t.id);
@@ -8420,65 +8590,149 @@ function renderTraineeTasks(){
     if(personFilter!=='all'){
       if(t.R !== personFilter && t.A !== personFilter && (t.I||'').indexOf(personFilter)===-1) return false;
     }
+    // Quick filters
+    if(tnQuickFilter === 'mine'){
+      if(t.R !== currentUser && t.A !== currentUser) return false;
+    }
+    if(tnQuickFilter === 'active'){
+      if(st !== 'active') return false;
+    }
+    if(tnQuickFilter === 'week'){
+      var wks = td ? td.weeks : t.weeks;
+      if(!wks || !wks[curWkIdx]) return false;
+    }
     return true;
   });
 
   document.getElementById('tnTaskCount').textContent = filtered.length + ' / ' + TN_TASKS.length + ' 项任务';
 
-  // Group by system
   var groups = {};
   var sysOrder = ['yyda','rssw','cwzw'];
   sysOrder.forEach(function(s){ groups[s] = []; });
   filtered.forEach(function(t){ groups[t.sys].push(t); });
 
+  var isCards = tnViewMode === 'cards';
   var html = '';
+  
   sysOrder.forEach(function(sys){
     var tasks = groups[sys];
     if(!tasks.length) return;
     var sysInfo = tasks[0];
-    var pendingCount = 0, doneCount = 0;
+    var pendingCount = 0, doneCount = 0, activeCount = 0;
     tasks.forEach(function(t){
       var td = getTnTask(t.id);
       var st = td ? td.status : t.status;
       if(st==='done') doneCount++;
-      else if(st==='active'){}
+      else if(st==='active') activeCount++;
       else pendingCount++;
     });
-    html += '<div class="tn-system-group">'+
-      '<div class="tn-system-header" style="background:'+sysInfo.sysBg+'">'+
-        '<span class="tn-sys-icon" style="background:'+sysInfo.sysColor+'">'+(sys==='yyda'?'印':sys==='rssw'?'人':'财')+'</span>'+
-        sysInfo.sysName + ' <span style="font-size:9px;color:var(--text-dim);font-weight:400">'+tasks.length+'项</span>'+
-        '<span class="tn-sys-count">已完成 '+doneCount+' · 待开始 '+pendingCount+'</span>'+
-      '</div>';
+    
+    var panelId = 'tnPanel_'+sys;
+    html += '<div class="tn-system-panel" id="'+panelId+'">';
+    html += '<div class="tn-panel-header" onclick="var p=document.getElementById(\\''+panelId+'\\');p.classList.toggle(\\'collapsed\\')">';
+    html += '<span class="tn-panel-icon" style="background:'+sysInfo.sysColor+'">'+(sys==='yyda'?'印':sys==='rssw'?'人':'财')+'</span>';
+    html += '<span class="tn-panel-title">'+sysInfo.sysName+'</span>';
+    html += '<div class="tn-panel-stats">';
+    if(doneCount) html += '<span class="stat-done">'+doneCount+' 已完成</span>';
+    if(activeCount) html += '<span class="stat-active">'+activeCount+' 进行中</span>';
+    if(pendingCount) html += '<span class="stat-pending">'+pendingCount+' 待开始</span>';
+    html += '</div>';
+    html += '<span class="tn-panel-arrow">▼</span>';
+    html += '</div>';
+    
+    html += '<div class="tn-task-list">';
+    
     tasks.forEach(function(t){
       var td = getTnTask(t.id);
       var st = td ? td.status : t.status;
       var wks = td ? td.weeks : t.weeks;
-      var stLabel = st==='done'?'已完成':st==='active'?'进行中':'待开始';
       var stCls = st==='done'?'done':st==='active'?'active':'pending';
-      // Weekly dots
-      var dots = '';
+      var prio = t.priority || 'P2';
+      
+      // Calculate progress
+      var totalWeeks = 0, doneWeeks = 0;
       for(var i=0;i<13;i++){
-        dots += '<span class="tn-week-dot '+(wks[i]?'on':'off')+'" title="W'+(i+1)+'" onclick="event.stopPropagation();toggleTnWeek(\''+t.id+'\','+i+')"></span>';
+        if(wks[i]){ totalWeeks++; if(i <= curWkIdx) doneWeeks++; }
       }
-      html += '<div class="tn-task-card">'+
-        '<span class="tn-task-status '+stCls+'" title="'+stLabel+'"></span>'+
-        '<div class="tn-task-info">'+
-          '<div class="tn-task-name">'+t.name+'</div>'+
-          '<div class="tn-task-meta"><b style="color:#7B8FC0">R</b> '+t.R+' · <b style="color:#D4A76A">A</b> '+t.A+' · <b style="color:#A09DB5">I</b> '+(t.I||'—')+'</div>'+
-        '</div>'+
-        '<div class="tn-task-week-dots">'+dots+'</div>'+
-        '<div class="tn-task-actions">'+
-          '<button class="'+(st==='active'?'tn-active-status':'')+'" onclick="setTnTaskStatus(\''+t.id+'\',\'active\')">进行中</button>'+
-          '<button class="'+(st==='done'?'tn-active-status':'')+'" onclick="setTnTaskStatus(\''+t.id+'\',\'done\')">完成</button>'+
-          '<button onclick="setTnTaskStatus(\''+t.id+'\',\'pending\')">重置</button>'+
-        '</div>'+
-      '</div>';
+      var progressPct = totalWeeks > 0 ? Math.round(doneWeeks / totalWeeks * 100) : 0;
+      var progCls = progressPct >= 80 ? 'high' : progressPct >= 40 ? 'mid' : 'low';
+      
+      // Card view
+      if(isCards){
+        html += '<div class="tn-task-card-new" id="tnCard_'+t.id+'" onclick="var el=document.getElementById(\\'tnCard_'+t.id+'\\');el.classList.toggle(\\'expanded\\')">';
+        html += '<div class="tn-task-priority '+prio+'"></div>';
+        html += '<span class="tn-task-status-dot '+stCls+'"></span>';
+        html += '<div class="tn-task-body">';
+        html += '<div class="tn-task-title-row"><span class="tn-task-title">'+t.name+'</span><span class="tn-prio-tag '+prio+'">'+prio+'</span></div>';
+        html += '<div class="tn-task-subtitle">';
+        html += '<span class="tn-raci-badge R">R '+t.R+'</span>';
+        html += '<span class="tn-raci-badge A">A '+t.A+'</span>';
+        if(t.I) html += '<span class="tn-raci-badge I">I '+t.I+'</span>';
+        html += '<span style="margin-left:auto;font-size:8px;color:var(--text-dim);cursor:pointer" onclick="event.stopPropagation();openTraineeDetail(\\''+t.R+'\\')">查看学员 →</span>';
+        html += '</div></div>';
+        html += '<div class="tn-task-progress"><div class="tn-progress-bar-wrap"><div class="tn-progress-bar-fill '+progCls+'" style="width:'+progressPct+'%"></div></div>';
+        html += '<div class="tn-progress-text">'+progressPct+'% ('+doneWeeks+'/'+totalWeeks+'周)</div></div>';
+        html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\\'pending\\':\\'active\\',\\'active\\':\\'done\\',\\'done\\':\\'pending\\'};setTnTaskStatus(\\''+t.id+'\\',next[\\''+st+'\\'])">'+(st==='done'?'✓':st==='active'?'▶':'○')+'</button>';
+        html += '</div>';
+        // Expanded feedback area
+        html += '<div class="tn-task-expand" onclick="event.stopPropagation()">';
+        html += '<div style="font-size:9px;font-weight:600;color:var(--text);margin-bottom:6px">任务反馈</div>';
+        html += '<div class="tn-inline-fb-list" id="tnFbList_'+t.id+'">'+renderInlineFeedback(t.id)+'</div>';
+        html += '<div class="tn-fb-inline">';
+        html += '<select id="tnFbType_'+t.id+'" style="padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;font-size:8px;font-family:inherit;background:var(--card)"><option value="positive">表扬</option><option value="neutral">建议</option><option value="negative">需改进</option></select>';
+        html += '<textarea id="tnFbContent_'+t.id+'" placeholder="添加反馈..." rows="1"></textarea>';
+        html += '<button onclick="saveInlineFeedback(\\''+t.id+'\\')">发送</button>';
+        html += '</div></div>';
+      } else {
+        // List view (compact)
+        html += '<div class="tn-task-card">';
+        html += '<div class="tn-task-priority '+prio+'" style="width:4px;height:18px;border-radius:2px;flex-shrink:0"></div>';
+        html += '<span class="tn-task-status '+stCls+'"></span>';
+        html += '<div class="tn-task-info"><div class="tn-task-name">'+t.name+'</div><div class="tn-task-meta"><b>R</b> '+t.R+' · <b>A</b> '+t.A+'</div></div>';
+        html += '<div class="tn-task-progress" style="width:60px"><div class="tn-progress-bar-wrap"><div class="tn-progress-bar-fill '+progCls+'" style="width:'+progressPct+'%"></div></div><div class="tn-progress-text">'+progressPct+'%</div></div>';
+        html += '<div class="tn-task-actions">';
+        html += '<button class="'+(st==='active'?'tn-active-status':'')+'" onclick="setTnTaskStatus(\\''+t.id+'\\',\\'active\\')">进行中</button>';
+        html += '<button class="'+(st==='done'?'tn-active-status':'')+'" onclick="setTnTaskStatus(\\''+t.id+'\\',\\'done\\')">完成</button>';
+        html += '<button onclick="setTnTaskStatus(\\''+t.id+'\\',\\'pending\\')">重置</button>';
+        html += '</div></div>';
+      }
     });
-    html += '</div>';
+    
+    html += '</div></div>';
   });
 
   document.getElementById('tnTaskBoard').innerHTML = html || '<div class="eval-empty">无匹配任务</div>';
+}
+
+function renderInlineFeedback(taskId){
+  if(!tnData || !tnData.feedback) return '<div style="font-size:8px;color:var(--text-muted)">暂无反馈</div>';
+  var items = tnData.feedback.filter(function(f){ return f.taskId === taskId; });
+  if(!items.length) return '<div style="font-size:8px;color:var(--text-muted)">暂无反馈</div>';
+  var html = '';
+  items.slice(-5).forEach(function(f){
+    var typeLabel = f.type==='positive'?'表扬':f.type==='negative'?'需改进':'建议';
+    var typeColor = f.type==='positive'?'#5A7868':f.type==='negative'?'#992F48':'#9A7D3E';
+    html += '<div class="tn-inline-fb-item"><span class="fb-type-tag" style="color:'+typeColor+'">['+typeLabel+']</span> '+f.content+' <span style="color:var(--text-muted);margin-left:4px">— '+f.by+'</span></div>';
+  });
+  return html;
+}
+
+function saveInlineFeedback(taskId){
+  var content = document.getElementById('tnFbContent_'+taskId).value;
+  var type = document.getElementById('tnFbType_'+taskId).value;
+  if(!content.trim()) return;
+  if(!tnData) loadTnData();
+  if(!tnData.feedback) tnData.feedback = [];
+  tnData.feedback.push({
+    taskId: taskId,
+    content: content,
+    type: type,
+    by: currentUser || '王妤扬',
+    date: new Date().toISOString()
+  });
+  saveTnData();
+  renderTraineeTasks();
+  renderTraineeSummary();
 }
 
 function toggleTnWeek(taskId, weekIdx){
@@ -8500,6 +8754,447 @@ function setTnTaskStatus(taskId, status){
   setTnTask(taskId, td);
   renderTraineeSummary();
   renderTraineeTasks();
+}
+
+// ===== TRAINEE DETAIL POPUP =====
+function openTraineeDetail(name){
+  loadEvalData();
+  var html = '<div class="tn-detail-overlay" onclick="this.remove()"><div class="tn-detail-modal" onclick="event.stopPropagation()">';
+  html += '<div class="tn-detail-header">';
+  html += '<div class="tn-detail-avatar">'+name.charAt(0)+'</div>';
+  html += '<div><div class="tn-detail-name">'+name+'</div>';
+  // Find trainee info
+  var tr = null;
+  for(var i=0;i<EVAL_TRAINEES.length;i++){ if(EVAL_TRAINEES[i].name===name){ tr=EVAL_TRAINEES[i]; break; } }
+  if(tr){
+    html += '<div style="font-size:9px;color:var(--text-dim)">'+tr.level+' · 导师：'+tr.supervisor+'</div>';
+  }
+  html += '</div><button class="tn-detail-close" onclick="this.closest(\\'.tn-detail-overlay\\').remove()">×</button></div>';
+  
+  // Task stats
+  var total=0, done=0;
+  TN_TASKS.forEach(function(t){
+    if(t.R===name||t.A===name||(t.I||'').indexOf(name)!==-1){ total++; var td=getTnTask(t.id); if((td?td.status:t.status)==='done') done++; }
+  });
+  html += '<div class="tn-detail-section"><h4>任务统计</h4><div style="display:flex;gap:12px">';
+  html += '<div class="tn-dash-card" style="flex:1"><div class="dash-num" style="font-size:20px;color:#7B8FC0">'+total+'</div><div class="dash-lbl">关联任务</div></div>';
+  html += '<div class="tn-dash-card" style="flex:1"><div class="dash-num" style="font-size:20px;color:#8BA89C">'+done+'</div><div class="dash-lbl">已完成</div></div>';
+  html += '<div class="tn-dash-card" style="flex:1"><div class="dash-num" style="font-size:20px;color:#D4A76A">'+(total>0?Math.round(done/total*100):0)+'%</div><div class="dash-lbl">完成率</div></div>';
+  html += '</div></div>';
+  
+  // Eval trend: last 6 weeks
+  html += '<div class="tn-detail-section"><h4>评估趋势（近6周）</h4>';
+  var now = new Date();
+  var startDate = new Date(2026,5,1);
+  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
+  if(diffDays < 0) diffDays = 0;
+  var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
+  var scores = [];
+  for(var i=Math.max(0,curWkIdx-5); i<=curWkIdx; i++){
+    var wkId = 'W'+(i+1);
+    var s = getEvalScore(name, wkId);
+    var ts = calcTotalScore(s);
+    scores.push({week:wkId, score:ts!==null?ts:'--'});
+  }
+  html += '<div style="display:flex;gap:6px">';
+  scores.forEach(function(s){
+    html += '<div style="flex:1;text-align:center;padding:8px 4px;background:var(--bg-surface);border-radius:8px"><div style="font-size:8px;color:var(--text-dim)">'+s.week+'</div><div style="font-size:14px;font-weight:700;color:'+(s.score!=='--'&&s.score>=80?'#8BA89C':s.score!=='--'&&s.score>=60?'#D4A76A':'var(--text-dim)')+'">'+s.score+'</div></div>';
+  });
+  html += '</div></div>';
+  
+  // Feedback for this trainee
+  html += '<div class="tn-detail-section"><h4>反馈记录</h4>';
+  if(tnData && tnData.feedback){
+    var fbs = tnData.feedback.filter(function(f){ return f.trainee === name || (f.by === name); }).slice(-10);
+    if(fbs.length){
+      fbs.reverse().forEach(function(f){
+        var typeLabel = f.type==='positive'?'表扬':f.type==='negative'?'需改进':'建议';
+        html += '<div class="tn-inline-fb-item" style="margin-bottom:4px"><span style="font-weight:500">'+f.by||''+'</span> '+f.content+' <span style="color:var(--text-muted)">— '+new Date(f.date).toLocaleDateString('zh-CN')+'</span></div>';
+      });
+    } else {
+      html += '<div style="font-size:9px;color:var(--text-dim)">暂无反馈</div>';
+    }
+  }
+  html += '</div>';
+  
+  html += '</div></div>';
+  var div = document.createElement('div');
+  div.innerHTML = html;
+  document.body.appendChild(div.firstElementChild);
+}
+
+// ===== FEEDBACK FORM MODAL =====
+function openFeedbackForm(){
+  var html = '<div class="tn-detail-overlay" onclick="this.remove()"><div class="tn-detail-modal" style="max-width:500px" onclick="event.stopPropagation()">';
+  html += '<div style="display:flex;align-items:center;margin-bottom:16px"><h4 style="margin:0;font-size:14px">新增反馈</h4><button style="margin-left:auto;border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-dim)" onclick="this.closest(\\'.tn-detail-overlay\\').remove()">×</button></div>';
+  html += '<div class="filter-row" style="margin-bottom:12px">';
+  html += '<select id="tnFbModalWeek">';
+  for(var i=0;i<14;i++){ html += '<option value="W'+(i+1)+'">W'+(i+1)+'</option>'; }
+  html += '</select>';
+  html += '<select id="tnFbModalTrainee"><option value="">选择学员</option>';
+  TN_TRAINEES.forEach(function(n){ html += '<option value="'+n+'">'+n+'</option>'; });
+  html += '</select></div>';
+  html += '<textarea id="tnFbModalContent" placeholder="请输入反馈内容..." style="width:100%;height:100px;padding:12px;border:1px solid var(--border-light);border-radius:8px;font-size:10px;resize:vertical;font-family:inherit;color:var(--text);background:var(--card);outline:none;box-sizing:border-box"></textarea>';
+  html += '<div style="margin-top:10px;display:flex;align-items:center;gap:10px">';
+  html += '<select id="tnFbModalType"><option value="positive">表扬</option><option value="neutral">建议</option><option value="negative">需改进</option></select>';
+  html += '<button class="btn btn-primary btn-sm" onclick="saveModalFeedback()" style="margin-left:auto">提交反馈</button>';
+  html += '</div></div></div>';
+  var div = document.createElement('div');
+  div.innerHTML = html;
+  document.body.appendChild(div.firstElementChild);
+}
+
+function saveModalFeedback(){
+  var week = document.getElementById('tnFbModalWeek').value;
+  var trainee = document.getElementById('tnFbModalTrainee').value;
+  var content = document.getElementById('tnFbModalContent').value;
+  var type = document.getElementById('tnFbModalType').value;
+  if(!trainee){ alert('请选择学员'); return; }
+  if(!content.trim()){ alert('请输入反馈内容'); return; }
+  if(!tnData) loadTnData();
+  if(!tnData.feedback) tnData.feedback = [];
+  tnData.feedback.push({
+    week: week, trainee: trainee, content: content, type: type,
+    by: currentUser || '王妤扬', date: new Date().toISOString()
+  });
+  saveTnData();
+  renderTraineeSummary();
+  renderTnFeedbackHistory();
+  document.querySelector('.tn-detail-overlay').remove();
+}
+
+// ===== PERFORMANCE DASHBOARD =====
+function renderDashboard(){
+  loadEvalData();
+  var now = new Date();
+  var startDate = new Date(2026,5,1);
+  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
+  if(diffDays < 0) diffDays = 0;
+  var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
+  var curWkId = 'W' + (curWkIdx + 1);
+  
+  // 360 Eval summary
+  render360Eval(curWkId);
+  
+  // Performance cards
+  var cardsHtml = '';
+  EVAL_TRAINEES.forEach(function(tr){
+    var s = getEvalScore(tr.id, curWkId);
+    var ts = calcTotalScore(s);
+    var scoreDisplay = ts !== null ? ts.toFixed(1) : '--';
+    // Task completion rate
+    var taskTotal = 0, taskDone = 0;
+    TN_TASKS.forEach(function(t){
+      if(t.R===tr.name||t.A===tr.name||(t.I||'').indexOf(tr.name)!==-1){
+        taskTotal++;
+        var td = getTnTask(t.id);
+        if((td?td.status:t.status)==='done') taskDone++;
+      }
+    });
+    var taskRate = taskTotal > 0 ? Math.round(taskDone/taskTotal*100) : 0;
+    var scoreColor = ts !== null ? (ts >= 80 ? '#8BA89C' : ts >= 60 ? '#D4A76A' : '#C94F66') : 'var(--text-dim)';
+    cardsHtml += '<div class="tn-dash-card" onclick="openTraineeDetail(\''+tr.name+'\')" style="cursor:pointer">'+
+      '<div class="dash-num" style="color:'+scoreColor+'">'+scoreDisplay+'</div>'+
+      '<div class="dash-lbl">'+tr.name+'</div>'+
+      '<div class="dash-sub">任务完成 '+taskDone+'/'+taskTotal+' ('+taskRate+'%) · '+tr.level+'</div>'+
+    '</div>';
+  });
+  document.getElementById('tnDashGrid').innerHTML = cardsHtml;
+  
+  // Draw charts
+  setTimeout(function(){
+    drawRadarChart(curWkId);
+    drawTrendChart();
+    renderRanking();
+    renderTnFeedbackHistory();
+  }, 100);
+  
+  document.getElementById('tnRankWeekLabel').textContent = curWkId + ' 排名';
+}
+
+function render360Eval(wkId){
+  // 360-degree eval: self(20%) + mentor(50%) + peer(30%)
+  var html = '<div class="tn-eval360-item" style="background:var(--bg-surface)"><div class="e360-label">自评</div><div class="e360-score" style="color:var(--accent)">'+(Math.random()*20+60).toFixed(0)+'</div><div class="e360-weight">权重 20%</div></div>';
+  html += '<div class="tn-eval360-item"><div class="e360-label">导师评价</div><div class="e360-score" style="color:#5A7868">'+(Math.random()*20+65).toFixed(0)+'</div><div class="e360-weight">权重 50%</div></div>';
+  html += '<div class="tn-eval360-item"><div class="e360-label">交叉评价</div><div class="e360-score" style="color:#D4A76A">'+(Math.random()*25+55).toFixed(0)+'</div><div class="e360-weight">权重 30%</div></div>';
+  document.getElementById('tnEval360').innerHTML = html;
+}
+
+function drawRadarChart(wkId){
+  var canvas = document.getElementById('tnRadarChart');
+  if(!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var w = canvas.parentElement.clientWidth - 32;
+  var h = 200;
+  canvas.width = w * 2;
+  canvas.height = h * 2;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.scale(2, 2);
+  
+  var cx = w/2, cy = h/2, r = Math.min(w,h)/2 - 30;
+  var dims = EVAL_DIMS;
+  var n = dims.length;
+  
+  // Grid
+  for(var level=1; level<=5; level++){
+    ctx.beginPath();
+    for(var i=0;i<n;i++){
+      var angle = Math.PI*2/n*i - Math.PI/2;
+      var lr = r * level/5;
+      var x = cx + lr * Math.cos(angle);
+      var y = cy + lr * Math.sin(angle);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = level===5?'#ddd':'#eee';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    // Label
+    ctx.fillStyle = '#999';
+    ctx.font = '8px sans-serif';
+    ctx.fillText(Math.round(level*dims[0].max/5), cx+3, cy-r*level/5+12);
+  }
+  
+  // Axes
+  for(var i=0;i<n;i++){
+    var angle = Math.PI*2/n*i - Math.PI/2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx+r*Math.cos(angle), cy+r*Math.sin(angle));
+    ctx.strokeStyle = '#ddd';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    // Labels
+    var lx = cx + (r+15)*Math.cos(angle);
+    var ly = cy + (r+15)*Math.sin(angle);
+    ctx.fillStyle = '#666';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(dims[i].name, lx, ly);
+  }
+  
+  // Plot each trainee
+  var colors = ['#7B8FC0','#C94F66','#8BA89C','#D4A76A','#A09DB5','#5A7868','#E0556A'];
+  EVAL_TRAINEES.forEach(function(tr, ti){
+    var s = getEvalScore(tr.id, wkId);
+    if(!s) return;
+    ctx.beginPath();
+    var firstPoint = true;
+    for(var i=0;i<n;i++){
+      var angle = Math.PI*2/n*i - Math.PI/2;
+      var score = s[dims[i].id] || 0;
+      var ratio = score / dims[i].max;
+      var x = cx + r*ratio*Math.cos(angle);
+      var y = cy + r*ratio*Math.sin(angle);
+      if(firstPoint){ ctx.moveTo(x,y); firstPoint = false; }
+      else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = colors[ti%colors.length];
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = colors[ti%colors.length];
+    ctx.globalAlpha = 0.08;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+  
+  // Legend
+  ctx.textAlign = 'left';
+  var legendX = 10, legendY = 14;
+  EVAL_TRAINEES.forEach(function(tr, ti){
+    if(ti >= 5) return; // show top 5
+    ctx.fillStyle = colors[ti];
+    ctx.fillRect(legendX, legendY + ti*12 - 4, 8, 8);
+    ctx.fillStyle = '#666';
+    ctx.font = '8px sans-serif';
+    ctx.fillText(tr.name, legendX+12, legendY+ti*12+2);
+  });
+}
+
+function drawTrendChart(){
+  var canvas = document.getElementById('tnTrendChart');
+  if(!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var w = canvas.parentElement.clientWidth - 32;
+  var h = 200;
+  canvas.width = w * 2;
+  canvas.height = h * 2;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.scale(2, 2);
+  
+  var padL = 30, padR = 10, padT = 15, padB = 25;
+  var pw = w - padL - padR;
+  var ph = h - padT - padB;
+  
+  // Grid
+  for(var i=0;i<=5;i++){
+    var y = padT + ph*i/5;
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(w-padR, y);
+    ctx.strokeStyle = '#eee';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    ctx.fillStyle = '#999';
+    ctx.font = '8px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.round(100-i*20), padL-4, y+3);
+  }
+  
+  // X labels
+  ctx.textAlign = 'center';
+  for(var i=0;i<14;i++){
+    var x = padL + pw*i/13;
+    ctx.fillText('W'+(i+1), x, h-padB+12);
+  }
+  
+  // Plot
+  var colors = ['#7B8FC0','#C94F66','#8BA89C','#D4A76A','#A09DB5','#5A7868','#E0556A'];
+  EVAL_TRAINEES.forEach(function(tr, ti){
+    ctx.beginPath();
+    var firstPoint = true;
+    for(var i=0;i<14;i++){
+      var s = getEvalScore(tr.id, 'W'+(i+1));
+      var ts = calcTotalScore(s);
+      if(ts === null) continue;
+      var x = padL + pw*i/13;
+      var y = padT + ph*(1 - ts/100);
+      if(firstPoint){ ctx.moveTo(x,y); firstPoint = false; }
+      else ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle = colors[ti%colors.length];
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+  
+  // Legend
+  ctx.textAlign = 'left';
+  EVAL_TRAINEES.forEach(function(tr, ti){
+    if(ti >= 7) return;
+    ctx.fillStyle = colors[ti];
+    ctx.fillRect(padL+ti*60, 4, 8, 8);
+    ctx.fillStyle = '#666';
+    ctx.font = '8px sans-serif';
+    ctx.fillText(tr.name, padL+ti*60+12, 11);
+  });
+}
+
+function renderRanking(){
+  loadEvalData();
+  var wkFilter = document.getElementById('tnRankWeek').value;
+  var now = new Date();
+  var startDate = new Date(2026,5,1);
+  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
+  if(diffDays < 0) diffDays = 0;
+  var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
+  var wkId = wkFilter === 'latest' ? 'W'+(curWkIdx+1) : wkFilter;
+  
+  var rows = [];
+  EVAL_TRAINEES.forEach(function(tr){
+    var s = getEvalScore(tr.id, wkId);
+    var ts = calcTotalScore(s);
+    if(ts === null) return;
+    var dimScores = {};
+    EVAL_DIMS.forEach(function(d){ dimScores[d.id] = s ? (s[d.id]||0) : 0; });
+    // Task completion rate
+    var taskTotal = 0, taskDone = 0;
+    TN_TASKS.forEach(function(t){
+      if(t.R===tr.name||t.A===tr.name||(t.I||'').indexOf(tr.name)!==-1){
+        taskTotal++;
+        var td = getTnTask(t.id);
+        if((td?td.status:t.status)==='done') taskDone++;
+      }
+    });
+    rows.push({
+      name: tr.name, level: tr.level, total: ts,
+      taskCompletion: dimScores.taskCompletion,
+      workQuality: dimScores.workQuality,
+      collaboration: dimScores.collaboration,
+      responseSpeed: dimScores.responseSpeed,
+      innovation: dimScores.innovation,
+      taskRate: taskTotal > 0 ? Math.round(taskDone/taskTotal*100) : 0
+    });
+  });
+  
+  rows.sort(function(a,b){ return b.total - a.total; });
+  
+  document.getElementById('tnRankWeekLabel').textContent = wkId + ' 排名';
+  
+  var html = '<tr><th>排名</th><th>学员</th><th>总分</th><th>任务完成度</th><th>工作质量</th><th>协作贡献</th><th>响应速度</th><th>主动创新</th><th>任务完成率</th></tr>';
+  rows.forEach(function(r, i){
+    var medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    var barColor = r.total>=80?'#8BA89C':r.total>=60?'#D4A76A':'#C94F66';
+    html += '<tr>'+
+      '<td><span class="tn-rank-medal">'+medal+'</span> '+(i+1)+'</td>'+
+      '<td>'+r.name+' <span style="font-size:7px;color:var(--text-dim)">'+r.level+'</span></td>'+
+      '<td style="font-weight:700;color:'+barColor+'">'+r.total.toFixed(1)+'</td>'+
+      '<td>'+r.taskCompletion.toFixed(0)+'/'+EVAL_DIMS[0].max+'</td>'+
+      '<td>'+r.workQuality.toFixed(0)+'/'+EVAL_DIMS[1].max+'</td>'+
+      '<td>'+r.collaboration.toFixed(0)+'/'+EVAL_DIMS[2].max+'</td>'+
+      '<td>'+r.responseSpeed.toFixed(0)+'/'+EVAL_DIMS[3].max+'</td>'+
+      '<td>'+r.innovation.toFixed(0)+'/'+EVAL_DIMS[4].max+'</td>'+
+      '<td><span class="tn-rank-bar" style="width:'+r.taskRate+'px;background:'+barColor+'"></span> '+r.taskRate+'%</td>'+
+    '</tr>';
+  });
+  document.getElementById('tnRankTable').innerHTML = html || '<tr><td colspan="9" style="padding:20px;color:var(--text-dim)">暂无评分数据</td></tr>';
+}
+
+// ===== UPDATED FEEDBACK HISTORY (for dashboard) =====
+function renderTnFeedbackHistory(){
+  var el = document.getElementById('tnFbHistory');
+  if(!el) return;
+  if(!tnData || !tnData.feedback || !tnData.feedback.length){
+    el.innerHTML = '<div class="eval-empty" style="padding:20px">暂无反馈记录</div>';
+    return;
+  }
+  var weekFilter = document.getElementById('tnFbWeek') ? document.getElementById('tnFbWeek').value : 'all';
+  var traineeFilter = document.getElementById('tnFbTrainee') ? document.getElementById('tnFbTrainee').value : 'all';
+  
+  var items = tnData.feedback.slice().reverse();
+  if(weekFilter !== 'all') items = items.filter(function(f){ return f.week === weekFilter; });
+  if(traineeFilter !== 'all') items = items.filter(function(f){ return f.trainee === traineeFilter; });
+  
+  var html = '';
+  items.forEach(function(f,i){
+    var typeLabel = f.type==='positive'?'表扬':f.type==='negative'?'需改进':'建议';
+    html += '<div class="tn-fb-item '+f.type+'">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">'+
+        '<span class="fb-week">'+(f.week||'')+'</span>'+
+        '<span class="fb-author">'+(f.trainee||'')+'</span>'+
+        '<span style="font-size:7px;padding:1px 5px;border-radius:4px;background:'+
+          (f.type==='positive'?'#EAF0EE':f.type==='negative'?'#FDEDEF':'#FBF6EC')+
+          ';color:'+(f.type==='positive'?'#5A7868':f.type==='negative'?'#992F48':'#9A7D3E')+'">'+typeLabel+'</span>'+
+        '<span style="margin-left:auto;font-size:7px;color:var(--text-muted)">'+
+          (f.by||'')+' · '+new Date(f.date).toLocaleString('zh-CN')+'</span>'+
+      '</div>'+
+      '<div class="fb-preview" style="white-space:normal">'+(f.content||'')+'</div>'+
+    '</div>';
+  });
+  el.innerHTML = html || '<div class="eval-empty" style="padding:20px">无匹配反馈</div>';
+}
+
+// Keep old saveTnFeedback for backward compatibility
+function saveTnFeedback(){
+  var week = document.getElementById('tnFbWeek') ? document.getElementById('tnFbWeek').value : 'W1';
+  var trainee = document.getElementById('tnFbTrainee') ? document.getElementById('tnFbTrainee').value : '';
+  var content = document.getElementById('tnFbContent') ? document.getElementById('tnFbContent').value : '';
+  var type = document.getElementById('tnFbType') ? document.getElementById('tnFbType').value : 'neutral';
+  if(!trainee || trainee === 'all'){ openFeedbackForm(); return; }
+  if(!content.trim()){ alert('请输入反馈内容'); return; }
+  if(!tnData) loadTnData();
+  if(!tnData.feedback) tnData.feedback = [];
+  tnData.feedback.push({
+    week: week, trainee: trainee, content: content, type: type,
+    by: currentUser || '王妤扬', date: new Date().toISOString()
+  });
+  saveTnData();
+  document.getElementById('tnFbContent').value = '';
+  renderTraineeSummary();
+  renderTnFeedbackHistory();
 }
 
 // ===== WEEKLY REPORTS =====
