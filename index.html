@@ -1203,51 +1203,17 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-task-priority.P1 { background:#D4A76A; }
 .tn-task-priority.P2 { background:var(--border-light); }
 .tn-task-body { flex:1; min-width:0; }
-.tn-task-title-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-.tn-task-title { font-size:10.5px; font-weight:500; color:var(--text); flex:1; min-width:120px; }
-.tn-prio-tag { font-size:7px; padding:2px 6px; border-radius:4px; font-weight:600; flex-shrink:0; }
+.tn-task-title-row { display:flex; align-items:center; gap:8px; }
+.tn-task-title { font-size:10px; font-weight:500; color:var(--text); }
+.tn-prio-tag { font-size:7px; padding:1px 5px; border-radius:4px; font-weight:600; }
 .tn-prio-tag.P0 { background:#FDEDEF; color:#992F48; }
 .tn-prio-tag.P1 { background:#FBF6EC; color:#9A7D3E; }
 .tn-prio-tag.P2 { background:var(--bg-surface); color:var(--text-muted); }
-.tn-raci-badge { font-size:7px; padding:1px 6px; border-radius:10px; font-weight:500; flex-shrink:0; white-space:nowrap; }
+.tn-task-subtitle { font-size:8px; color:var(--text-dim); margin-top:2px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.tn-raci-badge { font-size:7px; padding:1px 5px; border-radius:3px; font-weight:500; }
 .tn-raci-badge.R { background:#E8F0FE; color:#3A6BC5; }
 .tn-raci-badge.A { background:#FDEDEF; color:#992F48; }
 .tn-raci-badge.I { background:#F4F6FB; color:#7B8FC0; }
-.tn-trainee-link { font-size:10px; color:var(--text-muted); cursor:pointer; flex-shrink:0; opacity:0; transition:opacity .15s; padding:0 2px; }
-.tn-task-card-new:hover .tn-trainee-link { opacity:1; }
-.tn-trainee-link:hover { color:var(--accent); }
-.tn-src-badge { font-size:7px; padding:1px 5px; border-radius:4px; font-weight:600; flex-shrink:0; }
-.tn-src-badge.plan { background:#F4F6FB; color:#7B8FC0; }
-.tn-src-badge.weekly { background:#FBF6EC; color:#9A7D3E; }
-.tn-src-badge.ref { background:#ECEEF4; color:#7B7495; }
-
-/* Task type badge */
-.tn-task-type-badge { font-size:7px; padding:1px 5px; border-radius:4px; font-weight:600; flex-shrink:0; }
-/* Ref task type badge (category) */
-.tn-ref-type-badge { font-size:7px; padding:1px 5px; border-radius:4px; font-weight:600; flex-shrink:0; }
-
-/* Edit button on task cards */
-.tn-task-edit-btn { opacity:0; transition:opacity .15s; border:none; background:none; cursor:pointer; color:var(--text-dim); padding:4px; border-radius:4px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-.tn-task-edit-btn:hover { background:var(--bg-surface-hover); color:var(--text); }
-.tn-task-card-new:hover .tn-task-edit-btn { opacity:1; }
-.tn-task-edit-btn-inline { border:none; background:none; cursor:pointer; color:var(--text-dim); padding:4px; border-radius:4px; }
-
-/* Unified modal week checkboxes */
-.um-week-cb { display:inline-flex; align-items:center; gap:2px; font-size:8px; color:var(--text-dim); padding:3px 6px; background:var(--bg-surface); border-radius:5px; cursor:pointer; white-space:nowrap; }
-.um-week-cb input { margin:0; width:10px; height:10px; accent-color:var(--accent); }
-
-/* Eval task suggestion button */
-.eval-task-suggestion { display:inline-block; margin-left:8px; padding:1px 7px; border-radius:8px; background:var(--accent-wash); color:var(--accent); font-size:8px; font-weight:600; cursor:pointer; border:none; font-family:inherit; transition:all .15s; vertical-align:middle; }
-.eval-task-suggestion:hover { background:var(--accent); color:#fff; }
-
-/* Date range display */
-.tn-date-range { font-size:8px; color:var(--text-muted); flex-shrink:0; white-space:nowrap; }
-
-/* Executor list */
-.tn-executor-list { display:flex; flex-wrap:wrap; gap:2px; }
-.tn-wtask-del { padding:2px 6px; border:none; border-radius:4px; background:none; cursor:pointer; color:var(--text-muted); font-size:10px; flex-shrink:0; opacity:0; transition:opacity .15s; }
-.tn-task-card-new:hover .tn-wtask-del { opacity:1; }
-.tn-wtask-del:hover { color:var(--danger); background:var(--bg-surface); }
 .tn-task-progress { flex-shrink:0; width:80px; }
 .tn-progress-bar-wrap { height:6px; background:var(--border-light); border-radius:3px; overflow:hidden; margin-bottom:2px; }
 .tn-progress-bar-fill { height:100%; border-radius:3px; transition:width .3s; }
@@ -1288,32 +1254,23 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-detail-section h4 { font-size:10px; font-weight:600; color:var(--text); margin-bottom:8px; }
 
 /* Performance dashboard */
-.tn-dash-section { margin-bottom:20px; }
-.tn-dash-section-title { font-size:12px; font-weight:600; color:var(--text); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
-.tn-dash-section-title::before { content:''; display:inline-block; width:3px; height:14px; border-radius:2px; background:var(--accent); }
-.tn-dash-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
-.tn-dash-card { background:var(--card); border-radius:12px; padding:16px 14px; text-align:center; box-shadow:var(--shadow-xs); cursor:pointer; transition:all .15s; border:1px solid transparent; }
-.tn-dash-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.08); border-color:var(--accent-wash); }
-.tn-dash-card .dash-avatar { width:32px; height:32px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-size:14px; font-weight:700; margin-bottom:8px; }
-.tn-dash-card .dash-num { font-size:26px; font-weight:700; }
-.tn-dash-card .dash-lbl { font-size:10px; color:var(--text); font-weight:500; margin-top:2px; }
-.tn-dash-card .dash-sub { font-size:8px; color:var(--text-muted); margin-top:3px; }
-.tn-dash-card .dash-mini-bar { height:3px; background:var(--border-light); border-radius:2px; margin-top:8px; overflow:hidden; }
-.tn-dash-card .dash-mini-fill { height:100%; border-radius:2px; transition:width .4s; }
-.tn-dash-charts { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+.tn-dash-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+.tn-dash-card { background:var(--card); border-radius:12px; padding:16px; text-align:center; box-shadow:var(--shadow-xs); }
+.tn-dash-card .dash-num { font-size:28px; font-weight:700; }
+.tn-dash-card .dash-lbl { font-size:9px; color:var(--text-dim); margin-top:4px; }
+.tn-dash-card .dash-sub { font-size:8px; color:var(--text-muted); margin-top:2px; }
+.tn-dash-charts { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
 .tn-chart-box { background:var(--card); border-radius:12px; padding:16px; box-shadow:var(--shadow-xs); }
-.tn-chart-box-hd { font-size:10px; font-weight:600; color:var(--text); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
-.tn-chart-dot { display:inline-block; width:8px; height:8px; border-radius:50%; }
+.tn-chart-box h4 { font-size:10px; font-weight:600; color:var(--text); margin-bottom:10px; }
 .tn-chart-box canvas { width:100%; height:200px; }
 
 /* Ranking table */
 .tn-rank-table { width:100%; border-collapse:collapse; font-size:9px; }
-.tn-rank-table th { padding:8px 6px; text-align:center; background:var(--bg-surface); color:var(--text-dim); font-weight:500; position:sticky; top:0; font-size:8px; text-transform:uppercase; letter-spacing:.3px; }
-.tn-rank-table th:first-child { text-align:left; padding-left:12px; border-radius:6px 0 0 6px; }
-.tn-rank-table th:last-child { border-radius:0 6px 6px 0; }
-.tn-rank-table td { padding:8px 6px; text-align:center; border-bottom:1px solid var(--border-light); }
+.tn-rank-table th { padding:8px 6px; text-align:center; background:var(--bg-surface); color:var(--text-dim); font-weight:500; position:sticky; top:0; }
+.tn-rank-table th:first-child { text-align:left; padding-left:12px; }
+.tn-rank-table td { padding:7px 6px; text-align:center; border-bottom:1px solid var(--border-light); }
 .tn-rank-table td:first-child { text-align:left; padding-left:12px; font-weight:500; color:var(--text); }
-.tn-rank-table tbody tr:hover td { background:var(--bg-surface-hover); }
+.tn-rank-table tr:hover td { background:var(--bg-surface-hover); }
 .tn-rank-medal { font-size:14px; }
 .tn-rank-change { font-size:7px; }
 .tn-rank-change.up { color:var(--success); }
@@ -1321,38 +1278,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-rank-bar { display:inline-block; height:4px; border-radius:2px; vertical-align:middle; margin-left:4px; }
 
 /* 360 eval */
-.tn-eval360 { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-.tn-eval360-card { background:var(--bg-surface); border-radius:10px; padding:14px; display:flex; align-items:center; gap:10px; border:1px solid var(--border-light); }
-.tn-eval360-card .e360-icon { display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:var(--card); flex-shrink:0; color:var(--text-dim); }
-.tn-eval360-card .e360-info { flex:1; min-width:0; }
-.tn-eval360-card .e360-label { font-size:9px; font-weight:500; color:var(--text); }
-.tn-eval360-card .e360-weight { font-size:7px; color:var(--text-muted); }
-.tn-eval360-card .e360-score { font-size:16px; font-weight:700; flex-shrink:0; white-space:nowrap; max-width:100px; overflow:hidden; text-overflow:ellipsis; }
-
-/* Weekly report */
-.tn-report-layout { display:flex; gap:16px; align-items:flex-start; }
-.tn-report-form { flex:1; min-width:0; }
-.tn-report-history { width:320px; flex-shrink:0; }
-.tn-report-card { background:var(--card); border-radius:12px; padding:20px; box-shadow:var(--shadow-xs); }
-.tn-report-header { display:flex; align-items:flex-start; gap:10px; margin-bottom:16px; }
-.tn-report-header-icon { display:flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:10px; background:var(--accent-wash); color:var(--accent); flex-shrink:0; }
-.tn-report-selects { display:flex; gap:10px; margin-bottom:12px; }
-.tn-report-field { flex:1; }
-.tn-report-field label { display:block; font-size:8px; font-weight:500; color:var(--text-dim); margin-bottom:4px; text-transform:uppercase; letter-spacing:.5px; }
-.tn-report-field select { width:100%; padding:8px 10px; border:1px solid var(--border-light); border-radius:8px; font-size:10px; font-family:inherit; background:var(--bg-surface); color:var(--text); outline:none; }
-.tn-report-field select:focus { border-color:var(--accent); }
-#tnRptContent { width:100%; height:180px; padding:14px; border:1px solid var(--border-light); border-radius:10px; font-size:11px; color:var(--text); background:var(--bg-surface); resize:vertical; font-family:inherit; outline:none; line-height:1.6; transition:border-color .15s; box-sizing:border-box; }
-#tnRptContent:focus { border-color:var(--accent); }
-.tn-report-actions { display:flex; align-items:center; gap:10px; margin-top:12px; }
-.tn-report-actions #tnRptFileName { font-size:9px; color:var(--text-dim); max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.tn-autosave-hint { font-size:8px; color:var(--success); margin-left:auto; opacity:0; transition:opacity .3s; }
-.tn-autosave-hint.show { opacity:1; }
-.tn-rpt-item { padding:10px 12px; border-radius:8px; cursor:pointer; transition:background .12s; margin-bottom:4px; border:1px solid transparent; }
-.tn-rpt-item:hover { background:var(--bg-surface-hover); border-color:var(--border-light); }
-.tn-rpt-item .rpt-week { display:inline-block; font-size:8px; font-weight:600; padding:2px 6px; border-radius:4px; background:#E8F0FE; color:#3A6BC5; margin-right:6px; }
-.tn-rpt-item .rpt-author { font-size:9px; color:var(--text); font-weight:500; }
-.tn-rpt-item .rpt-preview { font-size:9px; color:var(--text-dim); margin-top:4px; line-height:1.4; }
-.tn-file-link { font-size:8px; color:var(--accent); cursor:pointer; margin-top:3px; display:inline-block; }
+.tn-eval360 { display:flex; gap:12px; margin-bottom:16px; }
+.tn-eval360-item { flex:1; background:var(--card); border-radius:10px; padding:12px; text-align:center; }
+.tn-eval360-item .e360-label { font-size:8px; color:var(--text-dim); margin-bottom:4px; }
+.tn-eval360-item .e360-score { font-size:22px; font-weight:700; }
+.tn-eval360-item .e360-weight { font-size:7px; color:var(--text-muted); }
 
 </style>
 </head>
@@ -1553,218 +1483,63 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
         </div>
       </div>
       <div class="filter-row" style="margin-bottom:14px" id="tnFilterRow">
-        <select id="tnSystemFilter" onchange="renderTraineeTasks()"><option value="all">全部系统</option><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option><option value="itpm">IT项目管理系统</option></select>
+        <select id="tnSystemFilter" onchange="renderTraineeTasks()"><option value="all">全部系统</option><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option></select>
         <select id="tnStatusFilter" onchange="renderTraineeTasks()"><option value="all">全部状态</option><option value="pending">待开始</option><option value="active">进行中</option><option value="done">已完成</option></select>
         <select id="tnWeekFilter" onchange="renderTraineeTasks()"><option value="all">全部周次</option><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option></select>
         <select id="tnPersonFilter" onchange="renderTraineeTasks()"><option value="all">全部执行者</option></select>
         <span style="margin-left:auto;font-size:10px;color:var(--text-dim)" id="tnTaskCount"></span>
-        <button class="btn btn-primary btn-sm" onclick="openWeeklyTaskModal()" style="font-size:9px;padding:6px 14px;border-radius:8px;margin-left:8px">+ 新增任务</button>
       </div>
       <div id="tnTaskBoard"></div>
-      <!-- Weekly task modal -->
-      <div class="tn-detail-overlay" id="weeklyTaskModal" style="display:none" onclick="if(event.target===this)closeWeeklyTaskModal()">
-        <div class="tn-detail-modal" style="width:440px;max-height:90vh" onclick="event.stopPropagation()">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-            <h4 style="margin:0;font-size:14px">新增本周任务</h4>
-            <button style="margin-left:auto;border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-dim)" onclick="closeWeeklyTaskModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-          </div>
-          <div class="tn-report-field" style="margin-bottom:10px">
-            <label>任务名称</label>
-            <input id="wtName" placeholder="输入任务名称…" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box">
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:10px">
-            <div class="tn-report-field" style="flex:1">
-              <label>所属系统</label>
-              <select id="wtSystem"><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option></select>
-            </div>
-            <div class="tn-report-field" style="flex:1">
-              <label>所属周次</label>
-              <select id="wtWeek"><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option><option value="W14">W14</option></select>
-            </div>
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:10px">
-            <div class="tn-report-field" style="flex:1">
-              <label>任务类型</label>
-              <select id="wtTaskType"><option value="normal">普通任务</option><option value="meeting">会议任务</option></select>
-            </div>
-            <div class="tn-report-field" style="flex:1">
-              <label>任务类别</label>
-              <select id="wtTaskCategory"><option value="deliverable">交付物</option><option value="okr">OKR</option><option value="milestone">里程碑</option><option value="review">评审</option></select>
-            </div>
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:16px">
-            <div class="tn-report-field" style="flex:1">
-              <label>负责人</label>
-              <select id="wtPerson"><option value="">选择管培生</option></select>
-            </div>
-            <div class="tn-report-field" style="flex:1">
-              <label>优先级</label>
-              <select id="wtPriority"><option value="P0">P0 · 紧急</option><option value="P1" selected>P1 · 重要</option><option value="P2">P2 · 普通</option></select>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-outline btn-sm" onclick="closeWeeklyTaskModal()" style="flex:1">取消</button>
-            <button class="btn btn-primary btn-sm" onclick="saveWeeklyTask()" style="flex:1">保存任务</button>
-          </div>
-        </div>
-      </div>
-      <!-- Unified task edit modal -->
-      <div class="tn-detail-overlay" id="unifiedTaskModal" style="display:none" onclick="if(event.target===this)closeUnifiedTaskModal()">
-        <div class="tn-detail-modal" style="width:520px;max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-            <h4 style="margin:0;font-size:14px" id="unifiedModalTitle">编辑任务</h4>
-            <span style="font-size:9px;padding:2px 8px;border-radius:10px;background:var(--bg-surface)" id="unifiedModalSourceTag"></span>
-            <button style="margin-left:auto;border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-dim)" onclick="closeUnifiedTaskModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-          </div>
-          <!-- Common fields -->
-          <div class="tn-report-field" style="margin-bottom:10px">
-            <label>任务名称</label>
-            <input id="umName" placeholder="输入任务名称…" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box">
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:10px">
-            <div class="tn-report-field" style="flex:1">
-              <label>所属系统</label>
-              <select id="umSystem"><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option></select>
-            </div>
-            <div class="tn-report-field" style="flex:1">
-              <label>优先级</label>
-              <select id="umPriority"><option value="P0">P0 · 紧急</option><option value="P1">P1 · 重要</option><option value="P2">P2 · 普通</option></select>
-            </div>
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:10px">
-            <div class="tn-report-field" style="flex:1">
-              <label>任务类型</label>
-              <select id="umTaskType"><option value="normal">普通任务</option><option value="meeting">会议任务</option></select>
-            </div>
-            <div class="tn-report-field" style="flex:1">
-              <label>任务类别</label>
-              <select id="umTaskCategory"><option value="deliverable">交付物</option><option value="okr">OKR</option><option value="milestone">里程碑</option><option value="review">评审</option></select>
-            </div>
-          </div>
-          <div class="tn-report-field" style="margin-bottom:12px">
-            <label>状态</label>
-            <select id="umStatus"><option value="pending">待开始</option><option value="active">进行中</option><option value="done">已完成</option></select>
-          </div>
-          <!-- Plan task fields -->
-          <div id="umPlanFields" style="display:none">
-            <div style="font-size:10px;font-weight:600;color:var(--text-dim);margin-bottom:8px">RACI 分配</div>
-            <div style="display:flex;gap:10px;margin-bottom:10px">
-              <div class="tn-report-field" style="flex:1"><label>R · 执行人</label><select id="umR"></select></div>
-              <div class="tn-report-field" style="flex:1"><label>A · 负责人</label><input id="umA" placeholder="负责人姓名" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box"></div>
-            </div>
-            <div class="tn-report-field" style="margin-bottom:10px"><label>I · 知会人（多人用逗号分隔）</label><input id="umI" placeholder="知会人姓名" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box"></div>
-            <div style="font-size:10px;font-weight:600;color:var(--text-dim);margin-bottom:6px">周次分配</div>
-            <div id="umWeeks" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px"></div>
-          </div>
-          <!-- Weekly task fields -->
-          <div id="umWeeklyFields" style="display:none">
-            <div style="display:flex;gap:10px;margin-bottom:10px">
-              <div class="tn-report-field" style="flex:1"><label>所属周次</label><select id="umWeek"></select></div>
-              <div class="tn-report-field" style="flex:1"><label>负责人</label><select id="umPerson"></select></div>
-            </div>
-          </div>
-          <!-- Reference task fields -->
-          <div id="umRefFields" style="display:none">
-            <div class="tn-report-field" style="margin-bottom:10px"><label>审批人</label><input id="umApprover" placeholder="审批人姓名" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box"></div>
-            <div class="tn-report-field" style="margin-bottom:10px"><label>执行人（多人用逗号分隔）</label><input id="umExecutors" placeholder="执行人姓名" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box"></div>
-            <div class="tn-report-field" style="margin-bottom:10px"><label>所属周次</label><div id="umWeekCheckboxes" style="display:flex;flex-wrap:wrap;gap:4px"></div></div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:16px">
-            <button class="btn btn-outline btn-sm" onclick="closeUnifiedTaskModal()" style="flex:1">取消</button>
-            <button class="btn btn-outline btn-sm" id="umDeleteBtn" style="flex:1;color:var(--danger);border-color:var(--danger)" onclick="deleteUnifiedTask()">删除任务</button>
-            <button class="btn btn-primary btn-sm" onclick="saveUnifiedTask()" style="flex:1">保存任务</button>
-          </div>
-        </div>
-      </div>
     </div>
     <div class="tn-view" id="tnReportView" style="display:none">
-      <div class="tn-report-layout">
-        <div class="tn-report-form">
-          <div class="tn-report-card">
-            <div class="tn-report-header">
-              <div class="tn-report-header-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
-              <div>
-                <div style="font-size:13px;font-weight:600;color:var(--text)">周报编写</div>
-                <div style="font-size:9px;color:var(--text-dim)">每周工作总结与附件上传</div>
-              </div>
-            </div>
-            <div class="tn-report-selects">
-              <div class="tn-report-field">
-                <label>选择周次</label>
-                <select id="tnRptWeek" onchange="loadTnReport()"><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option><option value="W14">W14</option></select>
-              </div>
-              <div class="tn-report-field">
-                <label>选择学员</label>
-                <select id="tnRptAuthor" onchange="loadTnReport()"><option value="">选择学员</option></select>
-              </div>
-            </div>
-            <textarea id="tnRptContent" placeholder="请输入本周工作总结…" oninput="autoSaveTnReport()"></textarea>
-            <div class="tn-report-actions">
-              <input type="file" id="tnRptFile" style="display:none" onchange="handleTnFileUpload(this)">
-              <button class="btn btn-outline btn-sm" onclick="document.getElementById('tnRptFile').click()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> 上传附件</button>
-              <span id="tnRptFileName"></span>
-              <span class="tn-autosave-hint" id="tnAutoSaveHint"></span>
-              <button class="btn btn-primary btn-sm" onclick="saveTnReport()">保存周报</button>
-            </div>
+      <div style="display:flex;gap:16px">
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px">上传周报</div>
+          <div class="filter-row" style="margin-bottom:12px">
+            <select id="tnRptWeek" onchange="loadTnReport()"><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option><option value="W14">W14</option></select>
+            <select id="tnRptAuthor" onchange="loadTnReport()"><option value="">选择学员</option></select>
+          </div>
+          <textarea id="tnRptContent" placeholder="请输入本周工作总结..." style="width:100%;height:160px;padding:14px;border:1px solid var(--border-light);border-radius:10px;font-size:11px;color:var(--text);background:var(--card);resize:vertical;font-family:inherit;outline:none" oninput="autoSaveTnReport()"></textarea>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+            <input type="file" id="tnRptFile" style="display:none" onchange="handleTnFileUpload(this)">
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('tnRptFile').click()" style="font-size:10px;padding:7px 14px">上传附件</button>
+            <span id="tnRptFileName" style="font-size:9px;color:var(--text-dim)"></span>
+            <button class="btn btn-primary btn-sm" onclick="saveTnReport()" style="margin-left:auto;font-size:10px;padding:7px 20px">保存周报</button>
           </div>
         </div>
-        <div class="tn-report-history">
-          <div class="tn-report-card">
-            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px">
-              <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg></span>历史周报
-              <span style="font-size:9px;color:var(--text-muted);font-weight:400" id="tnRptCount"></span>
-            </div>
-            <div id="tnRptHistory"></div>
-          </div>
+        <div style="width:300px;flex-shrink:0">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px">历史周报</div>
+          <div id="tnRptHistory" style="max-height:400px;overflow-y:auto"></div>
         </div>
       </div>
     </div>
     <div class="tn-view" id="tnDashboardView" style="display:none">
-      <!-- Section: 360 Evaluation -->
-      <div class="tn-dash-section">
-        <div class="tn-dash-section-title">本周评估概览</div>
-        <div class="tn-eval360" id="tnEval360"></div>
-      </div>
-      <!-- Section: Trainee Score Cards -->
-      <div class="tn-dash-section">
-        <div class="tn-dash-section-title">管培生绩效总览</div>
-        <div class="tn-dash-grid" id="tnDashGrid"></div>
-      </div>
-      <!-- Section: Charts -->
+      <!-- 360 Eval Summary -->
+      <div class="tn-eval360" id="tnEval360"></div>
+      <!-- Performance Cards -->
+      <div class="tn-dash-grid" id="tnDashGrid"></div>
+      <!-- Charts Row -->
       <div class="tn-dash-charts">
-        <div class="tn-chart-box">
-          <div class="tn-chart-box-hd"><span class="tn-chart-dot" style="background:var(--accent)"></span>五维能力雷达图</div>
-          <canvas id="tnRadarChart"></canvas>
-        </div>
-        <div class="tn-chart-box">
-          <div class="tn-chart-box-hd"><span class="tn-chart-dot" style="background:var(--success)"></span>总分趋势（14周）</div>
-          <canvas id="tnTrendChart"></canvas>
-        </div>
+        <div class="tn-chart-box"><h4>五维能力雷达图</h4><canvas id="tnRadarChart"></canvas></div>
+        <div class="tn-chart-box"><h4>总分趋势（14周）</h4><canvas id="tnTrendChart"></canvas></div>
       </div>
-      <!-- Section: Ranking -->
-      <div class="tn-dash-section">
-        <div class="tn-dash-section-title">管培生排行</div>
-        <div class="tn-chart-box" style="margin-bottom:0">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <span style="font-size:9px;color:var(--text-dim)" id="tnRankWeekLabel">当前周</span>
-            <select id="tnRankWeek" onchange="renderRanking()" style="padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;font-size:9px;font-family:inherit;background:var(--bg-surface)">
-              <option value="latest">最新</option>
-            </select>
-          </div>
-          <div style="overflow-x:auto"><table class="tn-rank-table" id="tnRankTable"></table></div>
-        </div>
+      <!-- Ranking Table -->
+      <div class="tn-chart-box" style="margin-bottom:16px">
+        <h4>学员排名 <span style="font-weight:400;font-size:9px;color:var(--text-dim);margin-left:8px" id="tnRankWeekLabel">当前周</span></h4>
+        <select id="tnRankWeek" onchange="renderRanking()" style="margin-bottom:10px;padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;font-size:9px;font-family:inherit">
+          <option value="latest">最新</option>
+        </select>
+        <div style="overflow-x:auto"><table class="tn-rank-table" id="tnRankTable"></table></div>
       </div>
-      <!-- Section: Feedback -->
-      <div class="tn-dash-section">
-        <div class="tn-dash-section-title">反馈记录</div>
-        <div class="tn-chart-box" style="margin-bottom:0">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-            <select id="tnFbWeek" onchange="renderTnFeedbackHistory()" style="padding:6px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:9px;font-family:inherit;background:var(--bg-surface)"><option value="all">全部周次</option></select>
-            <select id="tnFbTrainee" onchange="renderTnFeedbackHistory()" style="padding:6px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:9px;font-family:inherit;background:var(--bg-surface)"><option value="all">全部学员</option></select>
-            <button class="btn btn-primary btn-sm" onclick="openFeedbackForm()" style="margin-left:auto;font-size:9px;padding:6px 14px">+ 新增反馈</button>
-          </div>
-          <div id="tnFbHistory" style="max-height:300px;overflow-y:auto"></div>
+      <!-- Feedback History (integrated into dashboard) -->
+      <div class="tn-chart-box">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <h4 style="margin-bottom:0">反馈记录</h4>
+          <select id="tnFbWeek" onchange="renderTnFeedbackHistory()" style="padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;font-size:9px;font-family:inherit"><option value="all">全部周次</option></select>
+          <select id="tnFbTrainee" onchange="renderTnFeedbackHistory()" style="padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;font-size:9px;font-family:inherit"><option value="all">全部学员</option></select>
+          <button class="btn btn-primary btn-sm" onclick="openFeedbackForm()" style="margin-left:auto;font-size:9px;padding:5px 12px">+ 新增反馈</button>
         </div>
+        <div id="tnFbHistory" style="max-height:300px;overflow-y:auto"></div>
       </div>
     </div>
   <!-- Trainee Evaluation sub-page -->
@@ -3468,8 +3243,8 @@ function switchTab(tab) {
     restoreOkrFilters(); renderOKR();
   }
   else if (tab==='kpi') {
+    if(!currentUser){pendingTab=tab;showPermBlock('tabKPI','暂无权限访问KPI指标看板','请先登录后查看');setNewBtn(false);return;}
     hidePermBlock('tabKPI');
-    if(!currentUser){ switchKpiView('traineeMgmt'); return; }
     if(!canViewModule(currentUser,'kpi')){document.getElementById('kpiIndicatorsPage').innerHTML='<div class="empty"><p>暂无权限访问KPI指标看板</p><p style="font-size:9px">请联系管理员开通KPI查看权限</p></div>';document.getElementById('kpiIndicatorsPage').className='page active';document.getElementById('kpiFilterRow').style.display='none';document.getElementById('kpiFilterChips').style.display='none';setNewBtn(false);return;}
     switchKpiView(kpiView);
   }
@@ -3494,21 +3269,7 @@ function switchTab(tab) {
 function handleNew() { if(curTab==='workspace'||curTab==='vision')return; if(curTab==='org'&&!canEditModule(currentUser,'org')){alert('仅管理员可管理员工花名册');return;} curTab==='okr'?openOkrModal():curTab==='kpi'?openKpiModal():curTab==='report'?openReportModal():curTab==='org'?openEmployeeModal():openMeetingModal(); }
 
 function switchKpiView(view) {
-  // Allow trainee management without login
-  if(!currentUser){
-    if(view==='traineeMgmt'){
-      kpiView = view;
-      document.getElementById('kpiIndicatorsPage').className = 'page';
-      document.getElementById('kpiTraineePage').className = 'page active';
-      document.getElementById('kpiFilterRow').style.display = 'none';
-      document.getElementById('kpiFilterChips').style.display = 'none';
-      document.querySelectorAll('#kpiViewToggle button').forEach(function(b,i){
-        b.classList.toggle('active', i===1);
-      });
-      initTraineeSystem();
-    }
-    return;
-  }
+  if(!currentUser)return;
   if(!canViewModule(currentUser,'kpi')){
     document.getElementById('kpiIndicatorsPage').innerHTML='<div class="empty"><p>暂无权限访问KPI指标看板</p><p style="font-size:9px">请联系管理员开通KPI查看权限</p></div>';
     document.getElementById('kpiIndicatorsPage').className='page active';
@@ -4448,7 +4209,7 @@ function syncTaskToOKR(tk, meetingId){
   const meetingTitle=meeting?meeting.title:'';
   const meetingDate=meeting?meeting.date:'';
   const taskPct=tk.status==='done'?100:0;
-  const source={taskType:'meeting',taskCategory:'review',meetingId, taskId:tk.id, meetingTitle, meetingDate};
+  const source={type:'meeting',meetingId, taskId:tk.id, meetingTitle, meetingDate};
 
   // If already synced and link type hasn't changed, update the existing linked OKR/KR
   if(tk.syncStatus==='synced'&&tk.linkOkrId){
@@ -7863,8 +7624,7 @@ function renderWorkspace(){
       approvals.push({oid:o.id,title:o.title,type:o.type,quarter:o.quarter,status:o.status});
     }
   });
-  var wsEl = document.getElementById('wsStatApproval');
-  if(wsEl) wsEl.textContent = approvals.length;
+  document.getElementById('wsStatApproval').textContent=approvals.length;
 
   // ====== 待打卡 ======
   const checkins=[];
@@ -7876,8 +7636,7 @@ function renderWorkspace(){
     const ds=last?Math.floor((new Date(today)-new Date(last))/86400000):999;
     if(ds>7)checkins.push({oid:o.id,title:o.title,days:ds,last:last,urgent:ds>14});
   });
-  var wsCkEl = document.getElementById('wsStatCheckin');
-  if(wsCkEl) wsCkEl.textContent = checkins.length;
+  document.getElementById('wsStatCheckin').textContent=checkins.length;
 
   // ====== 待推进 ======
   const pushes=[];
@@ -7923,8 +7682,7 @@ function renderWorkspace(){
   });
   pushes.sort((a,b)=>(b.urgent?1:0)-(a.urgent?1:0)||a.type.localeCompare(b.type));
   document.getElementById('wsStatPush').textContent=pushes.length;
-  var wsRptEl = document.getElementById('wsStatReport');
-  if(wsRptEl) wsRptEl.textContent = reportDues.length;
+  document.getElementById('wsStatReport').textContent=reportDues.length;
 
   // ====== Ding记录 ======
   const dingItems=[];
@@ -7950,8 +7708,7 @@ function renderWorkspace(){
     }
   });
   dingItems.sort((a,b)=>new Date(b.date)-new Date(a.date));
-  var wsDingEl = document.getElementById('wsStatDing');
-  if(wsDingEl) wsDingEl.textContent = dingItems.length;
+  document.getElementById('wsStatDing').textContent=dingItems.length;
 
   // ====== 工作统筹 stats ======
   const myOkrs=okrs.filter(o=>!o.archived&&(getOwners(o.owner).includes(cu)||o.krs.some(k=>getOwners(k.owner).includes(cu))));
@@ -8361,13 +8118,8 @@ function renderEvalScorePanel(traineeId){
   for(var i=0;i<EVAL_DIMS.length;i++){
     var d = EVAL_DIMS[i];
     var val = s[d.id] || 0;
-    var suggestBtn = '';
-    if(d.id==='taskCompletion'){
-      var comp = calcTaskCompletionForTrainee(t.name, weekId);
-      suggestBtn = '<button class="eval-task-suggestion" onclick="event.preventDefault();applyTaskSuggestion(\''+t.id+'\',\''+weekId+'\','+comp.suggestedScore+')" title="基于'+comp.total+'项任务中已完成'+comp.done+'项（完成率'+comp.rate+'%）">建议 '+comp.suggestedScore+'</button>';
-    }
     dimsHtml += '<div class="eval-dim-item">'+
-      '<div class="eval-dim-label"><div class="dim-name">'+d.name+suggestBtn+'</div><div class="dim-weight">权重 '+d.weight+'%</div></div>'+
+      '<div class="eval-dim-label"><div class="dim-name">'+d.name+'</div><div class="dim-weight">权重 '+d.weight+'%</div></div>'+
       '<div class="eval-dim-score-input"><input type="number" value="'+val+'" min="0" max="'+d.max+'" step="0.5" onchange="updateDimScore(\''+t.id+'\',\''+d.id+'\',this.value,\''+weekId+'\')" id="evalDim_'+d.id+'"></div>'+
       '<div class="eval-dim-max">/ '+d.max+'</div>'+
       '<div class="eval-dim-slider"><input type="range" value="'+val+'" min="0" max="'+d.max+'" step="0.5" oninput="var inp=document.getElementById(\'evalDim_'+d.id+'\');if(inp){inp.value=this.value;updateDimScore(\''+t.id+'\',\''+d.id+'\',this.value,\''+weekId+'\');}"></div>'+
@@ -8416,17 +8168,6 @@ function renderEvalScorePanel(traineeId){
         '<button class="eval-btn-save" onclick="saveCurrentEval(\''+t.id+'\',\''+weekId+'\')">保存评分</button>'+
       '</div>'+
     '</div>';
-}
-
-function applyTaskSuggestion(traineeId, weekId, suggestedScore){
-  var inp = document.getElementById('evalDim_taskCompletion');
-  if(inp){
-    inp.value = suggestedScore;
-    updateDimScore(traineeId, 'taskCompletion', suggestedScore, weekId);
-    // Also update the slider
-    var slider = inp.parentElement.parentElement.querySelector('.eval-dim-slider input');
-    if(slider) slider.value = suggestedScore;
-  }
 }
 
 function updateDimScore(traineeId, dimId, value, weekId){
@@ -8704,167 +8445,17 @@ var TN_TASKS = [
   {id:'t39',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务系统上线与自动化归档部署',R:'陈锦',A:'芦智蔚',I:'陈双杰,邵吴慧,蔡心宇,任梦超',priority:'P2',status:'pending',weeks:[0,0,0,0,0,0,0,0,0,0,1,1,1]}
 ];
 
-// 59 Reference tasks from external task management system
-// 59 Reference tasks from external task management system
-var TN_REF_TASKS = [
-  // 钱 - 财务账务自动化系统 (30条)
-  {id:'r1',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'有关票点点自动开票的汇报ppt制作',taskType:'normal',taskCategory:'deliverable',executors:['陈双杰'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,0,0,0,1,1,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r2',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款系统第四版交付物',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,0,0,0,0,1,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r3',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'HKMS收款模块第三版交付',taskType:'normal',taskCategory:'milestone',executors:['陈双杰'],approver:'Jenny',refStatus:'pending',priority:'P0',weeks:[0,0,0,0,1,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r4',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款系统细节功能完善',taskType:'normal',taskCategory:'okr',executors:['陈锦'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,0,0,0,1,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r5',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款模块第三版交付（7月1日）',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,0,0,0,1,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r6',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'离职全流程梳理',taskType:'normal',taskCategory:'deliverable',executors:['黄燕婷'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r7',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'考勤管理板块梳理',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r8',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'各类财务账务表格设计',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r9',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款从申请到完成的状态流转图',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r10',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'银行流水与账单样本',taskType:'normal',taskCategory:'deliverable',executors:['陈双杰'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r11',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'梳理全部费用类型',taskType:'normal',taskCategory:'deliverable',executors:['陈双杰'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r12',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'收款业务流程梳理',taskType:'normal',taskCategory:'deliverable',executors:['陈双杰'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r13',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'可运行的前端项目骨架+《前端项目结构文档》',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,0,0,1,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r14',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款模块数据库表设计',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r15',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款流程梳理+收集报表+提交《科目字典与报表清单》',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r16',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款流程梳理+报表清单+科目字典',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r17',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'项目计划表',taskType:'normal',taskCategory:'deliverable',executors:['陈双杰'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r18',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'需要【标准财务报表模板】',taskType:'normal',taskCategory:'deliverable',executors:['蔡心宇'],approver:'Bella',refStatus:'active',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r19',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'个人分工任务提交',taskType:'normal',taskCategory:'okr',executors:['陈锦', '陈双杰'],approver:'Jenny',refStatus:'pending',priority:'P0',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:3},
-  {id:'r20',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'两个会议系统的合并',taskType:'normal',taskCategory:'okr',executors:['安子玥', '陈双杰'],approver:'Bella',refStatus:'active',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r21',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'六月凭证必传验证任务',taskType:'normal',taskCategory:'okr',executors:['王倩'],approver:'Jenny',refStatus:'pending',priority:'P0',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r22',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'六月财务凭证上传验证任务',taskType:'normal',taskCategory:'okr',executors:['王倩'],approver:'Jenny',refStatus:'pending',priority:'P0',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r23',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'流程搭建',taskType:'normal',taskCategory:'okr',executors:['陈双杰', '邵吴慧'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r24',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'全面上线与回测',taskType:'normal',taskCategory:'okr',executors:['芦智蔚', '安子玥', '陈圆', '黄燕婷', '陈锦', '陈双杰', '黄欢欢', '浏览器范围测试用户', '王倩', '蔡心宇', '任梦超', '邵吴慧', '赵柳文'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,0,0,0,0,0,0,1,0,0,0,0,0,0],attachments:0},
-  {id:'r25',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'P&L自动生成测试',taskType:'normal',taskCategory:'okr',executors:['陈锦', '陈双杰'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,0,0,0,0,1,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r26',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'HKMS接口开发V1.0',taskType:'normal',taskCategory:'okr',executors:['任梦超', '陈圆', '黄欢欢', '陈锦'],approver:'Jenny',refStatus:'active',priority:'P1',weeks:[0,0,0,1,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r27',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'P&L报表模板设计与数据整理',taskType:'normal',taskCategory:'okr',executors:['陈锦', '陈双杰'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,0,0,1,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r28',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'HKMS银行接口需求确认与开发',taskType:'normal',taskCategory:'okr',executors:['陈锦', '任梦超', '陈圆'],approver:'Jenny',refStatus:'active',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r29',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'投资系/人才系数据字典建设',taskType:'normal',taskCategory:'okr',executors:['陈锦', '陈双杰'],approver:'Jenny',refStatus:'active',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r30',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'陈锦/陈双杰入职与财务岗位带教启动',taskType:'normal',taskCategory:'okr',executors:['陈锦', '陈双杰'],approver:'Jenny',refStatus:'active',priority:'P1',weeks:[1,0,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  // 事 - 用印档案公司管理系统 (19条)
-  {id:'r31',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'最新版密码（黄燕婷用户名从cattoin改成tina）',taskType:'normal',taskCategory:'okr',executors:['Bella'],approver:'Bella',refStatus:'pending',priority:'P2',weeks:[0,0,0,1,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r32',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'密码（仅需阅知）',taskType:'normal',taskCategory:'okr',executors:['Bella', '任梦超'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,0,0,1,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r33',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'开弈集团公司名录+印章管理表格信息补全',taskType:'normal',taskCategory:'okr',executors:['Bella', '蔡心宇', '芦智蔚', '赵柳文'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:4},
-  {id:'r34',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印管理系统V1.0上线测试使用',taskType:'normal',taskCategory:'milestone',executors:['陈圆'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r35',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'标准合同版本的确定+系统字段表',taskType:'normal',taskCategory:'deliverable',executors:['安子玥'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r36',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'历史用印档案第二阶段梳理',taskType:'normal',taskCategory:'okr',executors:['赵柳文'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r37',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'商办标准合同版本及商办合同字段表',taskType:'normal',taskCategory:'deliverable',executors:['邵吴慧', '赵柳文'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r38',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'完整用户名密码（新增9个用印相关）',taskType:'normal',taskCategory:'okr',executors:['陈圆'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r39',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'6.11测试',taskType:'normal',taskCategory:'okr',executors:['陈圆'],approver:'Bella',refStatus:'pending',priority:'P2',weeks:[0,1,1,1,1,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r40',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印系统V1.0的修改反馈',taskType:'normal',taskCategory:'okr',executors:['邵吴慧', '赵柳文'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r41',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'各BU标准合同模板的汇总',taskType:'normal',taskCategory:'okr',executors:['赵柳文', '安子玥'],approver:'Bella',refStatus:'active',priority:'P1',weeks:[0,1,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r42',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'商办合同中段系统字段表',taskType:'normal',taskCategory:'okr',executors:['邵吴慧'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r43',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'HKMS2.0业务流程图',taskType:'normal',taskCategory:'okr',executors:['邵吴慧', '陈双杰'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,1,1,0,0,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r44',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'Bella用印邮件的智能化备份',taskType:'normal',taskCategory:'okr',executors:['陈双杰'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r45',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'涉及员工管理的用印资料合并进法务档案表',taskType:'normal',taskCategory:'okr',executors:['安子玥', '赵柳文'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r46',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'历史用印情况的智能化梳理第一阶段成果汇报',taskType:'normal',taskCategory:'okr',executors:['赵柳文'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r47',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印自动编号规则确认',taskType:'normal',taskCategory:'okr',executors:['赵柳文'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r48',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'1234',taskType:'normal',taskCategory:'okr',executors:['安子玥'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r49',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'六月跨部门项目推进周会',taskType:'meeting',taskCategory:'review',executors:['王倩', '黄燕婷', '陈锦'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  // 人 - 人事事务自动化系统 (8条)
-  {id:'r50',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工保险梳理',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r51',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'人事各板块工作现状梳理',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'active',priority:'P0',weeks:[0,1,1,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r52',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'人事用印档案系统字段表',taskType:'normal',taskCategory:'okr',executors:['安子玥'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r53',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工人事档案有关用印、审核部分的档案电子化',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r54',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工保险梳理报告',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r55',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'招聘流程梳理+流程图+小黄系统功能实现',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r56',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'人事系统框架搭建',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r57',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工劳动关系框架梳理及相关文件版本梳理',taskType:'normal',taskCategory:'okr',executors:['安子玥'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:6},
-  // IT - 项目管理 (2条)
-  {id:'r58',sys:'itpm',sysName:'IT项目管理系统',sysColor:'#8B6BAE',sysBg:'#F6F2FB',name:'项目管理系统V1.2修改',taskType:'normal',taskCategory:'okr',executors:['任梦超'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r59',sys:'itpm',sysName:'IT项目管理系统',sysColor:'#8B6BAE',sysBg:'#F6F2FB',name:'项目管理系统修改V26-611',taskType:'normal',taskCategory:'okr',executors:['任梦超'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,1,0,0,0,0,0,0,0,0,0,0,0],attachments:1}
-];
-
-
-var TN_TASK_TYPES = {
-  normal:{label:'普通任务',color:'#7B8FC0',bg:'#F4F6FB'},
-  meeting:{label:'会议任务',color:'#C94F66',bg:'#FDE8EC'}
-};
-
-var TN_TASK_CATEGORIES = {
-  okr:{label:'OKR',color:'#C94F66',bg:'#FDE8EC'},
-  milestone:{label:'里程碑',color:'#D4A76A',bg:'#FBF6EC'},
-  deliverable:{label:'交付物',color:'#7B8FC0',bg:'#F4F6FB'},
-  review:{label:'评审',color:'#8BA89C',bg:'#EAF0EE'}
-};
-
 var TN_TRAINEES = ['陈双杰','陈锦','赵柳文','安子玥','黄燕婷','任梦超','陈圆'];
 var TN_WEEK_LABELS = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12','W13'];
-var TN_ALL_WEEKS = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12','W13','W14'];
-
-// Date range + week overlap helper for reference tasks
-function getWeekDateRange(weekIdx){
-  // weekIdx is 0-indexed (0=W1 starting 06/01)
-  var start = new Date(2026,5,1 + weekIdx*7); // June=5
-  var end = new Date(2026,5,1 + (weekIdx+1)*7 - 1);
-  return {start:start, end:end};
-}
-
-function taskOverlapsWeek(task, weekIdx){
-  if(!task.startDate && !task.endDate) return false;
-  var w = getWeekDateRange(weekIdx);
-  var ts = task.startDate ? new Date(task.startDate+'T00:00:00') : null;
-  var te = task.endDate ? new Date(task.endDate+'T23:59:59') : null;
-  if(!ts && !te) return false;
-  if(ts && te) return ts <= w.end && te >= w.start;
-  if(ts) return ts <= w.end;
-  if(te) return te >= w.start;
-  return false;
-}
-
-// Cross-reference all task sources to calculate completion for a trainee in a given week
-function calcTaskCompletionForTrainee(traineeName, weekId){
-  var weekIdx = parseInt(weekId.slice(1)) - 1;
-  var total = 0, done = 0;
-
-  // 1. Plan tasks (TN_TASKS)
-  TN_TASKS.forEach(function(t){
-    if(t.R!==traineeName && t.A!==traineeName && (t.I||'').indexOf(traineeName)===-1) return;
-    if(!t.weeks || !t.weeks[weekIdx]) return;
-    total++;
-    var td = getTnTask(t.id);
-    if((td && td.status)==='done' || (!td && t.status==='done')) done++;
-  });
-
-  // 2. Weekly tasks (wtasks)
-  if(tnData && tnData.wtasks){
-    tnData.wtasks.forEach(function(w){
-      if(w.person!==traineeName) return;
-      if(w.week !== weekId) return;
-      total++;
-      if(w.status==='done') done++;
-    });
-  }
-
-  // 3. Reference tasks (refTasks)
-  var refTasks = tnData && tnData.refTasks ? tnData.refTasks : TN_REF_TASKS;
-  refTasks.forEach(function(r){
-    if(!r.executors || r.executors.indexOf(traineeName)===-1) return;
-    if(!r.weeks || !r.weeks[weekIdx]) return;
-    total++;
-    if(r.refStatus==='done') done++;
-  });
-
-  var rate = total > 0 ? Math.round(done/total*100) : 0;
-  var suggestedScore = total > 0 ? Math.round(rate/100 * EVAL_DIMS[0].max * 10) / 10 : 0;
-  return {total:total, done:done, rate:rate, suggestedScore:suggestedScore};
-}
 
 function getTnStorageKey(k){ return 'otms_trainee_'+k+'_v1'; }
 
 function loadTnData(){
   try{
     var raw = localStorage.getItem(getTnStorageKey('data'));
-    if(raw && raw !== 'undefined' && raw !== 'null'){
-      tnData = JSON.parse(raw);
-      // Migration: add missing fields for backward compat
-      if(!tnData.wtasks) tnData.wtasks = [];
-      if(!tnData.refTasks || !tnData.refTasks.length || !tnData.refTasks[0].weeks){
-        tnData.refTasks = JSON.parse(JSON.stringify(TN_REF_TASKS));
-        saveTnData();
-      }
-      if(!tnData._version) tnData._version = 2;
-      return;
-    }
+    if(raw){ tnData = JSON.parse(raw); return; }
   }catch(e){}
-  tnData = {tasks:{}, reports:{}, feedback:[], wtasks:[], refTasks:(typeof TN_REF_TASKS!=='undefined'?JSON.parse(JSON.stringify(TN_REF_TASKS)):[]), _version:2};
+  tnData = {tasks:{}, reports:{}, feedback:[]};
 }
 
 function saveTnData(){
@@ -8935,21 +8526,11 @@ function switchTraineeView(view){
 
 // ===== TASK BOARD =====
 function renderTraineeSummary(){
-  var total = 0;
+  var total = TN_TASKS.length;
   var pending = 0, active = 0, done = 0;
-  if(tnData && tnData.wtasks){
-    tnData.wtasks.forEach(function(w){
-      total++;
-      if(w.status==='done') done++;
-      else if(w.status==='active') active++;
-      else pending++;
-    });
-  }
-  // Also count reference tasks
-  var refTasks = tnData && tnData.refTasks ? tnData.refTasks : TN_REF_TASKS;
-  refTasks.forEach(function(r){
-    total++;
-    var st = r.refStatus || 'pending';
+  TN_TASKS.forEach(function(t){
+    var td = getTnTask(t.id);
+    var st = td ? td.status : t.status;
     if(st==='done') done++;
     else if(st==='active') active++;
     else pending++;
@@ -8975,7 +8556,7 @@ function renderTraineeSummary(){
   });
   var avgScore = traineeCount > 0 ? (totalScore / traineeCount).toFixed(1) : '--';
   document.getElementById('traineeSummary').innerHTML =
-    '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#7B8FC0">'+total+'</div><div class="tn-sc-lbl">全部任务</div></div>'+
+    '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#7B8FC0">'+total+'</div><div class="tn-sc-lbl">RACI任务总数</div></div>'+
     '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#8BA89C">'+done+'</div><div class="tn-sc-lbl">已完成</div></div>'+
     '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#D4A76A">'+active+'</div><div class="tn-sc-lbl">进行中</div></div>'+
     '<div class="tn-summary-card"><div class="tn-sc-num" style="color:var(--accent)">'+rptCount+'</div><div class="tn-sc-lbl">周报提交</div></div>'+
@@ -8997,41 +8578,36 @@ function renderTraineeTasks(){
   if(diffDays < 0) diffDays = 0;
   var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
   
-  // Weekly tasks
-  var filtered = [];
-  var wtasks = tnData && tnData.wtasks ? tnData.wtasks : [];
-  wtasks.forEach(function(w){
-    if(sysFilter!=='all' && w.sys!==sysFilter) return;
-    if(statusFilter!=='all' && w.status!==statusFilter) return;
-    if(weekIdx >= 0 && w.week !== ('W'+(weekIdx+1))) return;
-    if(tnQuickFilter === 'week' && w.week !== ('W'+(curWkIdx+1))) return;
-    if(tnQuickFilter === 'active' && w.status !== 'active') return;
-    if(personFilter!=='all' && w.person !== personFilter) return;
-    if(tnQuickFilter === 'mine' && currentUser && w.person !== currentUser) return;
-    w._source = 'weekly';
-    filtered.push(w);
+  var filtered = TN_TASKS.filter(function(t){
+    if(sysFilter!=='all' && t.sys!==sysFilter) return false;
+    var td = getTnTask(t.id);
+    var st = td ? td.status : t.status;
+    if(statusFilter!=='all' && st!==statusFilter) return false;
+    if(weekIdx >= 0){
+      var wks = td ? td.weeks : t.weeks;
+      if(!wks || !wks[weekIdx]) return false;
+    }
+    if(personFilter!=='all'){
+      if(t.R !== personFilter && t.A !== personFilter && (t.I||'').indexOf(personFilter)===-1) return false;
+    }
+    // Quick filters
+    if(tnQuickFilter === 'mine'){
+      if(t.R !== currentUser && t.A !== currentUser) return false;
+    }
+    if(tnQuickFilter === 'active'){
+      if(st !== 'active') return false;
+    }
+    if(tnQuickFilter === 'week'){
+      var wks = td ? td.weeks : t.weeks;
+      if(!wks || !wks[curWkIdx]) return false;
+    }
+    return true;
   });
 
-  // Reference tasks (from external task management system)
-  var refTasks = tnData && tnData.refTasks ? tnData.refTasks : TN_REF_TASKS;
-  refTasks.forEach(function(r){
-    if(sysFilter!=='all' && r.sys!==sysFilter) return;
-    var st = r.refStatus || 'pending';
-    if(statusFilter!=='all' && st!==statusFilter) return;
-    if(tnQuickFilter === 'active' && st !== 'active') return;
-    var rw = r.weeks || [];
-    if(weekIdx >= 0 && !rw[weekIdx]) return;
-    if(tnQuickFilter === 'week' && !rw[curWkIdx]) return;
-    if(personFilter!=='all' && (r.executors||[]).indexOf(personFilter)===-1) return;
-    if(tnQuickFilter === 'mine' && currentUser && (r.executors||[]).indexOf(currentUser)===-1) return;
-    r._source = 'ref';
-    filtered.push(r);
-  });
-
-  document.getElementById('tnTaskCount').textContent = filtered.length + ' 项任务';
+  document.getElementById('tnTaskCount').textContent = filtered.length + ' / ' + TN_TASKS.length + ' 项任务';
 
   var groups = {};
-  var sysOrder = ['yyda','rssw','cwzw','itpm'];
+  var sysOrder = ['yyda','rssw','cwzw'];
   sysOrder.forEach(function(s){ groups[s] = []; });
   filtered.forEach(function(t){ groups[t.sys].push(t); });
 
@@ -9041,15 +8617,11 @@ function renderTraineeTasks(){
   sysOrder.forEach(function(sys){
     var tasks = groups[sys];
     if(!tasks.length) return;
-    // Find sysInfo from first task (handle both plan and weekly)
     var sysInfo = tasks[0];
-    var sysNames = {yyda:'用印档案公司管理系统',rssw:'人事事务自动化系统',cwzw:'财务账务自动化系统',itpm:'IT项目管理系统'};
-    var sysColors = {yyda:'#7B8FC0',rssw:'#9A7D3E',cwzw:'#5A7868',itpm:'#8B6BAE'};
-    sysInfo.sysName = sysInfo.sysName || sysNames[sys];
-    sysInfo.sysColor = sysInfo.sysColor || sysColors[sys];
     var pendingCount = 0, doneCount = 0, activeCount = 0;
     tasks.forEach(function(t){
-      var st = t._source==='plan' ? ((getTnTask(t.id)&&getTnTask(t.id).status)?getTnTask(t.id).status:t.status) : t._source==='ref' ? (t.refStatus||'pending') : t.status;
+      var td = getTnTask(t.id);
+      var st = td ? td.status : t.status;
       if(st==='done') doneCount++;
       else if(st==='active') activeCount++;
       else pendingCount++;
@@ -9057,102 +8629,50 @@ function renderTraineeTasks(){
     
     var panelId = 'tnPanel_'+sys;
     html += '<div class="tn-system-panel" id="'+panelId+'">';
-    html += '<div class="tn-panel-header" onclick="var p=document.getElementById(\''+panelId+'\');p.classList.toggle(\'collapsed\')">';
-    html += '<span class="tn-panel-icon" style="background:'+sysInfo.sysColor+'">'+(sys==='yyda'?'印':sys==='rssw'?'人':sys==='cwzw'?'财':'IT')+'</span>';
+    html += '<div class="tn-panel-header" onclick="var p=document.getElementById(\\''+panelId+'\\');p.classList.toggle(\\'collapsed\\')">';
+    html += '<span class="tn-panel-icon" style="background:'+sysInfo.sysColor+'">'+(sys==='yyda'?'印':sys==='rssw'?'人':'财')+'</span>';
     html += '<span class="tn-panel-title">'+sysInfo.sysName+'</span>';
     html += '<div class="tn-panel-stats">';
     if(doneCount) html += '<span class="stat-done">'+doneCount+' 已完成</span>';
     if(activeCount) html += '<span class="stat-active">'+activeCount+' 进行中</span>';
     if(pendingCount) html += '<span class="stat-pending">'+pendingCount+' 待开始</span>';
     html += '</div>';
-    html += '<span class="tn-panel-arrow"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>';
+    html += '<span class="tn-panel-arrow">▼</span>';
     html += '</div>';
     
     html += '<div class="tn-task-list">';
     
     tasks.forEach(function(t){
-      var isWeekly = t._source === 'weekly';
-      var isRef = t._source === 'ref';
-      var td = (!isWeekly && !isRef) ? getTnTask(t.id) : null;
-      var st = isWeekly ? t.status : isRef ? (t.refStatus || 'pending') : ((td && td.status) ? td.status : t.status);
-      var wks = isRef ? (t.weeks || []) : (!isWeekly ? ((td && td.weeks) ? td.weeks : t.weeks) : null);
+      var td = getTnTask(t.id);
+      var st = td ? td.status : t.status;
+      var wks = td ? td.weeks : t.weeks;
       var stCls = st==='done'?'done':st==='active'?'active':'pending';
       var prio = t.priority || 'P2';
-
-      // Calculate progress
-      var progressPct = 0, totalWeeks = 0, doneWeeks = 0;
-      if(isWeekly){
-        progressPct = st==='done'?100:st==='active'?50:0;
-        totalWeeks = 1;
-        doneWeeks = st==='done'?1:0;
-      } else {
-        for(var i=0;i<13;i++){
-          if(wks[i]){ totalWeeks++; if(i <= curWkIdx) doneWeeks++; }
-        }
-        progressPct = totalWeeks > 0 ? Math.round(doneWeeks / totalWeeks * 100) : 0;
-      }
-      var progCls = progressPct >= 80 ? 'high' : progressPct >= 40 ? 'mid' : 'low';
-
-      // Source badge
-      var srcBadge;
-      if(isWeekly) srcBadge = '<span class="tn-src-badge weekly">'+t.week+'</span>';
-      else if(isRef){ var rwWeeks=[]; var rw=t.weeks||[]; for(var rwi=0;rwi<rw.length;rwi++){ if(rw[rwi]) rwWeeks.push('W'+(rwi+1)); } srcBadge = rwWeeks.length ? '<span class="tn-src-badge weekly">'+rwWeeks.join(',')+'</span>' : ''; }
-      else srcBadge = '<span class="tn-src-badge plan">计划</span>';
-      // Task type badge (普通任务/会议任务)
-      var taskTypeBadge = '';
-      var tt = TN_TASK_TYPES[t.taskType] || TN_TASK_TYPES['normal'];
-      taskTypeBadge = '<span class="tn-task-type-badge" style="background:'+tt.bg+';color:'+tt.color+'">'+tt.label+'</span>';
-      // Task category badge (OKR/里程碑/交付物/评审)
-      var catBadge = '';
-      var catKey = t.taskCategory || 'deliverable';
-      var tc = TN_TASK_CATEGORIES[catKey] || TN_TASK_CATEGORIES['deliverable'];
-      catBadge = '<span class="tn-ref-type-badge" style="background:'+tc.bg+';color:'+tc.color+'">'+tc.label+'</span>';
       
-      // Edit button SVG
-      var editBtnSVG = '<button class="tn-task-edit-btn" onclick="event.stopPropagation();openUnifiedTaskModal(\''+t._source+'\',\''+t.id+'\')" title="编辑任务"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
-
+      // Calculate progress
+      var totalWeeks = 0, doneWeeks = 0;
+      for(var i=0;i<13;i++){
+        if(wks[i]){ totalWeeks++; if(i <= curWkIdx) doneWeeks++; }
+      }
+      var progressPct = totalWeeks > 0 ? Math.round(doneWeeks / totalWeeks * 100) : 0;
+      var progCls = progressPct >= 80 ? 'high' : progressPct >= 40 ? 'mid' : 'low';
+      
       // Card view
       if(isCards){
-        html += '<div class="tn-task-card-new" id="tnCard_'+t.id+'" onclick="var el=document.getElementById(\'tnCard_'+t.id+'\');el.classList.toggle(\'expanded\')">';
+        html += '<div class="tn-task-card-new" id="tnCard_'+t.id+'" onclick="var el=document.getElementById(\\'tnCard_'+t.id+'\\');el.classList.toggle(\\'expanded\\')">';
         html += '<div class="tn-task-priority '+prio+'"></div>';
         html += '<span class="tn-task-status-dot '+stCls+'"></span>';
         html += '<div class="tn-task-body">';
-        html += '<div class="tn-task-title-row">';
-        html += '<span class="tn-task-title">'+t.name+'</span>';
-        html += srcBadge;
-        html += taskTypeBadge;
-        html += catBadge;
-        html += '<span class="tn-prio-tag '+prio+'">'+prio+'</span>';
-        if(isWeekly){
-          html += '<span class="tn-raci-badge R">'+t.person+'</span>';
-        } else if(isRef){
-          if(t.executors) html += '<span class="tn-raci-badge R">'+t.executors.join(',')+'</span>';
-          if(t.approver) html += '<span class="tn-raci-badge A">'+t.approver+'</span>';
-        } else {
-          var displayR = (td && td.R) ? td.R : t.R;
-          var displayA = (td && td.A) ? td.A : t.A;
-          var displayI = (td && td.I) ? td.I : (t.I||'');
-          html += '<span class="tn-raci-badge R">'+displayR+'</span>';
-          html += '<span class="tn-raci-badge A">'+displayA+'</span>';
-          if(displayI) html += '<span class="tn-raci-badge I">'+displayI+'</span>';
-          html += '<span class="tn-trainee-link" onclick="event.stopPropagation();openTraineeDetail(\''+displayR+'\')" title="查看学员"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>';
-        }
+        html += '<div class="tn-task-title-row"><span class="tn-task-title">'+t.name+'</span><span class="tn-prio-tag '+prio+'">'+prio+'</span></div>';
+        html += '<div class="tn-task-subtitle">';
+        html += '<span class="tn-raci-badge R">R '+t.R+'</span>';
+        html += '<span class="tn-raci-badge A">A '+t.A+'</span>';
+        if(t.I) html += '<span class="tn-raci-badge I">I '+t.I+'</span>';
+        html += '<span style="margin-left:auto;font-size:8px;color:var(--text-dim);cursor:pointer" onclick="event.stopPropagation();openTraineeDetail(\\''+t.R+'\\')">查看学员 →</span>';
         html += '</div></div>';
         html += '<div class="tn-task-progress"><div class="tn-progress-bar-wrap"><div class="tn-progress-bar-fill '+progCls+'" style="width:'+progressPct+'%"></div></div>';
-        var progressText;
-        if(isWeekly) progressText = (st==='done'?'已完成':st==='active'?'进行中':'待开始');
-        else progressText = (st==='done'?'已完成':st==='active'?'进行中':'待开始')+' · '+doneWeeks+'/'+totalWeeks+'周';
-        html += '<div class="tn-progress-text">'+progressText+'</div></div>';
-        if(isWeekly){
-          html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\'pending\':\'active\',\'active\':\'done\',\'done\':\'pending\'};setWeeklyTaskStatus(\''+t.id+'\',next[\''+st+'\'])">'+(st==='done'?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':st==='active'?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>':'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/></svg>')+'</button>';
-          html += '<button class="tn-wtask-del" onclick="event.stopPropagation();deleteWeeklyTask(\''+t.id+'\')" title="删除任务"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';
-        } else if(isRef){
-          html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\'pending\':\'active\',\'active\':\'done\',\'done\':\'pending\'};setRefTaskStatus(\''+t.id+'\',next[\''+st+'\'])">'+(st==='done'?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':st==='active'?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>':'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/></svg>')+'</button>';
-          html += '<button class="tn-wtask-del" onclick="event.stopPropagation();deleteRefTask(\''+t.id+'\')" title="删除任务"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';
-        } else {
-          html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\'pending\':\'active\',\'active\':\'done\',\'done\':\'pending\'};setTnTaskStatus(\''+t.id+'\',next[\''+st+'\'])">'+(st==='done'?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':st==='active'?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>':'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/></svg>')+'</button>';
-        }
-        html += editBtnSVG;
+        html += '<div class="tn-progress-text">'+progressPct+'% ('+doneWeeks+'/'+totalWeeks+'周)</div></div>';
+        html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\\'pending\\':\\'active\\',\\'active\\':\\'done\\',\\'done\\':\\'pending\\'};setTnTaskStatus(\\''+t.id+'\\',next[\\''+st+'\\'])">'+(st==='done'?'✓':st==='active'?'▶':'○')+'</button>';
         html += '</div>';
         // Expanded feedback area
         html += '<div class="tn-task-expand" onclick="event.stopPropagation()">';
@@ -9161,36 +8681,19 @@ function renderTraineeTasks(){
         html += '<div class="tn-fb-inline">';
         html += '<select id="tnFbType_'+t.id+'" style="padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;font-size:8px;font-family:inherit;background:var(--card)"><option value="positive">表扬</option><option value="neutral">建议</option><option value="negative">需改进</option></select>';
         html += '<textarea id="tnFbContent_'+t.id+'" placeholder="添加反馈..." rows="1"></textarea>';
-        html += '<button onclick="saveInlineFeedback(\''+t.id+'\')">发送</button>';
+        html += '<button onclick="saveInlineFeedback(\\''+t.id+'\\')">发送</button>';
         html += '</div></div>';
       } else {
         // List view (compact)
         html += '<div class="tn-task-card">';
         html += '<div class="tn-task-priority '+prio+'" style="width:4px;height:18px;border-radius:2px;flex-shrink:0"></div>';
         html += '<span class="tn-task-status '+stCls+'"></span>';
-        var metaHtml = srcBadge + taskTypeBadge + catBadge;
-        if(isWeekly) metaHtml += ' <b>负责人</b> '+t.person;
-        else if(isRef) metaHtml += ' <b>执行人</b> '+(t.executors||[]).join(',')+' · <b>审批</b> '+(t.approver||'');
-        else metaHtml += ' <b>R</b> '+(td&&td.R?td.R:t.R)+' · <b>A</b> '+(td&&td.A?td.A:t.A);
-        html += '<div class="tn-task-info"><div class="tn-task-name">'+t.name+'</div><div class="tn-task-meta">'+metaHtml+'</div></div>';
+        html += '<div class="tn-task-info"><div class="tn-task-name">'+t.name+'</div><div class="tn-task-meta"><b>R</b> '+t.R+' · <b>A</b> '+t.A+'</div></div>';
         html += '<div class="tn-task-progress" style="width:60px"><div class="tn-progress-bar-wrap"><div class="tn-progress-bar-fill '+progCls+'" style="width:'+progressPct+'%"></div></div><div class="tn-progress-text">'+progressPct+'%</div></div>';
         html += '<div class="tn-task-actions">';
-        if(isWeekly){
-          html += '<button class="'+(st==='active'?'tn-active-status':'')+'" onclick="setWeeklyTaskStatus(\''+t.id+'\',\'active\')">进行中</button>';
-          html += '<button class="'+(st==='done'?'tn-active-status':'')+'" onclick="setWeeklyTaskStatus(\''+t.id+'\',\'done\')">完成</button>';
-          html += '<button onclick="setWeeklyTaskStatus(\''+t.id+'\',\'pending\')">重置</button>';
-          html += '<button onclick="deleteWeeklyTask(\''+t.id+'\')" style="color:var(--danger)">删除</button>';
-        } else if(isRef){
-          html += '<button class="'+(st==='active'?'tn-active-status':'')+'" onclick="setRefTaskStatus(\''+t.id+'\',\'active\')">进行中</button>';
-          html += '<button class="'+(st==='done'?'tn-active-status':'')+'" onclick="setRefTaskStatus(\''+t.id+'\',\'done\')">完成</button>';
-          html += '<button onclick="setRefTaskStatus(\''+t.id+'\',\'pending\')">重置</button>';
-          html += '<button onclick="deleteRefTask(\''+t.id+'\')" style="color:var(--danger)">删除</button>';
-        } else {
-          html += '<button class="'+(st==='active'?'tn-active-status':'')+'" onclick="setTnTaskStatus(\''+t.id+'\',\'active\')">进行中</button>';
-          html += '<button class="'+(st==='done'?'tn-active-status':'')+'" onclick="setTnTaskStatus(\''+t.id+'\',\'done\')">完成</button>';
-          html += '<button onclick="setTnTaskStatus(\''+t.id+'\',\'pending\')">重置</button>';
-        }
-        html += '<button class="tn-task-edit-btn-inline" onclick="openUnifiedTaskModal(\''+t._source+'\',\''+t.id+'\')" title="编辑"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
+        html += '<button class="'+(st==='active'?'tn-active-status':'')+'" onclick="setTnTaskStatus(\\''+t.id+'\\',\\'active\\')">进行中</button>';
+        html += '<button class="'+(st==='done'?'tn-active-status':'')+'" onclick="setTnTaskStatus(\\''+t.id+'\\',\\'done\\')">完成</button>';
+        html += '<button onclick="setTnTaskStatus(\\''+t.id+'\\',\\'pending\\')">重置</button>';
         html += '</div></div>';
       }
     });
@@ -9253,305 +8756,6 @@ function setTnTaskStatus(taskId, status){
   renderTraineeTasks();
 }
 
-// ===== WEEKLY TASKS =====
-function openWeeklyTaskModal(){
-  // Set default week from filter
-  var wkFilter = document.getElementById('tnWeekFilter').value;
-  if(wkFilter !== 'all'){
-    document.getElementById('wtWeek').value = wkFilter;
-  } else {
-    var now = new Date();
-    var startDate = new Date(2026,5,1);
-    var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
-    if(diffDays < 0) diffDays = 0;
-    var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
-    document.getElementById('wtWeek').value = 'W' + (curWkIdx + 1);
-  }
-  // Populate person select
-  var sel = document.getElementById('wtPerson');
-  sel.innerHTML = TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
-  document.getElementById('wtName').value = '';
-  document.getElementById('weeklyTaskModal').style.display = 'flex';
-  document.getElementById('wtName').focus();
-}
-
-function closeWeeklyTaskModal(){
-  document.getElementById('weeklyTaskModal').style.display = 'none';
-}
-
-function saveWeeklyTask(){
-  var name = document.getElementById('wtName').value.trim();
-  if(!name){ alert('请输入任务名称'); return; }
-  var sys = document.getElementById('wtSystem').value;
-  var week = document.getElementById('wtWeek').value;
-  var person = document.getElementById('wtPerson').value || currentUser || '';
-  var priority = document.getElementById('wtPriority').value;
-  var taskType = document.getElementById('wtTaskType').value;
-  var taskCategory = document.getElementById('wtTaskCategory').value;
-  if(!tnData) loadTnData();
-  if(!tnData.wtasks) tnData.wtasks = [];
-  tnData.wtasks.push({
-    id: 'w'+Date.now(),
-    name: name,
-    sys: sys,
-    week: week,
-    person: person,
-    priority: priority,
-    taskType: taskType,
-    taskCategory: taskCategory,
-    status: 'pending',
-    createdAt: new Date().toISOString()
-  });
-  saveTnData();
-  closeWeeklyTaskModal();
-  renderTraineeSummary();
-  renderTraineeTasks();
-}
-
-function setWeeklyTaskStatus(wid, status){
-  if(!tnData || !tnData.wtasks) return;
-  for(var i=0;i<tnData.wtasks.length;i++){
-    if(tnData.wtasks[i].id === wid){
-      tnData.wtasks[i].status = status;
-      break;
-    }
-  }
-  saveTnData();
-  renderTraineeSummary();
-  renderTraineeTasks();
-}
-
-function deleteWeeklyTask(wid){
-  if(!confirm('确认删除该任务？')) return;
-  if(!tnData || !tnData.wtasks) return;
-  tnData.wtasks = tnData.wtasks.filter(function(w){ return w.id !== wid; });
-  saveTnData();
-  renderTraineeSummary();
-  renderTraineeTasks();
-}
-
-function setRefTaskStatus(rid, status){
-  if(!tnData) loadTnData();
-  if(!tnData.refTasks) tnData.refTasks = JSON.parse(JSON.stringify(TN_REF_TASKS));
-  for(var i=0;i<tnData.refTasks.length;i++){
-    if(tnData.refTasks[i].id === rid){
-      tnData.refTasks[i].refStatus = status;
-      break;
-    }
-  }
-  saveTnData();
-  renderTraineeSummary();
-  renderTraineeTasks();
-}
-
-function deleteRefTask(rid){
-  if(!confirm('确认删除该任务？')) return;
-  if(!tnData) loadTnData();
-  if(!tnData.refTasks) tnData.refTasks = JSON.parse(JSON.stringify(TN_REF_TASKS));
-  tnData.refTasks = tnData.refTasks.filter(function(r){ return r.id !== rid; });
-  saveTnData();
-  renderTraineeSummary();
-  renderTraineeTasks();
-}
-
-// ===== UNIFIED TASK EDIT MODAL =====
-var unifiedEditSource = null;
-var unifiedEditTaskId = null;
-
-function openUnifiedTaskModal(source, taskId){
-  unifiedEditSource = source;
-  unifiedEditTaskId = taskId;
-
-  // Populate R/person selects
-  var tOpts = TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
-  document.getElementById('umR').innerHTML = tOpts;
-  document.getElementById('umPerson').innerHTML = '<option value="">选择管培生</option>' + tOpts;
-
-  // Populate week selects
-  var wOpts = '';
-  for(var i=0;i<14;i++){ wOpts += '<option value="W'+(i+1)+'">W'+(i+1)+'</option>'; }
-  document.getElementById('umWeek').innerHTML = wOpts;
-
-  // Week checkboxes for plan tasks
-  var wChecks = '';
-  for(var i=0;i<13;i++){ wChecks += '<label class="um-week-cb"><input type="checkbox" value="'+i+'" id="umWk_'+i+'">W'+(i+1)+'</label>'; }
-  document.getElementById('umWeeks').innerHTML = wChecks;
-
-  // Hide all type-specific fields
-  document.getElementById('umPlanFields').style.display = 'none';
-  document.getElementById('umWeeklyFields').style.display = 'none';
-  document.getElementById('umRefFields').style.display = 'none';
-  document.getElementById('umDeleteBtn').style.display = '';
-
-  // Load task data
-  var task = null;
-  if(source === 'plan'){
-    for(var i=0;i<TN_TASKS.length;i++){ if(TN_TASKS[i].id===taskId){ task=TN_TASKS[i]; break; } }
-    if(task){
-      var td = getTnTask(taskId);
-      document.getElementById('umName').value = task.name;
-      document.getElementById('umSystem').value = task.sys;
-      document.getElementById('umPriority').value = task.priority;
-      document.getElementById('umStatus').value = (td && td.status) ? td.status : task.status;
-      document.getElementById('umR').value = task.R;
-      document.getElementById('umA').value = task.A;
-      document.getElementById('umI').value = task.I || '';
-      var wks = (td && td.weeks) ? td.weeks : task.weeks;
-      for(var i=0;i<13;i++){
-        var cb = document.getElementById('umWk_'+i);
-        if(cb) cb.checked = wks[i] === 1;
-      }
-      document.getElementById('umPlanFields').style.display = '';
-      document.getElementById('unifiedModalSourceTag').textContent = 'RACI计划';
-      document.getElementById('umDeleteBtn').style.display = 'none';
-    }
-  } else if(source === 'weekly'){
-    if(!tnData || !tnData.wtasks) return;
-    for(var i=0;i<tnData.wtasks.length;i++){ if(tnData.wtasks[i].id===taskId){ task=tnData.wtasks[i]; break; } }
-    if(task){
-      document.getElementById('umName').value = task.name;
-      document.getElementById('umSystem').value = task.sys;
-      document.getElementById('umPriority').value = task.priority || 'P1';
-      document.getElementById('umTaskType').value = task.taskType || 'normal';
-      document.getElementById('umTaskCategory').value = task.taskCategory || 'deliverable';
-      document.getElementById('umStatus').value = task.status;
-      document.getElementById('umWeek').value = task.week;
-      document.getElementById('umPerson').value = task.person;
-      document.getElementById('umWeeklyFields').style.display = '';
-      document.getElementById('unifiedModalSourceTag').textContent = '每周任务 · '+task.week;
-    }
-  } else if(source === 'ref'){
-    var refTasks = tnData && tnData.refTasks ? tnData.refTasks : TN_REF_TASKS;
-    for(var i=0;i<refTasks.length;i++){ if(refTasks[i].id===taskId){ task=refTasks[i]; break; } }
-    if(task){
-      document.getElementById('umName').value = task.name;
-      document.getElementById('umSystem').value = task.sys;
-      document.getElementById('umPriority').value = task.priority || 'P1';
-      document.getElementById('umTaskType').value = task.taskType || 'normal';
-      document.getElementById('umTaskCategory').value = task.taskCategory || 'deliverable';
-      document.getElementById('umStatus').value = task.refStatus || 'pending';
-      document.getElementById('umApprover').value = task.approver || '';
-      document.getElementById('umExecutors').value = (task.executors||[]).join(',');
-      // Generate week checkboxes
-      var wcb = document.getElementById('umWeekCheckboxes');
-      wcb.innerHTML = '';
-      var tw = task.weeks || [];
-      for(var wi=0;wi<14;wi++){
-        wcb.innerHTML += '<label style="display:flex;align-items:center;gap:3px;font-size:10px;cursor:pointer;padding:3px 6px;border-radius:4px;background:var(--bg-surface)"><input type="checkbox" value="'+wi+'"'+(tw[wi]?' checked':'')+' style="margin:0;accent-color:var(--primary)">W'+(wi+1)+'</label>';
-      }
-      document.getElementById('umRefFields').style.display = '';
-      var catInfo = TN_TASK_CATEGORIES[task.taskCategory] || TN_TASK_CATEGORIES['deliverable'];
-      document.getElementById('unifiedModalSourceTag').textContent = catInfo.label;
-    }
-  }
-
-  document.getElementById('unifiedTaskModal').style.display = 'flex';
-}
-
-function closeUnifiedTaskModal(){
-  document.getElementById('unifiedTaskModal').style.display = 'none';
-  unifiedEditSource = null;
-  unifiedEditTaskId = null;
-}
-
-function saveUnifiedTask(){
-  var name = document.getElementById('umName').value.trim();
-  if(!name){ alert('请输入任务名称'); return; }
-  var sys = document.getElementById('umSystem').value;
-  var priority = document.getElementById('umPriority').value;
-  var status = document.getElementById('umStatus').value;
-
-  if(unifiedEditSource === 'plan'){
-    var td = getTnTask(unifiedEditTaskId) || {};
-    // Find the original task template for read-only fields
-    var origTask = null;
-    for(var i=0;i<TN_TASKS.length;i++){ if(TN_TASKS[i].id===unifiedEditTaskId){ origTask=TN_TASKS[i]; break; } }
-    if(!origTask) return;
-    // Update mutable fields in tnData only (template stays unchanged)
-    td.status = status;
-    var wks = [];
-    for(var i=0;i<13;i++){
-      var cb = document.getElementById('umWk_'+i);
-      wks[i] = (cb && cb.checked) ? 1 : 0;
-    }
-    td.weeks = wks;
-    // R/A/I updates stored in td
-    td.R = document.getElementById('umR').value;
-    td.A = document.getElementById('umA').value.trim();
-    td.I = document.getElementById('umI').value.trim();
-    setTnTask(unifiedEditTaskId, td);
-  } else if(unifiedEditSource === 'weekly'){
-    if(!tnData || !tnData.wtasks) return;
-    for(var i=0;i<tnData.wtasks.length;i++){
-      if(tnData.wtasks[i].id === unifiedEditTaskId){
-        tnData.wtasks[i].name = name;
-        tnData.wtasks[i].sys = sys;
-        tnData.wtasks[i].priority = priority;
-        tnData.wtasks[i].taskType = document.getElementById('umTaskType').value;
-        tnData.wtasks[i].taskCategory = document.getElementById('umTaskCategory').value;
-        tnData.wtasks[i].status = status;
-        tnData.wtasks[i].week = document.getElementById('umWeek').value;
-        tnData.wtasks[i].person = document.getElementById('umPerson').value;
-        break;
-      }
-    }
-    saveTnData();
-  } else if(unifiedEditSource === 'ref'){
-    if(!tnData) loadTnData();
-    if(!tnData.refTasks) tnData.refTasks = JSON.parse(JSON.stringify(TN_REF_TASKS));
-    for(var i=0;i<tnData.refTasks.length;i++){
-      if(tnData.refTasks[i].id === unifiedEditTaskId){
-        tnData.refTasks[i].name = name;
-        tnData.refTasks[i].sys = sys;
-        tnData.refTasks[i].priority = priority;
-        tnData.refTasks[i].taskType = document.getElementById('umTaskType').value;
-        tnData.refTasks[i].taskCategory = document.getElementById('umTaskCategory').value;
-        tnData.refTasks[i].refStatus = status;
-        tnData.refTasks[i].approver = document.getElementById('umApprover').value.trim();
-        tnData.refTasks[i].executors = document.getElementById('umExecutors').value.split(',').map(function(s){return s.trim();}).filter(Boolean);
-        // Save weeks from checkboxes
-        var weeks = [];
-        var cbs = document.getElementById('umWeekCheckboxes').querySelectorAll('input[type=checkbox]');
-        for(var wi=0;wi<cbs.length;wi++){ weeks.push(cbs[wi].checked ? 1 : 0); }
-        tnData.refTasks[i].weeks = weeks;
-        // Update sysName/sysColor/sysBg if system changed
-        var sysNames = {yyda:'用印档案公司管理系统',rssw:'人事事务自动化系统',cwzw:'财务账务自动化系统',itpm:'IT项目管理系统'};
-        var sysColors = {yyda:'#7B8FC0',rssw:'#9A7D3E',cwzw:'#5A7868',itpm:'#8B6BAE'};
-        var sysBgs = {yyda:'#F4F6FB',rssw:'#FDF8F2',cwzw:'#F2F6F4',itpm:'#F6F2FB'};
-        tnData.refTasks[i].sysName = sysNames[sys];
-        tnData.refTasks[i].sysColor = sysColors[sys];
-        tnData.refTasks[i].sysBg = sysBgs[sys];
-        break;
-      }
-    }
-    saveTnData();
-  }
-
-  closeUnifiedTaskModal();
-  renderTraineeSummary();
-  renderTraineeTasks();
-}
-
-function deleteUnifiedTask(){
-  if(!confirm('确认删除该任务？此操作不可撤销。')) return;
-
-  if(unifiedEditSource === 'weekly'){
-    if(!tnData || !tnData.wtasks) return;
-    tnData.wtasks = tnData.wtasks.filter(function(w){ return w.id !== unifiedEditTaskId; });
-    saveTnData();
-  } else if(unifiedEditSource === 'ref'){
-    if(!tnData) loadTnData();
-    if(!tnData.refTasks) return;
-    tnData.refTasks = tnData.refTasks.filter(function(r){ return r.id !== unifiedEditTaskId; });
-    saveTnData();
-  }
-  // Plan tasks cannot be deleted (only edited)
-
-  closeUnifiedTaskModal();
-  renderTraineeSummary();
-  renderTraineeTasks();
-}
-
 // ===== TRAINEE DETAIL POPUP =====
 function openTraineeDetail(name){
   loadEvalData();
@@ -9565,24 +8769,26 @@ function openTraineeDetail(name){
   if(tr){
     html += '<div style="font-size:9px;color:var(--text-dim)">'+tr.level+' · 导师：'+tr.supervisor+'</div>';
   }
-  html += '</div><button class="tn-detail-close" onclick="this.closest(\'.tn-detail-overlay\').remove()">×</button></div>';
+  html += '</div><button class="tn-detail-close" onclick="this.closest(\\'.tn-detail-overlay\\').remove()">×</button></div>';
   
-  // Task stats - use all task sources
+  // Task stats
+  var total=0, done=0;
+  TN_TASKS.forEach(function(t){
+    if(t.R===name||t.A===name||(t.I||'').indexOf(name)!==-1){ total++; var td=getTnTask(t.id); if((td?td.status:t.status)==='done') done++; }
+  });
+  html += '<div class="tn-detail-section"><h4>任务统计</h4><div style="display:flex;gap:12px">';
+  html += '<div class="tn-dash-card" style="flex:1"><div class="dash-num" style="font-size:20px;color:#7B8FC0">'+total+'</div><div class="dash-lbl">关联任务</div></div>';
+  html += '<div class="tn-dash-card" style="flex:1"><div class="dash-num" style="font-size:20px;color:#8BA89C">'+done+'</div><div class="dash-lbl">已完成</div></div>';
+  html += '<div class="tn-dash-card" style="flex:1"><div class="dash-num" style="font-size:20px;color:#D4A76A">'+(total>0?Math.round(done/total*100):0)+'%</div><div class="dash-lbl">完成率</div></div>';
+  html += '</div></div>';
+  
+  // Eval trend: last 6 weeks
+  html += '<div class="tn-detail-section"><h4>评估趋势（近6周）</h4>';
   var now = new Date();
   var startDate = new Date(2026,5,1);
   var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
   if(diffDays < 0) diffDays = 0;
   var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
-  var curWkId = 'W' + (curWkIdx + 1);
-  var comp = calcTaskCompletionForTrainee(name, curWkId);
-  html += '<div class="tn-detail-section"><h4>任务统计（本周 '+curWkId+'）</h4><div style="display:flex;gap:12px">';
-  html += '<div class="tn-dash-card" style="flex:1"><div class="dash-num" style="font-size:20px;color:#7B8FC0">'+comp.total+'</div><div class="dash-lbl">关联任务</div></div>';
-  html += '<div class="tn-dash-card" style="flex:1"><div class="dash-num" style="font-size:20px;color:#8BA89C">'+comp.done+'</div><div class="dash-lbl">已完成</div></div>';
-  html += '<div class="tn-dash-card" style="flex:1"><div class="dash-num" style="font-size:20px;color:#D4A76A">'+comp.rate+'%</div><div class="dash-lbl">完成率</div></div>';
-  html += '</div></div>';
-  
-  // Eval trend: last 6 weeks
-  html += '<div class="tn-detail-section"><h4>评估趋势（近6周）</h4>';
   var scores = [];
   for(var i=Math.max(0,curWkIdx-5); i<=curWkIdx; i++){
     var wkId = 'W'+(i+1);
@@ -9620,7 +8826,7 @@ function openTraineeDetail(name){
 // ===== FEEDBACK FORM MODAL =====
 function openFeedbackForm(){
   var html = '<div class="tn-detail-overlay" onclick="this.remove()"><div class="tn-detail-modal" style="max-width:500px" onclick="event.stopPropagation()">';
-  html += '<div style="display:flex;align-items:center;margin-bottom:16px"><h4 style="margin:0;font-size:14px">新增反馈</h4><button style="margin-left:auto;border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-dim)" onclick="this.closest(\'.tn-detail-overlay\').remove()">×</button></div>';
+  html += '<div style="display:flex;align-items:center;margin-bottom:16px"><h4 style="margin:0;font-size:14px">新增反馈</h4><button style="margin-left:auto;border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-dim)" onclick="this.closest(\\'.tn-detail-overlay\\').remove()">×</button></div>';
   html += '<div class="filter-row" style="margin-bottom:12px">';
   html += '<select id="tnFbModalWeek">';
   for(var i=0;i<14;i++){ html += '<option value="W'+(i+1)+'">W'+(i+1)+'</option>'; }
@@ -9672,21 +8878,25 @@ function renderDashboard(){
   
   // Performance cards
   var cardsHtml = '';
-  var avatarColors = ['#7B8FC0','#D4A76A','#5A7868','#C94F66','#A09DB5','#6C9BD2','#E8A87C'];
-  EVAL_TRAINEES.forEach(function(tr, i){
+  EVAL_TRAINEES.forEach(function(tr){
     var s = getEvalScore(tr.id, curWkId);
     var ts = calcTotalScore(s);
     var scoreDisplay = ts !== null ? ts.toFixed(1) : '--';
-    var comp = calcTaskCompletionForTrainee(tr.name, curWkId);
-    var taskRate = comp.rate;
+    // Task completion rate
+    var taskTotal = 0, taskDone = 0;
+    TN_TASKS.forEach(function(t){
+      if(t.R===tr.name||t.A===tr.name||(t.I||'').indexOf(tr.name)!==-1){
+        taskTotal++;
+        var td = getTnTask(t.id);
+        if((td?td.status:t.status)==='done') taskDone++;
+      }
+    });
+    var taskRate = taskTotal > 0 ? Math.round(taskDone/taskTotal*100) : 0;
     var scoreColor = ts !== null ? (ts >= 80 ? '#8BA89C' : ts >= 60 ? '#D4A76A' : '#C94F66') : 'var(--text-dim)';
-    var avColor = avatarColors[i] || '#7B8FC0';
-    cardsHtml += '<div class="tn-dash-card" onclick="openTraineeDetail(\''+tr.name+'\')">'+
-      '<div class="dash-avatar" style="background:'+avColor+'">'+tr.name.charAt(0)+'</div>'+
+    cardsHtml += '<div class="tn-dash-card" onclick="openTraineeDetail(\''+tr.name+'\')" style="cursor:pointer">'+
       '<div class="dash-num" style="color:'+scoreColor+'">'+scoreDisplay+'</div>'+
       '<div class="dash-lbl">'+tr.name+'</div>'+
-      '<div class="dash-sub">'+tr.level+' · 任务完成率 '+taskRate+'%</div>'+
-      '<div class="dash-mini-bar"><div class="dash-mini-fill" style="width:'+taskRate+'%;background:'+scoreColor+'"></div></div>'+
+      '<div class="dash-sub">任务完成 '+taskDone+'/'+taskTotal+' ('+taskRate+'%) · '+tr.level+'</div>'+
     '</div>';
   });
   document.getElementById('tnDashGrid').innerHTML = cardsHtml;
@@ -9703,36 +8913,10 @@ function renderDashboard(){
 }
 
 function render360Eval(wkId){
-  loadEvalData();
-  var scores = [];
-  var totalScore = 0, evalCount = 0;
-  var topTrainee = null, topScore = -1;
-  var lowTrainee = null, lowScore = 999;
-  EVAL_TRAINEES.forEach(function(tr){
-    var s = getEvalScore(tr.id, wkId);
-    var ts = calcTotalScore(s);
-    if(ts !== null){
-      scores.push({name:tr.name,score:ts});
-      totalScore += ts; evalCount++;
-      if(ts > topScore){ topScore = ts; topTrainee = tr.name; }
-      if(ts < lowScore){ lowScore = ts; lowTrainee = tr.name; }
-    }
-  });
-  var avgScore = evalCount > 0 ? (totalScore / evalCount).toFixed(1) : '--';
-  var topDisplay = topTrainee ? topTrainee+' '+topScore.toFixed(1) : '--';
-  var lowDisplay = lowTrainee ? lowTrainee+' '+lowScore.toFixed(1) : '--';
-  var ratePct = EVAL_TRAINEES.length > 0 ? Math.round(evalCount/EVAL_TRAINEES.length*100) : 0;
-
-  var checkIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
-  var upIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6h6v6"/></svg>';
-  var downIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18h6v-6"/></svg>';
-  var starIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
-
-  var html = '';
-  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#E8F0FE;color:#3A6BC5">'+checkIcon+'</div><div class="e360-info"><div class="e360-label">已评估</div><div class="e360-weight">'+wkId+' 当前周</div></div><div class="e360-score" style="color:#3A6BC5">'+evalCount+'<span style="font-size:12px;font-weight:400">/'+EVAL_TRAINEES.length+'</span></div></div>';
-  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#EAF0EE;color:#5A7868">'+upIcon+'</div><div class="e360-info"><div class="e360-label">本周均分</div><div class="e360-weight">'+evalCount+'人参与</div></div><div class="e360-score" style="color:#5A7868">'+avgScore+'</div></div>';
-  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#FBF6EC;color:#D4A76A">'+starIcon+'</div><div class="e360-info"><div class="e360-label">最高分</div><div class="e360-weight">本周最佳</div></div><div class="e360-score" style="color:#D4A76A">'+topDisplay+'</div></div>';
-  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#FDEDEF;color:#C94F66">'+downIcon+'</div><div class="e360-info"><div class="e360-label">最低分</div><div class="e360-weight">本周待提升</div></div><div class="e360-score" style="color:#C94F66">'+lowDisplay+'</div></div>';
+  // 360-degree eval: self(20%) + mentor(50%) + peer(30%)
+  var html = '<div class="tn-eval360-item" style="background:var(--bg-surface)"><div class="e360-label">自评</div><div class="e360-score" style="color:var(--accent)">'+(Math.random()*20+60).toFixed(0)+'</div><div class="e360-weight">权重 20%</div></div>';
+  html += '<div class="tn-eval360-item"><div class="e360-label">导师评价</div><div class="e360-score" style="color:#5A7868">'+(Math.random()*20+65).toFixed(0)+'</div><div class="e360-weight">权重 50%</div></div>';
+  html += '<div class="tn-eval360-item"><div class="e360-label">交叉评价</div><div class="e360-score" style="color:#D4A76A">'+(Math.random()*25+55).toFixed(0)+'</div><div class="e360-weight">权重 30%</div></div>';
   document.getElementById('tnEval360').innerHTML = html;
 }
 
@@ -9916,7 +9100,15 @@ function renderRanking(){
     if(ts === null) return;
     var dimScores = {};
     EVAL_DIMS.forEach(function(d){ dimScores[d.id] = s ? (s[d.id]||0) : 0; });
-    var comp = calcTaskCompletionForTrainee(tr.name, wkId);
+    // Task completion rate
+    var taskTotal = 0, taskDone = 0;
+    TN_TASKS.forEach(function(t){
+      if(t.R===tr.name||t.A===tr.name||(t.I||'').indexOf(tr.name)!==-1){
+        taskTotal++;
+        var td = getTnTask(t.id);
+        if((td?td.status:t.status)==='done') taskDone++;
+      }
+    });
     rows.push({
       name: tr.name, level: tr.level, total: ts,
       taskCompletion: dimScores.taskCompletion,
@@ -9924,7 +9116,7 @@ function renderRanking(){
       collaboration: dimScores.collaboration,
       responseSpeed: dimScores.responseSpeed,
       innovation: dimScores.innovation,
-      taskRate: comp.rate
+      taskRate: taskTotal > 0 ? Math.round(taskDone/taskTotal*100) : 0
     });
   });
   
@@ -9932,9 +9124,9 @@ function renderRanking(){
   
   document.getElementById('tnRankWeekLabel').textContent = wkId + ' 排名';
   
-  var html = '<thead><tr><th>排名</th><th>学员</th><th>总分</th><th>任务完成度</th><th>工作质量</th><th>协作贡献</th><th>响应速度</th><th>主动创新</th><th>任务完成率</th></tr></thead><tbody>';
+  var html = '<tr><th>排名</th><th>学员</th><th>总分</th><th>任务完成度</th><th>工作质量</th><th>协作贡献</th><th>响应速度</th><th>主动创新</th><th>任务完成率</th></tr>';
   rows.forEach(function(r, i){
-    var medal = i===0?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A76A" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="12" font-weight="700" fill="#D4A76A" stroke="none">1</text></svg>':i===1?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="12" font-weight="700" fill="#9CA3AF" stroke="none">2</text></svg>':i===2?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9946A" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="12" font-weight="700" fill="#C9946A" stroke="none">3</text></svg>':'';
+    var medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
     var barColor = r.total>=80?'#8BA89C':r.total>=60?'#D4A76A':'#C94F66';
     html += '<tr>'+
       '<td><span class="tn-rank-medal">'+medal+'</span> '+(i+1)+'</td>'+
@@ -9948,7 +9140,6 @@ function renderRanking(){
       '<td><span class="tn-rank-bar" style="width:'+r.taskRate+'px;background:'+barColor+'"></span> '+r.taskRate+'%</td>'+
     '</tr>';
   });
-  html += '</tbody>';
   document.getElementById('tnRankTable').innerHTML = html || '<tr><td colspan="9" style="padding:20px;color:var(--text-dim)">暂无评分数据</td></tr>';
 }
 
@@ -10028,14 +9219,6 @@ function autoSaveTnReport(){
   tnData.reports[key].content = document.getElementById('tnRptContent').value;
   tnData.reports[key].autoSaved = new Date().toISOString();
   saveTnData();
-  // Show auto-save hint
-  var hint = document.getElementById('tnAutoSaveHint');
-  if(hint){
-    hint.textContent = '已自动保存';
-    hint.classList.add('show');
-    clearTimeout(hint._timeout);
-    hint._timeout = setTimeout(function(){ hint.classList.remove('show'); }, 2000);
-  }
 }
 
 function handleTnFileUpload(input){
@@ -10093,8 +9276,6 @@ function renderTnReportHistory(){
     if(ak[1]!==bk[1]) return bk[1].localeCompare(ak[1]);
     return ak[0].localeCompare(bk[0]);
   });
-  var countEl = document.getElementById('tnRptCount');
-  if(countEl) countEl.textContent = items.length ? '('+items.length+'条)' : '';
   if(!items.length){ document.getElementById('tnRptHistory').innerHTML = '<div class="eval-empty" style="padding:20px">暂无周报记录</div>'; return; }
   var html = '';
   items.forEach(function(item){
