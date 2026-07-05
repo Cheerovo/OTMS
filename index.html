@@ -110,6 +110,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .sidebar-nav button[data-tab="kpi"] .nav-icon { color:#7B8FC0; }
 .sidebar-nav button[data-tab="report"] .nav-icon { color:var(--warning); }
 .sidebar-nav button[data-tab="meeting"] .nav-icon { color:#A09DB5; }
+.sidebar-nav button[data-tab="trainee"] .nav-icon { color:#C94F66; }
 .sidebar-footer { padding:8px 2px 10px; }
 .sidebar-footer .btn { width:100%; font-size:11px; padding:9px 14px; border-radius:8px; cursor:pointer; transition:all .2s ease; border:none; background:var(--bg-surface); color:var(--text-dim); font-family:inherit; }
 .sidebar-footer .btn:hover { background:var(--bg-surface-hover); color:var(--accent); }
@@ -836,85 +837,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 /* Owner badges inline */
 .owner-badges { display:inline-flex; gap:4px; flex-wrap:wrap; }
 
-/* ===== Property Dashboard ===== */
-.prop-stats { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:24px; }
-.prop-stat-card { background:var(--bg-surface); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow-sm); border-top:4px solid var(--accent); position:relative; overflow:hidden; cursor:default; transition:var(--transition); }
-.prop-stat-card:hover { box-shadow:var(--shadow-elevated); transform:translateY(-2px); }
-.prop-stat-card:nth-child(2) { border-top-color:#7B8FC0; }
-.prop-stat-card:nth-child(3) { border-top-color:#8AA89C; }
-.prop-stat-card:nth-child(4) { border-top-color:#8D9A9E; }
-.prop-stat-card:nth-child(5) { border-top-color:var(--accent-light); }
-.prop-stat-card:nth-child(6) { border-top-color:#9B7EAA; }
-.prop-stat-card .prop-stat-label { font-size:11px; color:var(--text-muted); margin-bottom:6px; font-weight:400; text-transform:uppercase; letter-spacing:1px; }
-.prop-stat-card .prop-stat-value { font-size:22px; font-weight:400; color:var(--accent); letter-spacing:-.5px; line-height:1.2; }
-.prop-stat-card .prop-stat-sub { font-size:10px; color:var(--text-dim); margin-top:2px; }
-.prop-stat-card .prop-stat-badge { display:inline-block; padding:2px 6px; border-radius:8px; font-size:9px; font-weight:400; margin-left:4px; }
-.prop-stat-card .prop-stat-badge.good { background:var(--success-bg); color:var(--success-text); }
-.prop-stat-card .prop-stat-badge.warn { background:var(--warning-bg); color:var(--warning-text); }
-.prop-stat-card .prop-stat-badge.bad { background:var(--danger-bg); color:var(--danger-text); }
-
-.prop-section { margin-bottom:24px; }
-.prop-section-hd { font-size:13px; font-weight:400; color:var(--text); margin-bottom:12px; padding-bottom:10px; box-shadow:0 1px 0 var(--border-subtle); display:flex; align-items:center; gap:8px; }
-.prop-section-hd::before { content:''; display:inline-block; width:4px; height:16px; background:var(--accent); border-radius:2px; }
-
-.prop-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
-.prop-panel { background:var(--bg-surface); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden; }
-.prop-panel-hd { padding:12px 18px; font-size:12px; font-weight:400; color:var(--text); border-bottom:1px solid var(--border-subtle); background:var(--bg-surface-alt); display:flex; align-items:center; gap:10px; }
-.prop-dot { display:inline-block; width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-.prop-dot.rev { background:var(--accent); }
-.prop-dot.exp { background:var(--text-muted); }
-.prop-dot.utl { background:var(--warning); }
-.prop-dot.park { background:#7B8FC0; }
-
-.prop-table-wrap { padding:0; overflow-x:auto; }
-.prop-table { width:100%; border-collapse:collapse; font-size:11px; }
-.prop-table th { text-align:right; padding:8px 10px; font-size:10px; font-weight:400; color:var(--text-muted); background:var(--bg-surface-alt); border-bottom:1px solid var(--border-subtle); white-space:nowrap; }
-.prop-table th:first-child { text-align:left; }
-.prop-table td { text-align:right; padding:6px 10px; border-bottom:1px solid var(--border-subtle); white-space:nowrap; }
-.prop-table td:first-child { text-align:left; font-weight:400; }
-.prop-table .prop-row-total { font-weight:400; color:var(--text); background:var(--bg-surface-alt); }
-.prop-table .prop-row-sub { color:var(--text-dim); font-size:10px; }
-.prop-table .prop-row-sub td:first-child { padding-left:20px; }
-.prop-table .prop-val-pos { color:var(--success-text); }
-.prop-table .prop-val-neg { color:var(--danger-text); }
-.prop-table .prop-bar-cell { position:relative; min-width:60px; }
-.prop-table .prop-bar-bg { position:absolute; left:0; top:4px; bottom:4px; background:var(--bg-surface-alt); border-radius:3px; width:100%; }
-.prop-table .prop-bar-fill { position:absolute; left:0; top:4px; bottom:4px; background:var(--accent); border-radius:3px; opacity:.6; transition:width .4s ease; }
-
-.prop-chart-wrap { background:var(--bg-surface); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-sm); }
-.prop-chart-wrap canvas { width:100%; height:auto; display:block; }
-
-/* Slicer Bar */
-.prop-slicer-bar { background:var(--bg-surface); border-radius:var(--radius); padding:12px 18px; margin-bottom:16px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:10px; }
-.slicer-group { display:flex; align-items:center; gap:10px; }
-.slicer-label { font-size:11px; font-weight:400; color:var(--text-dim); min-width:32px; flex-shrink:0; }
-.slicer-chips { display:flex; gap:6px; flex-wrap:wrap; }
-.slicer-chip { padding:5px 14px; border-radius:16px; font-size:11px; cursor:pointer; border:1px solid var(--border-light); background:var(--card); color:var(--text-dim); transition:var(--transition); user-select:none; white-space:nowrap; }
-.slicer-chip:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-wash); }
-.slicer-chip.active { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:400; }
-.slicer-chip.active.year-2023 { background:#7B8FC0; border-color:#7B8FC0; }
-.slicer-chip.active.year-2024 { background:var(--warning); border-color:var(--warning); }
-.slicer-chip.active.year-2025 { background:#8AA89C; border-color:#8AA89C; }
-.slicer-chip.active.year-2026 { background:var(--accent-light); border-color:var(--accent-light); }
-
-/* Analysis Cards */
-.prop-analysis-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
-.prop-a-card { background:var(--bg-surface); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow-sm); text-align:center; }
-.prop-a-card .a-card-val { font-size:20px; font-weight:400; color:var(--accent); }
-.prop-a-card .a-card-label { font-size:10px; color:var(--text-dim); margin-top:4px; }
-.prop-a-card .a-card-delta { font-size:11px; font-weight:400; margin-top:2px; }
-.prop-a-card .a-card-delta.up { color:var(--success-text); }
-.prop-a-card .a-card-delta.down { color:var(--danger-text); }
-
-@media (max-width:900px) {
-  .prop-stats { grid-template-columns:repeat(3,1fr); }
-}
-@media (max-width:768px) {
-  .prop-stats { grid-template-columns:repeat(2,1fr); }
-  .prop-grid { grid-template-columns:1fr; }
-  .prop-analysis-cards { grid-template-columns:repeat(2,1fr); }
-}
-
 /* ===== 集团后台职能分工 — Accordion UI ===== */
 .func-header { margin-bottom:20px; }
 .func-title { font-size:20px; font-weight:400; color:var(--text); letter-spacing:-.3px; }
@@ -1085,6 +1007,166 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .ws-report-title { flex:1; font-size:11px; color:var(--text); min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .ws-report-meta { font-size:9px; color:var(--danger-text); flex-shrink:0; }
 @media(max-width:768px){ .ws-cols{flex-direction:column;} .ws-stats{flex-wrap:wrap;gap:6px;} .ws-stat-item{min-width:calc(33.3% - 4px);flex:none;} }
+
+/* ===== Trainee Evaluation System ===== */
+.eval-header { display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+.eval-header-actions { display:flex; align-items:center; gap:8px; margin-left:auto; }
+.eval-header-actions button { padding:6px 14px; border:1px solid var(--border); background:var(--card); border-radius:8px; font-size:10px; cursor:pointer; color:var(--text-dim); transition:var(--transition); font-family:inherit; }
+.eval-header-actions button:hover { background:var(--bg-surface-hover); color:var(--text); }
+.eval-evaluator { display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text-dim); }
+.eval-evaluator .eval-avatar { width:22px; height:22px; border-radius:50%; background:var(--accent-wash); color:var(--accent); display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:600; }
+.eval-sub-tabs { display:flex; gap:0; background:var(--bg-surface); border-radius:10px; padding:3px; }
+.eval-sub-tab { padding:7px 18px; border:none; background:none; font-size:11px; cursor:pointer; color:var(--text-dim); border-radius:8px; transition:var(--transition); font-family:inherit; }
+.eval-sub-tab.active { background:var(--card); color:var(--text); font-weight:500; box-shadow:var(--shadow-xs); }
+.eval-period { font-size:10px; color:var(--text-dim); margin-left:auto; }
+.eval-period strong { color:var(--text); }
+
+/* Week selector */
+.eval-week-tabs { display:flex; gap:4px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px; }
+.eval-week-tab { padding:6px 14px; border:1px solid var(--border-light); background:var(--card); border-radius:8px; font-size:10px; cursor:pointer; color:var(--text-dim); white-space:nowrap; transition:var(--transition); font-family:inherit; min-width:fit-content; }
+.eval-week-tab.active { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:500; }
+.eval-week-tab.has-data { border-color:var(--accent-light); }
+.eval-week-tab .wk-dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent-light); margin-left:4px; vertical-align:middle; }
+.eval-week-tab.active .wk-dot { background:#fff; }
+
+/* Trainee cards */
+.eval-trainee-list { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+.eval-trainee-card { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--card); border-radius:12px; cursor:pointer; transition:var(--transition); border:1.5px solid transparent; }
+.eval-trainee-card:hover { background:var(--bg-surface-hover); }
+.eval-trainee-card.selected { border-color:var(--accent); background:var(--accent-wash); }
+.eval-trainee-avatar { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:600; color:#fff; flex-shrink:0; }
+.eval-trainee-info { flex:1; min-width:0; }
+.eval-trainee-name { font-size:12px; font-weight:600; color:var(--text); }
+.eval-trainee-meta { font-size:9px; color:var(--text-dim); }
+.eval-trainee-score { text-align:right; flex-shrink:0; }
+.eval-trainee-score .score-num { font-size:18px; font-weight:700; color:var(--text); line-height:1; }
+.eval-trainee-score .score-change { font-size:9px; font-weight:500; }
+.eval-trainee-score .score-change.up { color:var(--success-text); }
+.eval-trainee-score .score-change.down { color:var(--danger-text); }
+
+/* Scoring panel */
+.eval-score-panel { background:var(--card); border-radius:14px; padding:24px; margin-bottom:16px; }
+.eval-score-panel-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.eval-score-panel-hd .name { font-size:14px; font-weight:600; color:var(--text); }
+.eval-score-panel-hd .meta { font-size:9px; color:var(--text-dim); }
+.eval-total-score { text-align:center; margin-bottom:20px; padding:16px; background:var(--bg-surface); border-radius:12px; }
+.eval-total-score .big-num { font-size:36px; font-weight:700; color:var(--accent); line-height:1; }
+.eval-total-score .big-label { font-size:10px; color:var(--text-dim); margin-top:4px; }
+.eval-total-score .sub-text { font-size:9px; color:var(--text-muted); margin-top:2px; }
+
+/* Dimension scoring */
+.eval-dims { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+.eval-dim-item { display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--bg-surface); border-radius:10px; }
+.eval-dim-label { width:90px; flex-shrink:0; }
+.eval-dim-label .dim-name { font-size:11px; font-weight:500; color:var(--text); }
+.eval-dim-label .dim-weight { font-size:8px; color:var(--text-muted); }
+.eval-dim-score-input { width:52px; flex-shrink:0; text-align:center; }
+.eval-dim-score-input input { width:100%; padding:6px 4px; border:1px solid var(--border-light); border-radius:8px; text-align:center; font-size:14px; font-weight:600; color:var(--text); background:var(--card); outline:none; font-family:inherit; transition:var(--transition); }
+.eval-dim-score-input input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(201,79,102,0.1); }
+.eval-dim-max { font-size:8px; color:var(--text-muted); text-align:center; width:60px; flex-shrink:0; }
+.eval-dim-slider { flex:1; min-width:0; }
+.eval-dim-slider input[type=range] { width:100%; -webkit-appearance:none; height:4px; border-radius:2px; background:var(--border-light); outline:none; }
+.eval-dim-slider input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--accent); cursor:pointer; }
+.eval-dim-comment { width:100%; margin-top:4px; }
+.eval-dim-comment input { width:100%; padding:5px 10px; border:1px solid var(--border-light); border-radius:6px; font-size:9px; color:var(--text-dim); background:var(--card); outline:none; font-family:inherit; }
+.eval-dim-comment input:focus { border-color:var(--accent-light); }
+
+/* Personalized tasks */
+.eval-extra-tasks { margin-bottom:20px; }
+.eval-extra-tasks .section-label { font-size:11px; font-weight:600; color:var(--text); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.eval-extra-task-item { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--bg-surface); border-radius:8px; margin-bottom:6px; }
+.eval-extra-task-item .task-name { flex:1; font-size:10px; color:var(--text); }
+.eval-extra-task-item .task-score { width:50px; }
+.eval-extra-task-item .task-score input { width:100%; padding:4px 6px; border:1px solid var(--border-light); border-radius:6px; text-align:center; font-size:12px; font-weight:600; color:var(--text); background:var(--card); outline:none; font-family:inherit; }
+.eval-extra-task-item .task-desc { font-size:9px; color:var(--text-dim); width:200px; flex-shrink:0; }
+.eval-extra-task-item .task-desc input { width:100%; padding:4px 8px; border:1px solid var(--border-light); border-radius:6px; font-size:9px; color:var(--text-dim); background:var(--card); outline:none; font-family:inherit; }
+
+.eval-save-row { display:flex; align-items:center; gap:8px; justify-content:flex-end; }
+.eval-save-row button { padding:8px 20px; border:none; border-radius:8px; font-size:11px; cursor:pointer; font-family:inherit; transition:var(--transition); }
+.eval-btn-save { background:var(--accent); color:#fff; }
+.eval-btn-save:hover { background:var(--accent-dim); }
+.eval-btn-restore { background:var(--bg-surface); color:var(--text-dim); border:1px solid var(--border-light); }
+.eval-btn-restore:hover { background:var(--bg-surface-hover); }
+
+/* Calendar view */
+.eval-cal-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px; }
+.eval-cal-stat { text-align:center; padding:14px; background:var(--card); border-radius:12px; }
+.eval-cal-stat .stat-val { font-size:20px; font-weight:700; color:var(--accent); }
+.eval-cal-stat .stat-lbl { font-size:8px; color:var(--text-muted); margin-top:2px; }
+.eval-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
+.eval-cal-week { background:var(--card); border-radius:10px; padding:14px 10px; text-align:center; cursor:pointer; transition:var(--transition); border:1.5px solid transparent; }
+.eval-cal-week:hover { border-color:var(--accent-light); }
+.eval-cal-week .wk-label { font-size:9px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.eval-cal-week .wk-date { font-size:7px; color:var(--text-muted); margin-bottom:6px; }
+.eval-cal-week .wk-avg { font-size:16px; font-weight:700; color:var(--text); }
+.eval-cal-week .wk-status { font-size:7px; color:var(--text-muted); margin-top:2px; }
+.eval-cal-week .wk-top { font-size:7px; color:var(--accent); margin-top:1px; }
+.eval-cal-week.has-data { border-color:var(--border-light); }
+.eval-cal-month-label { grid-column:1/-1; font-size:10px; font-weight:600; color:var(--text-dim); padding:6px 0 2px; margin-top:4px; }
+
+/* History table */
+.eval-history-table-wrap { overflow-x:auto; }
+.eval-history-table { width:100%; min-width:900px; border-collapse:collapse; font-size:9px; }
+.eval-history-table th { padding:8px 6px; text-align:center; background:var(--bg-surface); color:var(--text-dim); font-weight:500; position:sticky; top:0; z-index:1; white-space:nowrap; }
+.eval-history-table th:first-child { text-align:left; position:sticky; left:0; z-index:2; background:var(--bg-surface); }
+.eval-history-table th:nth-child(2) { position:sticky; left:80px; z-index:2; background:var(--bg-surface); }
+.eval-history-table td { padding:8px 6px; text-align:center; border-bottom:1px solid var(--border-light); }
+.eval-history-table td:first-child { text-align:left; font-weight:500; color:var(--text); position:sticky; left:0; background:var(--card); z-index:1; }
+.eval-history-table td:nth-child(2) { position:sticky; left:80px; background:var(--card); z-index:1; }
+.eval-history-table tr:hover td { background:var(--bg-surface-hover); }
+.eval-history-table .ev-avg { font-weight:600; color:var(--accent); }
+
+.eval-search { width:100%; padding:8px 12px; border:1px solid var(--border-light); border-radius:8px; font-size:10px; color:var(--text); background:var(--card); outline:none; margin-bottom:12px; font-family:inherit; }
+.eval-search:focus { border-color:var(--accent-light); }
+.eval-empty { text-align:center; padding:40px; color:var(--text-muted); font-size:11px; }
+
+/* ===== Trainee Management Tab ===== */
+.trainee-summary { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:20px; }
+.tn-summary-card { text-align:center; padding:14px; background:var(--card); border-radius:12px; }
+.tn-summary-card .tn-sc-num { font-size:20px; font-weight:700; }
+.tn-summary-card .tn-sc-lbl { font-size:8px; color:var(--text-muted); margin-top:2px; }
+
+.tn-sub-tab { padding:7px 20px; border:none; background:none; font-size:11px; cursor:pointer; color:var(--text-dim); border-radius:8px; transition:var(--transition); font-family:inherit; }
+.tn-sub-tab.active { background:var(--card); color:var(--text); font-weight:500; box-shadow:var(--shadow-xs); }
+.tn-sub-tab:hover:not(.active) { color:var(--text); }
+
+.tn-view { animation: fadeIn .25s ease; }
+
+/* Task board */
+.tn-system-group { margin-bottom:20px; }
+.tn-system-header { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:12px 12px 0 0; font-size:12px; font-weight:600; color:var(--text); cursor:pointer; }
+.tn-system-header .tn-sys-icon { width:20px; height:20px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#fff; flex-shrink:0; }
+.tn-system-header .tn-sys-count { margin-left:auto; font-size:9px; font-weight:400; color:var(--text-dim); }
+.tn-task-card { display:flex; align-items:center; gap:10px; padding:10px 16px; background:var(--card); border-bottom:1px solid var(--border-light); transition:background .12s; }
+.tn-task-card:hover { background:var(--bg-surface-hover); }
+.tn-task-card:last-child { border-bottom:none; border-radius:0 0 12px 12px; }
+.tn-task-status { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.tn-task-status.pending { background:var(--text-muted); }
+.tn-task-status.active { background:var(--warning); }
+.tn-task-status.done { background:var(--success); }
+.tn-task-info { flex:1; min-width:0; }
+.tn-task-name { font-size:10px; font-weight:500; color:var(--text); }
+.tn-task-meta { font-size:8px; color:var(--text-dim); margin-top:1px; }
+.tn-task-week-dots { display:flex; gap:2px; flex-shrink:0; }
+.tn-week-dot { width:12px; height:16px; border-radius:3px; cursor:pointer; transition:var(--transition); }
+.tn-week-dot.on { background:var(--accent); }
+.tn-week-dot.off { background:var(--border-light); }
+.tn-week-dot:hover { opacity:.7; }
+.tn-task-actions { flex-shrink:0; display:flex; gap:4px; }
+.tn-task-actions button { padding:3px 8px; border:1px solid var(--border-light); background:var(--card); border-radius:5px; font-size:8px; cursor:pointer; color:var(--text-dim); font-family:inherit; transition:var(--transition); }
+.tn-task-actions button:hover { background:var(--bg-surface-hover); color:var(--text); }
+.tn-task-actions button.tn-active-status { background:var(--accent-wash); color:var(--accent); border-color:var(--accent-light); }
+
+/* Report history */
+.tn-rpt-item, .tn-fb-item { padding:10px 14px; background:var(--card); border-radius:10px; margin-bottom:6px; cursor:pointer; transition:var(--transition); }
+.tn-rpt-item:hover, .tn-fb-item:hover { background:var(--bg-surface-hover); }
+.tn-rpt-item .rpt-week, .tn-fb-item .fb-week { font-size:9px; font-weight:600; color:var(--accent); }
+.tn-rpt-item .rpt-author, .tn-fb-item .fb-author { font-size:9px; color:var(--text-dim); }
+.tn-rpt-item .rpt-preview, .tn-fb-item .fb-preview { font-size:9px; color:var(--text-dim); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tn-fb-item.positive { border-left:3px solid var(--success); }
+.tn-fb-item.neutral { border-left:3px solid var(--warning); }
+.tn-fb-item.negative { border-left:3px solid var(--danger); }
+.tn-file-link { font-size:9px; color:var(--accent); cursor:pointer; margin-top:3px; display:inline-block; }
 </style>
 </head>
 <body>
@@ -1149,6 +1231,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
     <button data-tab="org" onclick="switchTab('org')" title="管理部门、团队和人员架构"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="2.5"/><path d="M3 20v-1.5c0-2 2.5-4 6-4s6 2 6 4V20"/><circle cx="18" cy="7" r="2"/><path d="M14 19v-1c0-1.5 2-3 4.5-3s4.5 1.5 4.5 3v1"/></svg></span><span>组织管理</span></button>
     <button data-tab="okr" onclick="switchTab('okr')" title="制定季度目标与关键结果，跟踪执行进度"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span><span>OKR 目标管理</span></button>
     <button data-tab="kpi" onclick="switchTab('kpi')" title="追踪收入、效率、质量等量化指标"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="13" width="4" height="8" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg></span><span>KPI 指标管理</span></button>
+
     <button data-tab="report" onclick="switchTab('report')" title="月度/年度财务报表的提交与汇总"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span><span>报表提交</span></button>
     <button data-tab="meeting" onclick="switchTab('meeting')" title="记录例会纪要、决议事项和临时任务"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><span>例会管理</span></button>
   </nav>
@@ -1211,6 +1294,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
   </div>
   <div class="page" id="okrTreePage">
     <div class="okr-list" id="okrTreeList"></div>
+
+
   </div>
 </div>
 </div>
@@ -1219,34 +1304,36 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 <div class="tab-content" id="tabKPI">
 <div class="main">
   <div class="page-hd"><span class="ph-dot c2"></span><div class="ph-title">KPI 指标管理</div><div class="ph-sub c2">Key Performance Indicators</div><button class="ph-act" id="btnNewKPI" onclick="openKpiModal()">+ 新建指标</button></div>
-  <div class="filter-row" id="kpiFilterRow">
-    <select id="kpiBuFilter" onchange="renderKPI()">
-      <option value="all">全部BU</option>
-      <option value="shangban">园区商办</option>
-      <option value="gongyu">园区公寓</option>
-      <option value="wuye">园区物业</option>
-      <option value="hr">人力资源</option>
-    </select>
-    <select id="kpiCatFilter" onchange="renderKPI()">
-      <option value="all">全部类别</option>
-      <option value="revenue">收入类</option>
-      <option value="cost">成本类</option>
-      <option value="efficiency">效率类</option>
-      <option value="quality">质量类</option>
-    </select>
-    <select id="kpiOwnerFilter" onchange="renderKPI()"><option value="all">全部负责人</option></select>
-    <select id="kpiMonthFilter" onchange="renderKPI()">
-      <option value="latest">最新数据</option>
-      <option value="2026-06">2026年6月</option>
-      <option value="2026-05">2026年5月</option>
-      <option value="2026-04">2026年4月</option>
-      <option value="2026-03">2026年3月</option>
-      <option value="2026-02">2026年2月</option>
-      <option value="2026-01">2026年1月</option>
-    </select>
-    <div class="view-toggle" id="kpiViewToggle" style="margin-left:auto">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+    <div class="filter-row" id="kpiFilterRow" style="margin-bottom:0;flex:1">
+      <select id="kpiBuFilter" onchange="renderKPI()">
+        <option value="all">全部BU</option>
+        <option value="shangban">园区商办</option>
+        <option value="gongyu">园区公寓</option>
+        <option value="wuye">园区物业</option>
+        <option value="hr">人力资源</option>
+      </select>
+      <select id="kpiCatFilter" onchange="renderKPI()">
+        <option value="all">全部类别</option>
+        <option value="revenue">收入类</option>
+        <option value="cost">成本类</option>
+        <option value="efficiency">效率类</option>
+        <option value="quality">质量类</option>
+      </select>
+      <select id="kpiOwnerFilter" onchange="renderKPI()"><option value="all">全部负责人</option></select>
+      <select id="kpiMonthFilter" onchange="renderKPI()">
+        <option value="latest">最新数据</option>
+        <option value="2026-06">2026年6月</option>
+        <option value="2026-05">2026年5月</option>
+        <option value="2026-04">2026年4月</option>
+        <option value="2026-03">2026年3月</option>
+        <option value="2026-02">2026年2月</option>
+        <option value="2026-01">2026年1月</option>
+      </select>
+    </div>
+    <div class="view-toggle" id="kpiViewToggle">
       <button class="active" onclick="switchKpiView('indicators')">KPI 指标</button>
-      <button onclick="switchKpiView('property')">物业数据看板</button>
+      <button onclick="switchKpiView('traineeMgmt')">管培生管理</button>
     </div>
   </div>
   <div class="filter-chips" id="kpiFilterChips"></div>
@@ -1256,97 +1343,121 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
     <div class="kpi-list" id="kpiList"></div>
   </div>
 
-  <!-- Property Dashboard sub-page -->
-  <div class="page" id="kpiPropertyPage">
-
-    <!-- KPI Stats Row - 6 cards -->
-    <div class="prop-stats" id="propStats"></div>
-
-    <!-- Data Analysis Section with Slicers & YOY Charts -->
-    <div class="prop-section" id="propAnalysisSection">
-      <div class="prop-section-hd">多维数据分析 · 同比环比</div>
-
-      <!-- Slicer Bar -->
-      <div class="prop-slicer-bar" id="propSlicerBar">
-        <div class="slicer-group">
-          <span class="slicer-label">指标</span>
-          <div class="slicer-chips" id="metricSlicers"></div>
-        </div>
-        <div class="slicer-group">
-          <span class="slicer-label">年份</span>
-          <div class="slicer-chips" id="yearSlicers"></div>
-        </div>
-        <div class="slicer-group">
-          <span class="slicer-label">视图</span>
-          <div class="slicer-chips" id="viewSlicers"></div>
-        </div>
-      </div>
-
-      <!-- YOY Analysis Chart -->
-      <div class="prop-chart-wrap" style="margin-bottom:12px">
-        <canvas id="propAnalysisChart" width="1080" height="340"></canvas>
-      </div>
-
-      <!-- Analysis Summary Cards -->
-      <div class="prop-analysis-cards" id="propAnalysisCards"></div>
-
-      <!-- YOY Data Table -->
-      <div class="prop-table-wrap" id="propAnalysisTable" style="background:var(--card);border-radius:var(--radius);padding:4px 0;box-shadow:0 1px 3px rgba(0,0,0,.04)"></div>
+  <!-- Trainee Management sub-page -->
+  <div class="page" id="kpiTraineePage">
+    <div class="trainee-summary" id="traineeSummary"></div>
+    <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;background:var(--bg-surface);border-radius:10px;padding:3px;width:fit-content">
+      <button class="tn-sub-tab active" onclick="switchTraineeView('tasks')">任务看板</button>
+      <button class="tn-sub-tab" onclick="switchTraineeView('reports')">周报上传</button>
+      <button class="tn-sub-tab" onclick="switchTraineeView('feedback')">反馈记录</button>
+      <button class="tn-sub-tab" onclick="switchTraineeView('evaluation')">管培生评估</button>
     </div>
-
-    <!-- Row 2: Revenue structure + Expense structure (two cols) -->
-    <div class="prop-grid">
-      <div class="prop-panel">
-        <div class="prop-panel-hd"><span class="prop-dot rev"></span>2026年1-6月 收入构成分析</div>
-        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px">
-          <canvas id="propRevPie" width="200" height="200" style="flex-shrink:0"></canvas>
-          <div class="prop-table-wrap" id="propRevenueTable" style="flex:1"></div>
-        </div>
+    <div class="tn-view" id="tnTaskView">
+      <div class="filter-row" style="margin-bottom:14px">
+        <select id="tnSystemFilter" onchange="renderTraineeTasks()"><option value="all">全部系统</option><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option></select>
+        <select id="tnStatusFilter" onchange="renderTraineeTasks()"><option value="all">全部状态</option><option value="pending">待开始</option><option value="active">进行中</option><option value="done">已完成</option></select>
+        <select id="tnWeekFilter" onchange="renderTraineeTasks()"><option value="all">全部周次</option><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option></select>
+        <select id="tnPersonFilter" onchange="renderTraineeTasks()"><option value="all">全部执行者</option></select>
+        <span style="margin-left:auto;font-size:10px;color:var(--text-dim)" id="tnTaskCount"></span>
       </div>
-      <div class="prop-panel">
-        <div class="prop-panel-hd"><span class="prop-dot exp"></span>2026年1-6月 支出结构分析</div>
-        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px">
-          <canvas id="propExpPie" width="200" height="200" style="flex-shrink:0"></canvas>
-          <div class="prop-table-wrap" id="propExpenseTable" style="flex:1"></div>
+      <div id="tnTaskBoard"></div>
+    </div>
+    <div class="tn-view" id="tnReportView" style="display:none">
+      <div style="display:flex;gap:16px">
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px">上传周报</div>
+          <div class="filter-row" style="margin-bottom:12px">
+            <select id="tnRptWeek" onchange="loadTnReport()"><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option><option value="W14">W14</option></select>
+            <select id="tnRptAuthor" onchange="loadTnReport()"><option value="">选择学员</option></select>
+          </div>
+          <textarea id="tnRptContent" placeholder="请输入本周工作总结..." style="width:100%;height:160px;padding:14px;border:1px solid var(--border-light);border-radius:10px;font-size:11px;color:var(--text);background:var(--card);resize:vertical;font-family:inherit;outline:none" oninput="autoSaveTnReport()"></textarea>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+            <input type="file" id="tnRptFile" style="display:none" onchange="handleTnFileUpload(this)">
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('tnRptFile').click()" style="font-size:10px;padding:7px 14px">上传附件</button>
+            <span id="tnRptFileName" style="font-size:9px;color:var(--text-dim)"></span>
+            <button class="btn btn-primary btn-sm" onclick="saveTnReport()" style="margin-left:auto;font-size:10px;padding:7px 20px">保存周报</button>
+          </div>
+        </div>
+        <div style="width:300px;flex-shrink:0">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px">历史周报</div>
+          <div id="tnRptHistory" style="max-height:400px;overflow-y:auto"></div>
         </div>
       </div>
     </div>
-
-    <!-- Row 3: Monthly trend + Budget comparison -->
-    <div class="prop-section">
-      <div class="prop-section-hd">2026年1-6月 月度收支趋势与预算对比</div>
-      <div class="prop-chart-wrap">
-        <canvas id="propTrendChart" width="1080" height="300"></canvas>
-      </div>
-      <div class="prop-table-wrap" id="propMonthTable" style="margin-top:10px"></div>
-    </div>
-
-    <!-- Row 4: YOY comparison -->
-    <div class="prop-section">
-      <div class="prop-section-hd">2023-2026年 核心指标年度对比</div>
-      <div class="prop-chart-wrap">
-        <canvas id="propYearChart" width="1080" height="320"></canvas>
-      </div>
-      <div class="prop-table-wrap" id="propYearTable" style="margin-top:10px"></div>
-    </div>
-
-    <!-- Row 5: Utility + Parking two cols -->
-    <div class="prop-grid">
-      <div class="prop-panel">
-        <div class="prop-panel-hd"><span class="prop-dot utl"></span>水电费收支差额趋势（万元）</div>
-        <div class="prop-chart-wrap" style="box-shadow:none;padding:8px 14px">
-          <canvas id="propUtilityChart" width="510" height="220"></canvas>
+    <div class="tn-view" id="tnFeedbackView" style="display:none">
+      <div style="display:flex;gap:16px">
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px">新增反馈</div>
+          <div class="filter-row" style="margin-bottom:12px">
+            <select id="tnFbWeek"><option value="W1">W1</option></select>
+            <select id="tnFbTrainee"><option value="">选择学员</option></select>
+          </div>
+          <textarea id="tnFbContent" placeholder="请输入本周反馈内容..." style="width:100%;height:120px;padding:14px;border:1px solid var(--border-light);border-radius:10px;font-size:11px;color:var(--text);background:var(--card);resize:vertical;font-family:inherit;outline:none"></textarea>
+          <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+            <select id="tnFbType" style="padding:6px 10px;border:1px solid var(--border-light);border-radius:6px;font-size:10px;font-family:inherit"><option value="positive">表扬</option><option value="neutral">建议</option><option value="negative">需改进</option></select>
+            <button class="btn btn-primary btn-sm" onclick="saveTnFeedback()" style="margin-left:auto;font-size:10px;padding:7px 20px">提交反馈</button>
+          </div>
         </div>
-        <div id="propUtilityNote" style="padding:6px 14px 10px;font-size:10px;color:var(--text2)"></div>
-      </div>
-      <div class="prop-panel">
-        <div class="prop-panel-hd"><span class="prop-dot park"></span>停车费收入月度趋势（万元）</div>
-        <div class="prop-chart-wrap" style="box-shadow:none;padding:8px 14px">
-          <canvas id="propParkingChart" width="510" height="220"></canvas>
+        <div style="width:360px;flex-shrink:0">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px">反馈历史</div>
+          <div id="tnFbHistory" style="max-height:420px;overflow-y:auto"></div>
         </div>
-        <div id="propParkingNote" style="padding:6px 14px 10px;font-size:10px;color:var(--text2)"></div>
       </div>
     </div>
+  <!-- Trainee Evaluation sub-page -->
+  <div class="tn-view" id="tnEvalView" style="display:none">
+    <!-- Header with actions and sub-tabs -->
+    <div class="eval-header">
+      <div class="eval-evaluator">
+        <div class="eval-avatar" id="evalAvatar">评</div>
+        <span id="evalName">评分人</span>
+      </div>
+      <div class="eval-sub-tabs" id="evalSubTabs">
+        <button class="eval-sub-tab active" onclick="switchEvalView('weekly')">本周评估</button>
+        <button class="eval-sub-tab" onclick="switchEvalView('calendar')">日历视图</button>
+        <button class="eval-sub-tab" onclick="switchEvalView('history')">历史评估</button>
+      </div>
+      <div class="eval-header-actions" style="margin-left:auto">
+        <button onclick="exportEvalData()">导出</button>
+        <button onclick="importEvalData()">导入</button>
+      </div>
+      <div class="eval-period">评估周期 <strong>2026年6月 - 9月</strong> · 共 14 周</div>
+    </div>
+
+    <!-- Weekly Evaluation View -->
+    <div class="eval-view" id="evalWeeklyView">
+      <!-- Week tabs -->
+      <div class="eval-week-tabs" id="evalWeekTabs"></div>
+      <!-- Trainee list + scoring panel -->
+      <div style="display:flex;gap:16px">
+        <div style="width:280px;flex-shrink:0">
+          <input class="eval-search" type="text" id="evalTraineeSearch" placeholder="搜索学员或直属上级..." oninput="renderEvalTraineeList()">
+          <div class="eval-trainee-list" id="evalTraineeList"></div>
+        </div>
+        <div style="flex:1;min-width:0" id="evalScorePanelContainer">
+          <div class="eval-empty">选择左侧学员查看评分详情</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar View -->
+    <div class="eval-view" id="evalCalendarView" style="display:none">
+      <div class="eval-cal-stats" id="evalCalStats"></div>
+      <div style="font-size:10px;font-weight:600;color:var(--text);margin-bottom:12px">评估日历 <span style="font-weight:400;color:var(--text-dim);font-size:9px">2026年6月1日 - 9月4日 · 共 14 周</span></div>
+      <div class="eval-cal-grid" id="evalCalGrid"></div>
+    </div>
+
+    <!-- History View -->
+    <div class="eval-view" id="evalHistoryView" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:11px;font-weight:600;color:var(--text)">历史评估</span>
+        <span style="font-size:9px;color:var(--text-dim)">查看所有学员在各周的评分记录</span>
+        <button onclick="exportEvalCSV()" style="margin-left:auto;padding:6px 12px;border:1px solid var(--border);background:var(--card);border-radius:6px;font-size:9px;cursor:pointer;color:var(--text-dim);font-family:inherit">导出 CSV</button>
+      </div>
+      <input class="eval-search" type="text" id="evalHistorySearch" placeholder="搜索学员姓名或直属上级..." oninput="renderEvalHistory()">
+      <div class="eval-history-table-wrap" id="evalHistoryTable"></div>
+    </div>
+  </div>
 
   </div>
 
@@ -2996,7 +3107,7 @@ function switchTab(tab) {
   else if (tab==='kpi') {
     if(!currentUser){pendingTab=tab;showPermBlock('tabKPI','暂无权限访问KPI指标看板','请先登录后查看');setNewBtn(false);return;}
     hidePermBlock('tabKPI');
-    if(!canViewModule(currentUser,'kpi')){document.getElementById('kpiIndicatorsPage').innerHTML='<div class="empty"><p>暂无权限访问KPI指标看板</p><p style="font-size:9px">请联系管理员开通KPI查看权限</p></div>';document.getElementById('kpiIndicatorsPage').className='page active';document.getElementById('kpiPropertyPage').className='page';document.getElementById('kpiFilterRow').style.display='none';document.getElementById('kpiFilterChips').style.display='none';setNewBtn(false);return;}
+    if(!canViewModule(currentUser,'kpi')){document.getElementById('kpiIndicatorsPage').innerHTML='<div class="empty"><p>暂无权限访问KPI指标看板</p><p style="font-size:9px">请联系管理员开通KPI查看权限</p></div>';document.getElementById('kpiIndicatorsPage').className='page active';document.getElementById('kpiFilterRow').style.display='none';document.getElementById('kpiFilterChips').style.display='none';setNewBtn(false);return;}
     switchKpiView(kpiView);
   }
   else if (tab==='report') {
@@ -3024,7 +3135,7 @@ function switchKpiView(view) {
   if(!canViewModule(currentUser,'kpi')){
     document.getElementById('kpiIndicatorsPage').innerHTML='<div class="empty"><p>暂无权限访问KPI指标看板</p><p style="font-size:9px">请联系管理员开通KPI查看权限</p></div>';
     document.getElementById('kpiIndicatorsPage').className='page active';
-    document.getElementById('kpiPropertyPage').className='page';
+    document.getElementById('kpiTraineePage').className='page';
     document.getElementById('kpiFilterRow').style.display='none';
     document.getElementById('kpiFilterChips').style.display='none';
     document.getElementById('sidebarBtn').style.display='none';
@@ -3032,19 +3143,14 @@ function switchKpiView(view) {
   }
   kpiView = view;
   document.getElementById('kpiIndicatorsPage').className = 'page' + (view==='indicators'?' active':'');
-  document.getElementById('kpiPropertyPage').className = 'page' + (view==='property'?' active':'');
-  document.querySelectorAll('#kpiViewToggle button').forEach((b,i)=>b.classList.toggle('active',i===['indicators','property'].indexOf(view)));
-  // Show/hide KPI filters based on view
-  const filterRow = document.getElementById('kpiFilterRow');
-  if (filterRow) {
-    const selects = filterRow.querySelectorAll('select');
-    selects.forEach(s => { s.style.display = view==='indicators' ? '' : 'none'; });
-  }
+  document.getElementById('kpiTraineePage').className = 'page' + (view==='traineeMgmt'?' active':'');
+  document.getElementById('kpiFilterRow').style.display = view==='indicators' ? '' : 'none';
   document.getElementById('kpiFilterChips').style.display = view==='indicators' ? '' : 'none';
-  document.getElementById('sidebarBtn').textContent = view==='indicators' ? '+ 新建指标' : '';
-  document.getElementById('sidebarBtn').onclick = view==='indicators' ? () => openKpiModal() : null;
-  if (view==='indicators') { restoreKpiFilters(); renderKPI(); }
-  else { renderPropertyDashboard(); }
+  document.querySelectorAll('#kpiViewToggle button').forEach(function(b,i){
+    b.classList.toggle('active', (i===0 && view==='indicators') || (i===1 && view==='traineeMgmt'));
+  });
+  if(view==='indicators'){ restoreKpiFilters(); renderKPI(); }
+  else if(view==='traineeMgmt'){ initTraineeSystem(); }
 }
 
 function switchOkrView(view) {
@@ -4306,1016 +4412,6 @@ document.addEventListener('click',function(e){
   if(w&&!w.contains(e.target))document.getElementById('notifyDrop').classList.remove('show');
 });
 
-// ===== Property Dashboard =====
-const PROP_DATA = {
-  months: ['1月','2月','3月','4月','5月','6月'],
-  monthlyIncome: [60.5668, 58.3526, 67.267, 58.7863, 66.4943, 71.8733],
-  monthlyExpense: [-62.4824, -43.0779, -43.7865, -45.386, -46.0284, -57.0524],
-  monthlyBudget: [65.25, 65.25, 65.25, 65.25, 65.25, 65.25],
-  budgetTotal: 391.5,
-  propFeeBudget: 227.9167,
-  parkingBudget: 46.92,
-  otherBudget: 8,
-  propertyFeeTotal: 262.7556,
-  parkingTotal: 98.2544,
-  otherTotal: 22.3302,
-  incomeTotal: 383.3402,
-  expenseTotal: -364.0377,
-  netProfit: 19.3025,
-  revenueCats: [
-    {name:'物业费', val:262.7556, pct:68.5, color:'#ed7279',
-      subs:[
-        {name:'C区物业费', val:94.7083},
-        {name:'AB区-商铺', val:13.1496},
-        {name:'D区物业费', val:7.3938},
-        {name:'内部结算', val:101.244},
-        {name:'其他物业费', val:46.2599}
-      ]},
-    {name:'停车费', val:98.2544, pct:25.6, color:'#3db3b3'},
-    {name:'其他收入', val:22.3302, pct:5.8, color:'#a3b3de'},
-  ],
-  expenseCats: [
-    {name:'人力成本', val:-245.4, pct:67.4, color:'#828996',
-      subs:[
-        {name:'物业员工25人', val:-138.45},
-        {name:'外包保安11人', val:-79.2},
-        {name:'员工福利37人', val:-27.75}
-      ]},
-    {name:'维修及保养', val:-44.5674, pct:12.2, color:'#f7b84e',
-      subs:[
-        {name:'垃圾清运', val:-20.833},
-        {name:'维修费', val:-5.1634},
-        {name:'绿化费', val:-4},
-        {name:'排水证办理', val:-3.35},
-        {name:'油污水井清理', val:-2.4},
-        {name:'停车维保', val:-2.01},
-        {name:'电梯保养', val:-1.89},
-        {name:'弱电', val:-1.849},
-        {name:'空调维保', val:-1.687},
-        {name:'虫害消杀', val:-0.6},
-        {name:'保险费', val:-0.4},
-        {name:'警署内保', val:-0.2},
-        {name:'水箱清洗', val:-0.185}
-      ]},
-    {name:'土地成本', val:-5.49, pct:1.5, color:'#a28bd2'},
-    {name:'水电费(收支差)', val:2.6986, pct:-0.7, color:'#48b5a0'},
-    {name:'部门报销', val:-0.5956, pct:0.2, color:'#c0b3a6'},
-    {name:'其他支出', val:-70.6832, pct:19.4, color:'#6e6e6e',
-      subs:[
-        {name:'税金', val:-38.334},
-        {name:'承担办公费', val:-15.45},
-        {name:'内部结算', val:-12.44},
-        {name:'公共关系', val:-4.4592}
-      ]},
-  ],
-  yearCompare: [
-    {year:'2023', income:592, expense:-688, profit:-96, propFee:382, parking:153, other:41, margin:-16.2},
-    {year:'2024', income:715, expense:-705, profit:10, propFee:484, parking:192, other:37, margin:1.4},
-    {year:'2025', income:780, expense:-673.84, profit:98, propFee:532, parking:211.95, other:33.69, margin:12.6},
-    {year:'2026H1', income:355.9, expense:-359.51, profit:14.4, propFee:261.77, parking:98.25, other:16.88, margin:4.0},
-  ],
-  utilityDeficit: {2023:64.00, 2024:41.11, 2025:32.62, '2026H1':9.91},
-  parkingMonthly: {
-    2023: [3.31,4.89,5.97,5.73,7.41,7.15,9.44,8.41,7.63,6.87,7.00,7.35],
-    2024: [7.15,4.86,8.01,7.13,7.30,7.17,9.04,7.90,6.49,6.67,7.20,6.97],
-    2025: [5.74,4.71,6.67,6.96,6.20,6.96,7.32,6.54,5.23,5.10,5.75,5.30],
-    2026: [5.08,3.39,4.28,3.93,9.26,9.26],
-  }
-};
-
-function renderPropertyDashboard() {
-  renderPropStats();
-  renderPropRevPie();
-  renderPropRevenueTable();
-  renderPropExpPie();
-  renderPropExpenseTable();
-  renderPropTrendChart();
-  renderPropMonthTable();
-  renderPropYearChart();
-  renderPropYearTable();
-  renderPropUtilityChart();
-  renderPropParkingChart();
-  renderPropSlicers();
-  renderPropAnalysis();
-}
-
-function renderPropStats() {
-  const d = PROP_DATA;
-  const incomeRate = (d.incomeTotal / d.budgetTotal * 100).toFixed(1);
-  const propFeeRate = (d.propertyFeeTotal / d.propFeeBudget * 100).toFixed(1);
-  const parkingRate = (d.parkingTotal / d.parkingBudget * 100).toFixed(1);
-  const otherRate = (d.otherTotal / d.otherBudget * 100).toFixed(1);
-  const margin = (d.netProfit / d.incomeTotal * 100).toFixed(1);
-  const badge = (v,t) => v>=95?'good':v>=80?'warn':'bad';
-
-  document.getElementById('propStats').innerHTML = `
-    <div class="prop-stat-card">
-      <div class="prop-stat-label">物业总收入（1-6月）</div>
-      <div class="prop-stat-value">${d.incomeTotal.toFixed(2)}<span style="font-size:11px;font-weight:400;color:var(--text2)"> 万</span></div>
-      <div class="prop-stat-sub">预算 ${d.budgetTotal} 万 <span class="prop-stat-badge ${badge(incomeRate)}">${incomeRate}%</span></div>
-    </div>
-    <div class="prop-stat-card">
-      <div class="prop-stat-label">物业费收入</div>
-      <div class="prop-stat-value">${d.propertyFeeTotal.toFixed(2)}<span style="font-size:11px;font-weight:400;color:var(--text2)"> 万</span></div>
-      <div class="prop-stat-sub">预算 ${d.propFeeBudget.toFixed(0)} 万 <span class="prop-stat-badge ${badge(propFeeRate)}">${propFeeRate}%</span></div>
-    </div>
-    <div class="prop-stat-card">
-      <div class="prop-stat-label">停车费收入</div>
-      <div class="prop-stat-value">${d.parkingTotal.toFixed(2)}<span style="font-size:11px;font-weight:400;color:var(--text2)"> 万</span></div>
-      <div class="prop-stat-sub">预算 ${d.parkingBudget} 万 <span class="prop-stat-badge ${badge(parkingRate)}">${parkingRate}%</span></div>
-    </div>
-    <div class="prop-stat-card">
-      <div class="prop-stat-label">物业总支出</div>
-      <div class="prop-stat-value" style="color:#b91c1c">${Math.abs(d.expenseTotal).toFixed(2)}<span style="font-size:11px;font-weight:400;color:var(--text2)"> 万</span></div>
-      <div class="prop-stat-sub">含工资、维保、税金等</div>
-    </div>
-    <div class="prop-stat-card">
-      <div class="prop-stat-label">净利润</div>
-      <div class="prop-stat-value" style="color:${d.netProfit>=0?'#059669':'#b91c1c'}">${d.netProfit.toFixed(2)}<span style="font-size:11px;font-weight:400;color:var(--text2)"> 万</span></div>
-      <div class="prop-stat-sub">净利率 <span class="prop-stat-badge ${d.netProfit>=0?'good':'bad'}">${margin}%</span></div>
-    </div>
-    <div class="prop-stat-card">
-      <div class="prop-stat-label">其他收入</div>
-      <div class="prop-stat-value">${d.otherTotal.toFixed(2)}<span style="font-size:11px;font-weight:400;color:var(--text2)"> 万</span></div>
-      <div class="prop-stat-sub">预算 ${d.otherBudget} 万 <span class="prop-stat-badge ${badge(otherRate)}">${otherRate}%</span></div>
-    </div>`;
-}
-
-function drawPie(ctx, cx, cy, r, items, total) {
-  let angle = -Math.PI/2;
-  items.forEach(item => {
-    const slice = item.val / total * Math.PI * 2;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, r, angle, angle + slice);
-    ctx.closePath();
-    ctx.fillStyle = item.color;
-    ctx.fill();
-    // Label
-    const mid = angle + slice/2;
-    const lx = cx + Math.cos(mid) * (r * 0.65);
-    const ly = cy + Math.sin(mid) * (r * 0.65);
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 10px -apple-system,sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const pct = (item.val / total * 100).toFixed(0);
-    if (parseInt(pct) >= 5) ctx.fillText(pct+'%', lx, ly);
-    angle += slice;
-  });
-}
-
-function renderPropRevPie() {
-  const canvas = document.getElementById('propRevPie');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0,0,W,H);
-  const d = PROP_DATA;
-  const items = d.revenueCats;
-  const total = items.reduce((a,b)=>a+b.val,0);
-  drawPie(ctx, 100, 85, 68, items, total);
-  // Legend
-  ctx.font = '11px -apple-system,sans-serif';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-  items.forEach((item, i) => {
-    const y = 165 + i * 14;
-    ctx.fillStyle = item.color;
-    ctx.fillRect(10, y, 8, 8);
-    ctx.fillStyle = '#4b5563';
-    ctx.fillText(item.name, 22, y);
-    ctx.fillStyle = '#9ca3af';
-    ctx.fillText(item.val.toFixed(1)+'万', 80, y);
-  });
-}
-
-function renderPropExpPie() {
-  const canvas = document.getElementById('propExpPie');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0,0,W,H);
-  const d = PROP_DATA;
-  const items = d.expenseCats.filter(e => Math.abs(e.val) > 0 && e.name !== '水电费(收支差)');
-  // Make all values positive for pie
-  const pieItems = items.map(e => ({...e, val: Math.abs(e.val)}));
-  const total = pieItems.reduce((a,b)=>a+b.val,0);
-  drawPie(ctx, 100, 85, 68, pieItems, total);
-  // Legend
-  ctx.font = '11px -apple-system,sans-serif';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-  pieItems.forEach((item, i) => {
-    const y = 165 + i * 14;
-    ctx.fillStyle = item.color;
-    ctx.fillRect(10, y, 8, 8);
-    ctx.fillStyle = '#4b5563';
-    ctx.fillText(item.name, 22, y);
-    ctx.fillStyle = '#9ca3af';
-    ctx.fillText(Math.abs(item.val).toFixed(1)+'万', 80, y);
-  });
-}
-
-function renderPropRevenueTable() {
-  const d = PROP_DATA;
-  let html = '<table class="prop-table"><thead><tr><th>收入项目</th><th>金额(万)</th><th>占比</th><th style="width:100px">完成度</th></tr></thead><tbody>';
-  d.revenueCats.forEach(cat => {
-    const pct = (cat.val / d.incomeTotal * 100).toFixed(1);
-    html += `<tr><td>${cat.name}</td><td>${cat.val.toFixed(2)}</td><td>${pct}%</td><td class="prop-bar-cell"><div class="prop-bar-bg"></div><div class="prop-bar-fill" style="width:${Math.min(100,pct*1.5)}%;background:${cat.color}"></div></td></tr>`;
-    if (cat.subs) cat.subs.forEach(s => {
-      const sp = (s.val / d.incomeTotal * 100).toFixed(1);
-      html += `<tr class="prop-row-sub"><td>${s.name}</td><td>${s.val.toFixed(2)}</td><td>${sp}%</td><td class="prop-bar-cell"><div class="prop-bar-bg"></div><div class="prop-bar-fill" style="width:${Math.min(100,parseFloat(sp)*1.5)}%;background:${cat.color};opacity:.35"></div></td></tr>`;
-    });
-  });
-  html += `<tr class="prop-row-total"><td>合计</td><td>${d.incomeTotal.toFixed(2)}</td><td>100%</td><td></td></tr></tbody></table>`;
-  document.getElementById('propRevenueTable').innerHTML = html;
-}
-
-function renderPropExpenseTable() {
-  const d = PROP_DATA;
-  const absTotal = Math.abs(d.expenseTotal);
-  let html = '<table class="prop-table"><thead><tr><th>支出项目</th><th>金额(万)</th><th>占比</th></tr></thead><tbody>';
-  d.expenseCats.forEach(cat => {
-    const av = Math.abs(cat.val);
-    const pct = (av / absTotal * 100).toFixed(1);
-    const cls = cat.val >= 0 ? 'prop-val-pos' : 'prop-val-neg';
-    html += `<tr><td>${cat.name}</td><td class="${cls}">${cat.val.toFixed(2)}</td><td>${pct}%</td></tr>`;
-    if (cat.subs) cat.subs.forEach(s => {
-      const sa = Math.abs(s.val);
-      const sp = (sa / absTotal * 100).toFixed(1);
-      const sc = s.val >= 0 ? 'prop-val-pos' : 'prop-val-neg';
-      html += `<tr class="prop-row-sub"><td>${s.name}</td><td class="${sc}">${s.val.toFixed(2)}</td><td>${sp}%</td></tr>`;
-    });
-  });
-  html += `<tr class="prop-row-total"><td>合计</td><td class="prop-val-neg">${d.expenseTotal.toFixed(2)}</td><td>100%</td></tr></tbody></table>`;
-  document.getElementById('propExpenseTable').innerHTML = html;
-}
-
-function renderPropTrendChart() {
-  const canvas = document.getElementById('propTrendChart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const d = PROP_DATA;
-  const W = canvas.width, H = canvas.height;
-  const pad = {top:30, right:40, bottom:45, left:55};
-  const pw = W - pad.left - pad.right, ph = H - pad.top - pad.bottom;
-
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle = '#fafdfd'; ctx.fillRect(0,0,W,H);
-
-  const allVals = [...d.monthlyIncome, ...d.monthlyExpense.map(Math.abs), ...d.monthlyBudget];
-  const maxVal = Math.ceil(Math.max(...allVals) / 10) * 10 + 5;
-  const minVal = Math.floor(Math.min(...d.monthlyExpense) / 10) * 10 - 5;
-
-  // Grid
-  ctx.strokeStyle = '#f0eeed'; ctx.lineWidth = 0.5;
-  for (let v = minVal; v <= maxVal; v += 10) {
-    const y = pad.top + ph - (v - minVal) / (maxVal - minVal) * ph;
-    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
-    ctx.fillStyle = '#9ca3af'; ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'right';
-    ctx.fillText(v, pad.left - 8, y + 3);
-  }
-  const zeroY = pad.top + ph - (0 - minVal) / (maxVal - minVal) * ph;
-  ctx.strokeStyle = '#d5d3d3'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(pad.left, zeroY); ctx.lineTo(W - pad.right, zeroY); ctx.stroke();
-
-  const groupW = pw / d.months.length, barW = groupW * 0.22;
-
-  // Income bars
-  d.monthlyIncome.forEach((v, i) => {
-    const x = pad.left + i * groupW + groupW * 0.16;
-    const h = (v - minVal) / (maxVal - minVal) * ph;
-    const y = pad.top + ph - h;
-    ctx.fillStyle = '#ed7279';
-    ctx.beginPath(); ctx.roundRect(x, y, barW, h, [3,3,0,0]); ctx.fill();
-    ctx.fillStyle = '#4b5563'; ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(v.toFixed(1), x + barW/2, y - 4);
-  });
-
-  // Expense bars
-  d.monthlyExpense.forEach((v, i) => {
-    const x = pad.left + i * groupW + groupW * 0.42;
-    const absV = Math.abs(v);
-    const h = (absV - minVal) / (maxVal - minVal) * ph;
-    ctx.fillStyle = '#828996';
-    ctx.beginPath(); ctx.roundRect(x, zeroY, barW, h, [3,3,0,0]); ctx.fill();
-    ctx.fillStyle = '#4b5563'; ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(v.toFixed(1), x + barW/2, zeroY + h + 13);
-  });
-
-  // Budget dashed line
-  ctx.strokeStyle = '#3db3b3'; ctx.lineWidth = 2; ctx.setLineDash([6,4]);
-  ctx.beginPath();
-  d.monthlyBudget.forEach((v, i) => {
-    const x = pad.left + i * groupW + groupW/2;
-    const y = pad.top + ph - (v - minVal) / (maxVal - minVal) * ph;
-    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-  });
-  ctx.stroke(); ctx.setLineDash([]);
-  // Budget dots
-  d.monthlyBudget.forEach((v, i) => {
-    const x = pad.left + i * groupW + groupW/2;
-    const y = pad.top + ph - (v - minVal) / (maxVal - minVal) * ph;
-    ctx.fillStyle = '#2563eb'; ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI*2); ctx.fill();
-  });
-
-  // Legend
-  ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'left';
-  const lx = W - 280;
-  ctx.fillStyle = '#b53b3b'; ctx.fillRect(lx, 8, 10, 10);
-  ctx.fillStyle = '#4b5563'; ctx.fillText('收入', lx+14, 16);
-  ctx.fillStyle = '#828996'; ctx.fillRect(lx+55, 8, 10, 10);
-  ctx.fillText('支出', lx+69, 16);
-  ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.setLineDash([6,4]);
-  ctx.beginPath(); ctx.moveTo(lx+110, 13); ctx.lineTo(lx+130, 13); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle = '#4b5563'; ctx.fillText('月预算', lx+134, 16);
-
-  // Month labels
-  ctx.textAlign = 'center'; ctx.fillStyle = '#9ca3af'; ctx.font = '11px -apple-system,sans-serif';
-  d.months.forEach((m, i) => { ctx.fillText(m, pad.left + i * groupW + groupW/2, H - 10); });
-}
-
-function renderPropMonthTable() {
-  const d = PROP_DATA;
-  let html = '<table class="prop-table"><thead><tr><th>月份</th><th>收入(万)</th><th>支出(万)</th><th>月利润(万)</th><th>月预算(万)</th><th>预算达成</th></tr></thead><tbody>';
-  d.months.forEach((m, i) => {
-    const inc = d.monthlyIncome[i], exp = d.monthlyExpense[i], bud = d.monthlyBudget[i];
-    const profit = inc + exp;
-    const rate = (inc / bud * 100).toFixed(0);
-    const pc = profit >= 0 ? 'prop-val-pos' : 'prop-val-neg';
-    html += `<tr><td>${m}</td><td>${inc.toFixed(2)}</td><td class="prop-val-neg">${exp.toFixed(2)}</td><td class="${pc}">${profit.toFixed(2)}</td><td>${bud.toFixed(2)}</td><td><span class="prop-stat-badge ${rate>=95?'good':rate>=80?'warn':'bad'}">${rate}%</span></td></tr>`;
-  });
-  const totalInc = d.monthlyIncome.reduce((a,b)=>a+b,0);
-  const totalExp = d.monthlyExpense.reduce((a,b)=>a+b,0);
-  const totalProfit = totalInc + totalExp;
-  const totalBud = d.monthlyBudget.reduce((a,b)=>a+b,0);
-  const tpc = totalProfit >= 0 ? 'prop-val-pos' : 'prop-val-neg';
-  html += `<tr class="prop-row-total"><td>合计</td><td>${totalInc.toFixed(2)}</td><td class="prop-val-neg">${totalExp.toFixed(2)}</td><td class="${tpc}">${totalProfit.toFixed(2)}</td><td>${totalBud}</td><td></td></tr></tbody></table>`;
-  document.getElementById('propMonthTable').innerHTML = html;
-}
-
-function renderPropYearChart() {
-  const canvas = document.getElementById('propYearChart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const d = PROP_DATA.yearCompare;
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle = '#fafdfd'; ctx.fillRect(0,0,W,H);
-  const pad = {top:30, right:40, bottom:45, left:65};
-  const pw = W - pad.left - pad.right, ph = H - pad.top - pad.bottom;
-
-  const minVal = -200, maxVal = 900;
-  ctx.strokeStyle = '#f0eeed'; ctx.lineWidth = 0.5;
-  for (let v = minVal; v <= maxVal; v += 100) {
-    const y = pad.top + ph - (v - minVal) / (maxVal - minVal) * ph;
-    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
-    ctx.fillStyle = '#9ca3af'; ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'right';
-    ctx.fillText(v, pad.left - 8, y + 3);
-  }
-  const zeroY = pad.top + ph - (0 - minVal) / (maxVal - minVal) * ph;
-  ctx.strokeStyle = '#c5c3c3'; ctx.lineWidth = 1.2;
-  ctx.beginPath(); ctx.moveTo(pad.left, zeroY); ctx.lineTo(W - pad.right, zeroY); ctx.stroke();
-
-  const groupW = pw / d.length, barW = groupW * 0.16, gap = 4;
-  d.forEach((y, i) => {
-    const baseX = pad.left + i * groupW + groupW * 0.15;
-    // Income bar
-    const ih = (y.income - minVal) / (maxVal - minVal) * ph;
-    ctx.fillStyle = '#b53b3b';
-    ctx.beginPath(); ctx.roundRect(baseX, pad.top + ph - ih, barW, ih, [3,3,0,0]); ctx.fill();
-    ctx.fillStyle = '#4b5563'; ctx.font = 'bold 10px -apple-system,sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(y.income, baseX+barW/2, pad.top+ph-ih-4);
-
-    // Expense bar
-    const eh = (Math.abs(y.expense) - minVal) / (maxVal - minVal) * ph;
-    ctx.fillStyle = '#828996';
-    ctx.beginPath(); ctx.roundRect(baseX+barW+gap, zeroY, barW, eh, [3,3,0,0]); ctx.fill();
-    ctx.fillText(Math.round(Math.abs(y.expense)), baseX+barW*1.5+gap, zeroY+eh+13);
-
-    // Profit bar
-    const absPr = Math.abs(y.profit);
-    if (y.profit >= 0) {
-      const ph2 = (y.profit - minVal) / (maxVal - minVal) * ph;
-      ctx.fillStyle = '#059669';
-      ctx.beginPath(); ctx.roundRect(baseX+barW*2+gap*2, pad.top+ph-ph2, barW, ph2, [3,3,0,0]); ctx.fill();
-      ctx.fillText(y.profit, baseX+barW*2.5+gap*2, pad.top+ph-ph2-4);
-    } else {
-      const ph2 = (absPr - minVal) / (maxVal - minVal) * ph;
-      ctx.fillStyle = '#b91c1c';
-      ctx.beginPath(); ctx.roundRect(baseX+barW*2+gap*2, zeroY, barW, ph2, [3,3,0,0]); ctx.fill();
-      ctx.fillText(y.profit, baseX+barW*2.5+gap*2, zeroY+ph2+13);
-    }
-
-    // Margin label
-    ctx.fillStyle = '#828996'; ctx.font = '11px -apple-system,sans-serif';
-    ctx.fillText((y.margin>=0?'+':'')+y.margin+'%', baseX+barW*2.5+gap*2, H-22);
-
-    // Year label
-    ctx.fillStyle = '#4b5563'; ctx.font = 'bold 10px -apple-system,sans-serif';
-    ctx.fillText(y.year, baseX + barW*1.5 + gap, H - 8);
-  });
-
-  // Legend
-  ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'left';
-  const lx = W - 300;
-  ctx.fillStyle = '#b53b3b'; ctx.fillRect(lx, 8, 10, 10); ctx.fillStyle = '#4b5563'; ctx.fillText('收入', lx+14, 16);
-  ctx.fillStyle = '#828996'; ctx.fillRect(lx+55, 8, 10, 10); ctx.fillText('支出', lx+69, 16);
-  ctx.fillStyle = '#059669'; ctx.fillRect(lx+110, 8, 10, 10); ctx.fillText('净利润', lx+124, 16);
-}
-
-function renderPropYearTable() {
-  const d = PROP_DATA.yearCompare;
-  let html = '<table class="prop-table"><thead><tr><th>年份</th><th>物业收入</th><th>物业费</th><th>停车费</th><th>其他收入</th><th>物业支出</th><th>净利润</th><th>利润率</th></tr></thead><tbody>';
-  d.forEach(y => {
-    const pc = y.profit>=0?'prop-val-pos':'prop-val-neg';
-    const mc = y.margin>=0?'prop-val-pos':'prop-val-neg';
-    html += `<tr><td><b>${y.year}</b></td><td>${y.income.toFixed(2)}</td><td>${y.propFee.toFixed(2)}</td><td>${y.parking.toFixed(2)}</td><td>${y.other.toFixed(2)}</td><td class="prop-val-neg">${Math.abs(y.expense).toFixed(2)}</td><td class="${pc}">${y.profit>=0?'+':''}${y.profit.toFixed(2)}</td><td class="${mc}">${y.margin>=0?'+':''}${y.margin}%</td></tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('propYearTable').innerHTML = html;
-}
-
-function renderPropUtilityChart() {
-  const canvas = document.getElementById('propUtilityChart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const d = PROP_DATA.utilityDeficit;
-  const W = canvas.width, H = canvas.height;
-  const pad = {top:20, right:20, bottom:30, left:45};
-  const pw = W - pad.left - pad.right, ph = H - pad.top - pad.bottom;
-
-  ctx.clearRect(0,0,W,H);
-
-  const keys = Object.keys(d);
-  const vals = Object.values(d);
-  const maxVal = Math.ceil(Math.max(...vals)/10)*10+5;
-
-  ctx.strokeStyle = '#f0eeed'; ctx.lineWidth = 0.5;
-  for (let v=0; v<=maxVal; v+=10) {
-    const y = pad.top+ph-v/maxVal*ph;
-    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(W-pad.right,y); ctx.stroke();
-    ctx.fillStyle = '#9ca3af'; ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'right';
-    ctx.fillText(v, pad.left-6, y+3);
-  }
-
-  const groupW = pw/keys.length, barW = groupW*0.55;
-  const colors = {2023:'#6b90e0',2024:'#f7b84e',2025:'#3db3b3','2026H1':'#ed7279'};
-  keys.forEach((k,i) => {
-    const x = pad.left+i*groupW+groupW*0.22;
-    const h = d[k]/maxVal*ph;
-    ctx.fillStyle = colors[k];
-    ctx.beginPath(); ctx.roundRect(x, pad.top+ph-h, barW, h, [3,3,0,0]); ctx.fill();
-    ctx.fillStyle = '#4b5563'; ctx.font = 'bold 11px -apple-system,sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(d[k].toFixed(1)+'万', x+barW/2, pad.top+ph-h-6);
-    ctx.fillStyle = '#4b5563'; ctx.font = '11px -apple-system,sans-serif';
-    ctx.fillText(k, x+barW/2, H-8);
-  });
-
-  const reduction = vals[0] > 0 ? ((vals[0] - vals[vals.length-1]) / vals[0] * 100).toFixed(0) : 0;
-  document.getElementById('propUtilityNote').innerHTML = `水电费亏损从2023年${vals[0].toFixed(1)}万降至2026H1仅${vals[vals.length-1].toFixed(1)}万，降幅约${reduction}%`;
-}
-
-function renderPropParkingChart() {
-  const canvas = document.getElementById('propParkingChart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const d = PROP_DATA.parkingMonthly;
-  const W = canvas.width, H = canvas.height;
-  const pad = {top:20, right:20, bottom:35, left:42};
-  const pw = W - pad.left - pad.right, ph = H - pad.top - pad.bottom;
-
-  ctx.clearRect(0,0,W,H);
-
-  const allVals = Object.values(d).flat();
-  const maxVal = Math.ceil(Math.max(...allVals)/5)*5+2;
-
-  ctx.strokeStyle = '#f0eeed'; ctx.lineWidth = 0.5;
-  for (let v=0; v<=maxVal; v+=2) {
-    const y = pad.top+ph-v/maxVal*ph;
-    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(W-pad.right,y); ctx.stroke();
-    ctx.fillStyle = '#9ca3af'; ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'right';
-    ctx.fillText(v.toFixed(0), pad.left-6, y+3);
-  }
-
-  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  const groupW = pw / 12;
-  const colors = {2023:'#6b90e0',2024:'#f7b84e',2025:'#3db3b3',2026:'#ed7279'};
-
-  Object.entries(d).forEach(([year, vals]) => {
-    ctx.strokeStyle = colors[year];
-    ctx.lineWidth = year==='2026'?2.8:1.8;
-    if (year!=='2026') ctx.setLineDash(year==='2023'?[3,3]:year==='2024'?[6,3]:[2,3]);
-    else ctx.setLineDash([]);
-    ctx.beginPath();
-    vals.forEach((v,i) => {
-      const x = pad.left+i*groupW+groupW/2;
-      const y = pad.top+ph-v/maxVal*ph;
-      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    });
-    ctx.stroke();
-    // End dot
-    const lastX = pad.left+(vals.length-1)*groupW+groupW/2;
-    const lastY = pad.top+ph-vals[vals.length-1]/maxVal*ph;
-    ctx.fillStyle = colors[year]; ctx.beginPath(); ctx.arc(lastX, lastY, 3, 0, Math.PI*2); ctx.fill();
-  });
-  ctx.setLineDash([]);
-
-  // Legend
-  ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'left';
-  const legend = [{l:'2023',c:'#9ca3af'},{l:'2024',c:'#f59e0b'},{l:'2025',c:'#2563eb'},{l:'2026',c:'#b53b3b'}];
-  legend.forEach((item,i) => {
-    const lx = W-200+i*52;
-    ctx.fillStyle = item.c; ctx.fillRect(lx,6,10,10);
-    ctx.fillStyle = '#4b5563'; ctx.fillText(item.l, lx+13, 14);
-  });
-
-  ctx.textAlign = 'center'; ctx.fillStyle = '#9ca3af'; ctx.font = '11px -apple-system,sans-serif';
-  months.forEach((m,i) => { ctx.fillText(m, pad.left+i*groupW+groupW/2, H-8); });
-
-  const h1Total = d['2026'].reduce((a,b)=>a+b,0);
-  document.getElementById('propParkingNote').innerHTML = `2026年1-6月停车费合计 <b>${h1Total.toFixed(1)}万</b> · 月均${(h1Total/6).toFixed(1)}万`;
-}
-
-// ===== Slicer Analysis =====
-const ANAL_METRICS = {
-  income: {name:'物业总收入', unit:'万元', color:'#6b90e0',
-    monthly: {
-      2023:[42.0,44.0,46.0,47.0,48.0,49.0,50.0,51.0,52.0,53.0,50.0,50.0],
-      2024:[52.0,54.0,56.0,57.0,58.0,59.0,61.0,63.0,64.0,63.0,60.0,59.0],
-      2025:[56.0,58.0,60.0,62.0,64.0,66.0,68.0,67.0,68.0,67.0,67.0,65.0],
-      2026:[52.0,53.0,56.4,57.6,62.6,74.3,0,0,0,0,0,0]
-    }},
-  propFee: {name:'物业费收入', unit:'万元', color:'#ed7279',
-    monthly: {
-      2023:[28.0,29.0,30.0,30.5,31.5,32.0,32.5,33.0,33.5,34.0,34.0,34.0],
-      2024:[36.0,37.0,38.0,39.0,40.0,41.0,41.5,42.0,42.5,43.0,42.5,41.5],
-      2025:[40.0,41.0,42.0,43.0,44.0,45.0,45.5,46.0,46.5,47.0,46.5,45.5],
-      2026:[38.3,39.1,41.6,42.5,46.2,54.7,0,0,0,0,0,0]
-    }},
-  parking: {name:'停车费收入', unit:'万元', color:'#3db3b3',
-    monthly: {
-      2023:[6.42,5.94,4.62,5.22,5.46,4.92,5.28,5.55,4.77,5.25,5.58,6.90],
-      2024:[7.18,7.96,7.18,8.50,9.06,8.37,10.08,11.28,7.90,8.69,8.28,11.64],
-      2025:[11.07,8.28,12.07,13.05,11.28,12.75,10.80,11.71,12.46,11.33,11.40,13.32],
-      2026:[9.08,10.36,10.86,9.19,11.81,11.81,0,0,0,0,0,0]
-    }},
-  utility: {name:'水电费亏损差额', unit:'万元', color:'#f7b84e', invert:true,
-    monthly: {
-      2023:[5.44,8.13,4.52,3.15,4.10,4.43,10.01,9.75,6.69,2.47,2.27,3.04],
-      2024:[1.58,4.15,2.41,2.58,1.90,2.19,7.06,6.35,4.66,2.58,2.34,3.30],
-      2025:[2.99,2.50,1.63,1.01,1.72,2.92,4.88,4.67,2.81,2.87,1.89,2.72],
-      2026:[3.96,2.33,2.75,0.39,0.48,0,0,0,0,0,0,0]
-    }}
-};
-
-const ANAL_ANNUAL = {
-  income:  {name:'物业收入', unit:'万元', vals:{2023:592,2024:715,2025:780,'2026H1':355.9}},
-  propFee: {name:'物业费', unit:'万元', vals:{2023:382,2024:484,2025:532,'2026H1':261.77}},
-  parking: {name:'停车费', unit:'万元', vals:{2023:153,2024:192,2025:211.95,'2026H1':98.25}},
-  expense: {name:'物业支出', unit:'万元', vals:{2023:688,2024:705,2025:673.84,'2026H1':359.51}},
-  profit:  {name:'净利润', unit:'万元', vals:{2023:-96,2024:10,2025:98,'2026H1':14.4}},
-  margin:  {name:'净利率', unit:'%', vals:{2023:-16.2,2024:1.4,2025:12.6,'2026H1':4.0}},
-};
-
-let analMetric = 'propFee';
-let analYears = ['2023','2024','2025','2026'];
-let analView = 'monthly'; // 'monthly' | 'annual'
-
-function renderPropSlicers() {
-  // Metric slicers
-  const metrics = [
-    {k:'income', label:'物业总收入'},
-    {k:'propFee', label:'物业费'},
-    {k:'parking', label:'停车费'},
-    {k:'utility', label:'水电费差额'},
-  ];
-  document.getElementById('metricSlicers').innerHTML = metrics.map(m =>
-    `<span class="slicer-chip${analMetric===m.k?' active':''}" onclick="analMetric='${m.k}';refreshAnalysis()">${m.label}</span>`
-  ).join('');
-
-  // Year slicers
-  const allYears = ['2023','2024','2025','2026'];
-  document.getElementById('yearSlicers').innerHTML = allYears.map(y =>
-    `<span class="slicer-chip year-${y}${analYears.includes(y)?' active':''}" onclick="toggleAnalYear('${y}')">${y}年</span>`
-  ).join('');
-
-  // View slicers
-  document.getElementById('viewSlicers').innerHTML = [
-    {k:'monthly', label:'月度趋势'},
-    {k:'annual', label:'年度汇总'},
-    {k:'growth', label:'同比增长率'},
-  ].map(v =>
-    `<span class="slicer-chip${analView===v.k?' active':''}" onclick="analView='${v.k}';refreshAnalysis()">${v.label}</span>`
-  ).join('');
-}
-
-function toggleAnalYear(y) {
-  if (analYears.includes(y)) {
-    if (analYears.length > 1) analYears = analYears.filter(x => x !== y);
-  } else {
-    analYears = [...analYears, y].sort();
-  }
-  refreshAnalysis();
-}
-
-function refreshAnalysis() {
-  renderPropSlicers();
-  renderPropAnalysis();
-}
-
-function renderPropAnalysis() {
-  if (analView === 'annual') renderAnnualChart();
-  else if (analView === 'growth') renderGrowthView();
-  else renderMonthlyChart();
-}
-
-function renderMonthlyChart() {
-  const canvas = document.getElementById('propAnalysisChart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle = '#fafdfd'; ctx.fillRect(0,0,W,H);
-  const pad = {top:25, right:40, bottom:40, left:50};
-  const pw = W - pad.left - pad.right, ph = H - pad.top - pad.bottom;
-
-  const metric = ANAL_METRICS[analMetric];
-  if (!metric) return;
-  const allVals = analYears.flatMap(y => metric.monthly[y] || []);
-  const maxVal = Math.ceil(Math.max(...allVals, 1) * 1.15);
-  const yColors = {2023:'#6b90e0',2024:'#f7b84e',2025:'#3db3b3',2026:'#ed7279'};
-
-  // Grid
-  ctx.strokeStyle = '#f0eeed'; ctx.lineWidth = 0.5;
-  const steps = maxVal > 20 ? 5 : maxVal > 10 ? 2 : 1;
-  for (let v = 0; v <= maxVal; v += steps) {
-    const y = pad.top + ph - v/maxVal*ph;
-    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(W-pad.right,y); ctx.stroke();
-    ctx.fillStyle = '#9ca3af'; ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'right';
-    ctx.fillText(v.toFixed(0), pad.left-6, y+3);
-  }
-
-  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  const groupW = pw / 12;
-
-  // Draw lines per year
-  analYears.forEach(year => {
-    const vals = metric.monthly[year];
-    if (!vals) return;
-    ctx.strokeStyle = yColors[year];
-    ctx.lineWidth = year==='2026'?2.5:1.8;
-    if (year!=='2026') ctx.setLineDash(year==='2023'?[3,3]:year==='2024'?[6,3]:[2,3]);
-    else ctx.setLineDash([]);
-
-    ctx.beginPath();
-    vals.forEach((v, i) => {
-      const x = pad.left + i*groupW + groupW/2;
-      const y = pad.top + ph - v/maxVal*ph;
-      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    });
-    ctx.stroke();
-
-    // Dots for each data point
-    ctx.setLineDash([]);
-    vals.forEach((v, i) => {
-      if (v === 0 && i >= 6) return; // Skip future months for 2026
-      const x = pad.left + i*groupW + groupW/2;
-      const y = pad.top + ph - v/maxVal*ph;
-      ctx.fillStyle = yColors[year];
-      ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI*2); ctx.fill();
-      // Value label for last month
-      if (i === vals.length-1 || (year==='2026' && i===5)) {
-        ctx.fillStyle = yColors[year];
-        ctx.font = 'bold 10px -apple-system,sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(v.toFixed(1), x+6, y+4);
-      }
-    });
-  });
-
-  // Month labels
-  ctx.textAlign = 'center'; ctx.fillStyle = '#9ca3af'; ctx.font = '11px -apple-system,sans-serif';
-  months.forEach((m,i) => ctx.fillText(m, pad.left+i*groupW+groupW/2, H-8));
-
-  // Title & legend
-  ctx.fillStyle = '#4b5563'; ctx.font = 'bold 11px -apple-system,sans-serif'; ctx.textAlign = 'left';
-  ctx.fillText(metric.name + ' · 月度同比趋势', pad.left, 14);
-  analYears.forEach((y,i) => {
-    const lx = pad.left + 180 + i*56;
-    ctx.fillStyle = yColors[y]; ctx.fillRect(lx, 5, 10, 10);
-    ctx.fillStyle = '#4b5563'; ctx.font = '11px -apple-system,sans-serif';
-    ctx.fillText(y, lx+13, 13);
-  });
-
-  // Summary cards
-  renderAnalysisCards(metric);
-  // Data table
-  renderAnalysisTable(metric, months, groupW);
-}
-
-function renderAnalysisCards(metric) {
-  const years = analYears.filter(y => metric.monthly[y]);
-  if (years.length < 2) {
-    document.getElementById('propAnalysisCards').innerHTML = '';
-    return;
-  }
-  const latest = years[years.length-1];
-  const prev = years[years.length-2];
-  const latestVals = metric.monthly[latest];
-  const prevVals = metric.monthly[prev];
-  const latestSum = latestVals.reduce((a,b)=>a+b,0);
-  const prevH1 = prevVals.slice(0,6).reduce((a,b)=>a+b,0);
-  const latestH1 = latestVals.slice(0,6).reduce((a,b)=>a+b,0);
-  const yoy = prevH1 > 0 ? ((latestH1 - prevH1)/prevH1*100) : 0;
-  const mom = latestVals.filter((_,i)=>i<6&&prevVals[i]>0).map((v,i)=>((v-prevVals[i])/prevVals[i]*100));
-  const avgMom = mom.length > 0 ? mom.reduce((a,b)=>a+b,0)/mom.length : 0;
-
-  const isGood = metric.invert ? (yoy < 0) : (yoy > 0);
-  const cls = isGood ? 'up' : 'down';
-  const arrow = isGood ? '↑' : '↓';
-
-  document.getElementById('propAnalysisCards').innerHTML = `
-    <div class="prop-a-card">
-      <div class="a-card-val">${latestH1.toFixed(1)}<span style="font-size:10px;color:var(--text2)"> ${metric.unit}</span></div>
-      <div class="a-card-label">${latest}年 1-6月合计</div>
-      <div class="a-card-delta">${prev}同期 ${prevH1.toFixed(1)}</div>
-    </div>
-    <div class="prop-a-card">
-      <div class="a-card-val" style="color:${isGood?'#059669':'#b91c1c'}">${arrow} ${Math.abs(yoy).toFixed(1)}%</div>
-      <div class="a-card-label">同比变化（vs ${prev}）</div>
-      <div class="a-card-delta ${cls}">1-6月累计同比</div>
-    </div>
-    <div class="prop-a-card">
-      <div class="a-card-val">${latestSum.toFixed(1)}<span style="font-size:10px;color:var(--text2)"> ${metric.unit}</span></div>
-      <div class="a-card-label">${latest}年 ${latest==='2026'?'1-6月':'全年'}合计</div>
-    </div>
-    <div class="prop-a-card">
-      <div class="a-card-val" style="color:${avgMom>=0?'#059669':'#b91c1c'}">${avgMom>=0?'+':''}${avgMom.toFixed(1)}%</div>
-      <div class="a-card-label">月均同比变化</div>
-    </div>`;
-}
-
-function renderAnalysisTable(metric, months) {
-  const years = analYears.filter(y => metric.monthly[y]);
-  let html = `<table class="prop-table"><thead><tr><th>月份</th>${years.map(y=>`<th>${y}年(${metric.unit})</th>`).join('')}<th>同比变化</th></tr></thead><tbody>`;
-
-  const latest = years[years.length-1];
-  const prev = years[years.length-2];
-
-  for (let i = 0; i < 12; i++) {
-    if (latest === '2026' && i >= 6) break; // Only show H1 for 2026
-    const latestV = metric.monthly[latest] ? metric.monthly[latest][i] : null;
-    const prevV = metric.monthly[prev] ? metric.monthly[prev][i] : null;
-    const yoyChange = (latestV && prevV && prevV > 0) ? ((latestV - prevV)/prevV*100) : null;
-    const yoyCls = yoyChange !== null ? (metric.invert ? (yoyChange<0?'prop-val-pos':'prop-val-neg') : (yoyChange>=0?'prop-val-pos':'prop-val-neg')) : '';
-    html += `<tr><td>${months[i]}</td>`;
-    years.forEach(y => {
-      const v = metric.monthly[y] ? metric.monthly[y][i] : null;
-      html += `<td>${v !== null && v !== 0 ? v.toFixed(2) : (y==='2026'&&i>=6?'—':'0')}</td>`;
-    });
-    html += `<td class="${yoyCls}">${yoyChange !== null ? (yoyChange>=0?'+':'')+yoyChange.toFixed(1)+'%' : '—'}</td></tr>`;
-  }
-
-  // Sum row
-  html += `<tr class="prop-row-total"><td>合计</td>`;
-  years.forEach(y => {
-    const vals = metric.monthly[y];
-    const sum = vals ? vals.slice(0, y==='2026'?6:12).reduce((a,b)=>a+b,0) : 0;
-    html += `<td>${sum.toFixed(2)}</td>`;
-  });
-  const latestSum = (metric.monthly[latest]||[]).slice(0,6).reduce((a,b)=>a+b,0);
-  const prevSum = (metric.monthly[prev]||[]).slice(0,6).reduce((a,b)=>a+b,0);
-  const totalYoy = prevSum > 0 ? ((latestSum-prevSum)/prevSum*100) : 0;
-  const tyCls = metric.invert ? (totalYoy<0?'prop-val-pos':'prop-val-neg') : (totalYoy>=0?'prop-val-pos':'prop-val-neg');
-  html += `<td class="${tyCls}">${totalYoy>=0?'+':''}${totalYoy.toFixed(1)}%</td></tr>`;
-
-  html += '</tbody></table>';
-  document.getElementById('propAnalysisTable').innerHTML = html;
-}
-
-function renderAnnualChart() {
-  const canvas = document.getElementById('propAnalysisChart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle = '#fafdfd'; ctx.fillRect(0,0,W,H);
-  const pad = {top:25, right:40, bottom:40, left:55};
-  const pw = W - pad.left - pad.right, ph = H - pad.top - pad.bottom;
-
-  const keys = ['income','propFee','parking','expense','profit'];
-  const colors = {income:'#6b90e0',propFee:'#ed7279',parking:'#3db3b3',expense:'#828996',profit:'#48b5a0'};
-  const yearKeys = ['2023','2024','2025','2026H1'];
-
-  // Collect all values: positives above zero, negatives below zero (as abs)
-  const allPos = keys.flatMap(k => yearKeys.map(y => {const v=ANAL_ANNUAL[k].vals[y]||0; return v>0?v:0;}));
-  const maxPos = Math.ceil(Math.max(...allPos, 1)/100)*100+100;
-  const maxNeg = 200; // negative axis capped at 200
-
-  // Zero baseline offset from bottom
-  const zeroY = pad.top + ph - 50; // zero near bottom, leave room for negative bars
-  const posH = zeroY - pad.top - 15;
-  const negH = 120; // fixed height for negative side
-  const posScale = posH / maxPos;
-  const negScale = negH / maxNeg;
-
-  // Positive grid
-  ctx.strokeStyle = '#f0eeed'; ctx.lineWidth = 0.5;
-  ctx.fillStyle = '#9ca3af'; ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'right';
-  for (let v=0; v<=maxPos; v+=100) {
-    const y = zeroY - v*posScale;
-    if (y > pad.top) { ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(W-pad.right,y); ctx.stroke(); }
-    ctx.fillText(v, pad.left-6, y+3);
-  }
-  // Negative grid
-  for (let v=50; v<=maxNeg; v+=50) {
-    const y = zeroY + v*negScale;
-    if (y < pad.top+ph-10) { ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(W-pad.right,y); ctx.stroke(); }
-    ctx.fillText(-v, pad.left-6, y+3);
-  }
-  // Zero line
-  ctx.strokeStyle = '#c5c3c3'; ctx.lineWidth = 1.2;
-  ctx.beginPath(); ctx.moveTo(pad.left, zeroY); ctx.lineTo(W-pad.right, zeroY); ctx.stroke();
-
-  const groups = keys.length, groupW = pw/groups, barW = groupW*0.14;
-  const yColors = {2023:'#6b90e0',2024:'#f7b84e',2025:'#3db3b3','2026H1':'#ed7279'};
-
-  keys.forEach((k, gi) => {
-    const baseX = pad.left + gi*groupW + groupW*0.08;
-    yearKeys.forEach((yk, yi) => {
-      const raw = ANAL_ANNUAL[k].vals[yk]||0;
-      const v = Math.abs(raw);
-      const isNeg = raw < 0;
-      const h = isNeg ? Math.min(v, maxNeg) * negScale : v * posScale;
-      const x = baseX + yi*(barW+3);
-      ctx.fillStyle = isNeg ? '#e0c4c9' : yColors[yk]; // lighter rose for negative bars
-      if (isNeg) {
-        ctx.beginPath(); ctx.roundRect(x, zeroY, barW, h, [0,0,2,2]); ctx.fill();
-        ctx.fillStyle = '#4b5563'; ctx.font = '8px -apple-system,sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(raw.toFixed(0), x+barW/2, zeroY+h+10);
-      } else {
-        ctx.beginPath(); ctx.roundRect(x, zeroY-h, barW, h, [2,2,0,0]); ctx.fill();
-        if (v > 0) {
-          ctx.fillStyle = '#4b5563'; ctx.font = '8px -apple-system,sans-serif'; ctx.textAlign = 'center';
-          ctx.fillText(v.toFixed(0), x+barW/2, zeroY-h-3);
-        }
-      }
-    });
-    // Group label
-    ctx.fillStyle = '#4b5563'; ctx.font = 'bold 10px -apple-system,sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(ANAL_ANNUAL[k].name, baseX+yearKeys.length*(barW+3)/2, H-8);
-  });
-
-  // Legend
-  ctx.textAlign = 'left'; ctx.font = '11px -apple-system,sans-serif';
-  yearKeys.forEach((yk, i) => {
-    const lx = W-260+i*56;
-    ctx.fillStyle = yColors[yk]; ctx.fillRect(lx,5,10,10);
-    ctx.fillStyle = '#4b5563'; ctx.fillText(yk, lx+13,13);
-  });
-
-  renderAnnualCards();
-  renderAnnualTable();
-}
-
-function renderAnnualCards() {
-  const items = [
-    {k:'income', icon:'收入'},
-    {k:'propFee', icon:'物业费'},
-    {k:'parking', icon:'停车费'},
-    {k:'profit', icon:'净利润'},
-  ];
-  document.getElementById('propAnalysisCards').innerHTML = items.map(item => {
-    const d = ANAL_ANNUAL[item.k];
-    const v2025 = d.vals['2025']||0, v2026 = d.vals['2026H1']||0;
-    const growth = v2025!==0 ? ((v2026-v2025)/Math.abs(v2025)*100) : 0;
-    const cls = growth>=0?'up':'down';
-    return `<div class="prop-a-card">
-      <div class="a-card-val">${v2026.toFixed(1)}<span style="font-size:10px;color:var(--text2)"> ${d.unit}</span></div>
-      <div class="a-card-label">${d.name} (2026H1)</div>
-      <div class="a-card-delta ${cls}">vs 2025 ${growth>=0?'+':''}${growth.toFixed(1)}%</div>
-    </div>`;
-  }).join('');
-}
-
-function renderAnnualTable() {
-  const keys = ['income','propFee','parking','expense','profit','margin'];
-  const yearKeys = ['2023','2024','2025','2026H1'];
-  let html = `<table class="prop-table"><thead><tr><th>指标</th>${yearKeys.map(y=>`<th>${y}</th>`).join('')}<th>23→25趋势</th></tr></thead><tbody>`;
-  keys.forEach(k => {
-    const d = ANAL_ANNUAL[k];
-    html += `<tr><td><b>${d.name}</b></td>`;
-    yearKeys.forEach(yk => {
-      const v = d.vals[yk];
-      const cls = (v!==undefined&&v<0)?'prop-val-neg':(v!==undefined&&v>0&&k==='profit')?'prop-val-pos':'';
-      html += `<td class="${cls}">${v!==undefined?v.toFixed(2):'—'}${k==='margin'?'%':''}</td>`;
-    });
-    const trend23_25 = d.vals['2023']&&d.vals['2025'] ? ((d.vals['2025']-d.vals['2023'])/Math.abs(d.vals['2023'])*100) : 0;
-    const tcls = trend23_25>=0?(k==='expense'?'prop-val-neg':'prop-val-pos'):(k==='expense'?'prop-val-pos':'prop-val-neg');
-    html += `<td class="${tcls}">${trend23_25>=0?'+':''}${trend23_25.toFixed(1)}%</td></tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('propAnalysisTable').innerHTML = html;
-}
-
-function renderGrowthView() {
-  const canvas = document.getElementById('propAnalysisChart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle = '#fafdfd'; ctx.fillRect(0,0,W,H);
-  const pad = {top:25, right:40, bottom:40, left:55};
-  const pw = W - pad.left - pad.right, ph = H - pad.top - pad.bottom;
-
-  const metric = ANAL_METRICS[analMetric];
-  if (!metric) return;
-
-  // Calculate YOY growth rates
-  const growthData = {};
-  const years = ['2023','2024','2025','2026'];
-  years.forEach(y => {
-    if (!metric.monthly[y]) return;
-    growthData[y] = [];
-    for (let i = 0; i < 6; i++) {
-      const prevY = metric.monthly[(parseInt(y)-1).toString()];
-      const cur = metric.monthly[y][i];
-      const prev = prevY ? prevY[i] : null;
-      if (prev && prev > 0 && cur > 0) {
-        growthData[y].push(parseFloat(((cur-prev)/prev*100).toFixed(1)));
-      } else {
-        growthData[y].push(null);
-      }
-    }
-  });
-
-  const allGrowths = Object.values(growthData).flat().filter(v=>v!==null);
-  const absMax = Math.ceil(Math.max(...allGrowths.map(Math.abs), 20)/10)*10+10;
-  const minVal = -absMax, maxVal = absMax;
-
-  // Grid
-  ctx.strokeStyle = '#f0eeed'; ctx.lineWidth = 0.5;
-  for (let v = minVal; v <= maxVal; v += absMax/5) {
-    const y = pad.top+ph-(v-minVal)/(maxVal-minVal)*ph;
-    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(W-pad.right,y); ctx.stroke();
-    ctx.fillStyle = '#9ca3af'; ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'right';
-    ctx.fillText(v.toFixed(0)+'%', pad.left-6, y+3);
-  }
-  // Zero line
-  const zeroY = pad.top+ph-(0-minVal)/(maxVal-minVal)*ph;
-  ctx.strokeStyle = '#c5c3c3'; ctx.lineWidth = 1.2;
-  ctx.beginPath(); ctx.moveTo(pad.left,zeroY); ctx.lineTo(W-pad.right,zeroY); ctx.stroke();
-
-  const months6 = ['1月','2月','3月','4月','5月','6月'];
-  const groupW = pw / 6;
-  const yColors = {2023:'#6b90e0',2024:'#f7b84e',2025:'#3db3b3',2026:'#ed7279'};
-
-  Object.entries(growthData).forEach(([year, vals]) => {
-    if (year === '2023') return; // 2023 has no prior year
-    ctx.strokeStyle = yColors[year];
-    ctx.lineWidth = year==='2026'?2.5:1.8;
-    if (year!=='2026') ctx.setLineDash([4,3]);
-
-    ctx.beginPath();
-    vals.forEach((v, i) => {
-      if (v === null) return;
-      const x = pad.left+i*groupW+groupW/2;
-      const y = pad.top+ph-(v-minVal)/(maxVal-minVal)*ph;
-      if (i===0||vals[i-1]===null) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    });
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Dots
-    vals.forEach((v, i) => {
-      if (v === null) return;
-      const x = pad.left+i*groupW+groupW/2;
-      const y = pad.top+ph-(v-minVal)/(maxVal-minVal)*ph;
-      ctx.fillStyle = yColors[year];
-      ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
-      ctx.fillText((v>=0?'+':'')+v.toFixed(0)+'%', x, y-7);
-    });
-  });
-
-  // Labels
-  ctx.textAlign = 'center'; ctx.fillStyle = '#9ca3af'; ctx.font = '11px -apple-system,sans-serif';
-  months6.forEach((m,i) => ctx.fillText(m, pad.left+i*groupW+groupW/2, H-8));
-  ctx.fillStyle = '#4b5563'; ctx.font = 'bold 11px -apple-system,sans-serif'; ctx.textAlign = 'left';
-  ctx.fillText(metric.name + ' · 同比增长率（1-6月）', pad.left, 14);
-
-  // Legend
-  Object.keys(growthData).filter(y=>y!=='2023').forEach((y,i) => {
-    const lx = pad.left+200+i*56;
-    ctx.fillStyle = yColors[y]; ctx.fillRect(lx,5,10,10);
-    ctx.fillStyle = '#4b5563'; ctx.font = '11px -apple-system,sans-serif';
-    ctx.fillText(y+' vs '+(parseInt(y)-1), lx+13, 13);
-  });
-
-  document.getElementById('propAnalysisCards').innerHTML = '';
-  renderAnalysisTable(metric, months6);
-}
 
 // ===== Org Management =====
 // --- Employee data layer ---
@@ -8653,6 +7749,921 @@ function renderWorkspace(){
       '</div>';
   }catch(e){}
 
+}
+
+// ===== TRAINEE EVALUATION SYSTEM =====
+var evalCurrentView = 'weekly';
+var evalCurrentWeek = 0;
+var evalSelectedTrainee = null;
+var evalData = null;
+
+var EVAL_TRAINEES = [
+  {id:'chendshuangjie',name:'陈双杰',role:'DS小队长',level:'第二层',supervisor:'Jenny',location:'香港(6.7到港)',color:'#7B8FC0',avatarBg:'#7B8FC0'},
+  {id:'chenjin',name:'陈锦',role:'账务管培生',level:'第二层',supervisor:'王倩',location:'上海',color:'#D4A76A',avatarBg:'#D4A76A'},
+  {id:'zhaoliuwen',name:'赵柳文',role:'法务管培生',level:'第二层',supervisor:'Bella',location:'香港(6.7到港)',color:'#8BA89C',avatarBg:'#8BA89C'},
+  {id:'anziyue',name:'安子玥',role:'法务管培生',level:'第二层',supervisor:'Bella',location:'上海',color:'#A09DB5',avatarBg:'#A09DB5'},
+  {id:'huangyanting',name:'黄燕婷',role:'HR管培生',level:'第二层',supervisor:'Shaun',location:'上海→香港',color:'#D4A76A',avatarBg:'#D4A76A'},
+  {id:'renmengchao',name:'任梦超',role:'CS管培生',level:'第三层',supervisor:'Bella',location:'北美在线',color:'var(--accent)',avatarBg:'#C94F66'},
+  {id:'chenyuan',name:'陈圆',role:'CS管培生',level:'第三层',supervisor:'Bella',location:'香港(6.1到港)',color:'#8BA89C',avatarBg:'#8BA89C'}
+];
+
+var EVAL_DIMS = [
+  {id:'taskCompletion',name:'任务完成度',weight:30,max:30,desc:'本周任务全部按时完成，交付质量高'},
+  {id:'workQuality',name:'工作质量',weight:25,max:25,desc:'提交工作前请核对细节'},
+  {id:'collaboration',name:'协作贡献',weight:20,max:20,desc:'积极协助团队成员解决问题'},
+  {id:'responseSpeed',name:'响应速度',weight:15,max:15,desc:'对需求变更响应迅速'},
+  {id:'innovation',name:'主动创新',weight:10,max:10,desc:'提出了流程优化建议'}
+];
+
+var EVAL_WEEKS = [
+  {id:'W1',label:'W1',start:'06/01',end:'06/05',month:'6月'},
+  {id:'W2',label:'W2',start:'06/08',end:'06/12',month:'6月'},
+  {id:'W3',label:'W3',start:'06/15',end:'06/19',month:'6月'},
+  {id:'W4',label:'W4',start:'06/22',end:'06/26',month:'6月'},
+  {id:'W5',label:'W5',start:'06/29',end:'07/03',month:'6-7月'},
+  {id:'W6',label:'W6',start:'07/06',end:'07/10',month:'7月'},
+  {id:'W7',label:'W7',start:'07/13',end:'07/17',month:'7月'},
+  {id:'W8',label:'W8',start:'07/20',end:'07/24',month:'7月'},
+  {id:'W9',label:'W9',start:'07/27',end:'07/31',month:'7月'},
+  {id:'W10',label:'W10',start:'08/03',end:'08/07',month:'8月'},
+  {id:'W11',label:'W11',start:'08/10',end:'08/14',month:'8月'},
+  {id:'W12',label:'W12',start:'08/17',end:'08/21',month:'8月'},
+  {id:'W13',label:'W13',start:'08/24',end:'08/28',month:'8月'},
+  {id:'W14',label:'W14',start:'08/31',end:'09/04',month:'8-9月'}
+];
+
+function getEvalStorageKey(){ return 'otms_trainee_eval_v1'; }
+
+function loadEvalData(){
+  try{
+    var raw = localStorage.getItem(getEvalStorageKey());
+    if(raw){ evalData = JSON.parse(raw); return; }
+  }catch(e){}
+  evalData = {scores:{}, extras:{}};
+}
+
+function saveEvalData(){
+  try{ localStorage.setItem(getEvalStorageKey(), JSON.stringify(evalData)); }catch(e){}
+}
+
+function getEvalScore(traineeId, weekId){
+  if(!evalData) loadEvalData();
+  var key = traineeId + '|' + weekId;
+  return evalData.scores[key] || null;
+}
+
+function getEvalExtras(traineeId, weekId){
+  if(!evalData) loadEvalData();
+  var key = traineeId + '|' + weekId;
+  return evalData.extras[key] || [];
+}
+
+function setEvalScore(traineeId, weekId, scores){
+  if(!evalData) loadEvalData();
+  var key = traineeId + '|' + weekId;
+  evalData.scores[key] = scores;
+  saveEvalData();
+}
+
+function setEvalExtras(traineeId, weekId, extras){
+  if(!evalData) loadEvalData();
+  var key = traineeId + '|' + weekId;
+  evalData.extras[key] = extras;
+  saveEvalData();
+}
+
+function calcTotalScore(scores){
+  if(!scores) return null;
+  var total = 0;
+  EVAL_DIMS.forEach(function(d){
+    total += (scores[d.id] || 0);
+  });
+  return Math.round(total * 10) / 10;
+}
+
+function calcExtraTotal(extras){
+  if(!extras || !extras.length) return 0;
+  return extras.reduce(function(s,e){ return s + (parseInt(e.score)||0); }, 0);
+}
+
+function initEvalSystem(){
+  loadEvalData();
+  var cu = currentUser || '王妤扬';
+  document.getElementById('evalAvatar').textContent = (cu||'评').charAt(0);
+  document.getElementById('evalName').textContent = cu || '评分人';
+  var now = new Date();
+  var startDate = new Date(2026,5,1);
+  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
+  if(diffDays < 0) diffDays = 0;
+  evalCurrentWeek = Math.min(Math.floor(diffDays / 7), 13);
+  initSampleData();
+  switchEvalView('weekly');
+}
+
+function initSampleData(){
+  var hasData = false;
+  for(var i=0;i<EVAL_TRAINEES.length;i++){
+    var s = getEvalScore(EVAL_TRAINEES[i].id, 'W1');
+    if(s){ hasData = true; break; }
+  }
+  if(hasData) return;
+  var w1Scores = {
+    'chendshuangjie': {taskCompletion:29,workQuality:24,collaboration:20,responseSpeed:15,innovation:10},
+    'chenjin':        {taskCompletion:22,workQuality:19,collaboration:17,responseSpeed:11,innovation:7},
+    'zhaoliuwen':     {taskCompletion:29,workQuality:25,collaboration:19,responseSpeed:15,innovation:10},
+    'anziyue':        {taskCompletion:29,workQuality:25,collaboration:19,responseSpeed:15,innovation:10},
+    'huangyanting':   {taskCompletion:24,workQuality:20,collaboration:18,responseSpeed:12,innovation:7},
+    'renmengchao':    {taskCompletion:30,workQuality:25,collaboration:20,responseSpeed:14,innovation:9.5},
+    'chenyuan':       {taskCompletion:30,workQuality:25,collaboration:20,responseSpeed:14,innovation:9.5}
+  };
+  var w1Extras = {
+    'chendshuangjie': [{name:'数据看板搭建',score:'10',desc:'完成管培生数据看板V1.0'}],
+    'renmengchao':    [{name:'架构设计文档',score:'9',desc:'完成三链路架构设计文档'}],
+    'chenyuan':       [{name:'前端页面框架',score:'10',desc:'完成合同档案系统前端框架搭建'}]
+  };
+  Object.keys(w1Scores).forEach(function(tid){
+    setEvalScore(tid, 'W1', w1Scores[tid]);
+    if(w1Extras[tid]) setEvalExtras(tid, 'W1', w1Extras[tid]);
+  });
+  var w2Scores = {
+    'chendshuangjie': {taskCompletion:27,workQuality:23,collaboration:19,responseSpeed:13,innovation:9.5},
+    'chenjin':        {taskCompletion:23,workQuality:19,collaboration:17,responseSpeed:11,innovation:6.5}
+  };
+  Object.keys(w2Scores).forEach(function(tid){
+    setEvalScore(tid, 'W2', w2Scores[tid]);
+  });
+}
+
+function switchEvalView(view){
+  evalCurrentView = view;
+  document.getElementById('evalWeeklyView').style.display = view==='weekly'?'':'none';
+  document.getElementById('evalCalendarView').style.display = view==='calendar'?'':'none';
+  document.getElementById('evalHistoryView').style.display = view==='history'?'':'none';
+  document.querySelectorAll('#evalSubTabs .eval-sub-tab').forEach(function(b,i){
+    var views = ['weekly','calendar','history'];
+    b.classList.toggle('active', views[i]===view);
+  });
+  if(view==='weekly'){ renderEvalWeekTabs(); renderEvalTraineeList(); }
+  else if(view==='calendar'){ renderEvalCalendar(); }
+  else if(view==='history'){ renderEvalHistory(); }
+}
+
+function renderEvalWeekTabs(){
+  var el = document.getElementById('evalWeekTabs');
+  var html = '';
+  for(var i=0;i<EVAL_WEEKS.length;i++){
+    var w = EVAL_WEEKS[i];
+    var hasData = false;
+    for(var j=0;j<EVAL_TRAINEES.length;j++){
+      if(getEvalScore(EVAL_TRAINEES[j].id, w.id)){ hasData = true; break; }
+    }
+    html += '<button class="eval-week-tab'+(i===evalCurrentWeek?' active':'')+(hasData?' has-data':'')+'" onclick="evalCurrentWeek='+i+';renderEvalWeekTabs();renderEvalTraineeList();evalSelectedTrainee=null;document.getElementById(\'evalScorePanelContainer\').innerHTML=\'<div class=eval-empty>选择左侧学员查看评分详情</div>\';">'+w.label+'<span style="font-size:7px;display:block">'+w.start+'</span>'+(hasData?'<span class=wk-dot></span>':'')+'</button>';
+  }
+  el.innerHTML = html;
+}
+
+function renderEvalTraineeList(){
+  var el = document.getElementById('evalTraineeList');
+  var search = (document.getElementById('evalTraineeSearch').value || '').trim().toLowerCase();
+  var weekId = EVAL_WEEKS[evalCurrentWeek].id;
+  var html = '';
+  for(var i=0;i<EVAL_TRAINEES.length;i++){
+    var t = EVAL_TRAINEES[i];
+    if(search && t.name.indexOf(search)===-1 && t.supervisor.toLowerCase().indexOf(search)===-1 && t.role.indexOf(search)===-1) continue;
+    var s = getEvalScore(t.id, weekId);
+    var total = calcTotalScore(s);
+    var extras = getEvalExtras(t.id, weekId);
+    var extraTotal = calcExtraTotal(extras);
+    var prevWeekIdx = evalCurrentWeek - 1;
+    var change = null;
+    if(prevWeekIdx >= 0){
+      var prevScore = getEvalScore(t.id, EVAL_WEEKS[prevWeekIdx].id);
+      var prevTotal = calcTotalScore(prevScore);
+      if(prevTotal !== null && total !== null){
+        change = Math.round((total - prevTotal) * 10) / 10;
+      }
+    }
+    var initials = t.name.charAt(0);
+    html += '<div class="eval-trainee-card'+(evalSelectedTrainee===t.id?' selected':'')+'" onclick="selectEvalTrainee(\''+t.id+'\')">'+
+      '<div class="eval-trainee-avatar" style="background:'+t.avatarBg+'">'+initials+'</div>'+
+      '<div class="eval-trainee-info">'+
+        '<div class="eval-trainee-name">'+t.name+'</div>'+
+        '<div class="eval-trainee-meta">'+t.level+' · '+t.supervisor+'</div>'+
+      '</div>'+
+      '<div class="eval-trainee-score">'+
+        (total !== null ? ('<div class="score-num">'+total+'</div>'+(change !== null && change !== 0 ? '<div class="score-change '+(change>0?'up':'down')+'">'+(change>0?'+':'')+change+'</div>' : '')+(extraTotal > 0 ? '<div style="font-size:8px;color:var(--accent);margin-top:2px">+'+extraTotal+'</div>' : '')) : '<div class="score-num" style="color:var(--text-muted);font-size:13px">—</div>')+
+      '</div>'+
+    '</div>';
+  }
+  el.innerHTML = html || '<div class="eval-empty" style="padding:20px">无匹配学员</div>';
+}
+
+function selectEvalTrainee(traineeId){
+  evalSelectedTrainee = traineeId;
+  renderEvalTraineeList();
+  renderEvalScorePanel(traineeId);
+}
+
+function renderEvalScorePanel(traineeId){
+  var t = null;
+  for(var i=0;i<EVAL_TRAINEES.length;i++){ if(EVAL_TRAINEES[i].id===traineeId){ t=EVAL_TRAINEES[i]; break; } }
+  if(!t) return;
+  var weekId = EVAL_WEEKS[evalCurrentWeek].id;
+  var weekLabel = EVAL_WEEKS[evalCurrentWeek].label + ' (' + EVAL_WEEKS[evalCurrentWeek].start + ' - ' + EVAL_WEEKS[evalCurrentWeek].end + ')';
+  var s = getEvalScore(t.id, weekId) || {};
+  var extras = getEvalExtras(t.id, weekId) || [];
+  var total = calcTotalScore(s);
+  var extraTotal = calcExtraTotal(extras);
+  var container = document.getElementById('evalScorePanelContainer');
+
+  var dimsHtml = '';
+  for(var i=0;i<EVAL_DIMS.length;i++){
+    var d = EVAL_DIMS[i];
+    var val = s[d.id] || 0;
+    dimsHtml += '<div class="eval-dim-item">'+
+      '<div class="eval-dim-label"><div class="dim-name">'+d.name+'</div><div class="dim-weight">权重 '+d.weight+'%</div></div>'+
+      '<div class="eval-dim-score-input"><input type="number" value="'+val+'" min="0" max="'+d.max+'" step="0.5" onchange="updateDimScore(\''+t.id+'\',\''+d.id+'\',this.value,\''+weekId+'\')" id="evalDim_'+d.id+'"></div>'+
+      '<div class="eval-dim-max">/ '+d.max+'</div>'+
+      '<div class="eval-dim-slider"><input type="range" value="'+val+'" min="0" max="'+d.max+'" step="0.5" oninput="var inp=document.getElementById(\'evalDim_'+d.id+'\');if(inp){inp.value=this.value;updateDimScore(\''+t.id+'\',\''+d.id+'\',this.value,\''+weekId+'\');}"></div>'+
+      '<div class="eval-dim-comment" style="width:160px;flex-shrink:0"><input type="text" placeholder="评语..." value="'+esc((s[d.id+'Comment']||d.desc))+'" onchange="updateDimComment(\''+t.id+'\',\''+d.id+'\',this.value,\''+weekId+'\')"></div>'+
+    '</div>';
+  }
+
+  var extrasHtml = '';
+  extrasHtml = '<div class="eval-extra-tasks">'+
+    '<div class="section-label"><span style="display:inline-block;width:3px;height:12px;border-radius:2px;background:var(--accent)"></span>个性化任务评分 <span style="font-size:8px;color:var(--text-muted);font-weight:400">加分项</span></div>';
+  for(var i=0;i<extras.length;i++){
+    extrasHtml += '<div class="eval-extra-task-item">'+
+      '<span style="font-size:9px;color:var(--text-dim);width:20px">'+(i+1)+'.</span>'+
+      '<div class="task-name"><input type="text" value="'+esc(extras[i].name||'')+'" placeholder="任务名称" onchange="updateExtraTask(\''+t.id+'\',\''+weekId+'\','+i+',\'name\',this.value)" style="width:100%;border:1px solid var(--border-light);border-radius:6px;padding:4px 8px;font-size:10px;font-family:inherit;outline:none"></div>'+
+      '<div class="task-desc"><input type="text" value="'+esc(extras[i].desc||'')+'" placeholder="任务描述" onchange="updateExtraTask(\''+t.id+'\',\''+weekId+'\','+i+',\'desc\',this.value)" style="width:100%"></div>'+
+      '<div class="task-score"><input type="number" value="'+(extras[i].score||0)+'" placeholder="分值" onchange="updateExtraTask(\''+t.id+'\',\''+weekId+'\','+i+',\'score\',this.value)"></div>'+
+      '<button onclick="removeExtraTask(\''+t.id+'\',\''+weekId+'\','+i+')" style="border:none;background:none;cursor:pointer;color:var(--text-muted);font-size:14px;padding:2px">&times;</button>'+
+    '</div>';
+  }
+  extrasHtml += '<button onclick="addExtraTask(\''+t.id+'\',\''+weekId+'\')" style="padding:5px 12px;border:1px dashed var(--border);background:none;border-radius:6px;font-size:9px;color:var(--text-dim);cursor:pointer;font-family:inherit;margin-top:4px">+ 添加加分项</button>'+
+  '</div>';
+
+  var prevWeekIdx = evalCurrentWeek - 1;
+  var prevDataBtn = '';
+  if(prevWeekIdx >= 0){
+    var prevWeekId = EVAL_WEEKS[prevWeekIdx].id;
+    prevDataBtn = '<button class="eval-btn-restore" onclick="restorePrevWeekData(\''+t.id+'\',\''+prevWeekId+'\',\''+weekId+'\')">恢复'+EVAL_WEEKS[prevWeekIdx].label+'数据</button>';
+  }
+
+  container.innerHTML =
+    '<div class="eval-score-panel">'+
+      '<div class="eval-score-panel-hd">'+
+        '<div><div class="name">'+t.name+'</div><div class="meta">'+t.level+' · '+t.supervisor+' · '+weekLabel+'</div></div>'+
+        '<div style="text-align:right"><div style="font-size:8px;color:var(--text-muted)">综合得分</div><div style="font-size:10px;color:var(--text-muted)">通用满分 100 分（个性化分数仅作展示，不计入总分）</div></div>'+
+      '</div>'+
+      '<div class="eval-total-score">'+
+        '<div class="big-num">'+(total !== null ? total : '—')+'</div>'+
+        '<div class="big-label">通用 '+(total !== null ? total : '—')+' / 100</div>'+
+        (extraTotal > 0 ? '<div class="sub-text" style="color:var(--accent)">个性化 +'+extraTotal+' 分</div>' : '<div class="sub-text">个性化 0 分</div>')+
+      '</div>'+
+      '<div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:10px">通用评分 <span style="font-weight:400;color:var(--text-dim);font-size:9px">满分 100 分</span></div>'+
+      '<div class="eval-dims">'+dimsHtml+'</div>'+
+      extrasHtml +
+      '<div class="eval-save-row">'+
+        prevDataBtn +
+        '<button class="eval-btn-save" onclick="saveCurrentEval(\''+t.id+'\',\''+weekId+'\')">保存评分</button>'+
+      '</div>'+
+    '</div>';
+}
+
+function updateDimScore(traineeId, dimId, value, weekId){
+  var s = getEvalScore(traineeId, weekId) || {};
+  s[dimId] = parseFloat(value) || 0;
+  setEvalScore(traineeId, weekId, s);
+  var total = calcTotalScore(s);
+  var totalEl = document.querySelector('#evalScorePanelContainer .big-num');
+  var labelEl = document.querySelector('#evalScorePanelContainer .big-label');
+  if(totalEl) totalEl.textContent = total !== null ? total : '—';
+  if(labelEl) labelEl.textContent = '通用 '+(total !== null ? total : '—')+' / 100';
+  renderEvalTraineeList();
+  renderEvalWeekTabs();
+}
+
+function updateDimComment(traineeId, dimId, value, weekId){
+  var s = getEvalScore(traineeId, weekId) || {};
+  s[dimId+'Comment'] = value;
+  setEvalScore(traineeId, weekId, s);
+}
+
+function addExtraTask(traineeId, weekId){
+  var extras = getEvalExtras(traineeId, weekId) || [];
+  extras.push({name:'',score:'0',desc:''});
+  setEvalExtras(traineeId, weekId, extras);
+  renderEvalScorePanel(traineeId);
+}
+
+function removeExtraTask(traineeId, weekId, index){
+  var extras = getEvalExtras(traineeId, weekId) || [];
+  extras.splice(index, 1);
+  setEvalExtras(traineeId, weekId, extras);
+  renderEvalScorePanel(traineeId);
+  renderEvalTraineeList();
+  renderEvalWeekTabs();
+}
+
+function updateExtraTask(traineeId, weekId, index, field, value){
+  var extras = getEvalExtras(traineeId, weekId) || [];
+  if(!extras[index]) return;
+  extras[index][field] = value;
+  setEvalExtras(traineeId, weekId, extras);
+  renderEvalTraineeList();
+  renderEvalWeekTabs();
+}
+
+function saveCurrentEval(traineeId, weekId){
+  renderEvalTraineeList();
+  renderEvalWeekTabs();
+  renderEvalScorePanel(traineeId);
+  var saveBtn = document.querySelector('.eval-btn-save');
+  if(saveBtn){ saveBtn.textContent = '已保存'; setTimeout(function(){ saveBtn.textContent = '保存评分'; }, 1500); }
+}
+
+function restorePrevWeekData(traineeId, prevWeekId, weekId){
+  var prevScore = getEvalScore(traineeId, prevWeekId);
+  if(!prevScore){ alert('上一周无评分数据'); return; }
+  setEvalScore(traineeId, weekId, JSON.parse(JSON.stringify(prevScore)));
+  var prevExtras = getEvalExtras(traineeId, prevWeekId);
+  if(prevExtras && prevExtras.length){
+    setEvalExtras(traineeId, weekId, JSON.parse(JSON.stringify(prevExtras)));
+  }
+  renderEvalScorePanel(traineeId);
+  renderEvalTraineeList();
+  renderEvalWeekTabs();
+}
+
+function renderEvalCalendar(){
+  var totalAvg = 0, totalCount = 0, maxWeekAvg = 0, maxWeekLabel = '';
+  for(var w=0;w<EVAL_WEEKS.length;w++){
+    var weekScores = [];
+    for(var t=0;t<EVAL_TRAINEES.length;t++){
+      var s = getEvalScore(EVAL_TRAINEES[t].id, EVAL_WEEKS[w].id);
+      var total = calcTotalScore(s);
+      if(total !== null){ weekScores.push(total); }
+    }
+    var avg = weekScores.length ? Math.round(weekScores.reduce(function(a,b){return a+b;},0)/weekScores.length*10)/10 : 0;
+    if(weekScores.length > 0){
+      totalAvg += weekScores.reduce(function(a,b){return a+b;},0);
+      totalCount += weekScores.length;
+    }
+    if(avg > maxWeekAvg){ maxWeekAvg = avg; maxWeekLabel = EVAL_WEEKS[w].label; }
+  }
+  var overallAvg = totalCount > 0 ? Math.round(totalAvg/totalCount*10)/10 : 0;
+
+  document.getElementById('evalCalStats').innerHTML =
+    '<div class="eval-cal-stat"><div class="stat-val">'+overallAvg+'</div><div class="stat-lbl">平均总分</div></div>'+
+    '<div class="eval-cal-stat"><div class="stat-val">'+EVAL_TRAINEES.length+'</div><div class="stat-lbl">学员人数</div></div>'+
+    '<div class="eval-cal-stat"><div class="stat-val">'+EVAL_WEEKS.length+'</div><div class="stat-lbl">评估周数</div></div>'+
+    '<div class="eval-cal-stat"><div class="stat-val">'+(maxWeekLabel||'—')+'</div><div class="stat-lbl">最高分周次</div></div>';
+
+  var gridHtml = '';
+  var currentMonth = '';
+  for(var w=0;w<EVAL_WEEKS.length;w++){
+    if(EVAL_WEEKS[w].month !== currentMonth){
+      currentMonth = EVAL_WEEKS[w].month;
+      gridHtml += '<div class="eval-cal-month-label">'+currentMonth+'</div>';
+    }
+    var wk = EVAL_WEEKS[w];
+    var weekScores = [];
+    var topTrainee = null;
+    var topScore = -1;
+    for(var t=0;t<EVAL_TRAINEES.length;t++){
+      var s = getEvalScore(EVAL_TRAINEES[t].id, wk.id);
+      var total = calcTotalScore(s);
+      if(total !== null){
+        weekScores.push(total);
+        if(total > topScore){ topScore = total; topTrainee = EVAL_TRAINEES[t]; }
+      }
+    }
+    var avg = weekScores.length ? Math.round(weekScores.reduce(function(a,b){return a+b;},0)/weekScores.length*10)/10 : 0;
+    var hasData = weekScores.length > 0;
+    gridHtml += '<div class="eval-cal-week'+(hasData?' has-data':'')+'" onclick="evalCurrentWeek='+w+';switchEvalView(\'weekly\');renderEvalWeekTabs();renderEvalTraineeList();" title="点击进入周评估">'+
+      '<div class="wk-label">'+wk.label+'</div>'+
+      '<div class="wk-date">'+wk.start+' - '+wk.end+'</div>'+
+      '<div class="wk-avg">'+(hasData ? avg : '—')+'</div>'+
+      '<div class="wk-status">'+(hasData ? '已完成' : '—')+' <span style="color:var(--text-muted)">'+weekScores.length+'/'+EVAL_TRAINEES.length+'</span></div>'+
+      (topTrainee ? '<div class="wk-top">最高分: '+topTrainee.name+'<br>'+topScore+'分</div>' : '')+
+    '</div>';
+  }
+  document.getElementById('evalCalGrid').innerHTML = gridHtml;
+}
+
+function renderEvalHistory(){
+  var search = (document.getElementById('evalHistorySearch').value || '').trim().toLowerCase();
+  var filtered = EVAL_TRAINEES.filter(function(t){
+    if(!search) return true;
+    return t.name.indexOf(search)!==-1 || t.supervisor.toLowerCase().indexOf(search)!==-1 || t.role.indexOf(search)!==-1;
+  });
+
+  var html = '<table class="eval-history-table"><thead><tr>'+
+    '<th style="width:80px">学员</th><th style="width:70px">层级</th>';
+  for(var w=0;w<EVAL_WEEKS.length;w++){
+    html += '<th style="min-width:48px">'+EVAL_WEEKS[w].label+'<br><span style="font-weight:400;font-size:7px">'+EVAL_WEEKS[w].start+'</span></th>';
+  }
+  html += '<th>平均</th></tr></thead><tbody>';
+
+  for(var t=0;t<filtered.length;t++){
+    var tr = filtered[t];
+    html += '<tr><td style="font-weight:500;color:var(--text)">'+tr.name+'</td><td style="font-size:8px;color:var(--text-dim)">'+tr.supervisor+'<br>'+tr.level+'</td>';
+    var allScores = [];
+    for(var w=0;w<EVAL_WEEKS.length;w++){
+      var s = getEvalScore(tr.id, EVAL_WEEKS[w].id);
+      var total = calcTotalScore(s);
+      if(total !== null){
+        allScores.push(total);
+        html += '<td style="cursor:pointer" onclick="evalCurrentWeek='+w+';switchEvalView(\'weekly\');renderEvalWeekTabs();renderEvalTraineeList();selectEvalTrainee(\''+tr.id+'\')">'+total+'</td>';
+      } else {
+        html += '<td style="color:var(--text-muted)">—</td>';
+      }
+    }
+    var avg = allScores.length ? Math.round(allScores.reduce(function(a,b){return a+b;},0)/allScores.length*10)/10 : '—';
+    html += '<td class="ev-avg">'+avg+'</td></tr>';
+  }
+  html += '</tbody></table>';
+
+  if(filtered.length === 0){
+    html = '<div class="eval-empty">无匹配记录</div>';
+  }
+  document.getElementById('evalHistoryTable').innerHTML = html;
+}
+
+function exportEvalData(){
+  loadEvalData();
+  var blob = new Blob([JSON.stringify(evalData, null, 2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'trainee_evaluation_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importEvalData(){
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      try{
+        var data = JSON.parse(ev.target.result);
+        if(data.scores){
+          evalData = data;
+          saveEvalData();
+          alert('数据导入成功！');
+          switchEvalView(evalCurrentView);
+        } else {
+          alert('无效的数据格式');
+        }
+      }catch(ex){
+        alert('导入失败：'+ex.message);
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function exportEvalCSV(){
+  var csv = '学员,层级,直属上级';
+  for(var w=0;w<EVAL_WEEKS.length;w++){ csv += ','+EVAL_WEEKS[w].label+' ('+EVAL_WEEKS[w].start+'-'+EVAL_WEEKS[w].end+')'; }
+  csv += ',平均\n';
+  for(var t=0;t<EVAL_TRAINEES.length;t++){
+    var tr = EVAL_TRAINEES[t];
+    csv += tr.name + ',' + tr.level + ',' + tr.supervisor;
+    var allScores = [];
+    for(var w=0;w<EVAL_WEEKS.length;w++){
+      var s = getEvalScore(tr.id, EVAL_WEEKS[w].id);
+      var total = calcTotalScore(s);
+      csv += ',' + (total !== null ? total : '');
+      if(total !== null) allScores.push(total);
+    }
+    csv += ',' + (allScores.length ? Math.round(allScores.reduce(function(a,b){return a+b;},0)/allScores.length*10)/10 : '');
+    csv += '\n';
+  }
+  var blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'trainee_evaluation_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ===== TRAINEE MANAGEMENT SYSTEM =====
+var tnCurrentView = 'tasks';
+var tnData = null;
+
+// 39 RACI tasks
+var TN_TASKS = [
+  // 用印档案公司管理系统 (13)
+  {id:'t1',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印档案MD文档编写与审核',R:'赵柳文',A:'王妤扬',I:'安子玥',status:'pending',weeks:[1,1,0,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t2',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批流程数据字典整理',R:'赵柳文',A:'王妤扬',I:'安子玥',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t3',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'股权信息台账模板设计与文档',R:'赵柳文',A:'王妤扬',I:'任梦超',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
+  {id:'t4',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批流程数据库设计',R:'任梦超',A:'王妤扬',I:'赵柳文,陈圆',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
+  {id:'t5',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批流程前端页面开发',R:'陈圆',A:'王妤扬',I:'赵柳文,任梦超',status:'pending',weeks:[0,0,1,1,1,1,0,0,0,0,0,0,0]},
+  {id:'t6',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批流程后端接口开发',R:'任梦超',A:'王妤扬',I:'赵柳文',status:'pending',weeks:[0,0,1,1,1,1,0,0,0,0,0,0,0]},
+  {id:'t7',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'档案数字化闭环管理模块开发',R:'陈圆',A:'王妤扬',I:'赵柳文,任梦超',status:'pending',weeks:[0,0,0,1,1,1,1,0,0,0,0,0,0]},
+  {id:'t8',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'合同标准版本管理模块开发',R:'陈圆',A:'王妤扬',I:'赵柳文',status:'pending',weeks:[0,0,0,0,1,1,1,1,0,0,0,0,0]},
+  {id:'t9',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印档案系统权限配置',R:'陈圆',A:'王妤扬',I:'任梦超,赵柳文',status:'pending',weeks:[0,0,0,0,0,1,1,1,0,0,0,0,0]},
+  {id:'t10',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印审批数据导入与验证',R:'赵柳文',A:'王妤扬',I:'安子玥',status:'pending',weeks:[0,0,0,0,0,0,1,1,1,0,0,0,0]},
+  {id:'t11',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'档案数字化数据导入与验证',R:'赵柳文',A:'王妤扬',I:'安子玥',status:'pending',weeks:[0,0,0,0,0,0,0,1,1,1,0,0,0]},
+  {id:'t12',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印档案系统人工测试与验收',R:'安子玥',A:'王妤扬',I:'赵柳文,陈圆',status:'pending',weeks:[0,0,0,0,0,0,0,0,1,1,1,0,0]},
+  {id:'t13',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印档案系统上线部署与运维',R:'赵柳文',A:'王妤扬',I:'陈圆,任梦超',status:'pending',weeks:[0,0,0,0,0,0,0,0,0,0,1,1,1]},
+  // 人事事务自动化系统 (13)
+  {id:'t14',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'劳动合同管理MD文档编写',R:'安子玥',A:'黄燕婷',I:'王妤扬',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t15',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'人事制度合规审查文档编写',R:'安子玥',A:'黄燕婷',I:'王妤扬',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t16',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'HR系统数据字典整理',R:'黄燕婷',A:'王妤扬',I:'安子玥',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
+  {id:'t17',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'HR系统数据库设计',R:'任梦超',A:'黄燕婷',I:'陈圆',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
+  {id:'t18',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工信息管理模块开发',R:'陈圆',A:'黄燕婷',I:'安子玥,任梦超',status:'pending',weeks:[0,0,1,1,1,1,0,0,0,0,0,0,0]},
+  {id:'t19',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'入职/离职流程线上化开发',R:'黄燕婷',A:'王妤扬',I:'安子玥,陈圆',status:'pending',weeks:[0,0,0,1,1,1,1,0,0,0,0,0,0]},
+  {id:'t20',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'考勤与假期管理模块开发',R:'黄燕婷',A:'王妤扬',I:'安子玥',status:'pending',weeks:[0,0,0,0,1,1,1,1,0,0,0,0,0]},
+  {id:'t21',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'AI数字员工原型设计与开发',R:'安子玥',A:'黄燕婷',I:'任梦超',status:'pending',weeks:[0,0,0,0,1,1,1,1,0,0,0,0,0]},
+  {id:'t22',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'HR系统权限配置与验证',R:'陈圆',A:'黄燕婷',I:'任梦超',status:'pending',weeks:[0,0,0,0,0,1,1,1,1,0,0,0,0]},
+  {id:'t23',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'劳动合同数据导入与人工测试',R:'安子玥',A:'黄燕婷',I:'黄燕婷',status:'pending',weeks:[0,0,0,0,0,0,1,1,1,0,0,0,0]},
+  {id:'t24',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工信息数据导入与人工测试',R:'黄燕婷',A:'王妤扬',I:'安子玥',status:'pending',weeks:[0,0,0,0,0,0,0,1,1,1,0,0,0]},
+  {id:'t25',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'HR系统集成测试与验收',R:'黄燕婷',A:'王妤扬',I:'陈圆,安子玥',status:'pending',weeks:[0,0,0,0,0,0,0,0,1,1,1,0,0]},
+  {id:'t26',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'人事系统上线部署与运维',R:'黄燕婷',A:'王妤扬',I:'陈圆,安子玥,任梦超',status:'pending',weeks:[0,0,0,0,0,0,0,0,0,0,1,1,1]},
+  // 财务账务自动化系统 (13)
+  {id:'t27',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务数据清洗与整理文档',R:'陈锦',A:'芦智蔚',I:'邵吴慧',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t28',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'HKMS数据映射方案文档',R:'邵吴慧',A:'芦智蔚',I:'陈锦,陈双杰',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t29',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'账务分类与会计科目体系文档',R:'邵吴慧',A:'黄欢欢',I:'陈锦,芦智蔚',status:'pending',weeks:[1,1,1,0,0,0,0,0,0,0,0,0,0]},
+  {id:'t30',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务账务系统数据库设计',R:'任梦超',A:'黄欢欢',I:'陈锦,邵吴慧',status:'pending',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0]},
+  {id:'t31',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'收款方向自动化模块开发',R:'陈双杰',A:'蔡心宇',I:'陈锦',status:'pending',weeks:[0,1,1,1,1,1,0,0,0,0,0,0,0]},
+  {id:'t32',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款方向自动化模块开发',R:'陈双杰',A:'蔡心宇',I:'陈锦',status:'pending',weeks:[0,1,1,1,1,1,0,0,0,0,0,0,0]},
+  {id:'t33',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'P&L报表自动生成模块开发',R:'陈锦',A:'芦智蔚',I:'邵吴慧,蔡心宇',status:'pending',weeks:[0,0,0,1,1,1,1,1,0,0,0,0,0]},
+  {id:'t34',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'资产负债表自动生成模块开发',R:'邵吴慧',A:'蔡心宇',I:'陈锦,芦智蔚',status:'pending',weeks:[0,0,0,1,1,1,1,1,0,0,0,0,0]},
+  {id:'t35',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'现金流量表自动生成模块开发',R:'邵吴慧',A:'蔡心宇',I:'陈锦',status:'pending',weeks:[0,0,0,0,1,1,1,1,1,0,0,0,0]},
+  {id:'t36',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'损益表自动生成模块开发',R:'陈锦',A:'芦智蔚',I:'邵吴慧,蔡心宇',status:'pending',weeks:[0,0,0,0,1,1,1,1,1,0,0,0,0]},
+  {id:'t37',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务系统权限配置与验证',R:'任梦超',A:'黄欢欢',I:'陈锦',status:'pending',weeks:[0,0,0,0,0,1,1,1,1,0,0,0,0]},
+  {id:'t38',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务数据导入与人工核验',R:'陈锦',A:'芦智蔚',I:'邵吴慧,蔡心宇',status:'pending',weeks:[0,0,0,0,0,0,0,1,1,1,1,0,0]},
+  {id:'t39',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'财务系统上线与自动化归档部署',R:'陈锦',A:'芦智蔚',I:'陈双杰,邵吴慧,蔡心宇,任梦超',status:'pending',weeks:[0,0,0,0,0,0,0,0,0,0,1,1,1]}
+];
+
+var TN_TRAINEES = ['陈双杰','陈锦','赵柳文','安子玥','黄燕婷','任梦超','陈圆'];
+var TN_WEEK_LABELS = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12','W13'];
+
+function getTnStorageKey(k){ return 'otms_trainee_'+k+'_v1'; }
+
+function loadTnData(){
+  try{
+    var raw = localStorage.getItem(getTnStorageKey('data'));
+    if(raw){ tnData = JSON.parse(raw); return; }
+  }catch(e){}
+  tnData = {tasks:{}, reports:{}, feedback:[]};
+}
+
+function saveTnData(){
+  try{ localStorage.setItem(getTnStorageKey('data'), JSON.stringify(tnData)); }catch(e){}
+}
+
+function getTnTask(taskId){
+  if(!tnData) loadTnData();
+  return tnData.tasks[taskId] || null;
+}
+
+function setTnTask(taskId, data){
+  if(!tnData) loadTnData();
+  tnData.tasks[taskId] = data;
+  saveTnData();
+}
+
+function initTraineeSystem(){
+  loadTnData();
+  // Populate person filter
+  var sel = document.getElementById('tnPersonFilter');
+  sel.innerHTML = '<option value="all">全部执行者</option>' + TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
+  // Populate week selectors for report and feedback
+  var weekOpts = '';
+  for(var i=0;i<14;i++){ var w='W'+(i+1); var st=TN_WEEK_LABELS[i]?TN_WEEK_LABELS[i]:''; weekOpts += '<option value="'+w+'">'+w+' (06/'+String(i*7+1).padStart(2,'0')+')</option>'; }
+  document.getElementById('tnFbWeek').innerHTML = weekOpts;
+  // Populate trainee selects
+  var tOpts = TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
+  document.getElementById('tnFbTrainee').innerHTML = '<option value="">选择学员</option>' + tOpts;
+  document.getElementById('tnRptAuthor').innerHTML = '<option value="">选择学员</option>' + tOpts;
+  // Set current week
+  var now = new Date();
+  var startDate = new Date(2026,5,1);
+  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
+  if(diffDays < 0) diffDays = 0;
+  var curWk = 'W' + Math.min(Math.floor(diffDays / 7) + 1, 14);
+  document.getElementById('tnRptWeek').value = curWk;
+  document.getElementById('tnFbWeek').value = curWk;
+  switchTraineeView('tasks');
+}
+
+function switchTraineeView(view){
+  tnCurrentView = view;
+  document.getElementById('tnTaskView').style.display = view==='tasks'?'':'none';
+  document.getElementById('tnReportView').style.display = view==='reports'?'':'none';
+  document.getElementById('tnFeedbackView').style.display = view==='feedback'?'':'none';
+  document.getElementById('tnEvalView').style.display = view==='evaluation'?'':'none';
+  document.querySelectorAll('.tn-sub-tab').forEach(function(b,i){
+    var views = ['tasks','reports','feedback','evaluation'];
+    b.classList.toggle('active', views[i]===view);
+  });
+  if(view==='tasks'){ renderTraineeSummary(); renderTraineeTasks(); }
+  else if(view==='reports'){ renderTraineeSummary(); loadTnReport(); renderTnReportHistory(); }
+  else if(view==='feedback'){ renderTraineeSummary(); loadTnFeedback(); renderTnFeedbackHistory(); }
+  else if(view==='evaluation'){ initEvalSystem(); }
+}
+
+// ===== TASK BOARD =====
+function renderTraineeSummary(){
+  var total = TN_TASKS.length;
+  var pending = 0, active = 0, done = 0;
+  TN_TASKS.forEach(function(t){
+    var td = getTnTask(t.id);
+    var st = td ? td.status : t.status;
+    if(st==='done') done++;
+    else if(st==='active') active++;
+    else pending++;
+  });
+  // Count reports
+  var rptCount = 0;
+  if(tnData && tnData.reports){
+    Object.keys(tnData.reports).forEach(function(k){ rptCount++; });
+  }
+  // Count feedback
+  var fbCount = tnData && tnData.feedback ? tnData.feedback.length : 0;
+  document.getElementById('traineeSummary').innerHTML =
+    '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#7B8FC0">'+total+'</div><div class="tn-sc-lbl">RACI任务总数</div></div>'+
+    '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#8BA89C">'+done+'</div><div class="tn-sc-lbl">已完成</div></div>'+
+    '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#D4A76A">'+active+'</div><div class="tn-sc-lbl">进行中</div></div>'+
+    '<div class="tn-summary-card"><div class="tn-sc-num" style="color:var(--accent)">'+rptCount+'</div><div class="tn-sc-lbl">周报提交</div></div>'+
+    '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#A09DB5">'+fbCount+'</div><div class="tn-sc-lbl">反馈记录</div></div>';
+}
+
+function renderTraineeTasks(){
+  var sysFilter = document.getElementById('tnSystemFilter').value;
+  var statusFilter = document.getElementById('tnStatusFilter').value;
+  var weekFilter = document.getElementById('tnWeekFilter').value;
+  var personFilter = document.getElementById('tnPersonFilter').value;
+  var weekIdx = weekFilter !== 'all' ? parseInt(weekFilter.slice(1)) - 1 : -1;
+
+  var filtered = TN_TASKS.filter(function(t){
+    if(sysFilter!=='all' && t.sys!==sysFilter) return false;
+    var td = getTnTask(t.id);
+    var st = td ? td.status : t.status;
+    if(statusFilter!=='all' && st!==statusFilter) return false;
+    if(weekIdx >= 0){
+      var wks = td ? td.weeks : t.weeks;
+      if(!wks || !wks[weekIdx]) return false;
+    }
+    if(personFilter!=='all'){
+      if(t.R !== personFilter && t.A !== personFilter && (t.I||'').indexOf(personFilter)===-1) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('tnTaskCount').textContent = filtered.length + ' / ' + TN_TASKS.length + ' 项任务';
+
+  // Group by system
+  var groups = {};
+  var sysOrder = ['yyda','rssw','cwzw'];
+  sysOrder.forEach(function(s){ groups[s] = []; });
+  filtered.forEach(function(t){ groups[t.sys].push(t); });
+
+  var html = '';
+  sysOrder.forEach(function(sys){
+    var tasks = groups[sys];
+    if(!tasks.length) return;
+    var sysInfo = tasks[0];
+    var pendingCount = 0, doneCount = 0;
+    tasks.forEach(function(t){
+      var td = getTnTask(t.id);
+      var st = td ? td.status : t.status;
+      if(st==='done') doneCount++;
+      else if(st==='active'){}
+      else pendingCount++;
+    });
+    html += '<div class="tn-system-group">'+
+      '<div class="tn-system-header" style="background:'+sysInfo.sysBg+'">'+
+        '<span class="tn-sys-icon" style="background:'+sysInfo.sysColor+'">'+(sys==='yyda'?'印':sys==='rssw'?'人':'财')+'</span>'+
+        sysInfo.sysName + ' <span style="font-size:9px;color:var(--text-dim);font-weight:400">'+tasks.length+'项</span>'+
+        '<span class="tn-sys-count">已完成 '+doneCount+' · 待开始 '+pendingCount+'</span>'+
+      '</div>';
+    tasks.forEach(function(t){
+      var td = getTnTask(t.id);
+      var st = td ? td.status : t.status;
+      var wks = td ? td.weeks : t.weeks;
+      var stLabel = st==='done'?'已完成':st==='active'?'进行中':'待开始';
+      var stCls = st==='done'?'done':st==='active'?'active':'pending';
+      // Weekly dots
+      var dots = '';
+      for(var i=0;i<13;i++){
+        dots += '<span class="tn-week-dot '+(wks[i]?'on':'off')+'" title="W'+(i+1)+'" onclick="event.stopPropagation();toggleTnWeek(\''+t.id+'\','+i+')"></span>';
+      }
+      html += '<div class="tn-task-card">'+
+        '<span class="tn-task-status '+stCls+'" title="'+stLabel+'"></span>'+
+        '<div class="tn-task-info">'+
+          '<div class="tn-task-name">'+t.name+'</div>'+
+          '<div class="tn-task-meta"><b style="color:#7B8FC0">R</b> '+t.R+' · <b style="color:#D4A76A">A</b> '+t.A+' · <b style="color:#A09DB5">I</b> '+(t.I||'—')+'</div>'+
+        '</div>'+
+        '<div class="tn-task-week-dots">'+dots+'</div>'+
+        '<div class="tn-task-actions">'+
+          '<button class="'+(st==='active'?'tn-active-status':'')+'" onclick="setTnTaskStatus(\''+t.id+'\',\'active\')">进行中</button>'+
+          '<button class="'+(st==='done'?'tn-active-status':'')+'" onclick="setTnTaskStatus(\''+t.id+'\',\'done\')">完成</button>'+
+          '<button onclick="setTnTaskStatus(\''+t.id+'\',\'pending\')">重置</button>'+
+        '</div>'+
+      '</div>';
+    });
+    html += '</div>';
+  });
+
+  document.getElementById('tnTaskBoard').innerHTML = html || '<div class="eval-empty">无匹配任务</div>';
+}
+
+function toggleTnWeek(taskId, weekIdx){
+  var t = null;
+  for(var i=0;i<TN_TASKS.length;i++){ if(TN_TASKS[i].id===taskId){ t=TN_TASKS[i]; break; } }
+  if(!t) return;
+  var td = getTnTask(taskId);
+  var wks = (td && td.weeks) ? td.weeks.slice() : t.weeks.slice();
+  wks[weekIdx] = wks[weekIdx] ? 0 : 1;
+  if(!td) td = {};
+  td.weeks = wks;
+  setTnTask(taskId, td);
+  renderTraineeTasks();
+}
+
+function setTnTaskStatus(taskId, status){
+  var td = getTnTask(taskId) || {};
+  td.status = status;
+  setTnTask(taskId, td);
+  renderTraineeSummary();
+  renderTraineeTasks();
+}
+
+// ===== WEEKLY REPORTS =====
+function loadTnReport(){
+  var week = document.getElementById('tnRptWeek').value;
+  var author = document.getElementById('tnRptAuthor').value || currentUser || '';
+  if(!author) return;
+  var key = author + '|' + week;
+  var rpt = tnData && tnData.reports ? tnData.reports[key] : null;
+  document.getElementById('tnRptContent').value = rpt ? rpt.content : '';
+  document.getElementById('tnRptFileName').textContent = rpt && rpt.fileName ? '已上传: '+rpt.fileName : '';
+}
+
+function autoSaveTnReport(){
+  var week = document.getElementById('tnRptWeek').value;
+  var author = document.getElementById('tnRptAuthor').value || currentUser || '';
+  if(!author) return;
+  var key = author + '|' + week;
+  if(!tnData) loadTnData();
+  if(!tnData.reports) tnData.reports = {};
+  if(!tnData.reports[key]) tnData.reports[key] = {};
+  tnData.reports[key].content = document.getElementById('tnRptContent').value;
+  tnData.reports[key].autoSaved = new Date().toISOString();
+  saveTnData();
+}
+
+function handleTnFileUpload(input){
+  var file = input.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var week = document.getElementById('tnRptWeek').value;
+    var author = document.getElementById('tnRptAuthor').value || currentUser || '';
+    if(!author) return;
+    var key = author + '|' + week;
+    if(!tnData) loadTnData();
+    if(!tnData.reports) tnData.reports = {};
+    if(!tnData.reports[key]) tnData.reports[key] = {};
+    tnData.reports[key].fileName = file.name;
+    tnData.reports[key].fileData = e.target.result;
+    tnData.reports[key].fileSize = file.size;
+    saveTnData();
+    document.getElementById('tnRptFileName').textContent = '已上传: '+file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveTnReport(){
+  var week = document.getElementById('tnRptWeek').value;
+  var author = document.getElementById('tnRptAuthor').value || currentUser || '';
+  if(!author){ alert('请先选择学员'); return; }
+  var key = author + '|' + week;
+  if(!tnData) loadTnData();
+  if(!tnData.reports) tnData.reports = {};
+  if(!tnData.reports[key]) tnData.reports[key] = {};
+  tnData.reports[key].content = document.getElementById('tnRptContent').value;
+  tnData.reports[key].savedAt = new Date().toISOString();
+  tnData.reports[key].savedBy = currentUser || '';
+  saveTnData();
+  renderTraineeSummary();
+  renderTnReportHistory();
+  var saveBtn = document.querySelector('#tnReportView .btn-primary');
+  if(saveBtn){ saveBtn.textContent = '已保存'; setTimeout(function(){ saveBtn.textContent = '保存周报'; }, 1500); }
+}
+
+function renderTnReportHistory(){
+  var author = document.getElementById('tnRptAuthor').value || currentUser || '';
+  if(!tnData || !tnData.reports){ document.getElementById('tnRptHistory').innerHTML = '<div class="eval-empty" style="padding:20px">暂无周报记录</div>'; return; }
+  var items = [];
+  Object.keys(tnData.reports).forEach(function(k){
+    if(author && k.indexOf(author+'|')!==0) return;
+    var rpt = tnData.reports[k];
+    if(!rpt.content && !rpt.fileName) return;
+    items.push({key:k, rpt:rpt});
+  });
+  items.sort(function(a,b){
+    var ak = a.key.split('|');
+    var bk = b.key.split('|');
+    if(ak[1]!==bk[1]) return bk[1].localeCompare(ak[1]);
+    return ak[0].localeCompare(bk[0]);
+  });
+  if(!items.length){ document.getElementById('tnRptHistory').innerHTML = '<div class="eval-empty" style="padding:20px">暂无周报记录</div>'; return; }
+  var html = '';
+  items.forEach(function(item){
+    var parts = item.key.split('|');
+    var r = item.rpt;
+    var preview = r.content ? r.content.slice(0,60)+(r.content.length>60?'...':'') : '';
+    html += '<div class="tn-rpt-item" onclick="document.getElementById(\'tnRptWeek\').value=\''+parts[1]+'\';document.getElementById(\'tnRptAuthor\').value=\''+parts[0].replace(/'/g,"\\'")+'\';loadTnReport();">'+
+      '<span class="rpt-week">'+parts[1]+'</span> <span class="rpt-author">'+parts[0]+'</span>'+
+      '<div class="rpt-preview">'+(preview||'(空)')+'</div>'+
+      (r.fileName ? '<span class="tn-file-link" onclick="event.stopPropagation();downloadTnFile(\''+item.key+'\')">📎 '+r.fileName+'</span>' : '')+
+      '<div style="font-size:7px;color:var(--text-muted);margin-top:2px">'+(r.savedAt?new Date(r.savedAt).toLocaleString('zh-CN'):'草稿')+'</div>'+
+    '</div>';
+  });
+  document.getElementById('tnRptHistory').innerHTML = html;
+}
+
+function downloadTnFile(key){
+  if(!tnData || !tnData.reports || !tnData.reports[key] || !tnData.reports[key].fileData) return;
+  var rpt = tnData.reports[key];
+  var a = document.createElement('a');
+  a.href = rpt.fileData;
+  a.download = rpt.fileName || 'report';
+  a.click();
+}
+
+// ===== FEEDBACK =====
+function loadTnFeedback(){
+  // Nothing to load in advance, just render history
+}
+
+function saveTnFeedback(){
+  var week = document.getElementById('tnFbWeek').value;
+  var trainee = document.getElementById('tnFbTrainee').value;
+  var content = document.getElementById('tnFbContent').value;
+  var type = document.getElementById('tnFbType').value;
+  if(!trainee){ alert('请选择学员'); return; }
+  if(!content.trim()){ alert('请输入反馈内容'); return; }
+  if(!tnData) loadTnData();
+  if(!tnData.feedback) tnData.feedback = [];
+  tnData.feedback.push({
+    week: week,
+    trainee: trainee,
+    content: content,
+    type: type,
+    by: currentUser || '王妤扬',
+    date: new Date().toISOString()
+  });
+  saveTnData();
+  document.getElementById('tnFbContent').value = '';
+  renderTraineeSummary();
+  renderTnFeedbackHistory();
+}
+
+function renderTnFeedbackHistory(){
+  if(!tnData || !tnData.feedback || !tnData.feedback.length){
+    document.getElementById('tnFbHistory').innerHTML = '<div class="eval-empty" style="padding:20px">暂无反馈记录</div>';
+    return;
+  }
+  var items = tnData.feedback.slice().reverse();
+  var html = '';
+  items.forEach(function(f,i){
+    html += '<div class="tn-fb-item '+f.type+'">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">'+
+        '<span class="fb-week">'+f.week+'</span>'+
+        '<span class="fb-author">'+f.trainee+'</span>'+
+        '<span style="font-size:7px;padding:1px 5px;border-radius:4px;background:'+(f.type==='positive'?'#EAF0EE':f.type==='negative'?'#FDEDEF':'#FBF6EC')+';color:'+(f.type==='positive'?'#5A7868':f.type==='negative'?'#992F48':'#9A7D3E')+'">'+(f.type==='positive'?'表扬':f.type==='negative'?'需改进':'建议')+'</span>'+
+        '<span style="margin-left:auto;font-size:7px;color:var(--text-muted)">'+f.by+' · '+new Date(f.date).toLocaleString('zh-CN')+'</span>'+
+      '</div>'+
+      '<div class="fb-preview" style="white-space:normal">'+f.content+'</div>'+
+      '<button onclick="deleteTnFeedback('+i+')" style="border:none;background:none;cursor:pointer;color:var(--text-muted);font-size:8px;margin-top:4px">删除</button>'+
+    '</div>';
+  });
+  document.getElementById('tnFbHistory').innerHTML = html;
+}
+
+function deleteTnFeedback(idx){
+  if(!tnData || !tnData.feedback) return;
+  // idx is from reversed, so map back
+  var realIdx = tnData.feedback.length - 1 - idx;
+  tnData.feedback.splice(realIdx, 1);
+  saveTnData();
+  renderTraineeSummary();
+  renderTnFeedbackHistory();
 }
 </script>
 </body>
