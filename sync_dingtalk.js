@@ -189,6 +189,17 @@ async function main() {
     const l = labels[u.todayStatus] || '—';
     console.log('  ' + u.name + ': ' + l);
   });
+
+  // Auto push to GitHub
+  try {
+    const { execSync } = require('child_process');
+    execSync('git add dingtalk_data.json', { cwd: __dirname, stdio: 'pipe', timeout: 10000 });
+    execSync('git commit -m "钉钉考勤数据同步 ' + new Date().toISOString().slice(0,10) + '"', { cwd: __dirname, stdio: 'pipe', timeout: 10000 });
+    execSync('git push', { cwd: __dirname, stdio: 'pipe', timeout: 30000 });
+    console.log(''); console.log('🚀 已推送到 GitHub Pages');
+  } catch (e) {
+    if (e.stderr && !e.stderr.toString().includes('nothing to commit')) console.warn('  ⚠️ 推送失败: ' + e.stderr.toString().slice(0,200));
+  }
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
