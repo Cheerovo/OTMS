@@ -6371,7 +6371,7 @@ function renderOrgAttachments() {
 // ===== Init =====
 // ===== Remote Data Sync (Supabase) =====
 const LOCAL_DATA_VER_KEY = 'okr_sync_version';
-const DATA_KEYS = ['okr_users','okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version'];
+const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version'];
 
 let _isImporting = false;
 let _autoUploadTimer = null;
@@ -6393,6 +6393,7 @@ function importDataToLocal(data){
   var imported = 0;
   Object.keys(data).forEach(function(k){
     if(k[0]==='_') return;
+    if(k==='okr_users') return; // 密码不同步，防止云端数据覆盖本地
     localStorage.setItem(k, typeof data[k]==='string'?data[k]:JSON.stringify(data[k]));
     imported++;
   });
