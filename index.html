@@ -3658,7 +3658,7 @@ function switchTab(tab) {
   }
   else if (tab==='kpi') {
     hidePermBlock('tabKPI');
-    if(!currentUser){ switchKpiView('traineeMgmt'); return; }
+    if(!currentUser){ showPermBlock('tabKPI','请先登录','登录后查看KPI指标和管培生管理'); setNewBtn(false); return; }
     if(!canViewModule(currentUser,'kpi')){document.getElementById('kpiIndicatorsPage').innerHTML='<div class="empty"><p>暂无权限访问KPI指标看板</p><p style="font-size:9px">请联系管理员开通KPI查看权限</p></div>';document.getElementById('kpiIndicatorsPage').className='page active';document.getElementById('kpiFilterRow').style.display='none';document.getElementById('kpiFilterChips').style.display='none';setNewBtn(false);return;}
     switchKpiView(kpiView);
   }
@@ -3683,19 +3683,13 @@ function switchTab(tab) {
 function handleNew() { if(curTab==='workspace'||curTab==='vision')return; if(curTab==='org'&&!canEditModule(currentUser,'org')){alert('仅管理员可管理员工花名册');return;} curTab==='okr'?openOkrModal():curTab==='kpi'?openKpiModal():curTab==='report'?openReportModal():curTab==='org'?openEmployeeModal():openMeetingModal(); }
 
 function switchKpiView(view) {
-  // Allow trainee management without login
   if(!currentUser){
-    if(view==='traineeMgmt'){
-      kpiView = view;
-      document.getElementById('kpiIndicatorsPage').className = 'page';
-      document.getElementById('kpiTraineePage').className = 'page active';
-      document.getElementById('kpiFilterRow').style.display = 'none';
-      document.getElementById('kpiFilterChips').style.display = 'none';
-      document.querySelectorAll('#kpiViewToggle button').forEach(function(b,i){
-        b.classList.toggle('active', i===1);
-      });
-      initTraineeSystem();
-    }
+    document.getElementById('kpiIndicatorsPage').innerHTML='<div class="empty"><p>请先登录</p></div>';
+    document.getElementById('kpiIndicatorsPage').className='page active';
+    document.getElementById('kpiTraineePage').className='page';
+    document.getElementById('kpiFilterRow').style.display='none';
+    document.getElementById('kpiFilterChips').style.display='none';
+    document.getElementById('sidebarBtn').style.display='none';
     return;
   }
   if(!canViewModule(currentUser,'kpi')){
