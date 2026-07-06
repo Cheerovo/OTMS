@@ -2391,6 +2391,8 @@ function defaultUsers(){return{
   '王力':{pw:'123123',role:'user',name:'王力'}
 };}
 function loadUsers(){
+  // 清除可能从旧数据同步残留的 okr_users，防止密码被覆盖
+  try{ localStorage.removeItem('okr_users'); }catch(e){}
   try{
     var stored = JSON.parse(localStorage.okr_users);
     if(!stored || typeof stored !== 'object' || Array.isArray(stored)) stored = {};
