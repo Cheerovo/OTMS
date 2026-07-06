@@ -1354,6 +1354,30 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-rpt-item .rpt-preview { font-size:9px; color:var(--text-dim); margin-top:4px; line-height:1.4; }
 .tn-file-link { font-size:8px; color:var(--accent); cursor:pointer; margin-top:3px; display:inline-block; }
 
+/* Meeting section */
+.report-section-tabs { display:flex; gap:4px; margin-bottom:16px; }
+.report-section-tab { padding:8px 20px; border:none; background:none; font-size:11px; cursor:pointer; color:var(--text-dim); border-radius:8px; transition:all .15s; }
+.report-section-tab.active { background:var(--card); color:var(--text); font-weight:500; box-shadow:var(--shadow-xs); }
+.report-section-tab:hover:not(.active) { color:var(--text); }
+.meeting-form-card { background:var(--card); border-radius:12px; padding:20px; box-shadow:var(--shadow-xs); }
+.meeting-attendee-chips { display:flex; flex-wrap:wrap; gap:6px; }
+.meeting-attendee-chip { padding:5px 12px; border-radius:20px; font-size:10px; cursor:pointer; border:1px solid var(--border-light); background:var(--bg-surface); transition:all .15s; user-select:none; }
+.meeting-attendee-chip:hover { border-color:var(--accent); }
+.meeting-attendee-chip.selected { background:var(--accent); color:#fff; border-color:var(--accent); }
+.meeting-list { margin-top:16px; }
+.meeting-list-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.meeting-list-item { padding:10px 14px; border-radius:10px; cursor:pointer; margin-bottom:6px; border:1px solid var(--border-light); background:var(--card); transition:all .12s; }
+.meeting-list-item:hover { border-color:var(--accent); box-shadow:var(--shadow-xs); }
+.meeting-list-item .mt-week { display:inline-block; font-size:8px; font-weight:600; padding:2px 6px; border-radius:4px; background:#FDE8EC; color:#C94F66; margin-right:8px; }
+.meeting-list-item .mt-title { font-size:11px; font-weight:500; color:var(--text); }
+.meeting-list-item .mt-meta { font-size:8px; color:var(--text-dim); margin-top:3px; }
+.meeting-list-item .mt-actions { display:flex; gap:6px; margin-top:6px; }
+.meeting-list-item .mt-actions button { font-size:8px; padding:3px 10px; border-radius:4px; border:1px solid var(--border-light); background:var(--bg-surface); cursor:pointer; color:var(--text-dim); }
+.meeting-list-item .mt-actions button:hover { background:var(--accent-wash); color:var(--accent); border-color:var(--accent); }
+.meeting-list-item .mt-actions button.danger:hover { background:#fef2f2; color:var(--danger); border-color:var(--danger); }
+.sync-checkbox { display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text-dim); cursor:pointer; margin-bottom:12px; }
+.sync-checkbox input { accent-color:var(--accent); }
+
 </style>
 </head>
 <body>
@@ -1535,7 +1559,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
     <div class="trainee-summary" id="traineeSummary"></div>
     <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;background:var(--bg-surface);border-radius:10px;padding:3px;width:fit-content">
       <button class="tn-sub-tab active" onclick="switchTraineeView('tasks')">任务看板</button>
-      <button class="tn-sub-tab" onclick="switchTraineeView('reports')">周报上传</button>
+      <button class="tn-sub-tab" onclick="switchTraineeView('reports')">每周反馈</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('dashboard')">学员绩效</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('evaluation')">管培生评估</button>
     </div>
@@ -1678,43 +1702,107 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
       </div>
     </div>
     <div class="tn-view" id="tnReportView" style="display:none">
-      <div class="tn-report-layout">
-        <div class="tn-report-form">
-          <div class="tn-report-card">
-            <div class="tn-report-header">
-              <div class="tn-report-header-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
-              <div>
-                <div style="font-size:13px;font-weight:600;color:var(--text)">周报编写</div>
-                <div style="font-size:9px;color:var(--text-dim)">每周工作总结与附件上传</div>
+      <!-- Internal section tabs -->
+      <div class="report-section-tabs" id="reportSectionTabs">
+        <button class="report-section-tab active" onclick="switchReportSection('meeting')">会议纪要</button>
+        <button class="report-section-tab" onclick="switchReportSection('report')">周报上传</button>
+      </div>
+      <!-- Meeting section -->
+      <div id="reportMeetingSection">
+        <div class="tn-report-layout">
+          <div class="tn-report-form">
+            <div class="meeting-form-card">
+              <div class="tn-report-header">
+                <div class="tn-report-header-icon" style="background:#FDE8EC;color:#C94F66"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><polyline points="9 10 11 13 15 9"/></svg></div>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text)">会议纪要</div>
+                  <div style="font-size:9px;color:var(--text-dim)">记录会议信息，自动关联任务看板</div>
+                </div>
+              </div>
+              <div class="tn-report-field" style="margin-bottom:10px">
+                <label>会议标题</label>
+                <input id="mtTitle" placeholder="输入会议标题…" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box">
+              </div>
+              <div style="display:flex;gap:10px;margin-bottom:10px">
+                <div class="tn-report-field" style="flex:1">
+                  <label>所属周次</label>
+                  <select id="mtWeek"><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option><option value="W14">W14</option></select>
+                </div>
+                <div class="tn-report-field" style="flex:1">
+                  <label>会议日期</label>
+                  <input type="date" id="mtDate" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box">
+                </div>
+              </div>
+              <div class="tn-report-field" style="margin-bottom:10px">
+                <label>所属系统</label>
+                <select id="mtSystem"><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option><option value="itpm">IT项目管理系统</option></select>
+              </div>
+              <div class="tn-report-field" style="margin-bottom:10px">
+                <label>参会人员</label>
+                <div class="meeting-attendee-chips" id="mtAttendees"></div>
+              </div>
+              <div class="tn-report-field" style="margin-bottom:10px">
+                <label>会议纪要</label>
+                <textarea id="mtMinutes" placeholder="记录会议讨论内容、决议事项…" style="width:100%;height:150px;padding:12px;border:1px solid var(--border-light);border-radius:10px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;resize:vertical;box-sizing:border-box"></textarea>
+              </div>
+              <label class="sync-checkbox"><input type="checkbox" id="mtSyncTask" checked> 同步创建会议任务到任务看板</label>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-primary btn-sm" onclick="saveTnMeeting()" style="font-size:10px">保存会议</button>
+                <button class="btn btn-outline btn-sm" onclick="clearTnMeetingForm()" style="font-size:10px">清空表单</button>
               </div>
             </div>
-            <div class="tn-report-selects">
-              <div class="tn-report-field">
-                <label>选择周次</label>
-                <select id="tnRptWeek" onchange="loadTnReport()"><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option><option value="W14">W14</option></select>
+          </div>
+          <div class="tn-report-history">
+            <div class="tn-report-card">
+              <div class="meeting-list-title">
+                <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg></span>会议记录
+                <span style="font-size:9px;color:var(--text-muted);font-weight:400" id="mtCount"></span>
               </div>
-              <div class="tn-report-field">
-                <label>选择学员</label>
-                <select id="tnRptAuthor" onchange="loadTnReport()"><option value="">选择学员</option></select>
-              </div>
-            </div>
-            <textarea id="tnRptContent" placeholder="请输入本周工作总结…" oninput="autoSaveTnReport()"></textarea>
-            <div class="tn-report-actions">
-              <input type="file" id="tnRptFile" style="display:none" onchange="handleTnFileUpload(this)">
-              <button class="btn btn-outline btn-sm" onclick="document.getElementById('tnRptFile').click()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> 上传附件</button>
-              <span id="tnRptFileName"></span>
-              <span class="tn-autosave-hint" id="tnAutoSaveHint"></span>
-              <button class="btn btn-primary btn-sm" onclick="saveTnReport()">保存周报</button>
+              <div id="mtHistory"></div>
             </div>
           </div>
         </div>
-        <div class="tn-report-history">
-          <div class="tn-report-card">
-            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px">
-              <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg></span>历史周报
-              <span style="font-size:9px;color:var(--text-muted);font-weight:400" id="tnRptCount"></span>
+      </div>
+      <!-- Report section (hidden by default) -->
+      <div id="reportReportSection" style="display:none">
+        <div class="tn-report-layout">
+          <div class="tn-report-form">
+            <div class="tn-report-card">
+              <div class="tn-report-header">
+                <div class="tn-report-header-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text)">周报编写</div>
+                  <div style="font-size:9px;color:var(--text-dim)">每周工作总结与附件上传</div>
+                </div>
+              </div>
+              <div class="tn-report-selects">
+                <div class="tn-report-field">
+                  <label>选择周次</label>
+                  <select id="tnRptWeek" onchange="loadTnReport()"><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option><option value="W14">W14</option></select>
+                </div>
+                <div class="tn-report-field">
+                  <label>选择学员</label>
+                  <select id="tnRptAuthor" onchange="loadTnReport()"><option value="">选择学员</option></select>
+                </div>
+              </div>
+              <textarea id="tnRptContent" placeholder="请输入本周工作总结…" oninput="autoSaveTnReport()"></textarea>
+              <div class="tn-report-actions">
+                <input type="file" id="tnRptFile" style="display:none" onchange="handleTnFileUpload(this)">
+                <button class="btn btn-outline btn-sm" onclick="document.getElementById('tnRptFile').click()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> 上传附件</button>
+                <span id="tnRptFileName"></span>
+                <span class="tn-autosave-hint" id="tnAutoSaveHint"></span>
+                <button class="btn btn-primary btn-sm" onclick="saveTnReport()">保存周报</button>
+              </div>
             </div>
-            <div id="tnRptHistory"></div>
+          </div>
+          <div class="tn-report-history">
+            <div class="tn-report-card">
+              <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px">
+                <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg></span>历史周报
+                <span style="font-size:9px;color:var(--text-muted);font-weight:400" id="tnRptCount"></span>
+              </div>
+              <div id="tnRptHistory"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -8860,11 +8948,12 @@ function loadTnData(){
         tnData.refTasks = JSON.parse(JSON.stringify(TN_REF_TASKS));
         saveTnData();
       }
+      if(!tnData.meetings) tnData.meetings = [];
       if(!tnData._version) tnData._version = 2;
       return;
     }
   }catch(e){}
-  tnData = {tasks:{}, reports:{}, feedback:[], wtasks:[], refTasks:(typeof TN_REF_TASKS!=='undefined'?JSON.parse(JSON.stringify(TN_REF_TASKS)):[]), _version:2};
+  tnData = {tasks:{}, reports:{}, feedback:[], wtasks:[], meetings:[], refTasks:(typeof TN_REF_TASKS!=='undefined'?JSON.parse(JSON.stringify(TN_REF_TASKS)):[]), _version:2};
 }
 
 function saveTnData(){
@@ -8928,7 +9017,7 @@ function switchTraineeView(view){
     b.classList.toggle('active', views[i]===view);
   });
   if(view==='tasks'){ renderTraineeSummary(); renderTraineeTasks(); }
-  else if(view==='reports'){ renderTraineeSummary(); loadTnReport(); renderTnReportHistory(); }
+  else if(view==='reports'){ renderTraineeSummary(); initTnAttendees(); clearTnMeetingForm(); renderTnMeetingList(); switchReportSection('meeting'); }
   else if(view==='dashboard'){ renderTraineeSummary(); renderDashboard(); }
   else if(view==='evaluation'){ initEvalSystem(); }
 }
@@ -10118,6 +10207,245 @@ function downloadTnFile(key){
   a.href = rpt.fileData;
   a.download = rpt.fileName || 'report';
   a.click();
+}
+
+// ===== MEETING MINUTES =====
+var reportCurrentSection = 'meeting'; // 'meeting' or 'report'
+
+function switchReportSection(section){
+  reportCurrentSection = section;
+  document.getElementById('reportMeetingSection').style.display = section==='meeting'?'':'none';
+  document.getElementById('reportReportSection').style.display = section==='report'?'':'none';
+  var tabs = document.querySelectorAll('#reportSectionTabs .report-section-tab');
+  tabs.forEach(function(t,i){ t.classList.toggle('active', (i===0&&section==='meeting')||(i===1&&section==='report')); });
+  if(section==='meeting'){ initTnAttendees(); renderTnMeetingList(); }
+  else if(section==='report'){ loadTnReport(); renderTnReportHistory(); }
+}
+
+function initTnAttendees(){
+  var container = document.getElementById('mtAttendees');
+  if(!container) return;
+  var html = '';
+  TN_TRAINEES.forEach(function(name){
+    html += '<span class="meeting-attendee-chip" onclick="toggleTnAttendee(this)" data-name="'+name+'">'+name+'</span>';
+  });
+  container.innerHTML = html;
+}
+
+function toggleTnAttendee(el){
+  el.classList.toggle('selected');
+}
+
+function getTnSelectedAttendees(){
+  var chips = document.querySelectorAll('#mtAttendees .meeting-attendee-chip.selected');
+  var names = [];
+  chips.forEach(function(c){ names.push(c.getAttribute('data-name')); });
+  return names;
+}
+
+function setTnSelectedAttendees(names){
+  var chips = document.querySelectorAll('#mtAttendees .meeting-attendee-chip');
+  chips.forEach(function(c){
+    if(names.indexOf(c.getAttribute('data-name'))!==-1) c.classList.add('selected');
+    else c.classList.remove('selected');
+  });
+}
+
+function saveTnMeeting(){
+  var title = document.getElementById('mtTitle').value.trim();
+  if(!title){ alert('请输入会议标题'); return; }
+  var week = document.getElementById('mtWeek').value;
+  var date = document.getElementById('mtDate').value;
+  var system = document.getElementById('mtSystem').value;
+  var attendees = getTnSelectedAttendees();
+  if(!attendees.length){ alert('请选择参会人员'); return; }
+  var minutes = document.getElementById('mtMinutes').value;
+  var syncTask = document.getElementById('mtSyncTask').checked;
+
+  if(!tnData) loadTnData();
+  if(!tnData.meetings) tnData.meetings = [];
+
+  // Check if editing existing meeting
+  var editId = document.getElementById('mtTitle').getAttribute('data-edit-id');
+  var meeting, linkedTaskId;
+
+  if(editId){
+    // Update existing meeting
+    for(var i=0;i<tnData.meetings.length;i++){
+      if(tnData.meetings[i].id===editId){ meeting = tnData.meetings[i]; break; }
+    }
+    if(meeting){
+      meeting.title = title;
+      meeting.week = week;
+      meeting.date = date;
+      meeting.system = system;
+      meeting.attendees = attendees;
+      meeting.minutes = minutes;
+      linkedTaskId = meeting.linkedTaskId;
+      // Update linked task if exists
+      if(syncTask && linkedTaskId && tnData.refTasks){
+        for(var j=0;j<tnData.refTasks.length;j++){
+          if(tnData.refTasks[j].id===linkedTaskId){
+            tnData.refTasks[j].name = title;
+            tnData.refTasks[j].executors = attendees.slice();
+            tnData.refTasks[j].sys = system;
+            tnData.refTasks[j].weeks = weekToWeeksArray(week);
+            break;
+          }
+        }
+      }
+    }
+  } else {
+    // Create new meeting
+    var meetingId = 'm'+Date.now();
+    linkedTaskId = '';
+
+    if(syncTask){
+      // Auto-create linked task in refTasks
+      linkedTaskId = 'mt_'+Date.now();
+      if(!tnData.refTasks) tnData.refTasks = [];
+      var sysNames = {yyda:'用印档案公司管理系统',rssw:'人事事务自动化系统',cwzw:'财务账务自动化系统',itpm:'IT项目管理系统'};
+      var sysColors = {yyda:'#7B8FC0',rssw:'#9A7D3E',cwzw:'#5A7868',itpm:'#8B6BAE'};
+      var sysBgs = {yyda:'#F4F6FB',rssw:'#FDF8F2',cwzw:'#F2F6F4',itpm:'#F6F2FB'};
+      tnData.refTasks.push({
+        id: linkedTaskId,
+        sys: system,
+        sysName: sysNames[system]||'',
+        sysColor: sysColors[system]||'#8B6BAE',
+        sysBg: sysBgs[system]||'#F6F2FB',
+        name: title,
+        taskType: 'meeting',
+        taskCategory: 'review',
+        executors: attendees.slice(),
+        approver: attendees[0] || currentUser || '',
+        refStatus: 'active',
+        priority: 'P2',
+        weeks: weekToWeeksArray(week),
+        attachments: 0,
+        _source: 'ref'
+      });
+    }
+
+    meeting = {
+      id: meetingId,
+      title: title,
+      week: week,
+      date: date,
+      system: system,
+      attendees: attendees.slice(),
+      minutes: minutes,
+      linkedTaskId: linkedTaskId,
+      createdAt: new Date().toISOString(),
+      createdBy: currentUser || ''
+    };
+    tnData.meetings.push(meeting);
+  }
+
+  saveTnData();
+  clearTnMeetingForm();
+  renderTnMeetingList();
+  renderTraineeSummary();
+  renderTraineeTasks();
+}
+
+function weekToWeeksArray(weekStr){
+  var arr = [];
+  var wkNum = parseInt(weekStr.slice(1)) - 1;
+  for(var i=0;i<14;i++){ arr.push(i===wkNum?1:0); }
+  return arr;
+}
+
+function clearTnMeetingForm(){
+  document.getElementById('mtTitle').value = '';
+  document.getElementById('mtTitle').removeAttribute('data-edit-id');
+  document.getElementById('mtDate').value = '';
+  document.getElementById('mtMinutes').value = '';
+  document.getElementById('mtSyncTask').checked = true;
+  // Clear attendee selections
+  var chips = document.querySelectorAll('#mtAttendees .meeting-attendee-chip');
+  chips.forEach(function(c){ c.classList.remove('selected'); });
+  // Reset week to current
+  var now = new Date();
+  var startDate = new Date(2026,5,1);
+  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
+  if(diffDays < 0) diffDays = 0;
+  var curWk = 'W' + Math.min(Math.floor(diffDays / 7) + 1, 14);
+  document.getElementById('mtWeek').value = curWk;
+  document.getElementById('mtDate').value = new Date().toISOString().slice(0,10);
+}
+
+function loadTnMeeting(id){
+  if(!tnData || !tnData.meetings) return;
+  var meeting = null;
+  for(var i=0;i<tnData.meetings.length;i++){
+    if(tnData.meetings[i].id===id){ meeting = tnData.meetings[i]; break; }
+  }
+  if(!meeting) return;
+  document.getElementById('mtTitle').value = meeting.title;
+  document.getElementById('mtTitle').setAttribute('data-edit-id', meeting.id);
+  document.getElementById('mtWeek').value = meeting.week;
+  document.getElementById('mtDate').value = meeting.date;
+  document.getElementById('mtSystem').value = meeting.system;
+  document.getElementById('mtMinutes').value = meeting.minutes || '';
+  document.getElementById('mtSyncTask').checked = !!meeting.linkedTaskId;
+  initTnAttendees();
+  setTnSelectedAttendees(meeting.attendees || []);
+  // Switch to meeting section
+  switchReportSection('meeting');
+  document.getElementById('reportMeetingSection').scrollIntoView({behavior:'smooth'});
+}
+
+function deleteTnMeeting(id){
+  if(!confirm('确认删除该会议？关联的任务也将被删除。')) return;
+  if(!tnData || !tnData.meetings) return;
+  var meeting = null;
+  for(var i=0;i<tnData.meetings.length;i++){
+    if(tnData.meetings[i].id===id){ meeting = tnData.meetings[i]; break; }
+  }
+  if(!meeting) return;
+  // Remove linked task
+  if(meeting.linkedTaskId && tnData.refTasks){
+    tnData.refTasks = tnData.refTasks.filter(function(r){ return r.id !== meeting.linkedTaskId; });
+  }
+  // Remove meeting
+  tnData.meetings = tnData.meetings.filter(function(m){ return m.id !== id; });
+  saveTnData();
+  renderTnMeetingList();
+  renderTraineeSummary();
+  renderTraineeTasks();
+}
+
+function renderTnMeetingList(){
+  if(!tnData) loadTnData();
+  if(!tnData.meetings) tnData.meetings = [];
+  var meetings = tnData.meetings;
+  var countEl = document.getElementById('mtCount');
+  if(countEl) countEl.textContent = meetings.length ? '('+meetings.length+'条)' : '';
+  var container = document.getElementById('mtHistory');
+  if(!container) return;
+  if(!meetings.length){
+    container.innerHTML = '<div class="eval-empty" style="padding:20px">暂无会议记录</div>';
+    return;
+  }
+  // Sort by date descending
+  meetings.sort(function(a,b){ return new Date(b.date||b.createdAt) - new Date(a.date||a.createdAt); });
+  var html = '';
+  var sysNames = {yyda:'用印档案',rssw:'人事事务',cwzw:'财务账务',itpm:'IT项目'};
+  meetings.forEach(function(m){
+    var preview = m.minutes ? m.minutes.slice(0,50)+(m.minutes.length>50?'...':'') : '(无纪要)';
+    var attendeeStr = (m.attendees||[]).join('、');
+    html += '<div class="meeting-list-item" onclick="loadTnMeeting(\''+m.id+'\')">';
+    html += '<span class="mt-week">'+m.week+'</span>';
+    html += '<span class="mt-title">'+m.title+'</span>';
+    html += '<div class="mt-meta">'+(m.date||'')+' · '+(sysNames[m.system]||m.system)+' · '+attendeeStr+'</div>';
+    html += '<div class="mt-meta" style="margin-top:2px">'+preview+'</div>';
+    html += '<div class="mt-actions">';
+    html += '<button onclick="event.stopPropagation();loadTnMeeting(\''+m.id+'\')">编辑</button>';
+    html += '<button class="danger" onclick="event.stopPropagation();deleteTnMeeting(\''+m.id+'\')">删除</button>';
+    html += m.linkedTaskId ? '<span style="font-size:8px;color:var(--success);margin-left:auto">已关联任务</span>' : '';
+    html += '</div></div>';
+  });
+  container.innerHTML = html;
 }
 
 // ===== FEEDBACK =====
