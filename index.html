@@ -9278,8 +9278,32 @@ function renderTraineeTasks(){
   if(diffDays < 0) diffDays = 0;
   var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
   
-  // Weekly tasks
   var filtered = [];
+
+  // Plan tasks (TN_TASKS RACI plan)
+  if(typeof TN_TASKS!=='undefined'){
+    TN_TASKS.forEach(function(t){
+      if(sysFilter!=='all' && t.sys!==sysFilter) return;
+      var td = getTnTask(t.id);
+      var st = (td && td.status) ? td.status : t.status;
+      if(statusFilter!=='all' && st!==statusFilter) return;
+      if(tnQuickFilter === 'active' && st !== 'active') return;
+      var tw = (td && td.weeks) ? td.weeks : t.weeks;
+      if(weekIdx >= 0 && !tw[weekIdx]) return;
+      if(tnQuickFilter === 'week' && !tw[curWkIdx]) return;
+      if(personFilter!=='all' && t.R!==personFilter && t.A!==personFilter && (t.I||'').indexOf(personFilter)===-1) return;
+      if(tnQuickFilter === 'mine' && currentUser && t.R!==currentUser && t.A!==currentUser) return;
+      var tChildren = getChildTasks(t.id);
+      if(parentFilter==='parent' && !tChildren.length) return;
+      var tParentId = (td && td.parentId) ? td.parentId : '';
+      if(parentFilter==='child' && !tParentId) return;
+      if(parentFilter==='independent' && (tParentId || tChildren.length)) return;
+      t._source = 'plan';
+      filtered.push(t);
+    });
+  }
+
+  // Weekly tasks
   var wtasks = tnData && tnData.wtasks ? tnData.wtasks : [];
   wtasks.forEach(function(w){
     if(sysFilter!=='all' && w.sys!==sysFilter) return;
@@ -9362,15 +9386,24 @@ function renderTraineeTasks(){
     // Build parent-child hierarchy for nested display
     var taskIdsInGroup = {};
     tasks.forEach(function(tt){ taskIdsInGroup[tt.id] = true; });
+    // Helper: get parentId from task (direct or from tnData override for plan tasks)
+    var getTaskParentId = function(tt){
+      if(tt.parentId) return tt.parentId;
+      if(tt._source==='plan'){
+        var ttd = getTnTask(tt.id);
+        if(ttd && ttd.parentId) return ttd.parentId;
+      }
+      return '';
+    };
     var childTaskIds = {};
-    tasks.forEach(function(tt){ if(tt.parentId && taskIdsInGroup[tt.parentId]) childTaskIds[tt.id] = true; });
+    tasks.forEach(function(tt){ var pid=getTaskParentId(tt); if(pid && taskIdsInGroup[pid]) childTaskIds[tt.id] = true; });
     var orderedTasks = [];
     var addedChildIds = {};
     tasks.forEach(function(tt){
       if(childTaskIds[tt.id]) return;
       orderedTasks.push(tt);
       tasks.forEach(function(ct){
-        if(ct.parentId === tt.id && childTaskIds[ct.id] && !addedChildIds[ct.id]){
+        if(getTaskParentId(ct)===tt.id && childTaskIds[ct.id] && !addedChildIds[ct.id]){
           orderedTasks.push(ct);
           addedChildIds[ct.id] = true;
         }
@@ -10629,12 +10662,13 @@ function downloadTnFile(key){
 var reportCurrentSection = 'meeting'; // 'meeting' or 'report'
 
 function switchReportSection(section){
+  var wasDifferent = reportCurrentSection !== section;
   reportCurrentSection = section;
   document.getElementById('reportMeetingSection').style.display = section==='meeting'?'':'none';
   document.getElementById('reportReportSection').style.display = section==='report'?'':'none';
   var tabs = document.querySelectorAll('#reportSectionTabs .report-section-tab');
   tabs.forEach(function(t,i){ t.classList.toggle('active', (i===0&&section==='meeting')||(i===1&&section==='report')); });
-  if(section==='meeting'){ initTnSystems(); initTnAttendees(); renderTnMeetingList(); }
+  if(section==='meeting' && wasDifferent){ initTnSystems(); initTnAttendees(); renderTnMeetingList(); }
   else if(section==='report'){ loadTnReport(); renderTnReportHistory(); }
 }
 
@@ -10737,6 +10771,9 @@ function addTnAssignmentTask(person){
   }
   tnCurrentAssignments[person].push({text: taskText, parentId: ''});
   input.value = '';
+  // Auto-check sync checkbox when user adds a task
+  var syncCb = document.getElementById('mtSyncTask');
+  if(syncCb && !syncCb.checked) syncCb.checked = true;
   renderTnAssignments();
 }
 
@@ -10937,6 +10974,7 @@ function saveTnMeeting(){
       // Create new linked tasks (one per person with assignments)
       var linkedTaskIds = [];
       if(syncTask && assignments.length){
+        if(!tnData.refTasks) tnData.refTasks = [];
         var sn = {yyda:'用印档案公司管理系统',rssw:'人事事务自动化系统',cwzw:'财务账务自动化系统',itpm:'IT项目管理系统'};
         var sc = {yyda:'#7B8FC0',rssw:'#9A7D3E',cwzw:'#5A7868',itpm:'#8B6BAE'};
         var sb = {yyda:'#F4F6FB',rssw:'#FDF8F2',cwzw:'#F2F6F4',itpm:'#F6F2FB'};
@@ -11001,11 +11039,19 @@ function saveTnMeeting(){
   }
 
   saveTnData();
+  var taskCount = (editId && meeting) ? (meeting.linkedTaskIds ? meeting.linkedTaskIds.length : 0) : linkedTaskIds.length;
   tnCurrentAssignments = {};
   clearTnMeetingForm();
   renderTnMeetingList();
   renderTraineeSummary();
   renderTraineeTasks();
+  // Show toast and scroll to meeting list so user knows where tasks went
+  if(syncTask && taskCount > 0){
+    var snMap = {yyda:'用印档案',rssw:'人事事务',cwzw:'财务账务',itpm:'IT项目'};
+    showToast('已同步 ' + taskCount + ' 个任务到「' + (snMap[systems[0]]||systems[0]) + '」任务看板', 'success');
+  }
+  var meetingListEl = document.getElementById('mtHistory');
+  if(meetingListEl) meetingListEl.scrollIntoView({behavior:'smooth'});
 }
 
 function weekToWeeksArray(weekStr){
@@ -11046,6 +11092,8 @@ function loadTnMeeting(id){
     if(tnData.meetings[i].id===id){ meeting = tnData.meetings[i]; break; }
   }
   if(!meeting) return;
+  // Switch to meeting section FIRST (before setting up chips, so subsequent setup is not overwritten)
+  switchReportSection('meeting');
   document.getElementById('mtTitle').value = meeting.title;
   document.getElementById('mtTitle').setAttribute('data-edit-id', meeting.id);
   document.getElementById('mtWeek').value = meeting.week;
@@ -11074,8 +11122,6 @@ function loadTnMeeting(id){
     });
   }
   renderTnAssignments();
-  // Switch to meeting section
-  switchReportSection('meeting');
   document.getElementById('reportMeetingSection').scrollIntoView({behavior:'smooth'});
 }
 
