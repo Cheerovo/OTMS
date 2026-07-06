@@ -8622,6 +8622,11 @@ function renderEvalScorePanel(traineeId){
   var t = null;
   for(var i=0;i<EVAL_TRAINEES.length;i++){ if(EVAL_TRAINEES[i].name===traineeId){ t=EVAL_TRAINEES[i]; break; } }
   if(!t) return;
+  // Permission: only supervisor (by display name) or admin can edit scores
+  var currentUserName = currentUser && users[currentUser] ? users[currentUser].name : '';
+  var canEdit = isGlobalAdmin(currentUser) || (currentUserName === t.supervisor);
+  var dis = canEdit ? '' : ' disabled';
+  var readonly = canEdit ? '' : ' readonly';
   var weekId = EVAL_WEEKS[evalCurrentWeek].id;
   var weekLabel = EVAL_WEEKS[evalCurrentWeek].label + ' (' + EVAL_WEEKS[evalCurrentWeek].start + ' - ' + EVAL_WEEKS[evalCurrentWeek].end + ')';
   var s = getEvalScore(t.name, weekId) || {};
@@ -8635,16 +8640,16 @@ function renderEvalScorePanel(traineeId){
     var d = EVAL_DIMS[i];
     var val = s[d.id] || 0;
     var suggestBtn = '';
-    if(d.id==='taskCompletion'){
+    if(d.id==='taskCompletion' && canEdit){
       var comp = calcTaskCompletionForTrainee(t.name, weekId);
       suggestBtn = '<button class="eval-task-suggestion" onclick="event.preventDefault();applyTaskSuggestion(\''+t.name+'\',\''+weekId+'\','+comp.suggestedScore+')" title="基于'+comp.total+'项任务中已完成'+comp.done+'项（完成率'+comp.rate+'%）">建议 '+comp.suggestedScore+'</button>';
     }
     dimsHtml += '<div class="eval-dim-item">'+
       '<div class="eval-dim-label"><div class="dim-name">'+d.name+suggestBtn+'</div><div class="dim-weight">权重 '+d.weight+'%</div></div>'+
-      '<div class="eval-dim-score-input"><input type="number" value="'+val+'" min="0" max="'+d.max+'" step="0.5" onchange="updateDimScore(\''+t.name+'\',\''+d.id+'\',this.value,\''+weekId+'\')" id="evalDim_'+d.id+'"></div>'+
+      '<div class="eval-dim-score-input"><input type="number" value="'+val+'" min="0" max="'+d.max+'" step="0.5" onchange="if(!this.disabled)updateDimScore(\''+t.name+'\',\''+d.id+'\',this.value,\''+weekId+'\')" id="evalDim_'+d.id+'"'+dis+'></div>'+
       '<div class="eval-dim-max">/ '+d.max+'</div>'+
-      '<div class="eval-dim-slider"><input type="range" value="'+val+'" min="0" max="'+d.max+'" step="0.5" oninput="var inp=document.getElementById(\'evalDim_'+d.id+'\');if(inp){inp.value=this.value;updateDimScore(\''+t.name+'\',\''+d.id+'\',this.value,\''+weekId+'\');}"></div>'+
-      '<div class="eval-dim-comment" style="width:160px;flex-shrink:0"><input type="text" placeholder="评语..." value="'+esc((s[d.id+'Comment']||d.desc))+'" onchange="updateDimComment(\''+t.name+'\',\''+d.id+'\',this.value,\''+weekId+'\')"></div>'+
+      '<div class="eval-dim-slider"><input type="range" value="'+val+'" min="0" max="'+d.max+'" step="0.5" oninput="var inp=document.getElementById(\'evalDim_'+d.id+'\');if(inp&&!inp.disabled){inp.value=this.value;updateDimScore(\''+t.name+'\',\''+d.id+'\',this.value,\''+weekId+'\');}"'+dis+'></div>'+
+      '<div class="eval-dim-comment" style="width:160px;flex-shrink:0"><input type="text" placeholder="评语..." value="'+esc((s[d.id+'Comment']||d.desc))+'" onchange="if(!this.disabled)updateDimComment(\''+t.name+'\',\''+d.id+'\',this.value,\''+weekId+'\')"'+dis+'></div>'+
     '</div>';
   }
 
@@ -8652,30 +8657,37 @@ function renderEvalScorePanel(traineeId){
   extrasHtml = '<div class="eval-extra-tasks">'+
     '<div class="section-label"><span style="display:inline-block;width:3px;height:12px;border-radius:2px;background:var(--accent)"></span>个性化任务评分 <span style="font-size:8px;color:var(--text-muted);font-weight:400">加分项</span></div>';
   for(var i=0;i<extras.length;i++){
+    var delBtn = canEdit ? '<button onclick="removeExtraTask(\''+t.name+'\',\''+weekId+'\','+i+')" style="border:none;background:none;cursor:pointer;color:var(--text-muted);font-size:14px;padding:2px">&times;</button>' : '';
     extrasHtml += '<div class="eval-extra-task-item">'+
       '<span style="font-size:9px;color:var(--text-dim);width:20px">'+(i+1)+'.</span>'+
-      '<div class="task-name"><input type="text" value="'+esc(extras[i].name||'')+'" placeholder="任务名称" onchange="updateExtraTask(\''+t.name+'\',\''+weekId+'\','+i+',\'name\',this.value)" style="width:100%;border:1px solid var(--border-light);border-radius:6px;padding:4px 8px;font-size:10px;font-family:inherit;outline:none"></div>'+
-      '<div class="task-desc"><input type="text" value="'+esc(extras[i].desc||'')+'" placeholder="任务描述" onchange="updateExtraTask(\''+t.name+'\',\''+weekId+'\','+i+',\'desc\',this.value)" style="width:100%"></div>'+
-      '<div class="task-score"><input type="number" value="'+(extras[i].score||0)+'" placeholder="分值" onchange="updateExtraTask(\''+t.name+'\',\''+weekId+'\','+i+',\'score\',this.value)"></div>'+
-      '<button onclick="removeExtraTask(\''+t.name+'\',\''+weekId+'\','+i+')" style="border:none;background:none;cursor:pointer;color:var(--text-muted);font-size:14px;padding:2px">&times;</button>'+
+      '<div class="task-name"><input type="text" value="'+esc(extras[i].name||'')+'" placeholder="任务名称" onchange="if(!this.disabled)updateExtraTask(\''+t.name+'\',\''+weekId+'\','+i+',\'name\',this.value)" style="width:100%;border:1px solid var(--border-light);border-radius:6px;padding:4px 8px;font-size:10px;font-family:inherit;outline:none"'+dis+'></div>'+
+      '<div class="task-desc"><input type="text" value="'+esc(extras[i].desc||'')+'" placeholder="任务描述" onchange="if(!this.disabled)updateExtraTask(\''+t.name+'\',\''+weekId+'\','+i+',\'desc\',this.value)" style="width:100%"'+dis+'></div>'+
+      '<div class="task-score"><input type="number" value="'+(extras[i].score||0)+'" placeholder="分值" onchange="if(!this.disabled)updateExtraTask(\''+t.name+'\',\''+weekId+'\','+i+',\'score\',this.value)"'+dis+'></div>'+
+      delBtn+
     '</div>';
   }
-  extrasHtml += '<button onclick="addExtraTask(\''+t.name+'\',\''+weekId+'\')" style="padding:5px 12px;border:1px dashed var(--border);background:none;border-radius:6px;font-size:9px;color:var(--text-dim);cursor:pointer;font-family:inherit;margin-top:4px">+ 添加加分项</button>'+
-  '</div>';
+  if(canEdit){
+    extrasHtml += '<button onclick="addExtraTask(\''+t.name+'\',\''+weekId+'\')" style="padding:5px 12px;border:1px dashed var(--border);background:none;border-radius:6px;font-size:9px;color:var(--text-dim);cursor:pointer;font-family:inherit;margin-top:4px">+ 添加加分项</button>';
+  }
+  extrasHtml += '</div>';
 
   var prevWeekIdx = evalCurrentWeek - 1;
   var prevDataBtn = '';
-  if(prevWeekIdx >= 0){
+  if(prevWeekIdx >= 0 && canEdit){
     var prevWeekId = EVAL_WEEKS[prevWeekIdx].id;
     prevDataBtn = '<button class="eval-btn-restore" onclick="restorePrevWeekData(\''+t.name+'\',\''+prevWeekId+'\',\''+weekId+'\')">恢复'+EVAL_WEEKS[prevWeekIdx].label+'数据</button>';
   }
 
+  var saveBtn = canEdit ? '<button class="eval-btn-save" onclick="saveCurrentEval(\''+t.name+'\',\''+weekId+'\')">保存评分</button>' : '';
+
+  var readonlyBanner = !canEdit ? '<div style="text-align:center;padding:6px;background:#FDF6EC;border-radius:8px;margin-bottom:12px;font-size:9px;color:#9A7D3E">仅限直属上级（'+t.supervisor+'）或管理员编辑评分</div>' : '';
   container.innerHTML =
     '<div class="eval-score-panel">'+
       '<div class="eval-score-panel-hd">'+
         '<div><div class="name">'+t.name+'</div><div class="meta">'+t.supervisor+' · '+weekLabel+'</div></div>'+
         '<div style="text-align:right"><div style="font-size:8px;color:var(--text-muted)">综合得分</div><div style="font-size:10px;color:var(--text-muted)">通用满分 100 分（个性化分数仅作展示，不计入总分）</div></div>'+
       '</div>'+
+      readonlyBanner +
       '<div class="eval-total-score">'+
         '<div class="big-num">'+(total !== null ? total : '—')+'</div>'+
         '<div class="big-label">通用 '+(total !== null ? total : '—')+' / 100</div>'+
@@ -8685,8 +8697,7 @@ function renderEvalScorePanel(traineeId){
       '<div class="eval-dims">'+dimsHtml+'</div>'+
       extrasHtml +
       '<div class="eval-save-row">'+
-        prevDataBtn +
-        '<button class="eval-btn-save" onclick="saveCurrentEval(\''+t.name+'\',\''+weekId+'\')">保存评分</button>'+
+        prevDataBtn + saveBtn +
       '</div>'+
     '</div>';
 }
