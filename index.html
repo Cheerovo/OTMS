@@ -944,6 +944,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .ws-todo-tag { font-size:9px; padding:2px 8px; border-radius:10px; flex-shrink:0; font-weight:400; }
 .ws-todo-tag.okr { background:#eff2fb; color:#4b7bec; }
 .ws-todo-tag.meeting { background:#fef5ee; color:#e69f67; }
+.ws-todo-tag.trainee { background:#f2f4fb; color:#7B8FC0; }
 .ws-todo-tag.report { background:var(--success-bg); color:var(--success-text); }
 .ws-todo-tag.ding { background:#fdf2f8; color:#9d81d9; }
 .ws-approval-item { display:flex; align-items:center; gap:12px; padding:12px 22px; cursor:pointer; transition:background .12s; border-bottom:1px solid var(--border-subtle); }
@@ -8096,6 +8097,41 @@ function renderWorkspace(){
       }
     });
   });
+  // Trainee tasks (管培生任务)
+  try{ if(!tnData) loadTnData(); }catch(e){}
+  if(tnData){
+    // Weekly tasks assigned to current user
+    if(tnData.wtasks){
+      tnData.wtasks.forEach(function(w){
+        if(w.person===cu && w.status==='active'){
+          pushes.push({type:'trainee',text:'周任务：'+w.name,meta:'W'+(w.week||''),urgent:false,tid:w.id,title:w.name});
+        }
+      });
+    }
+    // Ref tasks where current user is executor
+    if(tnData.refTasks){
+      tnData.refTasks.forEach(function(r){
+        if((r.executors||[]).indexOf(cu)!==-1 && r.refStatus==='active'){
+          var taskName = r.name;
+          if(taskName.length > 30) taskName = taskName.substring(0,28)+'..';
+          pushes.push({type:'trainee',text:taskName,meta:r.sysName||'',urgent:false,tid:r.id,title:r.name});
+        }
+      });
+    }
+    // Meeting assignments for current user
+    if(tnData.meetings){
+      tnData.meetings.forEach(function(m){
+        if(m.assignments && m.assignments.length){
+          m.assignments.forEach(function(a){
+            if(a.person===cu && a.text){
+              var aText = a.text.length > 25 ? a.text.substring(0,23)+'..' : a.text;
+              pushes.push({type:'trainee',text:'会议任务：'+aText,meta:m.title||'',urgent:false,mid:m.id,title:m.title});
+            }
+          });
+        }
+      });
+    }
+  }
   // Reports (separate from pushes)
   const reportDues=[];
   reports.forEach(r=>{
@@ -8196,20 +8232,23 @@ function renderWorkspace(){
   if(!pushes.length){
     psEl.innerHTML='<div class="ws-empty"><p>暂无待推进项</p></div>';
   }else{
-    const pushTags={kr:'okr',overdue:'okr',deadline:'okr',task:'meeting',report:'report'};
+    const pushTags={kr:'okr',overdue:'okr',deadline:'okr',task:'meeting',trainee:'trainee',report:'report'};
     psEl.innerHTML=pushes.map(p=>{
       let click='';
       if(p.type==='kr'||p.type==='overdue'||p.type==='deadline'){
         click=`onclick="switchTab('okr');setTimeout(()=>{const c=document.querySelector('.okr-card[data-id=\\'${p.oid}\\']');if(c){c.classList.add('open');c.scrollIntoView({behavior:'smooth'})}},200)"`;
       }else if(p.type==='task'){
         click=`onclick="switchTab('meeting');setTimeout(()=>document.querySelector('.meeting-card[data-id=\\'${p.mid}\\']')?.scrollIntoView({behavior:'smooth'}),200)"`;
+      }else if(p.type==='trainee'){
+        click=`onclick="switchTab('kpi');setTimeout(()=>{const el=document.getElementById('reportMeetingSection');if(el)el.scrollIntoView({behavior:'smooth'});},200)"`;
       }else if(p.type==='report'){
         click=`onclick="switchTab('report')"`;
       }
+      var tagLabel = p.type==='kr'?'OKR':p.type==='overdue'||p.type==='deadline'?'OKR':p.type==='task'?'例会':p.type==='trainee'?'管培':'报表';
       return `<div class="ws-todo-item${p.urgent?' urgent':''}" ${click}>
         <span class="ws-todo-dot ${p.urgent?'u':'n'}"></span>
         <span class="ws-todo-text"><span class="t">${esc(p.text)}</span><span class="sub">${esc(p.meta)}</span></span>
-        <span class="ws-todo-tag ${pushTags[p.type]}">${p.type==='kr'?'OKR':p.type==='overdue'||p.type==='deadline'?'OKR':p.type==='task'?'例会':'报表'}</span>
+        <span class="ws-todo-tag ${pushTags[p.type]}">${tagLabel}</span>
       </div>`;
     }).join('');
   }
