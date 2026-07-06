@@ -274,15 +274,32 @@ async function main() {
 
 
   const todayStr = today.toISOString().slice(0, 10);
+
+  // 加载已有数据，合并累积（而非覆盖）
+  let existing = { users: [] };
+  if (fs.existsSync(DATA_FILE)) {
+    try { existing = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch(_) {}
+  }
+  const existingMap = {};
+  (existing.users || []).forEach(u => { existingMap[u.name] = u; });
+
   const output = {
     updated: new Date().toISOString(),
-    users: allUsers.map(u => ({
-      name: u.name,
-      mobile: u.mobile || '',
-      deptName: u.dept_name_list || '',
-      statusByDate: statusMap[u.name] || {},
-      todayStatus: statusMap[u.name]?.[todayStr] || DEFAULT_STATUS
-    }))
+    users: allUsers.map(u => {
+      const prev = existingMap[u.name];
+      const newSBD = statusMap[u.name] || {};
+      // 合并历史数据：旧数据打底，新数据覆盖
+      const merged = {};
+      if (prev && prev.statusByDate) Object.assign(merged, prev.statusByDate);
+      Object.assign(merged, newSBD);
+      return {
+        name: u.name,
+        mobile: u.mobile || '',
+        deptName: u.dept_name_list || '',
+        statusByDate: merged,
+        todayStatus: newSBD[todayStr] || DEFAULT_STATUS
+      };
+    })
   };
 
   fs.writeFileSync(DATA_FILE, JSON.stringify(output, null, 2), 'utf8');

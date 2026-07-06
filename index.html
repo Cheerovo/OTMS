@@ -5830,7 +5830,8 @@ async function syncFromDingTalkSilent(date, attData, empList) {
     empList.forEach(function(e) {
       var ddUser = ddMap[e.name];
       if (!ddUser) { attData[date][e.id] = {m:'不在钉钉数据', s:'不在钉钉数据'}; return; }
-      var raw = (ddUser.statusByDate && ddUser.statusByDate[date]) ? ddUser.statusByDate[date] : (ddUser.todayStatus || {m:'在岗', s:'正常'});
+      var raw = (ddUser.statusByDate && ddUser.statusByDate[date]);
+      if (!raw) return; // 该日期没有钉钉数据，保留已有记录
       if (typeof raw === 'string') { raw = {m:'在岗', s: raw}; }  // backward compat
       attData[date][e.id] = raw;
     });
@@ -5861,7 +5862,9 @@ async function syncFromDingTalk() {
     empList.forEach(function(e) {
       var ddUser = ddMap[e.name];
       if (!ddUser) { attData[date][e.id] = {m:'不在钉钉数据', s:'不在钉钉数据'}; skipped++; return; }
-      var raw = (ddUser.statusByDate && ddUser.statusByDate[date]) || ddUser.todayStatus || {m:'在岗', s:'正常'};
+      // 只取 statusByDate 精确匹配日期的数据，不用 todayStatus 兜底
+      var raw = (ddUser.statusByDate && ddUser.statusByDate[date]);
+      if (!raw) return; // 该日期没有钉钉数据，保留已有记录
       if (typeof raw === 'string') { raw = {m:'在岗', s: raw}; }
       attData[date][e.id] = raw;
       synced++;
