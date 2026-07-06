@@ -5784,7 +5784,7 @@ async function syncFromDingTalk() {
     empList.forEach(function(e) {
       var ddUser = ddMap[e.name];
       if (!ddUser) { attData[date][e.id] = {m:'不在钉钉数据', s:'不在钉钉数据'}; skipped++; return; }
-      var raw = ddUser.todayStatus || (ddUser.statusByDate && ddUser.statusByDate[date]) || {m:'在岗', s:'正常'};
+      var raw = (ddUser.statusByDate && ddUser.statusByDate[date]) || ddUser.todayStatus || {m:'在岗', s:'正常'};
       if (typeof raw === 'string') { raw = {m:'在岗', s: raw}; }
       attData[date][e.id] = raw;
       synced++;
