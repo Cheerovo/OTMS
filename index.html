@@ -810,7 +810,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-card .card-dot.on { background: #8BA0B8; }
 .attend-card .card-dot.leave { background: #D4915E; }
 .attend-card .card-dot.out { background: #9B8EC4; }
-.attend-card .card-dot.other { background: #CA6B6B; }
+.attend-card .card-dot.other { background: #CA6B6B; width: 8px; height: 8px; }
 .attend-card .card-dot.nodd { background: #C5C1BB; }
 .as-nodd { color: #A09B95; } .as-nodd .stat-dot { background: #C5C1BB; }
 .attend-card .card-body { flex: 1; min-width: 0; }
@@ -821,16 +821,18 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .card-st-main.on { color: #7A8FA8; }
 .card-st-main.leave { color: #C57D48; }
 .card-st-main.out { color: #887AB8; }
-.card-st-main.other { color: #B85C5C; }
+.card-st-main.other { color: #B85C5C; font-size: 11px; font-weight: 700; }
 .card-st-main.nodd { color: #A09B95; }
 .card-st-sep { color: var(--border); font-weight: 300; }
 .card-st-sub { font-size: 10px; font-weight: 500; color: var(--text-muted); }
 .card-st-sub.ab { font-weight: 700; font-size: 10px; padding: 1px 7px; border-radius: 8px; }
-.card-st-sub.ab.on { color: #B85C5C; background: #FEF2F2; border: 1px solid #FECACA; }
+.card-st-sub.ab.on { color: #C57D48; background: #FFF8F0; border: 1px solid #FDDCB5; }
 .card-st-sub.ab.leave { color: #C57D48; background: #FFF8F0; border: 1px solid #FDDCB5; }
 .card-st-sub.ab.out { color: #887AB8; background: #F5F3FF; border: 1px solid #DDD6FE; }
-.card-st-sub.ab.other { color: #B85C5C; background: #FEF2F2; border: 1px solid #FECACA; }
-.attend-card.has-ab { box-shadow: 0 1px 3px rgba(202,107,107,0.06), 0 0 0 1px rgba(202,107,107,0.05); }
+.card-st-sub.ab.other { color: #B85C5C; font-size: 11px; font-weight: 700; background: #FEF2F2; border: 1px solid #FECACA; }
+.attend-card.has-ab { border-color: #FED7AA; box-shadow: 0 1px 3px rgba(212,145,94,0.08); }
+.attend-card.other { background: #FFFBFB; border-color: #FECACA; box-shadow: 0 0 0 2px rgba(202,107,107,0.1), 0 2px 8px rgba(202,107,107,0.08); }
+.attend-card.other:hover { border-color: #FCA5A5; box-shadow: 0 0 0 2px rgba(202,107,107,0.15), 0 4px 16px rgba(202,107,107,0.12); }
 .attend-card .card-location { font-size: 9px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rank-I { background:#F2EFEB; color:#8D8883; }
 .rank-II { background:#E8F0EC; color:#5A7868; }
@@ -5679,8 +5681,10 @@ function renderAttendView() {
     var isAb = sub !== '正常';
     var subCls = 'card-st-sub' + (isAb ? ' ab '+dc : '');
     var subHtml = (main === sub) ? '' : '<span class="card-st-sep">·</span><span class="'+subCls+'">'+esc(sub)+'</span>';
-    var abClass = isAb ? ' has-ab' : '';
-    return '<div class="attend-card'+abClass+'">'
+    var cardClass = 'attend-card';
+    if (dc === 'other') cardClass += ' other';
+    else if (isAb) cardClass += ' has-ab';
+    return '<div class="'+cardClass+'">'
       + '<span class="card-dot '+dc+'"></span>'
       + '<div class="card-body">'
       + '<div class="card-top"><span class="card-name">'+esc(e.name)+'</span>'
