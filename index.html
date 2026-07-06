@@ -3631,6 +3631,7 @@ function hidePermBlock(tabId){
 }
 function switchTab(tab) {
   curTab = tab;
+  safeSessionSet('okr_last_tab', tab);
   pendingTab = null;
   document.getElementById('tabOKR').className = 'tab-content' + (tab==='okr'?' active':'');
   document.getElementById('tabKPI').className = 'tab-content' + (tab==='kpi'?' active':'');
@@ -6535,7 +6536,9 @@ document.head.appendChild(_autoSyncStyle);
 function initApp(){
   restoreOkrFilters();
   syncFromRemote();
-  var homeTab = currentUser ? getPref('homeTab','org') : 'org';
+  // 恢复上次停留的标签页，默认进入工作台
+  var lastTab = safeSessionGet('okr_last_tab');
+  var homeTab = lastTab || (currentUser ? getPref('homeTab','workspace') : 'workspace');
   switchTab(homeTab);
   updateBellBadge();
 }
