@@ -1762,7 +1762,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
     <div class="tn-view" id="tnReportView" style="display:none">
       <!-- Internal section tabs -->
       <div class="report-section-tabs" id="reportSectionTabs">
-        <button class="report-section-tab active" onclick="switchReportSection('meeting')">会议纪要</button>
+        <button class="report-section-tab active" onclick="switchReportSection('meeting')">会议记录</button>
         <button class="report-section-tab" onclick="switchReportSection('report')">周报上传</button>
       </div>
       <!-- Meeting section -->
@@ -1773,7 +1773,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
               <div class="tn-report-header">
                 <div class="tn-report-header-icon" style="background:#FDE8EC;color:#C94F66"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><polyline points="9 10 11 13 15 9"/></svg></div>
                 <div>
-                  <div style="font-size:13px;font-weight:600;color:var(--text)">会议纪要</div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text)">会议记录</div>
                   <div style="font-size:9px;color:var(--text-dim)">记录会议信息，自动关联任务看板</div>
                 </div>
               </div>
@@ -1804,7 +1804,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
                 </div>
               </div>
               <div class="tn-report-field" style="margin-bottom:10px">
-                <label>会议纪要</label>
+                <label>会议记录</label>
                 <textarea id="mtMinutes" placeholder="记录会议讨论内容、决议事项…" style="width:100%;height:150px;padding:12px;border:1px solid var(--border-light);border-radius:10px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;resize:vertical;box-sizing:border-box"></textarea>
               </div>
               <div class="mt-assignments-section" id="mtAssignmentsSection">
@@ -4535,7 +4535,7 @@ function renderMeetingList(f){
       </div>
       <div class="meeting-card-body">
         <div class="meeting-section">
-          <div class="section-hd">会议纪要</div>
+          <div class="section-hd">会议记录</div>
           <div class="minutes-box">${m.minutes?esc(m.minutes):'<span style="color:var(--text2)">暂无纪要</span>'}</div>
           ${(m.minutesLog||[]).length?`<div class="kr-log" style="margin-top:6px">${m.minutesLog.slice(-3).map(l=>`<div class="kr-log-item"><span class="log-date">${l.date}</span><span>纪要已更新</span><span class="log-operator">${l.operator}</span></div>`).join('')}</div>`:''}
         </div>
@@ -4827,7 +4827,7 @@ function openMeetingModal(id){
   <div class="modal-body">
     <div class="form-row"><div class="form-group"><label>会议标题 *</label><input id="fMT" value="${m?esc(m.title):''}"></div><div class="form-group"><label>会议日期 *</label><input type="date" id="fMD" value="${m?m.date:new Date().toISOString().slice(0,10)}"></div></div>
     <div class="form-group"><label>参会人员（逗号分隔）</label><input id="fMA" value="${m?esc(m.attendees):''}" placeholder="杜宪,汪顺"></div>
-    <div class="form-group"><label>会议纪要</label><textarea id="fMM" rows="5" placeholder="记录会议讨论内容、决议事项...">${m?esc(m.minutes||''):''}</textarea></div>
+    <div class="form-group"><label>会议记录</label><textarea id="fMM" rows="5" placeholder="记录会议讨论内容、决议事项...">${m?esc(m.minutes||''):''}</textarea></div>
     <label style="font-size:10px;font-weight:400;color:var(--text2);margin:6px 0;display:block">临时任务</label>
     <div id="meetingTaskForms">${tks.map(tk=>meetingTaskForm(tk)).join('')}</div>
     <button class="add-kr-btn" onclick="addMeetingTaskForm()">+ 添加临时任务</button>
@@ -10538,7 +10538,9 @@ function renderTnAssignments(){
 
   var html = '';
   selected.forEach(function(person){
-    var tasks = tnCurrentAssignments[person] || [];
+    var assignData = tnCurrentAssignments[person] || {};
+    var tasks = assignData.tasks || [];
+    var savedParentId = assignData.parentId || '';
     html += '<div class="mt-assignment-card">';
     html += '<div class="mt-assignment-card-header">';
     html += '<span class="mt-assignment-person">' + person + '</span>';
@@ -10563,6 +10565,15 @@ function renderTnAssignments(){
     html += '<input class="mt-assignment-add-input" id="' + inputId + '" placeholder="添加' + person + '的任务…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();addTnAssignmentTask(\'' + safePerson2 + '\')}">';
     html += '<button class="mt-assignment-add-btn" onclick="addTnAssignmentTask(\'' + safePerson2 + '\')">添加</button>';
     html += '</div>';
+    // Parent task selector for this person
+    var parentSelectId = 'mtParent_' + person.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_');
+    var safePerson3 = person.replace(/'/g,"\\'");
+    html += '<div class="mt-assignment-add-row" style="margin-top:8px;border-top:1px dashed var(--border-light);padding-top:8px">';
+    html += '<select class="mt-assignment-add-input" id="' + parentSelectId + '" onchange="setTnAssignmentParent(\'' + safePerson3 + '\',this.value)" style="font-size:9px;border-style:solid">';
+    html += '<option value="">关联已有任务（可选）</option>';
+    html += buildParentOptions('', savedParentId);
+    html += '</select>';
+    html += '</div>';
     html += '</div>';
   });
   container.innerHTML = html;
@@ -10576,20 +10587,37 @@ function addTnAssignmentTask(person){
   if(!taskText) return;
 
   if(!tnCurrentAssignments[person]){
-    tnCurrentAssignments[person] = [];
+    tnCurrentAssignments[person] = {tasks: [], parentId: ''};
   }
-  tnCurrentAssignments[person].push(taskText);
+  if(!tnCurrentAssignments[person].tasks) tnCurrentAssignments[person].tasks = [];
+  tnCurrentAssignments[person].tasks.push(taskText);
+  // Preserve parentId
+  var curParentId = tnCurrentAssignments[person].parentId || '';
+  // Read from DOM if present
+  var parentSelectId = 'mtParent_' + person.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_');
+  var parentSelect = document.getElementById(parentSelectId);
+  if(parentSelect) curParentId = parentSelect.value;
+  tnCurrentAssignments[person].parentId = curParentId;
   input.value = '';
   renderTnAssignments();
 }
 
 function removeTnAssignmentTask(person, index){
-  if(!tnCurrentAssignments[person]) return;
-  tnCurrentAssignments[person].splice(index, 1);
-  if(!tnCurrentAssignments[person].length){
+  if(!tnCurrentAssignments[person] || !tnCurrentAssignments[person].tasks) return;
+  tnCurrentAssignments[person].tasks.splice(index, 1);
+  // Preserve parentId
+  var curPid = tnCurrentAssignments[person].parentId || '';
+  if(!tnCurrentAssignments[person].tasks.length){
     delete tnCurrentAssignments[person];
   }
   renderTnAssignments();
+}
+
+function setTnAssignmentParent(person, parentId){
+  if(!tnCurrentAssignments[person]){
+    tnCurrentAssignments[person] = {tasks: [], parentId: ''};
+  }
+  tnCurrentAssignments[person].parentId = parentId;
 }
 
 // System multi-select chips
@@ -10729,9 +10757,10 @@ function saveTnMeeting(){
   // Collect assignments from current form state
   var assignments = [];
   Object.keys(tnCurrentAssignments).forEach(function(person){
-    var tasks = tnCurrentAssignments[person];
+    var assignData = tnCurrentAssignments[person];
+    var tasks = (assignData && assignData.tasks) ? assignData.tasks : (Array.isArray(assignData) ? assignData : []);
     if(tasks && tasks.length){
-      assignments.push({person: person, tasks: tasks.slice()});
+      assignments.push({person: person, tasks: tasks.slice(), parentId: (assignData && assignData.parentId) || ''});
     }
   });
 
@@ -10784,7 +10813,7 @@ function saveTnMeeting(){
             approver: assign.person || attendees[0] || currentUser || '',
             refStatus: 'active', priority: 'P2',
             weeks: weekToWeeksArray(week), attachments: 0, _source: 'ref',
-            desc: '', parentId: ''
+            desc: '', parentId: (assign.parentId || '')
           });
           linkedTaskIds.push(taskId);
         });
@@ -10891,7 +10920,7 @@ function loadTnMeeting(id){
   tnCurrentAssignments = {};
   if(meeting.assignments && meeting.assignments.length){
     meeting.assignments.forEach(function(a){
-      tnCurrentAssignments[a.person] = (a.tasks||[]).slice();
+      tnCurrentAssignments[a.person] = {tasks: (a.tasks||[]).slice(), parentId: a.parentId || ''};
     });
   }
   renderTnAssignments();
