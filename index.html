@@ -811,8 +811,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-card .card-dot.leave { background: #D4915E; }
 .attend-card .card-dot.out { background: #9B8EC4; }
 .attend-card .card-dot.other { background: #CA6B6B; width: 8px; height: 8px; }
-.attend-card .card-dot.nodd { background: #C5C1BB; }
-.as-nodd { color: #A09B95; } .as-nodd .stat-dot { background: #C5C1BB; }
+.attend-card .card-dot.nodd { background: #DDD9D4; }
+.as-nodd { color: #B5B0AA; } .as-nodd .stat-dot { background: #DDD9D4; }
+.attend-card.nodd { opacity: 0.6; }
+.attend-card.nodd:hover { opacity: 0.85; }
 .attend-card .card-body { flex: 1; min-width: 0; }
 .attend-card .card-top { display: flex; align-items: baseline; gap: 6px; margin-bottom: 1px; }
 .attend-card .card-name { font-size: 11px; font-weight: 600; color: var(--text); letter-spacing: 0.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
@@ -822,7 +824,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .card-st-main.leave { color: #C57D48; }
 .card-st-main.out { color: #887AB8; }
 .card-st-main.other { color: #B85C5C; font-size: 11px; font-weight: 700; }
-.card-st-main.nodd { color: #A09B95; }
+.card-st-main.nodd { color: #B5B0AA; }
 .card-st-sep { color: var(--border); font-weight: 300; }
 .card-st-sub { font-size: 10px; font-weight: 500; color: var(--text-muted); }
 .card-st-sub.ab { font-weight: 700; font-size: 10px; padding: 1px 7px; border-radius: 8px; }
@@ -5683,6 +5685,7 @@ function renderAttendView() {
     var subHtml = (main === sub) ? '' : '<span class="card-st-sep">·</span><span class="'+subCls+'">'+esc(sub)+'</span>';
     var cardClass = 'attend-card';
     if (dc === 'other') cardClass += ' other';
+    else if (dc === 'nodd') cardClass += ' nodd';
     else if (isAb) cardClass += ' has-ab';
     return '<div class="'+cardClass+'">'
       + '<span class="card-dot '+dc+'"></span>'
