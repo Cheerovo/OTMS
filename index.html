@@ -1734,8 +1734,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
                 </div>
               </div>
               <div class="tn-report-field" style="margin-bottom:10px">
-                <label>所属系统</label>
-                <select id="mtSystem"><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option><option value="itpm">IT项目管理系统</option></select>
+                <label>所属系统 <span style="font-weight:400;color:var(--text-dim)">（可多选）</span></label>
+                <div class="meeting-attendee-chips" id="mtSystems"></div>
               </div>
               <div class="tn-report-field" style="margin-bottom:10px">
                 <label>参会人员 <span style="font-weight:400;color:var(--text-dim)">（点击选择，下方可添加其他人）</span></label>
@@ -10222,7 +10222,7 @@ function switchReportSection(section){
   document.getElementById('reportReportSection').style.display = section==='report'?'':'none';
   var tabs = document.querySelectorAll('#reportSectionTabs .report-section-tab');
   tabs.forEach(function(t,i){ t.classList.toggle('active', (i===0&&section==='meeting')||(i===1&&section==='report')); });
-  if(section==='meeting'){ initTnAttendees(); renderTnMeetingList(); }
+  if(section==='meeting'){ initTnSystems(); initTnAttendees(); renderTnMeetingList(); }
   else if(section==='report'){ loadTnReport(); renderTnReportHistory(); }
 }
 
@@ -10249,6 +10249,73 @@ function initTnAttendees(){
 
 function toggleTnAttendee(el){
   el.classList.toggle('selected');
+}
+
+// System multi-select chips
+var TN_SYSTEMS = [
+  {id:'yyda',name:'用印档案',color:'#7B8FC0'},
+  {id:'rssw',name:'人事事务',color:'#9A7D3E'},
+  {id:'cwzw',name:'财务账务',color:'#5A7868'},
+  {id:'itpm',name:'IT项目',color:'#8B6BAE'}
+];
+
+function initTnSystems(){
+  var container = document.getElementById('mtSystems');
+  if(!container) return;
+  // Check existing selections to preserve
+  var existingSelected = [];
+  var chips = container.querySelectorAll('.meeting-attendee-chip.selected');
+  chips.forEach(function(c){ existingSelected.push(c.getAttribute('data-id')); });
+  var html = '<span class="meeting-attendee-chip" onclick="toggleAllTnSystems(this)" data-id="all" style="font-weight:500">全部</span>';
+  TN_SYSTEMS.forEach(function(s){
+    html += '<span class="meeting-attendee-chip'+(existingSelected.indexOf(s.id)!==-1?' selected':'')+'" onclick="toggleTnAttendee(this);updateAllSystemChip()" data-id="'+s.id+'">'+s.name+'</span>';
+  });
+  container.innerHTML = html;
+}
+
+function toggleAllTnSystems(el){
+  var container = document.getElementById('mtSystems');
+  var chips = container.querySelectorAll('.meeting-attendee-chip:not([data-id="all"])');
+  var allSelected = el.classList.contains('selected');
+  if(allSelected){
+    // Deselect all
+    el.classList.remove('selected');
+    chips.forEach(function(c){ c.classList.remove('selected'); });
+  } else {
+    // Select all
+    el.classList.add('selected');
+    chips.forEach(function(c){ c.classList.add('selected'); });
+  }
+}
+
+function updateAllSystemChip(){
+  var container = document.getElementById('mtSystems');
+  var chips = container.querySelectorAll('.meeting-attendee-chip:not([data-id="all"])');
+  var allChip = container.querySelector('.meeting-attendee-chip[data-id="all"]');
+  var allSelected = true;
+  chips.forEach(function(c){ if(!c.classList.contains('selected')) allSelected = false; });
+  if(allChip){
+    if(allSelected) allChip.classList.add('selected');
+    else allChip.classList.remove('selected');
+  }
+}
+
+function getTnSelectedSystems(){
+  var container = document.getElementById('mtSystems');
+  var chips = container.querySelectorAll('.meeting-attendee-chip:not([data-id="all"]).selected');
+  var ids = [];
+  chips.forEach(function(c){ ids.push(c.getAttribute('data-id')); });
+  return ids;
+}
+
+function setTnSelectedSystems(ids){
+  var container = document.getElementById('mtSystems');
+  var chips = container.querySelectorAll('.meeting-attendee-chip:not([data-id="all"])');
+  chips.forEach(function(c){
+    if(ids.indexOf(c.getAttribute('data-id'))!==-1) c.classList.add('selected');
+    else c.classList.remove('selected');
+  });
+  updateAllSystemChip();
 }
 
 function addTnCustomAttendee(){
@@ -10310,7 +10377,8 @@ function saveTnMeeting(){
   if(!title){ alert('请输入会议标题'); return; }
   var week = document.getElementById('mtWeek').value;
   var date = document.getElementById('mtDate').value;
-  var system = document.getElementById('mtSystem').value;
+  var systems = getTnSelectedSystems();
+  if(!systems.length){ alert('请选择所属系统'); return; }
   var attendees = getTnSelectedAttendees();
   if(!attendees.length){ alert('请选择参会人员'); return; }
   var minutes = document.getElementById('mtMinutes').value;
@@ -10332,9 +10400,9 @@ function saveTnMeeting(){
       meeting.title = title;
       meeting.week = week;
       meeting.date = date;
-      meeting.system = system;
+      meeting.systems = systems;
       meeting.attendees = attendees;
-      meeting.minutes = minutes;
+            meeting.minutes = minutes;
       linkedTaskId = meeting.linkedTaskId;
       // Update linked task if exists
       if(syncTask && linkedTaskId && tnData.refTasks){
@@ -10342,7 +10410,7 @@ function saveTnMeeting(){
           if(tnData.refTasks[j].id===linkedTaskId){
             tnData.refTasks[j].name = title;
             tnData.refTasks[j].executors = attendees.slice();
-            tnData.refTasks[j].sys = system;
+            tnData.refTasks[j].sys = systems[0];
             tnData.refTasks[j].weeks = weekToWeeksArray(week);
             break;
           }
@@ -10361,12 +10429,13 @@ function saveTnMeeting(){
       var sysNames = {yyda:'用印档案公司管理系统',rssw:'人事事务自动化系统',cwzw:'财务账务自动化系统',itpm:'IT项目管理系统'};
       var sysColors = {yyda:'#7B8FC0',rssw:'#9A7D3E',cwzw:'#5A7868',itpm:'#8B6BAE'};
       var sysBgs = {yyda:'#F4F6FB',rssw:'#FDF8F2',cwzw:'#F2F6F4',itpm:'#F6F2FB'};
+      var taskSys = systems[0];
       tnData.refTasks.push({
         id: linkedTaskId,
-        sys: system,
-        sysName: sysNames[system]||'',
-        sysColor: sysColors[system]||'#8B6BAE',
-        sysBg: sysBgs[system]||'#F6F2FB',
+        sys: taskSys,
+        sysName: sysNames[taskSys]||'',
+        sysColor: sysColors[taskSys]||'#8B6BAE',
+        sysBg: sysBgs[taskSys]||'#F6F2FB',
         name: title,
         taskType: 'meeting',
         taskCategory: 'review',
@@ -10385,7 +10454,7 @@ function saveTnMeeting(){
       title: title,
       week: week,
       date: date,
-      system: system,
+      systems: systems.slice(),
       attendees: attendees.slice(),
       minutes: minutes,
       linkedTaskId: linkedTaskId,
@@ -10415,6 +10484,8 @@ function clearTnMeetingForm(){
   document.getElementById('mtDate').value = '';
   document.getElementById('mtMinutes').value = '';
   document.getElementById('mtSyncTask').checked = true;
+  // Clear system selections
+  initTnSystems();
   // Clear attendee selections
   var chips = document.querySelectorAll('#mtAttendees .meeting-attendee-chip');
   chips.forEach(function(c){ c.classList.remove('selected'); });
@@ -10439,7 +10510,8 @@ function loadTnMeeting(id){
   document.getElementById('mtTitle').setAttribute('data-edit-id', meeting.id);
   document.getElementById('mtWeek').value = meeting.week;
   document.getElementById('mtDate').value = meeting.date;
-  document.getElementById('mtSystem').value = meeting.system;
+  initTnSystems();
+  setTnSelectedSystems(meeting.systems || [meeting.system] || []);
   document.getElementById('mtMinutes').value = meeting.minutes || '';
   document.getElementById('mtSyncTask').checked = !!meeting.linkedTaskId;
   initTnAttendees();
@@ -10491,7 +10563,8 @@ function renderTnMeetingList(){
     html += '<div class="meeting-list-item" onclick="loadTnMeeting(\''+m.id+'\')">';
     html += '<span class="mt-week">'+m.week+'</span>';
     html += '<span class="mt-title">'+m.title+'</span>';
-    html += '<div class="mt-meta">'+(m.date||'')+' · '+(sysNames[m.system]||m.system)+' · '+attendeeStr+'</div>';
+    var sysDisplay = (m.systems||[]).length ? m.systems.map(function(s){return sysNames[s]||s;}).join('、') : (sysNames[m.system]||m.system||'');
+	    html += '<div class="mt-meta">'+(m.date||'')+' · '+sysDisplay+' · '+attendeeStr+'</div>';
     html += '<div class="mt-meta" style="margin-top:2px">'+preview+'</div>';
     html += '<div class="mt-actions">';
     html += '<button onclick="event.stopPropagation();loadTnMeeting(\''+m.id+'\')">编辑</button>';
