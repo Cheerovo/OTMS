@@ -817,14 +817,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-card .card-info { flex: 1; min-width: 0; line-height: 1.4; }
 .attend-card .card-name { font-size: 11px; font-weight: 500; color: var(--text); }
 .attend-card .card-location { font-size: 9px; color: var(--text-muted); }
-.attend-card .card-status-tag { font-size: 9px; font-weight: 500; margin-top: 1px; }
-.attend-card .card-status-tag.on { color: #059669; }
-.attend-card .card-status-tag.leave { color: #D97706; }
-.attend-card .card-status-tag.out { color: #2563EB; }
-.attend-card .card-status-tag.trip { color: #7C3AED; }
-.attend-card .card-status-tag.rest { color: #0891B2; }
-.attend-card .card-status-tag.late { color: #DC2626; }
-.attend-card .card-status-tag.other { color: #6B7280; }
+.card-status-two { display: flex; flex-direction: column; gap: 1px; margin-top: 1px; }
+.card-st-main { font-size: 10px; font-weight: 600; }
+.card-st-main.on { color: #059669; }
+.card-st-main.leave { color: #D97706; }
+.card-st-main.out { color: #2563EB; }
+.card-st-main.other { color: #6B7280; }
+.card-st-main.nodd { color: #9CA3AF; }
+.card-st-sub { font-size: 8px; color: var(--text-muted); }
 .rank-I { background:#F2EFEB; color:#8D8883; }
 .rank-II { background:#E8F0EC; color:#5A7868; }
 .rank-III { background:#F9F2E7; color:#9A7D3E; }
@@ -5588,8 +5588,8 @@ function switchFuncSubView(sub, tab) {
 }
 
 // ===== Attendance View (在岗状态) =====
-const ATTEND_STATUS = ['在岗','请假(带薪)','请假(无薪)','外出公干','出差','调休','迟到','其他','不在钉钉数据'];
-const ATTEND_CSS = {'在岗':'as-on','请假(带薪)':'as-leave','请假(无薪)':'as-leave','外出公干':'as-out','出差':'as-trip','调休':'as-rest','迟到':'as-late','其他':'as-other','不在钉钉数据':'as-nodd'};
+const ATTEND_MAIN = ['在岗','请假','外勤','旷工','不在钉钉数据'];
+const ATTEND_CSS = {'在岗':'as-on','请假':'as-leave','外勤':'as-out','旷工':'as-other','不在钉钉数据':'as-nodd'};
 
 function getTodayStr() { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
@@ -5620,11 +5620,12 @@ function renderAttendView() {
   if (buVal !== 'all') filtered = empList.filter(e => e.bu === buVal);
 
   let counts = {};
-  ATTEND_STATUS.forEach(s => counts[s] = 0);
+  ATTEND_MAIN.forEach(s => counts[s] = 0);
+  function ensureObj(st) { if (!st) return null; if (typeof st === 'string') { if (st==='在岗'||st==='迟到'||st==='早退') return {m:'在岗',s:st}; if (st.indexOf('请假')===0) return {m:'请假',s:st}; if (st==='出差'||st==='外出公干') return {m:'外勤',s:st}; if (st==='不在钉钉数据') return {m:'不在钉钉数据',s:st}; return {m:'在岗',s:st}; } return st; }
   filtered.forEach(e => {
-    const st = attData[date][e.id];
-    if (st && counts[st] !== undefined) counts[st]++;
-    else counts['不在钉钉数据']++;
+    var obj = ensureObj(attData[date][e.id]);
+    var main = obj ? obj.m : '不在钉钉数据';
+    counts[main] = (counts[main] || 0) + 1;
   });
 
   let html = '';
@@ -5644,7 +5645,7 @@ function renderAttendView() {
   // Compact stats inline
   html += '<div class="attend-stats">';
   let shown = 0;
-  ATTEND_STATUS.forEach(s => {
+  ATTEND_MAIN.forEach(s => {
     if (counts[s] > 0) {
       html += '<span class="attend-stat '+ATTEND_CSS[s]+'"><span class="stat-dot"></span>'+s+' '+counts[s]+'</span>';
       shown++;
@@ -5656,21 +5657,25 @@ function renderAttendView() {
   html += '<hr class="attend-divider">';
 
   function rankSortOrder(r) { const idx = RANK_ORDER.indexOf(r); return idx === -1 ? 99 : idx; }
-  function dotClass(st) {
-    if (st === '在岗') return 'on'; if (st.includes('请假')) return 'leave';
-    if (st === '外出公干') return 'out'; if (st === '出差') return 'trip';
-    if (st === '调休') return 'rest'; if (st === '迟到') return 'late';
-    if (st === '不在钉钉数据') return 'nodd'; return 'other';
+  function dotClass(main) {
+    if (main === '在岗') return 'on'; if (main === '请假') return 'leave';
+    if (main === '外勤') return 'out'; if (main === '旷工') return 'other';
+    if (main === '不在钉钉数据') return 'nodd'; return 'other';
   }
 
   function renderCard(e) {
-    const st = attData[date][e.id] || '不在钉钉数据';
-    const location = e.location || e.bu || '';
-    const dc = dotClass(st);
+    var raw = attData[date][e.id];
+    var obj = ensureObj(raw) || {m:'不在钉钉数据', s:'不在钉钉数据'};
+    var main = obj.m, sub = obj.s;
+    var location = e.location || e.bu || '';
+    var dc = dotClass(main);
     return '<div class="attend-card"><span class="card-dot '+dc+'"></span>'
       + '<div class="card-info"><div class="card-name">'+esc(e.name)+'</div>'
       + '<div class="card-location">'+esc(location)+'</div>'
-      + '<div class="card-status-tag '+dc+'">'+esc(st)+'</div></div></div>';
+      + '<div class="card-status-two">'
+      + '<span class="card-st-main '+dc+'">'+esc(main)+'</span>'
+      + '<span class="card-st-sub">'+esc(sub)+'</span>'
+      + '</div></div></div>';
   }
 
   const groups = {};
@@ -5725,12 +5730,13 @@ function batchSetStatus() {
   const date = document.getElementById('attendDateInput') ? document.getElementById('attendDateInput').value : getTodayStr();
   const buFilter = document.getElementById('attendBUFilter');
   const buVal = buFilter ? buFilter.value : 'all';
-  const status = prompt('输入要设置的状态（在岗/请假(带薪)/请假(无薪)/外出公干/出差/调休/迟到/其他）：','在岗');
-  if (!status || !ATTEND_STATUS.includes(status)) { if (status!==null) alert('无效状态'); return; }
+  const status = prompt('输入要设置的状态（格式: 主状态|子状态，如 在岗|正常）：','在岗|正常');
+  if (!status || status.indexOf('|') === -1) { if (status!==null) alert('格式错误，请使用 主状态|子状态'); return; }
+  var parts = status.split('|');
   const empList = loadEmployees().filter(e => buVal==='all' || e.bu===buVal);
   const attData = loadAttendance();
   if (!attData[date]) attData[date] = {};
-  empList.forEach(e => { attData[date][e.id] = status; });
+  empList.forEach(e => { attData[date][e.id] = {m: parts[0], s: parts[1]}; });
   saveAttendance(attData);
   renderAttendView();
 }
@@ -5743,13 +5749,12 @@ async function syncFromDingTalkSilent(date, attData, empList) {
     var dd = await resp.json();
     var ddMap = {};
     (dd.users || []).forEach(function(u) { ddMap[u.name] = u; });
-    var dtToLocal = { Normal: '在岗', Early: '迟到', Late: '迟到', Absenteeism: '其他', NotSigned: '其他', Leave: '请假(带薪)', LeaveUnpaid: '请假(无薪)', LieuLeave: '调休', BusinessTravel: '出差', Out: '外出公干' };
-
     empList.forEach(function(e) {
       var ddUser = ddMap[e.name];
-      if (!ddUser) { attData[date][e.id] = '不在钉钉数据'; return; }
-      var st = (ddUser.statusByDate && ddUser.statusByDate[date]) ? ddUser.statusByDate[date] : (ddUser.todayStatus || 'Normal');
-      attData[date][e.id] = dtToLocal[st] || '在岗';
+      if (!ddUser) { attData[date][e.id] = {m:'不在钉钉数据', s:'不在钉钉数据'}; return; }
+      var raw = (ddUser.statusByDate && ddUser.statusByDate[date]) ? ddUser.statusByDate[date] : (ddUser.todayStatus || {m:'在岗', s:'正常'});
+      if (typeof raw === 'string') { raw = {m:'在岗', s: raw}; }  // backward compat
+      attData[date][e.id] = raw;
     });
     saveAttendance(attData);
     renderAttendView();
@@ -5769,13 +5774,6 @@ async function syncFromDingTalk() {
     const ddMap = {};
     (dd.users || []).forEach(function(u) { ddMap[u.name] = u; });
 
-    // DingTalk status → local status mapping
-    var dtToLocal = {
-      Normal: '在岗', Early: '迟到', Late: '迟到',
-      Absenteeism: '其他', NotSigned: '其他',
-      Leave: '请假(带薪)', LeaveUnpaid: '请假(无薪)', LieuLeave: '调休', BusinessTravel: '出差', Out: '外出公干'
-    };
-
     const empList = loadEmployees();
     const attData = loadAttendance();
     if (!attData[date]) attData[date] = {};
@@ -5784,14 +5782,10 @@ async function syncFromDingTalk() {
 
     empList.forEach(function(e) {
       var ddUser = ddMap[e.name];
-      if (!ddUser) { attData[date][e.id] = '不在钉钉数据'; skipped++; return; }
-      var st = ddUser.todayStatus || (ddUser.statusByDate && ddUser.statusByDate[date]) || 'Normal';
-      var localSt = dtToLocal[st] || '在岗';
-      attData[date][e.id] = localSt;
-      if (ddUser.statusByDate && ddUser.statusByDate[date]) {
-        var dateSt = ddUser.statusByDate[date];
-        attData[date][e.id] = dtToLocal[dateSt] || '在岗';
-      }
+      if (!ddUser) { attData[date][e.id] = {m:'不在钉钉数据', s:'不在钉钉数据'}; skipped++; return; }
+      var raw = ddUser.todayStatus || (ddUser.statusByDate && ddUser.statusByDate[date]) || {m:'在岗', s:'正常'};
+      if (typeof raw === 'string') { raw = {m:'在岗', s: raw}; }
+      attData[date][e.id] = raw;
       synced++;
     });
 

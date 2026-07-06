@@ -88,6 +88,18 @@ function dedupUsers(users) {
   });
 }
 
+// 考勤状态映射: timeResult → {m:主状态, s:具体状态}
+const ATTEND_STATUS_MAP = {
+  'Normal': {m:'在岗', s:'正常'},
+  'Late': {m:'在岗', s:'迟到'},
+  'Early': {m:'在岗', s:'早退'},
+  'Absenteeism': {m:'旷工', s:'旷工'},
+  'NotSigned': {m:'旷工', s:'缺卡'},
+  'BusinessTravel': {m:'外勤', s:'出差'},
+  'Out': {m:'外勤', s:'外出'},
+};
+const DEFAULT_STATUS = {m:'在岗', s:'正常'};
+
 // 获取OA请假审批记录，覆盖考勤数据
 async function getLeaveApprovals(token, dateFrom, dateTo) {
   const leaveCodes = [
@@ -99,15 +111,7 @@ async function getLeaveApprovals(token, dateFrom, dateTo) {
   const startTime = new Date(dateFrom + 'T00:00:00+08:00').getTime();
   const endTime = new Date(dateTo + 'T23:59:59+08:00').getTime();
 
-  // leaveType tag → timeResult mapping
-  const leaveTypeMap = {
-    '年假': 'Leave', '病假': 'Leave', '婚假': 'Leave', '产假': 'Leave',
-    '陪产假': 'Leave', '丧假': 'Leave', '工伤假': 'Leave',
-    '事假': 'LeaveUnpaid',
-    '调休': 'LieuLeave'
-  };
-
-  const leaveMap = {};  // {name: {date: 'Leave'}}
+  const leaveMap = {};  // {userid: {date: {m:'请假', s:'年假'}}}
 
   for (const code of leaveCodes) {
     const idsRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/processinstance/listids', { access_token: token }, {
@@ -133,11 +137,11 @@ async function getLeaveApprovals(token, dateFrom, dateTo) {
 
       try {
         const ext = JSON.parse(holidayField.ext_value);
-        // 获取请假类型
-        let leaveType = 'Leave';
+        // 获取请假具体类型标签
+        let leaveTag = '请假';
         if (ext.extension) {
           const extTag = JSON.parse(ext.extension);
-          leaveType = leaveTypeMap[extTag.tag] || 'Leave';
+          leaveTag = extTag.tag || '请假';
         }
         const detailList = ext.detailList || [];
         for (const d of detailList) {
@@ -145,7 +149,7 @@ async function getLeaveApprovals(token, dateFrom, dateTo) {
           const workDate = new Date(wd > 10000000000 ? wd : wd * 1000).toISOString().slice(0, 10);
           if (workDate >= dateFrom && workDate <= dateTo) {
             if (!leaveMap[userId]) leaveMap[userId] = {};
-            leaveMap[userId][workDate] = leaveType;
+            leaveMap[userId][workDate] = {m:'请假', s: leaveTag};
           }
         }
       } catch(_) { /* skip parse errors */ }
@@ -246,7 +250,7 @@ async function main() {
       date = String(rawDate || '').slice(0, 10);
     }
     if (!statusMap[name]) statusMap[name] = {};
-    statusMap[name][date] = r.timeResult || 'Normal';
+    statusMap[name][date] = ATTEND_STATUS_MAP[r.timeResult] || DEFAULT_STATUS;
   });
   console.log('  ✅ 考勤记录覆盖 ' + Object.keys(statusMap).length + ' 人');
 
@@ -275,7 +279,7 @@ async function main() {
       mobile: u.mobile || '',
       deptName: u.dept_name_list || '',
       statusByDate: statusMap[u.name] || {},
-      todayStatus: statusMap[u.name]?.[todayStr] || 'Normal'
+      todayStatus: statusMap[u.name]?.[todayStr] || DEFAULT_STATUS
     }))
   };
 
@@ -286,10 +290,11 @@ async function main() {
 
   console.log('');
   console.log('=== 今日在岗状态 ===');
-  const labels = { Normal: '✅在岗', Early: '⚠️早退', Late: '⚠️迟到', Absenteeism: '❌旷工', NotSigned: '❓缺卡', Leave: '📝请假(带薪)', LeaveUnpaid: '📝请假(无薪)', LieuLeave: '🔄调休', BusinessTravel: '✈️出差', Out: '🚶外出' };
+  const mainIcons = { '在岗':'✅', '请假':'📝', '外勤':'🚶', '旷工':'❌' };
   output.users.forEach(u => {
-    const l = labels[u.todayStatus] || '—';
-    console.log('  ' + u.name + ': ' + l);
+    const ts = u.todayStatus;
+    const icon = mainIcons[ts.m] || '—';
+    console.log('  ' + u.name + ': ' + icon + ts.m + ' / ' + ts.s);
   });
 
   // Auto push to GitHub
