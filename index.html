@@ -1379,6 +1379,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-rpt-item:hover { background:var(--bg-surface-hover); border-color:var(--border-light); }
 .tn-rpt-item .rpt-week { display:inline-block; font-size:8px; font-weight:600; padding:2px 6px; border-radius:4px; background:#E8F0FE; color:#3A6BC5; margin-right:6px; }
 .tn-rpt-item .rpt-author { font-size:9px; color:var(--text); font-weight:500; }
+.tn-rpt-del-btn { float:right; border:none; background:none; font-size:14px; color:var(--text-dim); cursor:pointer; padding:0 4px; line-height:1; border-radius:3px; }
+.tn-rpt-del-btn:hover { color:var(--danger); background:var(--danger-bg); }
 .tn-rpt-item .rpt-preview { font-size:9px; color:var(--text-dim); margin-top:4px; line-height:1.4; }
 .tn-file-link { font-size:8px; color:var(--accent); cursor:pointer; margin-top:3px; display:inline-block; }
 
@@ -10614,6 +10616,22 @@ function saveTnReport(){
   if(saveBtn){ saveBtn.textContent = '已保存'; setTimeout(function(){ saveBtn.textContent = '保存周报'; }, 1500); }
 }
 
+function deleteTnReport(key){
+  if(!tnData || !tnData.reports || !tnData.reports[key]) return;
+  var rpt = tnData.reports[key];
+  var parts = key.split('|');
+  var reportOwner = parts[0];
+  var uploader = rpt.savedBy || '';
+  // Allow: admin, uploader, or the person the report belongs to
+  var canDelete = isGlobalAdmin(currentUser) || currentUser === uploader || currentUser === reportOwner;
+  if(!canDelete){ alert('只有上传人、所属学员或管理员可以删除'); return; }
+  if(!confirm('删除 ' + reportOwner + ' ' + parts[1] + ' 的周报？')) return;
+  delete tnData.reports[key];
+  saveTnData();
+  renderTraineeSummary();
+  renderTnReportHistory();
+}
+
 function renderTnReportHistory(){
   var author = document.getElementById('tnRptAuthor').value || currentUser || '';
   if(!tnData || !tnData.reports){ document.getElementById('tnRptHistory').innerHTML = '<div class="eval-empty" style="padding:20px">暂无周报记录</div>'; return; }
@@ -10640,8 +10658,10 @@ function renderTnReportHistory(){
     var parts = item.key.split('|');
     var r = item.rpt;
     var preview = r.content ? r.content.slice(0,60)+(r.content.length>60?'...':'') : '';
+    var canDelete = isGlobalAdmin(currentUser) || currentUser === (r.savedBy||'') || currentUser === parts[0];
+    var delBtn = canDelete ? '<button class="tn-rpt-del-btn" onclick="event.stopPropagation();deleteTnReport(\''+item.key+'\')" title="删除">×</button>' : '';
     html += '<div class="tn-rpt-item" onclick="document.getElementById(\'tnRptWeek\').value=\''+parts[1]+'\';document.getElementById(\'tnRptAuthor\').value=\''+parts[0].replace(/'/g,"\\'")+'\';loadTnReport();">'+
-      '<span class="rpt-week">'+parts[1]+'</span> <span class="rpt-author">'+parts[0]+'</span>'+
+      '<span class="rpt-week">'+parts[1]+'</span> <span class="rpt-author">'+parts[0]+'</span>'+delBtn+
       '<div class="rpt-preview">'+(preview||'(空)')+'</div>'+
       (r.fileName ? '<span class="tn-file-link" onclick="event.stopPropagation();downloadTnFile(\''+item.key+'\')">📎 '+r.fileName+'</span>' : '')+
       '<div style="font-size:7px;color:var(--text-muted);margin-top:2px">'+(r.savedBy?r.savedBy+' 上传 · ':'')+(r.savedAt?new Date(r.savedAt).toLocaleString('zh-CN'):'草稿')+'</div>'+
