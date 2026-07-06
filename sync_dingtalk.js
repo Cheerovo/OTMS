@@ -290,21 +290,57 @@ async function main() {
   });
   console.log('  ✅ 考勤记录覆盖 ' + Object.keys(statusMap).length + ' 人');
 
+  // 根据考勤记录推断每人工作日（默认做五休二，周末有打卡才加）
+  const workDaysMap = {}; // name → Set of day numbers (1=Mon, 7=Sun)
+  // 默认周一到周五为工作日
+  attendance.forEach(r => {
+    const name = r.userName || (nameMap[r.userId]?.name) || r.userId;
+    if (!workDaysMap[name]) workDaysMap[name] = new Set([1,2,3,4,5]);
+    var rawDate = r.workDate || r.userCheckTime;
+    var date;
+    if (typeof rawDate === 'number') {
+      date = toLocalDate(rawDate);
+    } else if (/^\d{10}$/.test(String(rawDate))) {
+      date = toLocalDate(Number(rawDate));
+    } else if (/^\d{13}$/.test(String(rawDate))) {
+      date = toLocalDate(Number(rawDate));
+    } else {
+      date = String(rawDate || '').slice(0, 10);
+    }
+    var dow = new Date(date + 'T00:00:00+08:00').getDay(); // 0=Sun
+    var dayNum = dow === 0 ? 7 : dow; // 1=Mon ... 7=Sun
+    workDaysMap[name].add(dayNum);
+  });
+  // 为没有考勤记录的人设默认值
+  allUsers.forEach(u => {
+    if (!workDaysMap[nameMap[u.userid]?.name || u.name]) {
+      workDaysMap[u.name] = new Set([1,2,3,4,5]);
+    }
+  });
+
   // 用OA请假审批覆盖考勤状态（拉90天，分段请求）
   console.log('[6] 获取OA请假审批（' + leaveDateFromStr + ' ~ ' + leaveDateToStr + '）...');
   const leaveMap = await getLeaveApprovals(token, leaveDateFromStr, leaveDateToStr);
   let leaveOverlayCount = 0;
+  let leaveSkipRest = 0;
   for (const [userId, dateMap] of Object.entries(leaveMap)) {
     const name = nameMap[userId]?.name;
     if (!name) continue;
     if (!statusMap[name]) statusMap[name] = {};
+    const wdSet = workDaysMap[name];
     for (const [date, st] of Object.entries(dateMap)) {
+      // 如果该日是此人的休息日，跳过请假标记
+      if (wdSet && wdSet.size > 0) {
+        var dow = new Date(date + 'T00:00:00+08:00').getDay();
+        var dayNum = dow === 0 ? 7 : dow;
+        if (!wdSet.has(dayNum)) { leaveSkipRest++; continue; }
+      }
       statusMap[name][date] = st;
       leaveOverlayCount++;
     }
   }
   const leavePersonCount = Object.keys(leaveMap).filter(uid => nameMap[uid]).length;
-  console.log('  ✅ 请假覆盖 ' + leaveOverlayCount + ' 个日期（' + leavePersonCount + ' 人）');
+  console.log('  ✅ 请假覆盖 ' + leaveOverlayCount + ' 个日期（' + leavePersonCount + ' 人）' + (leaveSkipRest > 0 ? '，跳过 ' + leaveSkipRest + ' 个休息日' : ''));
 
 
   const todayStr = toLocalDate(today.getTime());
@@ -326,12 +362,14 @@ async function main() {
       const merged = {};
       if (prev && prev.statusByDate) Object.assign(merged, prev.statusByDate);
       Object.assign(merged, newSBD);
+      const wdSet = workDaysMap[u.name];
       return {
         name: u.name,
         mobile: u.mobile || '',
         deptName: u.dept_name_list || '',
         statusByDate: merged,
-        todayStatus: newSBD[todayStr] || DEFAULT_STATUS
+        todayStatus: newSBD[todayStr] || DEFAULT_STATUS,
+        workDays: wdSet ? [...wdSet].sort((a,b) => a-b) : [1,2,3,4,5] // 默认做五休二
       };
     })
   };

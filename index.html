@@ -832,6 +832,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .as-leave { color: #D4915E; } .as-leave .stat-dot { background: #D4915E; }
 .as-out { color: #9B8EC4; } .as-out .stat-dot { background: #9B8EC4; }
 .as-other { color: #CA6B6B; } .as-other .stat-dot { background: #CA6B6B; }
+.as-rest { color: #B0B8C1; } .as-rest .stat-dot { background: #D0D5DD; }
+.as-nodd { color: #B0B8C1; } .as-nodd .stat-dot { background: #D0D5DD; }
 .attend-divider { border: none; border-top: 1px solid var(--border-subtle); margin-bottom: 16px; }
 /* Card Grid */
 .attend-bu-section { margin-bottom: 22px; }
@@ -857,6 +859,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .as-nodd { color: #B5B0AA; } .as-nodd .stat-dot { background: #DDD9D4; }
 .attend-card.nodd { opacity: 0.6; }
 .attend-card.nodd:hover { opacity: 0.85; }
+.attend-card.rest { opacity: 0.45; background: #FAFBFC; }
+.attend-card.rest:hover { opacity: 0.7; }
 .attend-card .card-body { flex: 1; min-width: 0; }
 .attend-card .card-name { font-size: 11px; font-weight: 600; color: var(--text); letter-spacing: 0.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 1px; }
 .attend-card .card-status { font-size: 10px; font-weight: 500; white-space: nowrap; display: flex; align-items: center; gap: 2px; }
@@ -5639,8 +5643,8 @@ function switchFuncSubView(sub, tab) {
 }
 
 // ===== Attendance View (在岗状态) =====
-const ATTEND_MAIN = ['在岗','请假','外勤','旷工','不在钉钉数据'];
-const ATTEND_CSS = {'在岗':'as-on','请假':'as-leave','外勤':'as-out','旷工':'as-other','不在钉钉数据':'as-nodd'};
+const ATTEND_MAIN = ['在岗','请假','外勤','旷工','休息','不在钉钉数据'];
+const ATTEND_CSS = {'在岗':'as-on','请假':'as-leave','外勤':'as-out','旷工':'as-other','休息':'as-rest','不在钉钉数据':'as-nodd'};
 
 function getTodayStr() { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
@@ -5673,7 +5677,7 @@ function renderAttendView(skipAutoSync) {
   let counts = {};
   let subCounts = {};
   ATTEND_MAIN.forEach(s => counts[s] = 0);
-  function ensureObj(st) { if (!st) return null; if (typeof st === 'string') { if (st==='在岗') return {m:'在岗',s:'正常'}; if (st==='迟到') return {m:'在岗',s:'迟到'}; if (st==='早退') return {m:'在岗',s:'早退'}; if (st.indexOf('请假')===0) return {m:'请假',s:st}; if (st==='出差'||st==='外出公干') return {m:'外勤',s:st}; if (st==='不在钉钉数据') return {m:'不在钉钉数据',s:st}; return {m:'在岗',s:st}; } return st; }
+  function ensureObj(st) { if (!st) return null; if (typeof st === 'string') { if (st==='在岗') return {m:'在岗',s:'正常'}; if (st==='迟到') return {m:'在岗',s:'迟到'}; if (st==='早退') return {m:'在岗',s:'早退'}; if (st.indexOf('请假')===0) return {m:'请假',s:st}; if (st==='出差'||st==='外出公干') return {m:'外勤',s:st}; if (st==='不在钉钉数据') return {m:'不在钉钉数据',s:st}; if (st==='休息') return {m:'休息',s:'休息'}; return {m:'在岗',s:st}; } return st; }
   filtered.forEach(e => {
     var obj = ensureObj(attData[date][e.id]);
     var main = obj ? obj.m : '不在钉钉数据';
@@ -5810,7 +5814,8 @@ function renderAttendView(skipAutoSync) {
         monthDates.forEach(function(md){
           var det = detMap[md];
           var dotCls = det ? (mainCSS[det.m]||'') : 'empty';
-          var title = md + (det ? ' '+det.m+'/'+det.s : ' 在岗');
+          var restLabel = isRestDay(p.name, md) ? '休息' : '在岗';
+          var title = md + (det ? ' '+det.m+'/'+det.s : ' '+restLabel);
           if (dotCls === 'empty') {
             html += '<span class="ms-person-dot" style="background:transparent" title="'+title+'"></span>';
           } else {
@@ -5843,16 +5848,30 @@ function renderAttendView(skipAutoSync) {
 
   html += '<hr class="attend-divider">';
 
+  // 加载工作日配置（从钉钉考勤数据推断）
+  var workDaysMap = {};
+  try { workDaysMap = JSON.parse(localStorage.getItem('attendance_workdays') || '{}'); } catch(_) {}
+  function isRestDay(name, dateStr) {
+    var wd = workDaysMap[name];
+    if (!wd || wd.length === 0) return false;
+    var dow = new Date(dateStr + 'T00:00:00+08:00').getDay();
+    var dayNum = dow === 0 ? 7 : dow;
+    return !wd.includes(dayNum);
+  }
+
   function rankSortOrder(r) { const idx = RANK_ORDER.indexOf(r); return idx === -1 ? 99 : idx; }
   function dotClass(main) {
     if (main === '在岗') return 'on'; if (main === '请假') return 'leave';
     if (main === '外勤') return 'out'; if (main === '旷工') return 'other';
-    if (main === '不在钉钉数据') return 'nodd'; return 'other';
+    if (main === '不在钉钉数据') return 'nodd';
+    if (main === '休息') return 'rest';
+    return 'other';
   }
 
   function renderCard(e) {
     var raw = attData[date][e.id];
-    var obj = ensureObj(raw) || {m:'不在钉钉数据', s:'不在钉钉数据'};
+    var fallback = isRestDay(e.name, date) ? {m:'休息', s:'休息'} : {m:'不在钉钉数据', s:'不在钉钉数据'};
+    var obj = ensureObj(raw) || fallback;
     var main = obj.m, sub = obj.s;
     var dc = dotClass(main);
     var isAb = sub !== '正常';
@@ -5861,6 +5880,7 @@ function renderAttendView(skipAutoSync) {
     var cardClass = 'attend-card';
     if (dc === 'other') cardClass += ' other';
     else if (dc === 'nodd') cardClass += ' nodd';
+    else if (dc === 'rest') cardClass += ' rest';
     else if (isAb) cardClass += ' has-ab';
     return '<div class="'+cardClass+'" id="emp-'+e.id+'">'
       + '<span class="card-dot '+dc+'"></span>'
@@ -5966,13 +5986,15 @@ async function syncFromDingTalkSilent(date, attData, empList) {
     if (!resp.ok) return;
     var dd = await resp.json();
     var ddMap = {};
-    (dd.users || []).forEach(function(u) { ddMap[u.name] = u; });
+    var wdMap = {};
+    (dd.users || []).forEach(function(u) { ddMap[u.name] = u; if (u.workDays) wdMap[u.name] = u.workDays; });
+    localStorage.setItem('attendance_workdays', JSON.stringify(wdMap));
     empList.forEach(function(e) {
       var ddUser = ddMap[e.name];
       if (!ddUser) { attData[date][e.id] = {m:'不在钉钉数据', s:'不在钉钉数据'}; return; }
       var raw = (ddUser.statusByDate && ddUser.statusByDate[date]);
-      if (!raw) { delete attData[date][e.id]; return; } // 该日期没有钉钉数据，清除脏数据
-      if (typeof raw === 'string') { raw = {m:'在岗', s: raw}; }  // backward compat
+      if (!raw) { delete attData[date][e.id]; return; }
+      if (typeof raw === 'string') { raw = {m:'在岗', s: raw}; }
       attData[date][e.id] = raw;
     });
     saveAttendance(attData);
@@ -5991,7 +6013,9 @@ async function syncFromDingTalk() {
     if (!resp.ok) throw new Error('dingtalk_data.json 不存在，请先运行 node sync_dingtalk.js');
     const dd = await resp.json();
     const ddMap = {};
-    (dd.users || []).forEach(function(u) { ddMap[u.name] = u; });
+    var wdMap2 = {};
+    (dd.users || []).forEach(function(u) { ddMap[u.name] = u; if (u.workDays) wdMap2[u.name] = u.workDays; });
+    localStorage.setItem('attendance_workdays', JSON.stringify(wdMap2));
 
     const empList = loadEmployees();
     const attData = loadAttendance();
