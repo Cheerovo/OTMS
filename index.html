@@ -2329,7 +2329,7 @@ function defaultUsers(){return{
   '蔡心宇':{pw:'123123',role:'user',name:'蔡心宇'},
   '芦智蔚':{pw:'123123',role:'user',name:'芦智蔚'},
   '黄欢欢':{pw:'123123',role:'user',name:'黄欢欢'},
-  '王妤杨':{pw:'123123',role:'user',name:'王妤杨'},
+  '王妤扬':{pw:'123123',role:'user',name:'王妤扬'},
   '王力':{pw:'123123',role:'user',name:'王力'}
 };}
 function loadUsers(){
@@ -2793,9 +2793,9 @@ function canViewFile(uploader){return canViewReportFile(null,uploader);}
 })();
 
 // ===== OKR Data =====
-const OWNERS = ['杜宪','汪顺','王倩','邵吴慧','Jenny','黄一萧','蔡心宇','芦智蔚','黄欢欢','王妤杨','王力','ALL'];
-const OWNER_COLORS = { '杜宪':'#b53b3b','汪顺':'#4b7bec','王倩':'#b45309','邵吴慧':'#62bb92','Jenny':'#9d81d9','黄一萧':'#e69f67','蔡心宇':'#0891b2','芦智蔚':'#d97706','黄欢欢':'#7c3aed','王妤杨':'#0d9488','王力':'#dc2626' };
-const OWNER_BG = { '杜宪':'#fef2f2','汪顺':'#eff6ff','王倩':'#fff7ed','邵吴慧':'#f0fdf4','Jenny':'#f5f3ff','黄一萧':'#fff7ed','蔡心宇':'#ecfeff','芦智蔚':'#fffbeb','黄欢欢':'#f5f3ff','王妤杨':'#f0fdfa','王力':'#fef2f2' };
+const OWNERS = ['杜宪','汪顺','王倩','邵吴慧','Jenny','黄一萧','蔡心宇','芦智蔚','黄欢欢','王妤扬','王力','ALL'];
+const OWNER_COLORS = { '杜宪':'#b53b3b','汪顺':'#4b7bec','王倩':'#b45309','邵吴慧':'#62bb92','Jenny':'#9d81d9','黄一萧':'#e69f67','蔡心宇':'#0891b2','芦智蔚':'#d97706','黄欢欢':'#7c3aed','王妤扬':'#0d9488','王力':'#dc2626' };
+const OWNER_BG = { '杜宪':'#fef2f2','汪顺':'#eff6ff','王倩':'#fff7ed','邵吴慧':'#f0fdf4','Jenny':'#f5f3ff','黄一萧':'#fff7ed','蔡心宇':'#ecfeff','芦智蔚':'#fffbeb','黄欢欢':'#f5f3ff','王妤扬':'#f0fdfa','王力':'#fef2f2' };
 function ownerTag(name){ const c=OWNER_COLORS[name]||'#9ca3af'; const bg=OWNER_BG[name]||'#f3f4f6'; const dn=getDisplayName(name); return `<span class="owner-block" style="background:${bg};color:${c};padding:2px 8px;border-radius:4px;font-size:9px;font-weight:500;border:1px solid ${c}22;white-space:nowrap">${dn}</span>`; }
 function getDisplayName(username){var u=users[username];return u?u.name:username;}
 function resolveUserByName(displayName){for(var k in users){if(users[k].name===displayName)return k;}return displayName;}
@@ -2936,7 +2936,7 @@ function defaultKPIs(){return[
   {id:'i10',name:'大后台服务满意度',cat:'quality',bu:'hr',target:90,cur:0,u:'%',owner:'杜宪',cycle:'quarterly',history:mkHistory([['2026-01',0],['2026-02',0],['2026-03',0],['2026-04',0],['2026-05',0],['2026-06',0]])},
   {id:'i12',name:'人事档案数字化完成率',cat:'efficiency',bu:'hr',target:100,cur:30,u:'%',owner:'黄欢欢',cycle:'quarterly',history:mkHistory([['2026-01',10],['2026-02',15],['2026-03',20],['2026-04',23],['2026-05',27],['2026-06',30]])},
   {id:'i18',name:'核心岗位平均招聘周期',cat:'efficiency',bu:'hr',target:30,cur:42,u:'天',owner:'黄欢欢',cycle:'monthly',history:mkHistory([['2026-01',50],['2026-02',48],['2026-03',46],['2026-04',44],['2026-05',43],['2026-06',42]])},
-  {id:'i19',name:'员工培训覆盖率',cat:'quality',bu:'hr',target:100,cur:45,u:'%',owner:'王妤杨',cycle:'quarterly',history:mkHistory([['2026-01',20],['2026-02',28],['2026-03',33],['2026-04',38],['2026-05',42],['2026-06',45]])}
+  {id:'i19',name:'员工培训覆盖率',cat:'quality',bu:'hr',target:100,cur:45,u:'%',owner:'王妤扬',cycle:'quarterly',history:mkHistory([['2026-01',20],['2026-02',28],['2026-03',33],['2026-04',38],['2026-05',42],['2026-06',45]])}
 ];}
 
 function loadKPIs(){try{return JSON.parse(localStorage.kpi_data)||defaultKPIs()}catch(e){return defaultKPIs()}}
@@ -10259,7 +10259,7 @@ function switchReportSection(section){
 }
 
 // All available people for meeting attendees (trainees + managers + external)
-var TN_MEETING_PEOPLE = ['Jenny','杜宪','王倩','汪顺','邵吴慧','黄一萧','蔡心宇','芦智蔚','黄欢欢','王妤杨','王力','陈双杰','陈锦','赵柳文','安子玥','黄燕婷','任梦超','陈圆'];
+var TN_MEETING_PEOPLE = ['Jenny','杜宪','王倩','汪顺','邵吴慧','黄一萧','蔡心宇','芦智蔚','黄欢欢','王妤扬','王力','陈双杰','陈锦','赵柳文','安子玥','黄燕婷','任梦超','陈圆'];
 var tnCurrentAssignments = {}; // { personName: [taskStr, ...] }
 
 function initTnAttendees(){
