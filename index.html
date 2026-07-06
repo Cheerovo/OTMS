@@ -10588,8 +10588,8 @@ function render360Eval(wkId){
     }
   });
   var avgScore = evalCount > 0 ? (totalScore / evalCount).toFixed(1) : '--';
-  var topDisplay = topTrainee ? topTrainee+' '+topScore.toFixed(1) : '--';
-  var lowDisplay = lowTrainee ? lowTrainee+' '+lowScore.toFixed(1) : '--';
+  var topDisplay = topTrainee ? '<div style="font-size:9px;font-weight:500;color:var(--text);line-height:1.3">'+topTrainee+'</div><div style="font-size:14px;font-weight:700;line-height:1.2">'+topScore.toFixed(1)+'</div>' : '--';
+  var lowDisplay = lowTrainee ? '<div style="font-size:9px;font-weight:500;color:var(--text);line-height:1.3">'+lowTrainee+'</div><div style="font-size:14px;font-weight:700;line-height:1.2">'+lowScore.toFixed(1)+'</div>' : '--';
   var ratePct = EVAL_TRAINEES.length > 0 ? Math.round(evalCount/EVAL_TRAINEES.length*100) : 0;
 
   var checkIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
