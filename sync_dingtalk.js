@@ -93,8 +93,10 @@ const ATTEND_STATUS_MAP = {
   'Normal': {m:'在岗', s:'正常'},
   'Late': {m:'在岗', s:'迟到'},
   'Early': {m:'在岗', s:'早退'},
+  'Free': {m:'在岗', s:'自由工时'},
   'Absenteeism': {m:'旷工', s:'旷工'},
   'NotSigned': {m:'旷工', s:'缺卡'},
+  'SeriousLate': {m:'旷工', s:'严重迟到'},
   'BusinessTravel': {m:'外勤', s:'出差'},
   'Out': {m:'外勤', s:'外出'},
 };

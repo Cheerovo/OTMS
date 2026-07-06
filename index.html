@@ -5669,12 +5669,13 @@ function renderAttendView() {
     var main = obj.m, sub = obj.s;
     var location = e.location || e.bu || '';
     var dc = dotClass(main);
+    var subHtml = (main === sub) ? '' : '<span class="card-st-sub">'+esc(sub)+'</span>';
     return '<div class="attend-card"><span class="card-dot '+dc+'"></span>'
       + '<div class="card-info"><div class="card-name">'+esc(e.name)+'</div>'
       + '<div class="card-location">'+esc(location)+'</div>'
       + '<div class="card-status-two">'
       + '<span class="card-st-main '+dc+'">'+esc(main)+'</span>'
-      + '<span class="card-st-sub">'+esc(sub)+'</span>'
+      + subHtml
       + '</div></div></div>';
   }
 
