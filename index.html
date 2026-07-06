@@ -1964,6 +1964,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
         <div class="tn-dash-section-title">管培生绩效总览</div>
         <div class="tn-dash-grid" id="tnDashGrid"></div>
       </div>
+      <!-- Section: Attendance -->
+      <div class="tn-dash-section" id="tnDashAttendSection" style="display:none">
+        <div class="tn-dash-section-title">今日在岗状态 <span style="font-size:8px;color:var(--text-muted);font-weight:400">钉钉同步</span></div>
+        <div id="tnDashAttend" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
       <!-- Section: Charts -->
       <div class="tn-dash-charts">
         <div class="tn-chart-box">
@@ -8460,6 +8465,81 @@ function saveEvalData(){
   try{ localStorage.setItem(getEvalStorageKey(), JSON.stringify(evalData)); }catch(e){}
 }
 
+// ===== 钉钉在岗状态 =====
+var dingtalkData = null;
+function loadDingtalkData(cb){
+  if(dingtalkData){ cb(dingtalkData); return; }
+  fetch('dingtalk_data.json?t='+Date.now()).then(function(r){ return r.json(); }).then(function(d){
+    dingtalkData = d;
+    // Build lookup map by name
+    dingtalkData._map = {};
+    (d.users||[]).forEach(function(u){ dingtalkData._map[u.name] = u.todayStatus; });
+    cb(d);
+  }).catch(function(){ dingtalkData = {_map:{}}; cb(null); });
+}
+
+var DINGTALK_STATUS = {
+  Normal:       {label:'在岗', color:'#8BA89C'},
+  Early:        {label:'早退', color:'#D4A76A'},
+  Late:         {label:'迟到', color:'#D4A76A'},
+  Absenteeism:  {label:'旷工', color:'#C94F66'},
+  NotSigned:    {label:'缺卡', color:'#9CA3AF'},
+  Leave:        {label:'请假', color:'#7B8FC0'},
+  BusinessTravel:{label:'出差', color:'#8B6BAE'},
+  Out:          {label:'外出', color:'#D4A76A'}
+};
+
+function getDingtalkStatus(name){
+  return dingtalkData && dingtalkData._map ? (dingtalkData._map[name] || null) : null;
+}
+
+function renderDingtalkDot(name, size){
+  var st = getDingtalkStatus(name);
+  if(!st) return '';
+  var info = DINGTALK_STATUS[st] || {label:st, color:'#9CA3AF'};
+  var s = size || 7;
+  return '<span title="'+info.label+'" style="display:inline-block;width:'+s+'px;height:'+s+'px;border-radius:50%;background:'+info.color+';flex-shrink:0;margin-right:2px;vertical-align:middle;cursor:default" onclick="event.stopPropagation()"></span>';
+}
+
+function renderDashAttendance(){
+  var el = document.getElementById('tnDashAttend');
+  var section = document.getElementById('tnDashAttendSection');
+  if(!el || !section) return;
+  if(!dingtalkData || !dingtalkData.users){ section.style.display='none'; return; }
+
+  var d = dingtalkData;
+  var counts = {};
+  (d.users||[]).forEach(function(u){
+    var st = u.todayStatus || 'Normal';
+    counts[st] = (counts[st]||0) + 1;
+  });
+
+  var total = d.users.length;
+  var html = '';
+  Object.keys(DINGTALK_STATUS).forEach(function(st){
+    var cnt = counts[st] || 0;
+    if(cnt === 0) return;
+    var info = DINGTALK_STATUS[st];
+    html += '<div style="display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--bg-surface);border-radius:8px;border:1px solid var(--border-light)"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+info.color+'"></span><span style="font-size:9px;color:var(--text)">'+info.label+'</span><span style="font-size:11px;font-weight:700;color:'+info.color+'">'+cnt+'</span></div>';
+  });
+
+  // Trainees only
+  var traineeNames = EVAL_TRAINEES.map(function(tr){ return tr.name; });
+  var traineeList = (d.users||[]).filter(function(u){ return traineeNames.indexOf(u.name)>=0; });
+  if(traineeList.length > 0){
+    html += '<div style="width:100%;margin-top:4px"></div>';
+    html += '<div style="font-size:8px;color:var(--text-muted);width:100%">管培生: </div>';
+    traineeList.forEach(function(u){
+      var st = u.todayStatus || 'Normal';
+      var info = DINGTALK_STATUS[st] || {label:st, color:'#9CA3AF'};
+      html += '<span style="font-size:9px;padding:2px 6px;border-radius:4px;background:'+info.color+'15;color:'+info.color+';white-space:nowrap">'+u.name+'</span>';
+    });
+  }
+
+  el.innerHTML = html;
+  section.style.display = 'block';
+}
+
 function getEvalScore(traineeId, weekId){
   if(!evalData) loadEvalData();
   var key = traineeId + '|' + weekId;
@@ -8557,7 +8637,7 @@ function switchEvalView(view){
     var views = ['weekly','calendar','history'];
     b.classList.toggle('active', views[i]===view);
   });
-  if(view==='weekly'){ renderEvalWeekTabs(); renderEvalTraineeList(); }
+  if(view==='weekly'){ renderEvalWeekTabs(); loadDingtalkData(function(){ renderEvalTraineeList(); }); }
   else if(view==='calendar'){ renderEvalCalendar(); }
   else if(view==='history'){ renderEvalHistory(); }
 }
@@ -8598,10 +8678,11 @@ function renderEvalTraineeList(){
       }
     }
     var initials = t.name.charAt(0);
+    var dtDot = renderDingtalkDot(t.name, 7);
     html += '<div class="eval-trainee-card'+(evalSelectedTrainee===t.name?' selected':'')+'" onclick="selectEvalTrainee(\''+t.name+'\')">'+
       '<div class="eval-trainee-avatar" style="background:'+t.avatarBg+'">'+initials+'</div>'+
       '<div class="eval-trainee-info">'+
-        '<div class="eval-trainee-name">'+t.name+'</div>'+
+        '<div class="eval-trainee-name">'+dtDot+' '+t.name+'</div>'+
         '<div class="eval-trainee-meta">'+t.supervisor+'</div>'+
       '</div>'+
       '<div class="eval-trainee-score">'+
@@ -10577,6 +10658,7 @@ function renderDashboard(){
     drawTrendChart();
     renderRanking();
     renderTnFeedbackHistory();
+    loadDingtalkData(function(){ renderDashAttendance(); });
   }, 100);
   
   document.getElementById('tnRankWeekLabel').textContent = curWkId + ' 排名';
