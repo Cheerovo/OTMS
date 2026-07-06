@@ -8637,14 +8637,14 @@ function renderEvalScorePanel(traineeId){
     var suggestBtn = '';
     if(d.id==='taskCompletion'){
       var comp = calcTaskCompletionForTrainee(t.name, weekId);
-      suggestBtn = '<button class="eval-task-suggestion" onclick="event.preventDefault();applyTaskSuggestion(\''+t.id+'\',\''+weekId+'\','+comp.suggestedScore+')" title="基于'+comp.total+'项任务中已完成'+comp.done+'项（完成率'+comp.rate+'%）">建议 '+comp.suggestedScore+'</button>';
+      suggestBtn = '<button class="eval-task-suggestion" onclick="event.preventDefault();applyTaskSuggestion(\''+t.name+'\',\''+weekId+'\','+comp.suggestedScore+')" title="基于'+comp.total+'项任务中已完成'+comp.done+'项（完成率'+comp.rate+'%）">建议 '+comp.suggestedScore+'</button>';
     }
     dimsHtml += '<div class="eval-dim-item">'+
       '<div class="eval-dim-label"><div class="dim-name">'+d.name+suggestBtn+'</div><div class="dim-weight">权重 '+d.weight+'%</div></div>'+
-      '<div class="eval-dim-score-input"><input type="number" value="'+val+'" min="0" max="'+d.max+'" step="0.5" onchange="updateDimScore(\''+t.id+'\',\''+d.id+'\',this.value,\''+weekId+'\')" id="evalDim_'+d.id+'"></div>'+
+      '<div class="eval-dim-score-input"><input type="number" value="'+val+'" min="0" max="'+d.max+'" step="0.5" onchange="updateDimScore(\''+t.name+'\',\''+d.id+'\',this.value,\''+weekId+'\')" id="evalDim_'+d.id+'"></div>'+
       '<div class="eval-dim-max">/ '+d.max+'</div>'+
-      '<div class="eval-dim-slider"><input type="range" value="'+val+'" min="0" max="'+d.max+'" step="0.5" oninput="var inp=document.getElementById(\'evalDim_'+d.id+'\');if(inp){inp.value=this.value;updateDimScore(\''+t.id+'\',\''+d.id+'\',this.value,\''+weekId+'\');}"></div>'+
-      '<div class="eval-dim-comment" style="width:160px;flex-shrink:0"><input type="text" placeholder="评语..." value="'+esc((s[d.id+'Comment']||d.desc))+'" onchange="updateDimComment(\''+t.id+'\',\''+d.id+'\',this.value,\''+weekId+'\')"></div>'+
+      '<div class="eval-dim-slider"><input type="range" value="'+val+'" min="0" max="'+d.max+'" step="0.5" oninput="var inp=document.getElementById(\'evalDim_'+d.id+'\');if(inp){inp.value=this.value;updateDimScore(\''+t.name+'\',\''+d.id+'\',this.value,\''+weekId+'\');}"></div>'+
+      '<div class="eval-dim-comment" style="width:160px;flex-shrink:0"><input type="text" placeholder="评语..." value="'+esc((s[d.id+'Comment']||d.desc))+'" onchange="updateDimComment(\''+t.name+'\',\''+d.id+'\',this.value,\''+weekId+'\')"></div>'+
     '</div>';
   }
 
@@ -8654,20 +8654,20 @@ function renderEvalScorePanel(traineeId){
   for(var i=0;i<extras.length;i++){
     extrasHtml += '<div class="eval-extra-task-item">'+
       '<span style="font-size:9px;color:var(--text-dim);width:20px">'+(i+1)+'.</span>'+
-      '<div class="task-name"><input type="text" value="'+esc(extras[i].name||'')+'" placeholder="任务名称" onchange="updateExtraTask(\''+t.id+'\',\''+weekId+'\','+i+',\'name\',this.value)" style="width:100%;border:1px solid var(--border-light);border-radius:6px;padding:4px 8px;font-size:10px;font-family:inherit;outline:none"></div>'+
-      '<div class="task-desc"><input type="text" value="'+esc(extras[i].desc||'')+'" placeholder="任务描述" onchange="updateExtraTask(\''+t.id+'\',\''+weekId+'\','+i+',\'desc\',this.value)" style="width:100%"></div>'+
-      '<div class="task-score"><input type="number" value="'+(extras[i].score||0)+'" placeholder="分值" onchange="updateExtraTask(\''+t.id+'\',\''+weekId+'\','+i+',\'score\',this.value)"></div>'+
-      '<button onclick="removeExtraTask(\''+t.id+'\',\''+weekId+'\','+i+')" style="border:none;background:none;cursor:pointer;color:var(--text-muted);font-size:14px;padding:2px">&times;</button>'+
+      '<div class="task-name"><input type="text" value="'+esc(extras[i].name||'')+'" placeholder="任务名称" onchange="updateExtraTask(\''+t.name+'\',\''+weekId+'\','+i+',\'name\',this.value)" style="width:100%;border:1px solid var(--border-light);border-radius:6px;padding:4px 8px;font-size:10px;font-family:inherit;outline:none"></div>'+
+      '<div class="task-desc"><input type="text" value="'+esc(extras[i].desc||'')+'" placeholder="任务描述" onchange="updateExtraTask(\''+t.name+'\',\''+weekId+'\','+i+',\'desc\',this.value)" style="width:100%"></div>'+
+      '<div class="task-score"><input type="number" value="'+(extras[i].score||0)+'" placeholder="分值" onchange="updateExtraTask(\''+t.name+'\',\''+weekId+'\','+i+',\'score\',this.value)"></div>'+
+      '<button onclick="removeExtraTask(\''+t.name+'\',\''+weekId+'\','+i+')" style="border:none;background:none;cursor:pointer;color:var(--text-muted);font-size:14px;padding:2px">&times;</button>'+
     '</div>';
   }
-  extrasHtml += '<button onclick="addExtraTask(\''+t.id+'\',\''+weekId+'\')" style="padding:5px 12px;border:1px dashed var(--border);background:none;border-radius:6px;font-size:9px;color:var(--text-dim);cursor:pointer;font-family:inherit;margin-top:4px">+ 添加加分项</button>'+
+  extrasHtml += '<button onclick="addExtraTask(\''+t.name+'\',\''+weekId+'\')" style="padding:5px 12px;border:1px dashed var(--border);background:none;border-radius:6px;font-size:9px;color:var(--text-dim);cursor:pointer;font-family:inherit;margin-top:4px">+ 添加加分项</button>'+
   '</div>';
 
   var prevWeekIdx = evalCurrentWeek - 1;
   var prevDataBtn = '';
   if(prevWeekIdx >= 0){
     var prevWeekId = EVAL_WEEKS[prevWeekIdx].id;
-    prevDataBtn = '<button class="eval-btn-restore" onclick="restorePrevWeekData(\''+t.id+'\',\''+prevWeekId+'\',\''+weekId+'\')">恢复'+EVAL_WEEKS[prevWeekIdx].label+'数据</button>';
+    prevDataBtn = '<button class="eval-btn-restore" onclick="restorePrevWeekData(\''+t.name+'\',\''+prevWeekId+'\',\''+weekId+'\')">恢复'+EVAL_WEEKS[prevWeekIdx].label+'数据</button>';
   }
 
   container.innerHTML =
@@ -8686,7 +8686,7 @@ function renderEvalScorePanel(traineeId){
       extrasHtml +
       '<div class="eval-save-row">'+
         prevDataBtn +
-        '<button class="eval-btn-save" onclick="saveCurrentEval(\''+t.id+'\',\''+weekId+'\')">保存评分</button>'+
+        '<button class="eval-btn-save" onclick="saveCurrentEval(\''+t.name+'\',\''+weekId+'\')">保存评分</button>'+
       '</div>'+
     '</div>';
 }
