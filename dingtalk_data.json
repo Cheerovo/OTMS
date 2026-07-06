@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-06T13:56:15.172Z",
+  "updated": "2026-07-06T14:08:43.002Z",
   "users": [
     {
       "name": "张毅",
@@ -139,12 +139,12 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782748800": "Normal",
-        "1782835200": "Normal",
-        "1782921600": "Normal",
-        "1783094400": "Normal",
-        "1783180800": "Normal",
-        "1783267200": "Normal"
+        "+058463-01": "Normal",
+        "+058465-10": "Normal",
+        "+058468-07": "Normal",
+        "+058474-01": "Normal",
+        "+058476-09": "Normal",
+        "+058479-06": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -153,9 +153,9 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782748800": "Normal",
-        "1782835200": "Normal",
-        "1782921600": "Normal"
+        "+058463-01": "Normal",
+        "+058465-10": "Normal",
+        "+058468-07": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -227,11 +227,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782748800": "Normal",
-        "1782835200": "Normal",
-        "1782921600": "Normal",
-        "1783008000": "Normal",
-        "1783267200": "Late"
+        "+058463-01": "Normal",
+        "+058465-10": "Normal",
+        "+058468-07": "Normal",
+        "+058471-04": "Normal",
+        "+058479-06": "Late"
       },
       "todayStatus": "Normal"
     },
@@ -303,12 +303,12 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782835200": "Normal",
-        "1782921600": "Normal",
-        "1783008000": "Normal",
-        "1783094400": "Normal",
-        "1783180800": "Normal",
-        "1783267200": "Normal"
+        "+058465-10": "Normal",
+        "+058468-07": "Normal",
+        "+058471-04": "Normal",
+        "+058474-01": "Normal",
+        "+058476-09": "Normal",
+        "+058479-06": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -317,12 +317,12 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782748800": "Normal",
-        "1782835200": "Normal",
-        "1782921600": "Normal",
-        "1783008000": "Normal",
-        "1783180800": "Normal",
-        "1783267200": "Normal"
+        "+058463-01": "Normal",
+        "+058465-10": "Normal",
+        "+058468-07": "Normal",
+        "+058471-04": "Normal",
+        "+058476-09": "Normal",
+        "+058479-06": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -597,9 +597,9 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782748800": "Normal",
-        "1782835200": "Normal",
-        "1783008000": "Normal"
+        "+058463-01": "Normal",
+        "+058465-10": "Normal",
+        "+058471-04": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -615,12 +615,12 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782748800": "Normal",
-        "1782835200": "Normal",
-        "1782921600": "Normal",
-        "1783008000": "Normal",
-        "1783180800": "Normal",
-        "1783267200": "Normal"
+        "+058463-01": "Normal",
+        "+058465-10": "Normal",
+        "+058468-07": "Normal",
+        "+058471-04": "Normal",
+        "+058476-09": "Normal",
+        "+058479-06": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -629,12 +629,12 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782748800": "Normal",
-        "1782835200": "Normal",
-        "1782921600": "Normal",
-        "1783008000": "Normal",
-        "1783180800": "Normal",
-        "1783267200": "Normal"
+        "+058463-01": "Normal",
+        "+058465-10": "Normal",
+        "+058468-07": "Normal",
+        "+058471-04": "Normal",
+        "+058476-09": "Normal",
+        "+058479-06": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -643,11 +643,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782835200": "Normal",
-        "1782921600": "Normal",
-        "1783008000": "Normal",
-        "1783094400": "Normal",
-        "1783267200": "Normal"
+        "+058465-10": "Normal",
+        "+058468-07": "Normal",
+        "+058471-04": "Normal",
+        "+058474-01": "Normal",
+        "+058479-06": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -747,11 +747,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782748800": "Normal",
-        "1782835200": "Normal",
-        "1782921600": "Normal",
-        "1783008000": "Normal",
-        "1783267200": "Normal"
+        "+058463-01": "Normal",
+        "+058465-10": "Normal",
+        "+058468-07": "Normal",
+        "+058471-04": "Normal",
+        "+058479-06": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -767,11 +767,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782748800": "Normal",
-        "1782835200": "Normal",
-        "1782921600": "Normal",
-        "1783008000": "Normal",
-        "1783267200": "Normal"
+        "+058463-01": "Normal",
+        "+058465-10": "Normal",
+        "+058468-07": "Normal",
+        "+058471-04": "Normal",
+        "+058479-06": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -787,11 +787,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782748800": "NotSigned",
-        "1782835200": "NotSigned",
-        "1782921600": "Normal",
-        "1783008000": "Normal",
-        "1783267200": "Normal"
+        "+058463-01": "NotSigned",
+        "+058465-10": "NotSigned",
+        "+058468-07": "Normal",
+        "+058471-04": "Normal",
+        "+058479-06": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -800,11 +800,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782748800": "Late",
-        "1782835200": "Normal",
-        "1782921600": "Normal",
-        "1783008000": "Normal",
-        "1783267200": "Normal"
+        "+058463-01": "Late",
+        "+058465-10": "Normal",
+        "+058468-07": "Normal",
+        "+058471-04": "Normal",
+        "+058479-06": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -820,11 +820,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782748800": "Normal",
-        "1782835200": "Normal",
-        "1782921600": "Normal",
-        "1783008000": "Normal",
-        "1783267200": "Normal"
+        "+058463-01": "Normal",
+        "+058465-10": "Normal",
+        "+058468-07": "Normal",
+        "+058471-04": "Normal",
+        "+058479-06": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -847,11 +847,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "1782748800": "Normal",
-        "1782835200": "Normal",
-        "1782921600": "Normal",
-        "1783008000": "Normal",
-        "1783267200": "Normal"
+        "+058463-01": "Normal",
+        "+058465-10": "Normal",
+        "+058468-07": "Normal",
+        "+058471-04": "Normal",
+        "+058479-06": "Normal"
       },
       "todayStatus": "Normal"
     },
