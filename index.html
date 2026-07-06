@@ -9294,6 +9294,7 @@ function initTraineeSystem(){
   var weekOpts = '';
   for(var i=0;i<14;i++){ var w='W'+(i+1); var st=TN_WEEK_LABELS[i]?TN_WEEK_LABELS[i]:''; weekOpts += '<option value="'+w+'">'+w+' (06/'+String(i*7+1).padStart(2,'0')+')</option>'; }
   document.getElementById('tnFbWeek').innerHTML = weekOpts;
+  document.getElementById('tnRankWeek').innerHTML = '<option value="latest">最新</option>' + weekOpts;
   // Populate trainee selects
   var tOpts = TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
   document.getElementById('tnFbTrainee').innerHTML = '<option value="">选择学员</option>' + tOpts;
