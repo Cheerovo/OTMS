@@ -1,870 +1,1434 @@
 {
-  "updated": "2026-07-06T14:33:49.221Z",
+  "updated": "2026-07-06T14:44:42.112Z",
   "users": [
     {
       "name": "张毅",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "黄一萧",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "郭双红",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "周梓荣",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "陈一卓",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "吴靖娴",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "杨崴",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "王雷",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "葛豪平",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "张祥",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "毛华英",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "杨漾",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "裘碧钰",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "郑昌杰",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "卢素丹",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "沈丽霞",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "侯心怡",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "王倩",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "贾东升",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "罗俊尧",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-29": "Normal",
-        "2026-06-30": "Normal",
-        "2026-07-01": "Normal",
-        "2026-07-03": "Normal",
-        "2026-07-04": "Normal",
-        "2026-07-05": "Normal"
+        "2026-06-29": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-03": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-04": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-05": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "吕相坠",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-29": "Normal",
-        "2026-06-30": "Normal",
-        "2026-07-01": "Normal"
+        "2026-06-29": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "林知峰",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "董宾宾",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "党红艳",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "吴立军",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-30": "Leave"
+        "2026-06-30": {
+          "m": "请假",
+          "s": "年假"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "韩喆",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "苏坤",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "邵吴慧",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "武敏辉",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "杜宪",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "李萍萍",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-29": "Normal",
-        "2026-06-30": "Normal",
-        "2026-07-01": "Normal",
-        "2026-07-02": "Normal",
-        "2026-07-05": "Late"
+        "2026-06-29": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-02": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-05": {
+          "m": "在岗",
+          "s": "迟到"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "周凯楠",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "汪顺",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "王力",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "程璐",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "王韬",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "方有保",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "胡金明",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "金学忠",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "贾飞龙",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "朱鑫沛",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-30": "Normal",
-        "2026-07-01": "Normal",
-        "2026-07-02": "Normal",
-        "2026-07-03": "Normal",
-        "2026-07-04": "Normal",
-        "2026-07-05": "Normal"
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-02": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-03": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-04": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-05": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "安东生",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-29": "Normal",
-        "2026-06-30": "Normal",
-        "2026-07-01": "Normal",
-        "2026-07-02": "Normal",
-        "2026-07-04": "Normal",
-        "2026-07-05": "Normal"
+        "2026-06-29": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-02": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-04": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-05": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "庄艳林",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "黄连兵",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "谢小强",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "史文奎",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "吴骏",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "胡程林",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "姚伟",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "朱朝甫",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "李军立",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "胡保林",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "蒋团伟",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "梁晓永",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "丁国朝",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "胡红卫",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "杨永宁",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "刘曦文",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "孔令波",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "贾元录",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "李俭波",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "刘鹏",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "吉庆",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "李浩涵",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "卢奕含",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "贾康",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "王海涛",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "马金超",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "李龙",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "宋英杰",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "李威威",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "朱家良",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "许磊",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "徐刘岸",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "杨永奋",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "安文波",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "王玉玺",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "宣国英",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "丁成英",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "高玉玲",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "孙建芳",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-29": "Normal",
-        "2026-06-30": "Normal",
-        "2026-07-02": "Normal"
+        "2026-06-29": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-02": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "殷德昌",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "翟建设",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-29": "Normal",
-        "2026-06-30": "Normal",
-        "2026-07-01": "Normal",
-        "2026-07-02": "Normal",
-        "2026-07-04": "Normal",
-        "2026-07-05": "Normal"
+        "2026-06-29": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-02": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-04": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-05": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "徐培珍",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-29": "Normal",
-        "2026-06-30": "Normal",
-        "2026-07-01": "Normal",
-        "2026-07-02": "Normal",
-        "2026-07-04": "Normal",
-        "2026-07-05": "Normal"
+        "2026-06-29": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-02": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-04": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-05": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "王建平",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-30": "Normal",
-        "2026-07-01": "Normal",
-        "2026-07-02": "Normal",
-        "2026-07-03": "Normal",
-        "2026-07-05": "Normal"
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-02": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-03": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-05": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "施玉芹",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "张林梅",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "刘顺兰",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "高光付",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-07-03": "LeaveUnpaid"
+        "2026-07-03": {
+          "m": "请假",
+          "s": "事假"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "肖德云",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "王妤扬",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "季文菊",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "赵柳文",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "陈圆",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "安子玥",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "陈双杰",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "黄燕婷",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "賴淑賢",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "蔡心宇",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-29": "Normal",
-        "2026-06-30": "Normal",
-        "2026-07-01": "Normal",
-        "2026-07-02": "Normal",
-        "2026-07-05": "Normal"
+        "2026-06-29": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-02": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-05": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "王永佳",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "韩燕",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-29": "Normal",
-        "2026-06-30": "Normal",
-        "2026-07-01": "Normal",
-        "2026-07-02": "Normal",
-        "2026-07-05": "Normal"
+        "2026-06-29": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-02": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-05": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "芦智蔚",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "李蕾",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-29": "NotSigned",
-        "2026-06-30": "NotSigned",
-        "2026-07-01": "Normal",
-        "2026-07-02": "Normal",
-        "2026-07-05": "Normal"
+        "2026-06-29": {
+          "m": "旷工",
+          "s": "缺卡"
+        },
+        "2026-06-30": {
+          "m": "旷工",
+          "s": "缺卡"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-02": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-05": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "黄欢欢",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-29": "Late",
-        "2026-06-30": "Normal",
-        "2026-07-01": "Normal",
-        "2026-07-02": "Normal",
-        "2026-07-05": "Normal"
+        "2026-06-29": {
+          "m": "在岗",
+          "s": "迟到"
+        },
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-02": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-05": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "沈明明",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "季嘉莉",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-29": "Normal",
-        "2026-06-30": "Normal",
-        "2026-07-01": "Normal",
-        "2026-07-02": "Normal",
-        "2026-07-05": "Normal"
+        "2026-06-29": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-02": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-05": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "李佳",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "陈锦",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "蒋孝峰",
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "2026-06-29": "Normal",
-        "2026-06-30": "Normal",
-        "2026-07-01": "Normal",
-        "2026-07-02": "Normal",
-        "2026-07-05": "Normal"
+        "2026-06-29": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-06-30": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-01": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-02": {
+          "m": "在岗",
+          "s": "正常"
+        },
+        "2026-07-05": {
+          "m": "在岗",
+          "s": "正常"
+        }
       },
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     },
     {
       "name": "杨美玲",
       "mobile": "",
       "deptName": "",
       "statusByDate": {},
-      "todayStatus": "Normal"
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      }
     }
   ]
 }
