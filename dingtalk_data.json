@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-06T14:30:47.444Z",
+  "updated": "2026-07-06T14:32:08.180Z",
   "users": [
     {
       "name": "张毅",
@@ -184,7 +184,9 @@
       "name": "吴立军",
       "mobile": "",
       "deptName": "",
-      "statusByDate": {},
+      "statusByDate": {
+        "2026-06-30": "Leave"
+      },
       "todayStatus": "Normal"
     },
     {
@@ -676,7 +678,9 @@
       "name": "高光付",
       "mobile": "",
       "deptName": "",
-      "statusByDate": {},
+      "statusByDate": {
+        "2026-07-03": "LeaveUnpaid"
+      },
       "todayStatus": "Normal"
     },
     {
