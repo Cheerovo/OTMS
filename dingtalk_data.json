@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-06T14:11:11.916Z",
+  "updated": "2026-07-06T14:11:47.747Z",
   "users": [
     {
       "name": "张毅",
@@ -139,12 +139,12 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058463-01": "Normal",
-        "+058465-10": "Normal",
-        "+058468-07": "Normal",
-        "+058474-01": "Normal",
-        "+058476-09": "Normal",
-        "+058479-06": "Normal"
+        "2026-06-29": "Normal",
+        "2026-06-30": "Normal",
+        "2026-07-01": "Normal",
+        "2026-07-03": "Normal",
+        "2026-07-04": "Normal",
+        "2026-07-05": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -153,9 +153,9 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058463-01": "Normal",
-        "+058465-10": "Normal",
-        "+058468-07": "Normal"
+        "2026-06-29": "Normal",
+        "2026-06-30": "Normal",
+        "2026-07-01": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -227,11 +227,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058463-01": "Normal",
-        "+058465-10": "Normal",
-        "+058468-07": "Normal",
-        "+058471-04": "Normal",
-        "+058479-06": "Late"
+        "2026-06-29": "Normal",
+        "2026-06-30": "Normal",
+        "2026-07-01": "Normal",
+        "2026-07-02": "Normal",
+        "2026-07-05": "Late"
       },
       "todayStatus": "Normal"
     },
@@ -303,12 +303,12 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058465-10": "Normal",
-        "+058468-07": "Normal",
-        "+058471-04": "Normal",
-        "+058474-01": "Normal",
-        "+058476-09": "Normal",
-        "+058479-06": "Normal"
+        "2026-06-30": "Normal",
+        "2026-07-01": "Normal",
+        "2026-07-02": "Normal",
+        "2026-07-03": "Normal",
+        "2026-07-04": "Normal",
+        "2026-07-05": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -317,12 +317,12 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058463-01": "Normal",
-        "+058465-10": "Normal",
-        "+058468-07": "Normal",
-        "+058471-04": "Normal",
-        "+058476-09": "Normal",
-        "+058479-06": "Normal"
+        "2026-06-29": "Normal",
+        "2026-06-30": "Normal",
+        "2026-07-01": "Normal",
+        "2026-07-02": "Normal",
+        "2026-07-04": "Normal",
+        "2026-07-05": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -597,9 +597,9 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058463-01": "Normal",
-        "+058465-10": "Normal",
-        "+058471-04": "Normal"
+        "2026-06-29": "Normal",
+        "2026-06-30": "Normal",
+        "2026-07-02": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -615,12 +615,12 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058463-01": "Normal",
-        "+058465-10": "Normal",
-        "+058468-07": "Normal",
-        "+058471-04": "Normal",
-        "+058476-09": "Normal",
-        "+058479-06": "Normal"
+        "2026-06-29": "Normal",
+        "2026-06-30": "Normal",
+        "2026-07-01": "Normal",
+        "2026-07-02": "Normal",
+        "2026-07-04": "Normal",
+        "2026-07-05": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -629,12 +629,12 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058463-01": "Normal",
-        "+058465-10": "Normal",
-        "+058468-07": "Normal",
-        "+058471-04": "Normal",
-        "+058476-09": "Normal",
-        "+058479-06": "Normal"
+        "2026-06-29": "Normal",
+        "2026-06-30": "Normal",
+        "2026-07-01": "Normal",
+        "2026-07-02": "Normal",
+        "2026-07-04": "Normal",
+        "2026-07-05": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -643,11 +643,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058465-10": "Normal",
-        "+058468-07": "Normal",
-        "+058471-04": "Normal",
-        "+058474-01": "Normal",
-        "+058479-06": "Normal"
+        "2026-06-30": "Normal",
+        "2026-07-01": "Normal",
+        "2026-07-02": "Normal",
+        "2026-07-03": "Normal",
+        "2026-07-05": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -747,11 +747,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058463-01": "Normal",
-        "+058465-10": "Normal",
-        "+058468-07": "Normal",
-        "+058471-04": "Normal",
-        "+058479-06": "Normal"
+        "2026-06-29": "Normal",
+        "2026-06-30": "Normal",
+        "2026-07-01": "Normal",
+        "2026-07-02": "Normal",
+        "2026-07-05": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -767,11 +767,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058463-01": "Normal",
-        "+058465-10": "Normal",
-        "+058468-07": "Normal",
-        "+058471-04": "Normal",
-        "+058479-06": "Normal"
+        "2026-06-29": "Normal",
+        "2026-06-30": "Normal",
+        "2026-07-01": "Normal",
+        "2026-07-02": "Normal",
+        "2026-07-05": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -787,11 +787,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058463-01": "NotSigned",
-        "+058465-10": "NotSigned",
-        "+058468-07": "Normal",
-        "+058471-04": "Normal",
-        "+058479-06": "Normal"
+        "2026-06-29": "NotSigned",
+        "2026-06-30": "NotSigned",
+        "2026-07-01": "Normal",
+        "2026-07-02": "Normal",
+        "2026-07-05": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -800,11 +800,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058463-01": "Late",
-        "+058465-10": "Normal",
-        "+058468-07": "Normal",
-        "+058471-04": "Normal",
-        "+058479-06": "Normal"
+        "2026-06-29": "Late",
+        "2026-06-30": "Normal",
+        "2026-07-01": "Normal",
+        "2026-07-02": "Normal",
+        "2026-07-05": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -820,11 +820,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058463-01": "Normal",
-        "+058465-10": "Normal",
-        "+058468-07": "Normal",
-        "+058471-04": "Normal",
-        "+058479-06": "Normal"
+        "2026-06-29": "Normal",
+        "2026-06-30": "Normal",
+        "2026-07-01": "Normal",
+        "2026-07-02": "Normal",
+        "2026-07-05": "Normal"
       },
       "todayStatus": "Normal"
     },
@@ -847,11 +847,11 @@
       "mobile": "",
       "deptName": "",
       "statusByDate": {
-        "+058463-01": "Normal",
-        "+058465-10": "Normal",
-        "+058468-07": "Normal",
-        "+058471-04": "Normal",
-        "+058479-06": "Normal"
+        "2026-06-29": "Normal",
+        "2026-06-30": "Normal",
+        "2026-07-01": "Normal",
+        "2026-07-02": "Normal",
+        "2026-07-05": "Normal"
       },
       "todayStatus": "Normal"
     },
