@@ -825,7 +825,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .card-st-main.nodd { color: #A09B95; }
 .card-st-sep { color: var(--border); font-weight: 300; }
 .card-st-sub { font-size: 10px; font-weight: 500; color: var(--text-muted); }
-.card-st-sub.abnormal { color: #C5787E; font-weight: 600; }
+.card-st-sub.abnormal { color: #D4535B; font-weight: 700; font-size: 10px; background: #FEF2F2; padding: 1px 7px; border-radius: 8px; border: 1px solid #FECACA; }
+.attend-card.has-ab { box-shadow: 0 1px 3px rgba(212,83,91,0.06), 0 0 0 1px rgba(212,83,91,0.06); }
 .attend-card .card-location { font-size: 9px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rank-I { background:#F2EFEB; color:#8D8883; }
 .rank-II { background:#E8F0EC; color:#5A7868; }
@@ -5675,7 +5676,8 @@ function renderAttendView() {
     var isAb = abnormalSubs.indexOf(sub) !== -1;
     var subCls = 'card-st-sub' + (isAb ? ' abnormal' : '');
     var subHtml = (main === sub) ? '' : '<span class="card-st-sep">·</span><span class="'+subCls+'">'+esc(sub)+'</span>';
-    return '<div class="attend-card">'
+    var abClass = isAb ? ' has-ab' : '';
+    return '<div class="attend-card'+abClass+'">'
       + '<span class="card-dot '+dc+'"></span>'
       + '<div class="card-body">'
       + '<div class="card-top"><span class="card-name">'+esc(e.name)+'</span>'
