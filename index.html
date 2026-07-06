@@ -812,7 +812,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-card .card-dot.on { background: #059669; } .attend-card .card-dot.leave { background: #D97706; }
 .attend-card .card-dot.out { background: #2563EB; } .attend-card .card-dot.trip { background: #7C3AED; }
 .attend-card .card-dot.rest { background: #0891B2; } .attend-card .card-dot.late { background: #DC2626; }
-.attend-card .card-dot.other { background: #9CA3AF; }
+.attend-card .card-dot.other { background: #9CA3AF; } .attend-card .card-dot.nodd { background: #E5E7EB; }
+.as-nodd { color: #9CA3AF; } .as-nodd .stat-dot { background: #D1D5DB; }
 .attend-card .card-info { flex: 1; min-width: 0; line-height: 1.4; }
 .attend-card .card-name { font-size: 11px; font-weight: 500; color: var(--text); }
 .attend-card .card-location { font-size: 9px; color: var(--text-muted); }
@@ -5587,8 +5588,8 @@ function switchFuncSubView(sub, tab) {
 }
 
 // ===== Attendance View (在岗状态) =====
-const ATTEND_STATUS = ['在岗','请假(带薪)','请假(无薪)','外出公干','出差','调休','迟到','其他'];
-const ATTEND_CSS = {'在岗':'as-on','请假(带薪)':'as-leave','请假(无薪)':'as-leave','外出公干':'as-out','出差':'as-trip','调休':'as-rest','迟到':'as-late','其他':'as-other'};
+const ATTEND_STATUS = ['在岗','请假(带薪)','请假(无薪)','外出公干','出差','调休','迟到','其他','不在钉钉数据'];
+const ATTEND_CSS = {'在岗':'as-on','请假(带薪)':'as-leave','请假(无薪)':'as-leave','外出公干':'as-out','出差':'as-trip','调休':'as-rest','迟到':'as-late','其他':'as-other','不在钉钉数据':'as-nodd'};
 
 function getTodayStr() { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
@@ -5623,7 +5624,7 @@ function renderAttendView() {
   filtered.forEach(e => {
     const st = attData[date][e.id];
     if (st && counts[st] !== undefined) counts[st]++;
-    else counts['在岗']++;
+    else counts['不在钉钉数据']++;
   });
 
   let html = '';
@@ -5658,11 +5659,12 @@ function renderAttendView() {
   function dotClass(st) {
     if (st === '在岗') return 'on'; if (st.includes('请假')) return 'leave';
     if (st === '外出公干') return 'out'; if (st === '出差') return 'trip';
-    if (st === '调休') return 'rest'; if (st === '迟到') return 'late'; return 'other';
+    if (st === '调休') return 'rest'; if (st === '迟到') return 'late';
+    if (st === '不在钉钉数据') return 'nodd'; return 'other';
   }
 
   function renderCard(e) {
-    const st = attData[date][e.id] || '在岗';
+    const st = attData[date][e.id] || '不在钉钉数据';
     const location = e.location || e.bu || '';
     const dc = dotClass(st);
     return '<div class="attend-card"><span class="card-dot '+dc+'"></span>'
@@ -5745,7 +5747,7 @@ async function syncFromDingTalkSilent(date, attData, empList) {
 
     empList.forEach(function(e) {
       var ddUser = ddMap[e.name];
-      if (!ddUser) return;
+      if (!ddUser) { attData[date][e.id] = '不在钉钉数据'; return; }
       var st = (ddUser.statusByDate && ddUser.statusByDate[date]) ? ddUser.statusByDate[date] : (ddUser.todayStatus || 'Normal');
       attData[date][e.id] = dtToLocal[st] || '在岗';
     });
@@ -5782,11 +5784,10 @@ async function syncFromDingTalk() {
 
     empList.forEach(function(e) {
       var ddUser = ddMap[e.name];
-      if (!ddUser) { skipped++; return; }
+      if (!ddUser) { attData[date][e.id] = '不在钉钉数据'; skipped++; return; }
       var st = ddUser.todayStatus || (ddUser.statusByDate && ddUser.statusByDate[date]) || 'Normal';
       var localSt = dtToLocal[st] || '在岗';
       attData[date][e.id] = localSt;
-      // Also check statusByDate for the selected date
       if (ddUser.statusByDate && ddUser.statusByDate[date]) {
         var dateSt = ddUser.statusByDate[date];
         attData[date][e.id] = dtToLocal[dateSt] || '在岗';
@@ -5797,7 +5798,7 @@ async function syncFromDingTalk() {
     saveAttendance(attData);
     renderAttendView();
     if (btn) { btn.textContent = '🔄 同步钉钉'; btn.disabled = false; }
-    alert('同步完成！\n已匹配 ' + synced + ' 人' + (skipped > 0 ? '\n' + skipped + ' 人未在钉钉数据中找到' : '') + '\n\n数据来源: dingtalk_data.json (' + (dd.updated || '').slice(0,10) + ')');
+    alert('同步完成！\n已匹配 ' + synced + ' 人' + (skipped > 0 ? '\n' + skipped + ' 人不在钉钉数据中，已标记为"不在钉钉数据"' : '') + '\n\n数据来源: dingtalk_data.json (' + (dd.updated || '').slice(0,10) + ')');
   } catch (err) {
     var btn = document.querySelector('button[onclick="syncFromDingTalk()"]');
     if (btn) { btn.textContent = '🔄 同步钉钉'; btn.disabled = false; }
