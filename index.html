@@ -5727,9 +5727,9 @@ function renderAttendView(skipAutoSync) {
   }
   var onDutyDetail = buildOnDutyDetail();
 
-  // Monthly summary (从7月1日起，折叠面板)
-  var monthStart = '2026-07-01';
-  if (date >= monthStart) {
+  // Monthly summary (当月汇总，折叠面板)
+  var monthStart = date.slice(0,7) + '-01';
+  var monthLabel = (+date.slice(5,7)) + '月';
     // 生成日期列表
     var monthDates = [];
     var parts = monthStart.split('-');
@@ -5772,8 +5772,8 @@ function renderAttendView(skipAutoSync) {
     html += '<div class="month-summary" id="'+collapseId+'">';
     html += '<div class="month-summary-header" onclick="var el=document.getElementById(\''+collapseId+'\');el.classList.toggle(\'open\')">';
     html += '<span class="ms-chevron">▶</span>';
-    html += '<span class="ms-title">7月异常汇总</span>';
-    html += '<span class="ms-date-range">7.1~'+date.slice(5)+'</span>';
+    html += '<span class="ms-title">'+monthLabel+'异常汇总</span>';
+    html += '<span class="ms-date-range">'+monthStart.slice(5)+'~'+date.slice(5)+'</span>';
     if (totalAbnormalDays === 0) {
       html += '<span class="ms-inline-stat" style="color:var(--text-muted)">暂无异常</span>';
     } else {
