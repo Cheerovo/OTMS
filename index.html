@@ -9505,7 +9505,7 @@ function renderTraineeTasks(){
       var srcBadge;
       if(isWeekly) srcBadge = '<span class="tn-src-badge weekly">'+t.week+'</span>';
       else if(isRef){ var rwWeeks=[]; var rw=t.weeks||[]; for(var rwi=0;rwi<rw.length;rwi++){ if(rw[rwi]) rwWeeks.push('W'+(rwi+1)); } srcBadge = rwWeeks.length ? '<span class="tn-src-badge weekly">'+rwWeeks.join(',')+'</span>' : ''; }
-      else { var planWeeks=[]; for(var pwi=0;pwi<wks.length;pwi++){ if(wks[pwi]) planWeeks.push('W'+(pwi+1)); } srcBadge = planWeeks.length ? '<span class="tn-src-badge plan">'+planWeeks.join(',')+'</span>' : '<span class="tn-src-badge plan">计划</span>'; }
+      else { var planWeeks=[]; for(var pwi=0;pwi<wks.length;pwi++){ if(wks[pwi]) planWeeks.push('W'+(pwi+1)); } srcBadge = planWeeks.length ? '<span class="tn-src-badge weekly">'+planWeeks.join(',')+'</span>' : '<span class="tn-src-badge plan">计划</span>'; }
       // Task type badge (普通任务/会议任务)
       var taskTypeBadge = '';
       var tt = TN_TASK_TYPES[t.taskType] || TN_TASK_TYPES['normal'];
