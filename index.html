@@ -789,13 +789,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-stats { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
 .attend-stat { font-size: 11px; color: var(--text-dim); display: inline-flex; align-items: center; gap: 4px; }
 .attend-stat .stat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.as-on { color: var(--success-text); } .as-on .stat-dot { background: #059669; }
-.as-leave { color: var(--warning-text); } .as-leave .stat-dot { background: #D97706; }
-.as-out { color: #2563EB; } .as-out .stat-dot { background: #2563EB; }
-.as-trip { color: #7C3AED; } .as-trip .stat-dot { background: #7C3AED; }
-.as-rest { color: #0891B2; } .as-rest .stat-dot { background: #0891B2; }
-.as-late { color: #DC2626; } .as-late .stat-dot { background: #DC2626; }
-.as-other { color: var(--text-dim); } .as-other .stat-dot { background: #9CA3AF; }
+.as-on { color: #3B82F6; } .as-on .stat-dot { background: #3B82F6; }
+.as-leave { color: #F59E0B; } .as-leave .stat-dot { background: #F59E0B; }
+.as-out { color: #8B5CF6; } .as-out .stat-dot { background: #8B5CF6; }
+.as-other { color: #EF4444; } .as-other .stat-dot { background: #EF4444; }
 .attend-divider { border: none; border-top: 1px solid var(--border-subtle); margin-bottom: 16px; }
 /* Card Grid */
 .attend-bu-section { margin-bottom: 20px; }
@@ -809,22 +806,22 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-card { background: var(--card); border-radius: 6px; padding: 8px 10px; transition: var(--transition); display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-xs); }
 .attend-card:hover { box-shadow: var(--shadow-sm); }
 .attend-card .card-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.attend-card .card-dot.on { background: #059669; } .attend-card .card-dot.leave { background: #D97706; }
-.attend-card .card-dot.out { background: #2563EB; } .attend-card .card-dot.trip { background: #7C3AED; }
-.attend-card .card-dot.rest { background: #0891B2; } .attend-card .card-dot.late { background: #DC2626; }
-.attend-card .card-dot.other { background: #9CA3AF; } .attend-card .card-dot.nodd { background: #E5E7EB; }
+.attend-card .card-dot.on { background: #3B82F6; } .attend-card .card-dot.leave { background: #F59E0B; }
+.attend-card .card-dot.out { background: #8B5CF6; }
+.attend-card .card-dot.other { background: #EF4444; } .attend-card .card-dot.nodd { background: #D1D5DB; }
 .as-nodd { color: #9CA3AF; } .as-nodd .stat-dot { background: #D1D5DB; }
 .attend-card .card-info { flex: 1; min-width: 0; line-height: 1.4; }
 .attend-card .card-name { font-size: 11px; font-weight: 500; color: var(--text); }
 .attend-card .card-location { font-size: 9px; color: var(--text-muted); }
 .card-status-two { display: flex; flex-direction: column; gap: 1px; margin-top: 1px; }
 .card-st-main { font-size: 10px; font-weight: 600; }
-.card-st-main.on { color: #059669; }
-.card-st-main.leave { color: #D97706; }
-.card-st-main.out { color: #2563EB; }
-.card-st-main.other { color: #6B7280; }
+.card-st-main.on { color: #3B82F6; }
+.card-st-main.leave { color: #F59E0B; }
+.card-st-main.out { color: #8B5CF6; }
+.card-st-main.other { color: #EF4444; }
 .card-st-main.nodd { color: #9CA3AF; }
 .card-st-sub { font-size: 8px; color: var(--text-muted); }
+.card-st-sub.abnormal { font-size: 10px; font-weight: 600; color: #EF4444; }
 .rank-I { background:#F2EFEB; color:#8D8883; }
 .rank-II { background:#E8F0EC; color:#5A7868; }
 .rank-III { background:#F9F2E7; color:#9A7D3E; }
@@ -5669,7 +5666,10 @@ function renderAttendView() {
     var main = obj.m, sub = obj.s;
     var location = e.location || e.bu || '';
     var dc = dotClass(main);
-    var subHtml = (main === sub) ? '' : '<span class="card-st-sub">'+esc(sub)+'</span>';
+    var abnormalSubs = ['迟到','早退','缺卡','旷工','严重迟到'];
+    var isAb = abnormalSubs.indexOf(sub) !== -1;
+    var subCls = 'card-st-sub' + (isAb ? ' abnormal' : '');
+    var subHtml = (main === sub) ? '' : '<span class="'+subCls+'">'+esc(sub)+'</span>';
     return '<div class="attend-card"><span class="card-dot '+dc+'"></span>'
       + '<div class="card-info"><div class="card-name">'+esc(e.name)+'</div>'
       + '<div class="card-location">'+esc(location)+'</div>'
