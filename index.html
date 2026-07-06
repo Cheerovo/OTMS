@@ -5791,22 +5791,6 @@ function renderAttendView(skipAutoSync) {
     // --- expanded body ---
     html += '<div class="month-summary-body">';
     if (totalAbnormalDays > 0) {
-      // Bar chart
-      var maxCount = Math.max(monthCounts['请假']||0, monthCounts['外勤']||0, monthCounts['旷工']||0);
-      var totalDays = monthDates.length;
-      var totalPerson = mTarget.length;
-      var maxPersonDays = totalDays * totalPerson;
-      FOCUS.forEach(function(s){
-        var cnt = monthCounts[s] || 0;
-        if (cnt === 0) return;
-        var pct = Math.round(cnt / maxPersonDays * 100);
-        var barPct = Math.round(cnt / maxCount * 100);
-        html += '<div class="ms-bar-row">';
-        html += '<span class="ms-bar-label" style="color:var(--text-dim)">'+s+'</span>';
-        html += '<span class="ms-bar-track"><span class="ms-bar-fill '+mainCSS[s]+'" style="width:'+barPct+'%"></span></span>';
-        html += '<span class="ms-bar-count">'+cnt+'天 <span style="color:var(--text-muted)">'+pct+'%</span></span>';
-        html += '</div>';
-      });
       // Per-person detail
       var abnormalPeople = [];
       Object.keys(personDays).forEach(function(name){
