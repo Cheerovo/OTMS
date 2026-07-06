@@ -1274,13 +1274,30 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-fb-inline select { padding:4px 8px; border:1px solid var(--border-light); border-radius:6px; font-size:8px; font-family:inherit; background:var(--card); }
 .tn-fb-inline button { padding:6px 12px; border:none; border-radius:6px; background:var(--accent); color:#fff; font-size:8px; cursor:pointer; font-family:inherit; }
 .tn-inline-fb-list { margin-top:6px; max-height:120px; overflow-y:auto; }
-.tn-inline-fb-item { padding:6px 8px; font-size:8px; color:var(--text-dim); border-left:2px solid var(--border-light); margin-bottom:3px; background:var(--card); border-radius:0 6px 6px 0; }
-.tn-inline-fb-item .fb-type-tag { font-size:7px; margin-right:4px; }
+.tn-inline-fb-item { display:flex; align-items:baseline; gap:4px; padding:6px 8px; font-size:8px; color:var(--text-dim); border-left:2px solid var(--border-light); margin-bottom:3px; background:var(--card); border-radius:0 6px 6px 0; flex-wrap:wrap; }
+.tn-inline-fb-item .fb-type-tag { font-size:7px; margin-right:2px; flex-shrink:0; }
+.tn-inline-fb-item .fb-content-text { flex:1; min-width:0; word-break:break-word; }
+.tn-inline-fb-item .fb-meta { font-size:7px; color:var(--text-muted); white-space:nowrap; flex-shrink:0; }
+.tn-inline-fb-item .fb-actions { display:flex; gap:1px; flex-shrink:0; margin-left:2px; }
+.fb-edit-btn, .fb-del-btn { cursor:pointer; font-size:9px; border:none; background:none; padding:0 3px; border-radius:2px; line-height:1; color:var(--text-muted); }
+.fb-edit-btn:hover { color:var(--accent); }
+.fb-del-btn:hover { color:var(--danger); }
 
 /* ---- Task description, parent/child hierarchy ---- */
 .tn-desc-preview { font-size:8px; color:var(--text-muted); margin-top:3px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; max-width:320px; }
 .tn-desc-indicator { display:inline-block; width:4px; height:4px; border-radius:50%; background:var(--accent); opacity:.5; margin-right:3px; vertical-align:middle; }
-.tn-child-task { padding-left:20px !important; border-left:2px solid var(--border-light) !important; margin-left:0 !important; }
+.tn-child-task-row { display:flex; align-items:center; gap:6px; padding:4px 12px 4px 24px; border-bottom:1px solid var(--border-light); font-size:10px; background:var(--bg-surface); }
+.tn-child-task-row:last-child { border-bottom:none; }
+.tn-child-connector { width:8px; height:8px; border-left:2px solid var(--accent); border-bottom:2px solid var(--accent); margin-right:2px; flex-shrink:0; }
+.tn-child-task-body { flex:1; display:flex; align-items:center; gap:6px; min-width:0; overflow:hidden; }
+.tn-child-task-name { font-size:10px; color:var(--text); cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tn-child-task-name:hover { color:var(--accent); text-decoration:underline; }
+.tn-child-task-meta { font-size:8px; color:var(--text-dim); white-space:nowrap; flex-shrink:0; }
+.tn-child-task-desc { font-size:8px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; flex-shrink:1; }
+.tn-child-task-time { font-size:7px; color:var(--text-muted); white-space:nowrap; flex-shrink:0; }
+.tn-child-task-actions { display:flex; align-items:center; gap:3px; flex-shrink:0; }
+.tn-child-task-del { cursor:pointer; font-size:10px; color:var(--text-dim); border:none; background:none; padding:0 3px; border-radius:2px; line-height:1; }
+.tn-child-task-del:hover { color:var(--danger); }
 .tn-parent-badge { font-size:7px; padding:1px 5px; border-radius:4px; background:#FBF6EC; color:#9A7D3E; font-weight:600; flex-shrink:0; white-space:nowrap; }
 .tn-child-count { font-size:7px; padding:1px 5px; border-radius:4px; background:var(--bg-surface); color:var(--text-dim); flex-shrink:0; white-space:nowrap; }
 .tn-child-count.has-children { background:var(--accent-wash); color:var(--accent); font-weight:600; cursor:pointer; }
@@ -1399,11 +1416,15 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .mt-assignment-person { font-size:11px; font-weight:600; color:var(--accent); }
 .mt-assignment-task-count { font-size:9px; color:var(--text-dim); }
 .mt-assignment-task-list { display:flex; flex-direction:column; gap:4px; }
-.mt-assignment-task-item { display:flex; align-items:center; gap:6px; padding:4px 8px; background:var(--card); border-radius:6px; transition:background .12s; }
+.mt-assignment-task-item { display:flex; flex-direction:column; gap:3px; padding:4px 8px; background:var(--card); border-radius:6px; transition:background .12s; }
 .mt-assignment-task-item:hover { background:#fff; }
+.mt-assignment-task-row { display:flex; align-items:center; gap:6px; }
 .mt-assignment-task-text { flex:1; font-size:10px; color:var(--text); line-height:1.4; word-break:break-word; }
 .mt-assignment-task-del { cursor:pointer; font-size:11px; color:var(--text-dim); border:none; background:none; padding:1px 5px; border-radius:3px; line-height:1; transition:all .12s; }
 .mt-assignment-task-del:hover { color:var(--danger); background:#fef2f2; }
+.mt-assignment-task-parent { }
+.mt-task-parent-select { width:100%; padding:2px 4px; border:1px solid var(--border-light); border-radius:4px; font-size:8.5px; background:var(--bg-surface); outline:none; font-family:inherit; color:var(--text-dim); }
+.mt-task-parent-select:focus { border-color:var(--accent); }
 .mt-assignment-add-row { display:flex; gap:6px; margin-top:6px; }
 .mt-assignment-add-input { flex:1; padding:5px 8px; border:1px dashed var(--border-light); border-radius:6px; font-size:10px; background:var(--card); outline:none; font-family:inherit; color:var(--text); transition:border-color .12s; }
 .mt-assignment-add-input:focus { border-color:var(--accent); border-style:solid; }
@@ -9023,7 +9044,8 @@ function loadTnData(){
       if(!tnData._version) tnData._version = 2;
       // Migration: add desc/parentId to existing tasks
       if(tnData.wtasks){ tnData.wtasks.forEach(function(w){ if(w.desc===undefined) w.desc=''; if(w.parentId===undefined) w.parentId=''; }); }
-      if(tnData.refTasks){ tnData.refTasks.forEach(function(r){ if(r.desc===undefined) r.desc=''; if(r.parentId===undefined) r.parentId=''; }); }
+      if(tnData.refTasks){ tnData.refTasks.forEach(function(r){ if(r.desc===undefined) r.desc=''; if(r.parentId===undefined) r.parentId=''; if(r.createdAt===undefined) r.createdAt=''; }); }
+      if(tnData.feedback){ tnData.feedback.forEach(function(f){ if(!f.id) f.id = 'fb_'+Date.now()+'_'+Math.random().toString(36).slice(2,8); }); }
       return;
     }
   }catch(e){}
@@ -9336,10 +9358,30 @@ function renderTraineeTasks(){
     html += '</div>';
     
     html += '<div class="tn-task-list">';
-    
-    tasks.forEach(function(t){
+
+    // Build parent-child hierarchy for nested display
+    var taskIdsInGroup = {};
+    tasks.forEach(function(tt){ taskIdsInGroup[tt.id] = true; });
+    var childTaskIds = {};
+    tasks.forEach(function(tt){ if(tt.parentId && taskIdsInGroup[tt.parentId]) childTaskIds[tt.id] = true; });
+    var orderedTasks = [];
+    var addedChildIds = {};
+    tasks.forEach(function(tt){
+      if(childTaskIds[tt.id]) return;
+      orderedTasks.push(tt);
+      tasks.forEach(function(ct){
+        if(ct.parentId === tt.id && childTaskIds[ct.id] && !addedChildIds[ct.id]){
+          orderedTasks.push(ct);
+          addedChildIds[ct.id] = true;
+        }
+      });
+    });
+    tasks.forEach(function(ct){ if(childTaskIds[ct.id] && !addedChildIds[ct.id]) orderedTasks.push(ct); });
+
+    orderedTasks.forEach(function(t){
       var isWeekly = t._source === 'weekly';
       var isRef = t._source === 'ref';
+      var isChild = !!childTaskIds[t.id];
       var td = (!isWeekly && !isRef) ? getTnTask(t.id) : null;
       var st = isWeekly ? t.status : isRef ? (t.refStatus || 'pending') : ((td && td.status) ? td.status : t.status);
       var wks = isRef ? (t.weeks || []) : (!isWeekly ? ((td && td.weeks) ? td.weeks : t.weeks) : null);
@@ -9380,6 +9422,49 @@ function renderTraineeTasks(){
 
       // Card view
       if(isCards){
+        // Description text (needed by both child and full card)
+        var descText = '';
+        if(isWeekly || isRef){ descText = t.desc || ''; }
+        else { var tdd = getTnTask(t.id); descText = (tdd && tdd.desc) ? tdd.desc : ''; }
+
+        if(isChild){
+          // Compact child row
+          html += '<div class="tn-child-task-row" id="tnCard_'+t.id+'">';
+          html += '<span class="tn-child-connector"></span>';
+          html += '<span class="tn-task-status-dot '+stCls+'"></span>';
+          html += '<div class="tn-child-task-body">';
+          html += '<span class="tn-child-task-name" onclick="openUnifiedTaskModal(\''+t._source+'\',\''+t.id+'\')" title="编辑任务">'+t.name+'</span>';
+          if(isWeekly){
+            html += '<span class="tn-child-task-meta">'+t.person+'</span>';
+          } else if(isRef){
+            html += '<span class="tn-child-task-meta">'+(t.executors||[]).join(',')+'</span>';
+          } else {
+            var displayR = (td && td.R) ? td.R : t.R;
+            html += '<span class="tn-child-task-meta">'+displayR+'</span>';
+          }
+          if(descText.trim()){
+            html += '<span class="tn-child-task-desc">'+descText.substring(0,30)+(descText.length>30?'..':'')+'</span>';
+          }
+          if(t.createdAt){
+            var d2 = new Date(t.createdAt);
+            var ts2 = (d2.getMonth()+1)+'/'+d2.getDate()+' '+String(d2.getHours()).padStart(2,'0')+':'+String(d2.getMinutes()).padStart(2,'0');
+            html += '<span class="tn-child-task-time">'+ts2+'</span>';
+          }
+          html += '</div>';
+          html += '<div class="tn-child-task-actions">';
+          if(isWeekly){
+            html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\'pending\':\'active\',\'active\':\'done\',\'done\':\'pending\'};setWeeklyTaskStatus(\''+t.id+'\',next[\''+st+'\'])">'+(st==='done'?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':st==='active'?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>':'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/></svg>')+'</button>';
+            html += '<button class="tn-child-task-del" onclick="event.stopPropagation();deleteWeeklyTask(\''+t.id+'\')" title="删除">x</button>';
+          } else if(isRef){
+            html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\'pending\':\'active\',\'active\':\'done\',\'done\':\'pending\'};setRefTaskStatus(\''+t.id+'\',next[\''+st+'\'])">'+(st==='done'?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':st==='active'?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>':'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/></svg>')+'</button>';
+            html += '<button class="tn-child-task-del" onclick="event.stopPropagation();deleteRefTask(\''+t.id+'\')" title="删除">x</button>';
+          } else {
+            html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\'pending\':\'active\',\'active\':\'done\',\'done\':\'pending\'};setTnTaskStatus(\''+t.id+'\',next[\''+st+'\'])">'+(st==='done'?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':st==='active'?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>':'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/></svg>')+'</button>';
+          }
+          html += editBtnSVG;
+          html += '</div></div>';
+        } else {
+          // Full card for parent/independent tasks
         html += '<div class="tn-task-card-new" id="tnCard_'+t.id+'" onclick="var el=document.getElementById(\'tnCard_'+t.id+'\');el.classList.toggle(\'expanded\')">';
         html += '<div class="tn-task-priority '+prio+'"></div>';
         html += '<span class="tn-task-status-dot '+stCls+'"></span>';
@@ -9405,32 +9490,21 @@ function renderTraineeTasks(){
           html += '<span class="tn-trainee-link" onclick="event.stopPropagation();openTraineeDetail(\''+displayR+'\')" title="查看学员"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>';
         }
         html += '</div>';
-        // Parent/child badges
+        // Child count badge
         var tChildren = getChildTasks(t.id);
         var hasChildren = tChildren.length > 0;
-        var isChild = !!(t.parentId);
-        if(isChild || hasChildren){
+        if(hasChildren){
           html += '<div style="display:flex;gap:4px;align-items:center;margin-top:2px">';
-          if(isChild){
-            // Find parent name
-            var pn = '';
-            if(tnData && tnData.wtasks){ tnData.wtasks.forEach(function(wt){ if(wt.id===t.parentId) pn=wt.name; }); }
-            if(!pn && tnData && tnData.refTasks){ tnData.refTasks.forEach(function(rt){ if(rt.id===t.parentId) pn=rt.name; }); }
-            if(!pn && typeof TN_TASKS!=='undefined'){ TN_TASKS.forEach(function(pt){ if(pt.id===t.parentId) pn=pt.name; }); }
-            var pnShort = pn.length > 12 ? pn.substring(0,10)+'..' : pn;
-            html += '<span class="tn-parent-badge" title="父任务: '+pn.replace(/"/g,'&quot;')+'">↳ '+pnShort+'</span>';
-          }
-          if(hasChildren){
-            html += '<span class="tn-child-count has-children" title="'+tChildren.length+'个子任务">'+tChildren.length+' ↧</span>';
-          }
+          html += '<span class="tn-child-count has-children" title="'+tChildren.length+'个子任务">'+tChildren.length+'个子任务</span>';
           html += '</div>';
         }
-        // Description preview
-        var descText = '';
-        if(isWeekly || isRef){ descText = t.desc || ''; }
-        else { var tdd = getTnTask(t.id); descText = (tdd && tdd.desc) ? tdd.desc : ''; }
         if(descText.trim()){
           html += '<div class="tn-desc-preview"><span class="tn-desc-indicator"></span>'+descText.substring(0,50)+(descText.length>50?'..':'')+'</div>';
+        }
+        if(t.createdAt){
+          var d = new Date(t.createdAt);
+          var ts = (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+          html += '<div style="font-size:7px;color:var(--text-muted);margin-top:2px">添加于 '+ts+'</div>';
         }
         html += '</div>';
         html += '<div class="tn-task-progress"><div class="tn-progress-bar-wrap"><div class="tn-progress-bar-fill '+progCls+'" style="width:'+progressPct+'%"></div></div>';
@@ -9458,8 +9532,30 @@ function renderTraineeTasks(){
         html += '<textarea id="tnFbContent_'+t.id+'" placeholder="添加反馈..." rows="1"></textarea>';
         html += '<button onclick="saveInlineFeedback(\''+t.id+'\')">发送</button>';
         html += '</div></div>';
+        } // end if(isChild)
       } else {
         // List view (compact)
+        if(isChild){
+          html += '<div class="tn-child-task-row">';
+          html += '<span class="tn-child-connector"></span>';
+          html += '<span class="tn-task-status-dot '+stCls+'"></span>';
+          html += '<div class="tn-child-task-body">';
+          html += '<span class="tn-child-task-name" onclick="openUnifiedTaskModal(\''+t._source+'\',\''+t.id+'\')" title="编辑">'+t.name+'</span>';
+          if(isWeekly){ html += '<span class="tn-child-task-meta">'+t.person+'</span>'; }
+          else if(isRef){ html += '<span class="tn-child-task-meta">'+(t.executors||[]).join(',')+'</span>'; }
+          else { html += '<span class="tn-child-task-meta">'+(td&&td.R?td.R:t.R)+'</span>'; }
+          html += '</div>';
+          html += '<div class="tn-child-task-actions">';
+          if(isWeekly){
+            html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\'pending\':\'active\',\'active\':\'done\',\'done\':\'pending\'};setWeeklyTaskStatus(\''+t.id+'\',next[\''+st+'\'])">'+(st==='done'?'✓':st==='active'?'▶':'○')+'</button>';
+          } else if(isRef){
+            html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\'pending\':\'active\',\'active\':\'done\',\'done\':\'pending\'};setRefTaskStatus(\''+t.id+'\',next[\''+st+'\'])">'+(st==='done'?'✓':st==='active'?'▶':'○')+'</button>';
+          } else {
+            html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\'pending\':\'active\',\'active\':\'done\',\'done\':\'pending\'};setTnTaskStatus(\''+t.id+'\',next[\''+st+'\'])">'+(st==='done'?'✓':st==='active'?'▶':'○')+'</button>';
+          }
+          html += editBtnSVG;
+          html += '</div></div>';
+        } else {
         html += '<div class="tn-task-card">';
         html += '<div class="tn-task-priority '+prio+'" style="width:4px;height:18px;border-radius:2px;flex-shrink:0"></div>';
         html += '<span class="tn-task-status '+stCls+'"></span>';
@@ -9487,6 +9583,7 @@ function renderTraineeTasks(){
         }
         html += '<button class="tn-task-edit-btn-inline" onclick="openUnifiedTaskModal(\''+t._source+'\',\''+t.id+'\')" title="编辑"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
         html += '</div></div>';
+        }
       }
     });
     
@@ -9504,7 +9601,20 @@ function renderInlineFeedback(taskId){
   items.slice(-5).forEach(function(f){
     var typeLabel = f.type==='positive'?'表扬':f.type==='negative'?'需改进':'建议';
     var typeColor = f.type==='positive'?'#5A7868':f.type==='negative'?'#992F48':'#9A7D3E';
-    html += '<div class="tn-inline-fb-item"><span class="fb-type-tag" style="color:'+typeColor+'">['+typeLabel+']</span> '+f.content+' <span style="color:var(--text-muted);margin-left:4px">— '+f.by+'</span></div>';
+    var fbId = f.id || '';
+    var timeStr = '';
+    if(f.date){
+      var d = new Date(f.date);
+      timeStr = (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    }
+    html += '<div class="tn-inline-fb-item" id="fbItem_'+fbId+'">';
+    html += '<span class="fb-type-tag" style="color:'+typeColor+'">['+typeLabel+']</span>';
+    html += '<span class="fb-content-text">'+f.content+'</span>';
+    html += '<span class="fb-meta">— '+f.by+(timeStr?' · '+timeStr:'')+'</span>';
+    html += '<span class="fb-actions">';
+    html += '<button class="fb-edit-btn" onclick="event.stopPropagation();editInlineFeedback(\''+taskId+'\',\''+fbId+'\')" title="编辑">'+String.fromCodePoint(0x270E)+'</button>';
+    html += '<button class="fb-del-btn" onclick="event.stopPropagation();deleteInlineFeedback(\''+taskId+'\',\''+fbId+'\')" title="删除">×</button>';
+    html += '</span></div>';
   });
   return html;
 }
@@ -9516,6 +9626,7 @@ function saveInlineFeedback(taskId){
   if(!tnData) loadTnData();
   if(!tnData.feedback) tnData.feedback = [];
   tnData.feedback.push({
+    id: 'fb_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),
     taskId: taskId,
     content: content,
     type: type,
@@ -9525,6 +9636,39 @@ function saveInlineFeedback(taskId){
   saveTnData();
   renderTraineeTasks();
   renderTraineeSummary();
+}
+
+function editInlineFeedback(taskId, fbId){
+  var el = document.getElementById('fbItem_'+fbId);
+  if(!el) return;
+  var contentSpan = el.querySelector('.fb-content-text');
+  if(!contentSpan) return;
+  var currentText = contentSpan.textContent;
+  el.innerHTML = '<textarea id="fbEdit_'+fbId+'" style="width:100%;padding:4px;border:1px solid var(--accent);border-radius:4px;font-size:9px;font-family:inherit;resize:vertical;min-height:36px;box-sizing:border-box">'+currentText.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')+'</textarea>'+
+    '<div style="margin-top:3px;display:flex;gap:4px">'+
+    '<button onclick="event.stopPropagation();saveEditInlineFeedback(\''+taskId+'\',\''+fbId+'\')" style="font-size:9px;padding:2px 8px;border:1px solid var(--accent);background:var(--accent-wash);color:var(--accent);border-radius:4px;cursor:pointer">保存</button>'+
+    '<button onclick="event.stopPropagation();renderTraineeTasks()" style="font-size:9px;padding:2px 8px;border:1px solid var(--border-light);border-radius:4px;cursor:pointer;background:var(--card)">取消</button></div>';
+}
+
+function saveEditInlineFeedback(taskId, fbId){
+  var textarea = document.getElementById('fbEdit_'+fbId);
+  if(!textarea || !textarea.value.trim()) return;
+  for(var i=0;i<tnData.feedback.length;i++){
+    if(tnData.feedback[i].id === fbId){
+      tnData.feedback[i].content = textarea.value.trim();
+      tnData.feedback[i].editedAt = new Date().toISOString();
+      break;
+    }
+  }
+  saveTnData();
+  renderTraineeTasks();
+}
+
+function deleteInlineFeedback(taskId, fbId){
+  if(!confirm('确认删除该反馈？')) return;
+  tnData.feedback = tnData.feedback.filter(function(f){ return f.id !== fbId; });
+  saveTnData();
+  renderTraineeTasks();
 }
 
 function toggleTnWeek(taskId, weekIdx){
@@ -10449,7 +10593,9 @@ function renderTnReportHistory(){
   items.sort(function(a,b){
     var ak = a.key.split('|');
     var bk = b.key.split('|');
-    if(ak[1]!==bk[1]) return bk[1].localeCompare(ak[1]);
+    var aw = parseInt((ak[1]||'').replace('W','')) || 0;
+    var bw = parseInt((bk[1]||'').replace('W','')) || 0;
+    if(aw !== bw) return aw - bw;
     return ak[0].localeCompare(bk[0]);
   });
   var countEl = document.getElementById('tnRptCount');
@@ -10464,7 +10610,7 @@ function renderTnReportHistory(){
       '<span class="rpt-week">'+parts[1]+'</span> <span class="rpt-author">'+parts[0]+'</span>'+
       '<div class="rpt-preview">'+(preview||'(空)')+'</div>'+
       (r.fileName ? '<span class="tn-file-link" onclick="event.stopPropagation();downloadTnFile(\''+item.key+'\')">📎 '+r.fileName+'</span>' : '')+
-      '<div style="font-size:7px;color:var(--text-muted);margin-top:2px">'+(r.savedAt?new Date(r.savedAt).toLocaleString('zh-CN'):'草稿')+'</div>'+
+      '<div style="font-size:7px;color:var(--text-muted);margin-top:2px">'+(r.savedBy?r.savedBy+' 上传 · ':'')+(r.savedAt?new Date(r.savedAt).toLocaleString('zh-CN'):'草稿')+'</div>'+
     '</div>';
   });
   document.getElementById('tnRptHistory').innerHTML = html;
@@ -10494,7 +10640,7 @@ function switchReportSection(section){
 
 // All available people for meeting attendees (trainees + managers + external)
 var TN_MEETING_PEOPLE = ['Jenny','杜宪','王倩','汪顺','邵吴慧','黄一萧','蔡心宇','芦智蔚','黄欢欢','王妤扬','王力','陈双杰','陈锦','赵柳文','安子玥','黄燕婷','任梦超','陈圆'];
-var tnCurrentAssignments = {}; // { personName: [taskStr, ...] }
+var tnCurrentAssignments = {}; // { personName: [{text, parentId}, ...] }
 
 function initTnAttendees(){
   var container = document.getElementById('mtAttendees');
@@ -10538,9 +10684,7 @@ function renderTnAssignments(){
 
   var html = '';
   selected.forEach(function(person){
-    var assignData = tnCurrentAssignments[person] || {};
-    var tasks = assignData.tasks || [];
-    var savedParentId = assignData.parentId || '';
+    var tasks = tnCurrentAssignments[person] || [];
     html += '<div class="mt-assignment-card">';
     html += '<div class="mt-assignment-card-header">';
     html += '<span class="mt-assignment-person">' + person + '</span>';
@@ -10550,11 +10694,22 @@ function renderTnAssignments(){
     html += '</div>';
     if(tasks.length){
       html += '<div class="mt-assignment-task-list">';
-      tasks.forEach(function(task, idx){
+      tasks.forEach(function(taskObj, idx){
+        var taskText = typeof taskObj === 'string' ? taskObj : taskObj.text;
+        var taskParentId = (typeof taskObj === 'object' && taskObj.parentId) ? taskObj.parentId : '';
         var safePerson = person.replace(/'/g,"\\'");
         html += '<div class="mt-assignment-task-item">';
-        html += '<span class="mt-assignment-task-text">' + (idx+1) + '. ' + task + '</span>';
+        html += '<div class="mt-assignment-task-row">';
+        html += '<span class="mt-assignment-task-text">' + (idx+1) + '. ' + taskText + '</span>';
         html += '<button class="mt-assignment-task-del" onclick="removeTnAssignmentTask(\'' + safePerson + '\',' + idx + ')" title="删除">&#x2715;</button>';
+        html += '</div>';
+        var selId = 'mtTaskParent_' + person.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_') + '_' + idx;
+        html += '<div class="mt-assignment-task-parent">';
+        html += '<select class="mt-task-parent-select" id="' + selId + '" onchange="setTnAssignmentParent(\'' + safePerson + '\',' + idx + ',this.value)">';
+        html += '<option value="">关联父任务（可选）</option>';
+        html += buildParentOptions('', taskParentId);
+        html += '</select>';
+        html += '</div>';
         html += '</div>';
       });
       html += '</div>';
@@ -10564,15 +10719,6 @@ function renderTnAssignments(){
     html += '<div class="mt-assignment-add-row">';
     html += '<input class="mt-assignment-add-input" id="' + inputId + '" placeholder="添加' + person + '的任务…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();addTnAssignmentTask(\'' + safePerson2 + '\')}">';
     html += '<button class="mt-assignment-add-btn" onclick="addTnAssignmentTask(\'' + safePerson2 + '\')">添加</button>';
-    html += '</div>';
-    // Parent task selector for this person
-    var parentSelectId = 'mtParent_' + person.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_');
-    var safePerson3 = person.replace(/'/g,"\\'");
-    html += '<div class="mt-assignment-add-row" style="margin-top:8px;border-top:1px dashed var(--border-light);padding-top:8px">';
-    html += '<select class="mt-assignment-add-input" id="' + parentSelectId + '" onchange="setTnAssignmentParent(\'' + safePerson3 + '\',this.value)" style="font-size:9px;border-style:solid">';
-    html += '<option value="">关联已有任务（可选）</option>';
-    html += buildParentOptions('', savedParentId);
-    html += '</select>';
     html += '</div>';
     html += '</div>';
   });
@@ -10587,37 +10733,26 @@ function addTnAssignmentTask(person){
   if(!taskText) return;
 
   if(!tnCurrentAssignments[person]){
-    tnCurrentAssignments[person] = {tasks: [], parentId: ''};
+    tnCurrentAssignments[person] = [];
   }
-  if(!tnCurrentAssignments[person].tasks) tnCurrentAssignments[person].tasks = [];
-  tnCurrentAssignments[person].tasks.push(taskText);
-  // Preserve parentId
-  var curParentId = tnCurrentAssignments[person].parentId || '';
-  // Read from DOM if present
-  var parentSelectId = 'mtParent_' + person.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_');
-  var parentSelect = document.getElementById(parentSelectId);
-  if(parentSelect) curParentId = parentSelect.value;
-  tnCurrentAssignments[person].parentId = curParentId;
+  tnCurrentAssignments[person].push({text: taskText, parentId: ''});
   input.value = '';
   renderTnAssignments();
 }
 
 function removeTnAssignmentTask(person, index){
-  if(!tnCurrentAssignments[person] || !tnCurrentAssignments[person].tasks) return;
-  tnCurrentAssignments[person].tasks.splice(index, 1);
-  // Preserve parentId
-  var curPid = tnCurrentAssignments[person].parentId || '';
-  if(!tnCurrentAssignments[person].tasks.length){
+  if(!tnCurrentAssignments[person]) return;
+  tnCurrentAssignments[person].splice(index, 1);
+  if(!tnCurrentAssignments[person].length){
     delete tnCurrentAssignments[person];
   }
   renderTnAssignments();
 }
 
-function setTnAssignmentParent(person, parentId){
-  if(!tnCurrentAssignments[person]){
-    tnCurrentAssignments[person] = {tasks: [], parentId: ''};
-  }
-  tnCurrentAssignments[person].parentId = parentId;
+function setTnAssignmentParent(person, idx, parentId){
+  if(!tnCurrentAssignments[person]) return;
+  if(!tnCurrentAssignments[person][idx]) return;
+  tnCurrentAssignments[person][idx].parentId = parentId;
 }
 
 // System multi-select chips
@@ -10757,10 +10892,14 @@ function saveTnMeeting(){
   // Collect assignments from current form state
   var assignments = [];
   Object.keys(tnCurrentAssignments).forEach(function(person){
-    var assignData = tnCurrentAssignments[person];
-    var tasks = (assignData && assignData.tasks) ? assignData.tasks : (Array.isArray(assignData) ? assignData : []);
+    var tasks = tnCurrentAssignments[person];
     if(tasks && tasks.length){
-      assignments.push({person: person, tasks: tasks.slice(), parentId: (assignData && assignData.parentId) || ''});
+      tasks.forEach(function(taskObj){
+        var text = typeof taskObj === 'string' ? taskObj : taskObj.text;
+        if(text){
+          assignments.push({person: person, text: text, parentId: (typeof taskObj === 'object' && taskObj.parentId) || ''});
+        }
+      });
     }
   });
 
@@ -10804,7 +10943,7 @@ function saveTnMeeting(){
         var taskSys = systems[0];
         assignments.forEach(function(assign, i){
           var taskId = 'mt_'+Date.now()+'_'+i;
-          var taskName = title + ' - ' + assign.person + ': ' + assign.tasks.join('; ');
+          var taskName = title + ' - ' + assign.person + ': ' + assign.text;
           tnData.refTasks.push({
             id: taskId, sys: taskSys,
             sysName: sn[taskSys]||'', sysColor: sc[taskSys]||'#8B6BAE', sysBg: sb[taskSys]||'#F6F2FB',
@@ -10813,7 +10952,7 @@ function saveTnMeeting(){
             approver: assign.person || attendees[0] || currentUser || '',
             refStatus: 'active', priority: 'P2',
             weeks: weekToWeeksArray(week), attachments: 0, _source: 'ref',
-            desc: '', parentId: (assign.parentId || '')
+            desc: assign.text || '', parentId: (assign.parentId || ''), createdAt: new Date().toISOString()
           });
           linkedTaskIds.push(taskId);
         });
@@ -10836,7 +10975,7 @@ function saveTnMeeting(){
       var taskSys = systems[0];
       assignments.forEach(function(assign, i){
         var taskId = 'mt_'+Date.now()+'_'+i;
-        var taskName = title + ' - ' + assign.person + ': ' + assign.tasks.join('; ');
+        var taskName = title + ' - ' + assign.person + ': ' + assign.text;
         tnData.refTasks.push({
           id: taskId, sys: taskSys,
           sysName: sn[taskSys]||'', sysColor: sc[taskSys]||'#8B6BAE', sysBg: sb[taskSys]||'#F6F2FB',
@@ -10844,7 +10983,8 @@ function saveTnMeeting(){
           executors: [assign.person],
           approver: assign.person || attendees[0] || currentUser || '',
           refStatus: 'active', priority: 'P2',
-          weeks: weekToWeeksArray(week), attachments: 0, _source: 'ref'
+          weeks: weekToWeeksArray(week), attachments: 0, _source: 'ref',
+          desc: assign.text || '', parentId: (assign.parentId || ''), createdAt: new Date().toISOString()
         });
         linkedTaskIds.push(taskId);
       });
@@ -10920,7 +11060,17 @@ function loadTnMeeting(id){
   tnCurrentAssignments = {};
   if(meeting.assignments && meeting.assignments.length){
     meeting.assignments.forEach(function(a){
-      tnCurrentAssignments[a.person] = {tasks: (a.tasks||[]).slice(), parentId: a.parentId || ''};
+      if(!tnCurrentAssignments[a.person]){
+        tnCurrentAssignments[a.person] = [];
+      }
+      // Handle both old format (a.tasks array) and new format (a.text single)
+      if(a.tasks){
+        a.tasks.forEach(function(t){
+          tnCurrentAssignments[a.person].push({text: t, parentId: a.parentId || ''});
+        });
+      } else if(a.text){
+        tnCurrentAssignments[a.person].push({text: a.text, parentId: a.parentId || ''});
+      }
     });
   }
   renderTnAssignments();
@@ -10983,7 +11133,12 @@ function renderTnMeetingList(){
     html += '<div class="mt-meta" style="margin-top:2px">'+preview+'</div>';
     // Show assignment summary if present
     if(m.assignments && m.assignments.length){
-      var assignSummary = m.assignments.map(function(a){ return a.person + '(' + a.tasks.length + '项)'; }).join('，');
+      var personTaskCount = {};
+      m.assignments.forEach(function(a){
+        if(a.tasks){ personTaskCount[a.person] = (personTaskCount[a.person]||0) + a.tasks.length; }
+        else if(a.text){ personTaskCount[a.person] = (personTaskCount[a.person]||0) + 1; }
+      });
+      var assignSummary = Object.keys(personTaskCount).map(function(p){ return p + '(' + personTaskCount[p] + '项)'; }).join('，');
       html += '<div class="mt-meta" style="margin-top:2px">任务分配: ' + assignSummary + '</div>';
     }
     html += '<div class="mt-actions">';
