@@ -787,13 +787,43 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-topbar .date-label { font-size: 15px; font-weight: 500; color: var(--text); }
 .attend-topbar input[type=date] { padding: 7px 10px; border: none; border-radius: 8px; font-size: 12px; color: var(--text); background: var(--card); box-shadow: var(--shadow-xs); }
 .attend-topbar .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-/* Monthly summary */
-.month-summary { background: var(--card); border-radius: 12px; padding: 14px 18px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid var(--border-subtle); }
-.month-summary-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
-.month-summary-stats { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-.month-stat { font-size: 11px; color: var(--text-dim); background: var(--bg-surface); padding: 4px 10px; border-radius: 6px; }
-.month-stat strong { color: var(--text); }
-.month-sub-badge { font-size: 10px; padding: 3px 8px; border-radius: 4px; background: #FEF2F2; color: #B85C5C; font-weight: 600; }
+/* Monthly summary — collapsible card */
+.month-summary { background: var(--card); border-radius: 12px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border: 1px solid var(--border-subtle); overflow: hidden; transition: box-shadow .2s; }
+.month-summary:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.month-summary-header { display: flex; align-items: center; gap: 14px; padding: 12px 18px; cursor: pointer; user-select: none; transition: background .15s; }
+.month-summary-header:hover { background: var(--bg-surface); }
+.month-summary-header .ms-chevron { font-size: 9px; color: var(--text-muted); transition: transform .25s; flex-shrink: 0; width: 16px; text-align: center; }
+.month-summary.open .ms-chevron { transform: rotate(90deg); }
+.ms-title { font-size: 13px; font-weight: 600; color: var(--text); flex-shrink: 0; }
+.ms-date-range { font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+.ms-inline-stats { display: flex; gap: 10px; flex: 1; flex-wrap: wrap; align-items: center; }
+.ms-inline-stat { font-size: 10px; color: var(--text-dim); white-space: nowrap; }
+.ms-inline-stat strong { font-weight: 600; }
+.ms-inline-stat.on { color: #8BA0B8; } .ms-inline-stat.leave { color: #D4915E; }
+.ms-inline-stat.out { color: #9B8EC4; } .ms-inline-stat.other { color: #CA6B6B; }
+.ms-badge { font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 600; white-space: nowrap; }
+.ms-badge.other { background: #FEF2F2; color: #B85C5C; }
+.ms-badge.leave { background: #FFF8F0; color: #C57D48; }
+/* Expanded body */
+.month-summary-body { display: none; padding: 0 18px 16px; border-top: 1px solid var(--border-subtle); }
+.month-summary.open .month-summary-body { display: block; }
+.ms-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.ms-bar-label { font-size: 11px; width: 36px; text-align: right; flex-shrink: 0; color: var(--text-dim); }
+.ms-bar-track { flex: 1; height: 6px; background: var(--bg-surface); border-radius: 3px; overflow: hidden; }
+.ms-bar-fill { height: 100%; border-radius: 3px; transition: width .4s; }
+.ms-bar-fill.on { background: #C4D4E0; } .ms-bar-fill.leave { background: #E8C9A8; }
+.ms-bar-fill.out { background: #C8BFE0; } .ms-bar-fill.other { background: #E0A8A8; }
+.ms-bar-count { font-size: 10px; color: var(--text-dim); width: 50px; flex-shrink: 0; }
+.ms-detail-section { margin-top: 12px; }
+.ms-detail-title { font-size: 10px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .4px; }
+.ms-person-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-size: 11px; }
+.ms-person-name { color: var(--text); width: 60px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-person-dots { display: flex; gap: 3px; flex-wrap: wrap; flex: 1; }
+.ms-person-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.ms-person-dot.on { background: #C4D4E0; } .ms-person-dot.leave { background: #E8C9A8; }
+.ms-person-dot.out { background: #C8BFE0; } .ms-person-dot.other { background: #E0A8A8; }
+.ms-person-dot[style*="transparent"] { visibility: hidden; }
+.ms-person-summary { font-size: 10px; color: var(--text-dim); flex-shrink: 0; white-space: nowrap; }
 .attend-stats { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
 .attend-stat { font-size: 11px; color: var(--text-dim); display: inline-flex; align-items: center; gap: 4px; cursor: pointer; padding: 3px 8px; border-radius: 6px; transition: background .15s; }
 .attend-stat:hover { background: var(--bg-surface); }
@@ -5697,10 +5727,10 @@ function renderAttendView(skipAutoSync) {
   }
   var onDutyDetail = buildOnDutyDetail();
 
-  // Monthly summary (从7月1日起)
+  // Monthly summary (从7月1日起，折叠面板)
   var monthStart = '2026-07-01';
   if (date >= monthStart) {
-    // 生成日期列表（避免 toISOString UTC偏移）
+    // 生成日期列表
     var monthDates = [];
     var parts = monthStart.split('-');
     var dY = +parts[0], dM = +parts[1], dD = +parts[2];
@@ -5709,7 +5739,6 @@ function renderAttendView(skipAutoSync) {
     while (dY < eY || (dY === eY && dM < eM) || (dY === eY && dM === eM && dD <= eD)) {
       monthDates.push(dY + '-' + String(dM).padStart(2,'0') + '-' + String(dD).padStart(2,'0'));
       dD++;
-      // 简单月进位（够用了）
       var dim = 31;
       if (dM === 2) dim = 28; else if ([4,6,9,11].indexOf(dM) >= 0) dim = 30;
       if (dD > dim) { dD = 1; dM++; if (dM > 12) { dM = 1; dY++; } }
@@ -5717,34 +5746,105 @@ function renderAttendView(skipAutoSync) {
     var monthCounts = {};
     var monthSubCounts = {};
     var monthPersonDays = 0;
-    var activePersons = {};
+    var personDays = {};    // {name: {在岗:N, 请假:N, ...}}
+    var personDetails = {}; // {name: [{date, main, sub}]} — for dot matrix
+    var mTarget = filtered || empList.filter(function(e){return e.bu!=='董事会'});
     monthDates.forEach(function(md) {
-      (filtered || empList.filter(function(e){return e.bu!=='董事会'})).forEach(function(e) {
+      mTarget.forEach(function(e) {
         var obj = ensureObj((attData[md]||{})[e.id]);
         var main = obj ? obj.m : null;
         if (!main) return;
         monthPersonDays++;
         monthCounts[main] = (monthCounts[main] || 0) + 1;
         monthSubCounts[obj.s] = (monthSubCounts[obj.s] || 0) + 1;
-        if (!activePersons[e.name]) activePersons[e.name] = {};
-        activePersons[e.name][main] = (activePersons[e.name][main] || 0) + 1;
+        if (!personDays[e.name]) { personDays[e.name] = {}; personDetails[e.name] = []; }
+        personDays[e.name][main] = (personDays[e.name][main] || 0) + 1;
+        personDetails[e.name].push({d:md, m:main, s:obj.s});
       });
     });
-    var activePersonCount = Object.keys(activePersons).length;
-    var monthSubDetail = '';
-    ['迟到','早退','自由工时','旷工','缺卡','严重迟到'].forEach(function(ss){
-      if (monthSubCounts[ss] > 0) monthSubDetail += '<span class="month-sub-badge">'+ss+' '+monthSubCounts[ss]+'</span>';
-    });
-    html += '<div class="month-summary">';
-    html += '<div class="month-summary-title">7月汇总 <span style="font-weight:400;font-size:10px;color:var(--text-muted)">7.1 ~ '+date.slice(5)+' · '+activePersonCount+'人出勤 · '+monthPersonDays+'人次</span></div>';
-    html += '<div class="month-summary-stats">';
+    var activePersonCount = Object.keys(personDays).length;
+    var totalDays = monthDates.length;
+    // 总人次（理论最大）= 人数 × 天数
+    var maxPersonDays = activePersonCount * totalDays;
+
+    // link each ATTEND_MAIN to its CSS class
+    var mainCSS = { '在岗':'on', '请假':'leave', '外勤':'out', '旷工':'other' };
+
+    // --- collapsed header ---
+    var collapseId = 'monthSum' + date;
+    html += '<div class="month-summary" id="'+collapseId+'">';
+    html += '<div class="month-summary-header" onclick="var el=document.getElementById(\''+collapseId+'\');el.classList.toggle(\'open\')">';
+    html += '<span class="ms-chevron">▶</span>';
+    html += '<span class="ms-title">7月考勤</span>';
+    html += '<span class="ms-date-range">7.1~'+date.slice(5)+'</span>';
+    html += '<span class="ms-inline-stats">';
     ATTEND_MAIN.forEach(function(s){
       if (monthCounts[s] > 0) {
-        html += '<span class="month-stat">'+s+' <strong>'+monthCounts[s]+'</strong>天</span>';
+        var cls = mainCSS[s] || '';
+        html += '<span class="ms-inline-stat '+cls+'">'+s+' <strong>'+monthCounts[s]+'</strong>天</span>';
       }
     });
-    html += monthSubDetail;
-    html += '</div></div>';
+    html += '</span>';
+    html += '<span class="ms-badge" style="background:var(--bg-surface);color:var(--text-dim);font-weight:400">'+activePersonCount+'人</span>';
+    html += '</div>';
+
+    // --- expanded body ---
+    html += '<div class="month-summary-body">';
+    // Bar chart
+    var maxCount = Math.max(1, monthCounts['在岗']||0, monthCounts['请假']||0, monthCounts['外勤']||0, monthCounts['旷工']||0);
+    ATTEND_MAIN.forEach(function(s){
+      var cnt = monthCounts[s] || 0;
+      if (cnt === 0) return;
+      var cls = mainCSS[s] || '';
+      var pct = Math.round(cnt / maxPersonDays * 100);
+      var barPct = Math.round(cnt / maxCount * 100);
+      html += '<div class="ms-bar-row">';
+      html += '<span class="ms-bar-label">'+s+'</span>';
+      html += '<span class="ms-bar-track"><span class="ms-bar-fill '+cls+'" style="width:'+barPct+'%"></span></span>';
+      html += '<span class="ms-bar-count">'+cnt+'天 <span style="color:var(--text-muted)">'+pct+'%</span></span>';
+      html += '</div>';
+    });
+    // Per-person detail for non-在岗 people
+    var abnormalPeople = [];
+    Object.keys(personDays).forEach(function(name){
+      var pd = personDays[name];
+      var total = (pd['请假']||0) + (pd['外勤']||0) + (pd['旷工']||0);
+      if (total > 0) abnormalPeople.push({name:name, pd:pd, total:total, details: personDetails[name]});
+    });
+    if (abnormalPeople.length > 0) {
+      abnormalPeople.sort(function(a,b){ return b.total - a.total; });
+      html += '<div class="ms-detail-section">';
+      html += '<div class="ms-detail-title">异常明细</div>';
+      abnormalPeople.forEach(function(p){
+        html += '<div class="ms-person-row">';
+        html += '<span class="ms-person-name" title="'+esc(p.name)+'">'+esc(p.name)+'</span>';
+        // Dot matrix: one dot per day in month
+        html += '<span class="ms-person-dots">';
+        var detMap = {};
+        (p.details||[]).forEach(function(dd){ detMap[dd.d] = dd; });
+        monthDates.forEach(function(md){
+          var det = detMap[md];
+          var dotCls = det ? (mainCSS[det.m]||'') : 'empty';
+          var title = md + (det ? ' '+det.m+'/'+det.s : ' 无数据');
+          if (dotCls === 'empty') {
+            html += '<span class="ms-person-dot" style="background:transparent" title="'+title+'"></span>';
+          } else {
+            html += '<span class="ms-person-dot '+dotCls+'" title="'+title+'"></span>';
+          }
+        });
+        html += '</span>';
+        // Text summary: e.g. "请假 10天"
+        var summaries = [];
+        ATTEND_MAIN.forEach(function(s){
+          if (p.pd[s] > 0 && s !== '在岗') summaries.push(s+' '+p.pd[s]+'天');
+        });
+        html += '<span class="ms-person-summary">'+summaries.join(' · ')+'</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+    html += '</div>'; // body
+    html += '</div>'; // month-summary
   }
 
   // Top summary (当日)
