@@ -787,6 +787,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-topbar .date-label { font-size: 15px; font-weight: 500; color: var(--text); }
 .attend-topbar input[type=date] { padding: 7px 10px; border: none; border-radius: 8px; font-size: 12px; color: var(--text); background: var(--card); box-shadow: var(--shadow-xs); }
 .attend-topbar .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+/* Monthly summary */
+.month-summary { background: var(--card); border-radius: 12px; padding: 14px 18px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid var(--border-subtle); }
+.month-summary-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.month-summary-stats { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.month-stat { font-size: 11px; color: var(--text-dim); background: var(--bg-surface); padding: 4px 10px; border-radius: 6px; }
+.month-stat strong { color: var(--text); }
+.month-sub-badge { font-size: 10px; padding: 3px 8px; border-radius: 4px; background: #FEF2F2; color: #B85C5C; font-weight: 600; }
 .attend-stats { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
 .attend-stat { font-size: 11px; color: var(--text-dim); display: inline-flex; align-items: center; gap: 4px; cursor: pointer; padding: 3px 8px; border-radius: 6px; transition: background .15s; }
 .attend-stat:hover { background: var(--bg-surface); }
@@ -5612,7 +5619,7 @@ function loadAttendance() {
 }
 function saveAttendance(data) { localStorage.setItem('okr_attendance',JSON.stringify(data)); }
 
-function renderAttendView() {
+function renderAttendView(skipAutoSync) {
   var div = document.getElementById('orgAttendView');
   var today = getTodayStr();
   var dateInput = document.getElementById('attendDateInput');
@@ -5621,8 +5628,8 @@ function renderAttendView() {
   var attData = loadAttendance();
   if (!attData[date]) attData[date] = {};
 
-  // Auto-sync from dingtalk_data.json if no data for today yet
-  if (date === today && Object.keys(attData[date]).length === 0) {
+  // Auto-sync from dingtalk_data.json every time viewing today (always refresh)
+  if (date === today && !skipAutoSync) {
     syncFromDingTalkSilent(date, attData, empList);
   }
 
@@ -5690,7 +5697,57 @@ function renderAttendView() {
   }
   var onDutyDetail = buildOnDutyDetail();
 
-  // Top summary
+  // Monthly summary (从7月1日起)
+  var monthStart = '2026-07-01';
+  if (date >= monthStart) {
+    // 生成日期列表（避免 toISOString UTC偏移）
+    var monthDates = [];
+    var parts = monthStart.split('-');
+    var dY = +parts[0], dM = +parts[1], dD = +parts[2];
+    var endParts = date.split('-');
+    var eY = +endParts[0], eM = +endParts[1], eD = +endParts[2];
+    while (dY < eY || (dY === eY && dM < eM) || (dY === eY && dM === eM && dD <= eD)) {
+      monthDates.push(dY + '-' + String(dM).padStart(2,'0') + '-' + String(dD).padStart(2,'0'));
+      dD++;
+      // 简单月进位（够用了）
+      var dim = 31;
+      if (dM === 2) dim = 28; else if ([4,6,9,11].indexOf(dM) >= 0) dim = 30;
+      if (dD > dim) { dD = 1; dM++; if (dM > 12) { dM = 1; dY++; } }
+    }
+    var monthCounts = {};
+    var monthSubCounts = {};
+    var monthPersonDays = 0;
+    var activePersons = {};
+    monthDates.forEach(function(md) {
+      (filtered || empList.filter(function(e){return e.bu!=='董事会'})).forEach(function(e) {
+        var obj = ensureObj((attData[md]||{})[e.id]);
+        var main = obj ? obj.m : null;
+        if (!main) return;
+        monthPersonDays++;
+        monthCounts[main] = (monthCounts[main] || 0) + 1;
+        monthSubCounts[obj.s] = (monthSubCounts[obj.s] || 0) + 1;
+        if (!activePersons[e.name]) activePersons[e.name] = {};
+        activePersons[e.name][main] = (activePersons[e.name][main] || 0) + 1;
+      });
+    });
+    var activePersonCount = Object.keys(activePersons).length;
+    var monthSubDetail = '';
+    ['迟到','早退','自由工时','旷工','缺卡','严重迟到'].forEach(function(ss){
+      if (monthSubCounts[ss] > 0) monthSubDetail += '<span class="month-sub-badge">'+ss+' '+monthSubCounts[ss]+'</span>';
+    });
+    html += '<div class="month-summary">';
+    html += '<div class="month-summary-title">7月汇总 <span style="font-weight:400;font-size:10px;color:var(--text-muted)">7.1 ~ '+date.slice(5)+' · '+activePersonCount+'人出勤 · '+monthPersonDays+'人次</span></div>';
+    html += '<div class="month-summary-stats">';
+    ATTEND_MAIN.forEach(function(s){
+      if (monthCounts[s] > 0) {
+        html += '<span class="month-stat">'+s+' <strong>'+monthCounts[s]+'</strong>天</span>';
+      }
+    });
+    html += monthSubDetail;
+    html += '</div></div>';
+  }
+
+  // Top summary (当日)
   html += '<div class="attend-stats">';
   ATTEND_MAIN.forEach(function(s) {
     if (counts[s] > 0) {
@@ -5836,7 +5893,7 @@ async function syncFromDingTalkSilent(date, attData, empList) {
       attData[date][e.id] = raw;
     });
     saveAttendance(attData);
-    renderAttendView();
+    renderAttendView(true);
   } catch(_) {}
 }
 
@@ -5871,7 +5928,7 @@ async function syncFromDingTalk() {
     });
 
     saveAttendance(attData);
-    renderAttendView();
+    renderAttendView(true);
     if (btn) { btn.textContent = '🔄 同步钉钉'; btn.disabled = false; }
     alert('同步完成！\n已匹配 ' + synced + ' 人' + (skipped > 0 ? '\n' + skipped + ' 人不在钉钉数据中，已标记为"不在钉钉数据"' : '') + '\n\n数据来源: dingtalk_data.json (' + (dd.updated || '').slice(0,10) + ')');
   } catch (err) {

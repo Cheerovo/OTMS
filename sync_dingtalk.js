@@ -5,6 +5,14 @@ const path = require('path');
 const CONFIG_FILE = path.join(__dirname, 'dingtalk_config.json');
 const DATA_FILE = path.join(__dirname, 'dingtalk_data.json');
 
+// 本地日期格式化（避免 toISOString 的 UTC 偏移问题）
+function toLocalDate(ts) {
+  // ts: 毫秒(>10000000000) 或 秒(<=10000000000)
+  var ms = ts > 10000000000 ? ts : ts * 1000;
+  var d = new Date(ms);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
 function loadConfig() {
   if (!fs.existsSync(CONFIG_FILE)) {
     console.error('请先创建 dingtalk_config.json: {"appKey":"xxx","appSecret":"xxx","deptId":1}');
@@ -161,8 +169,7 @@ async function getLeaveApprovals(token, dateFrom, dateTo) {
             }
             const detailList = ext.detailList || [];
             for (const d of detailList) {
-              const wd = d.workDate;
-              const workDate = new Date(wd > 10000000000 ? wd : wd * 1000).toISOString().slice(0, 10);
+              const workDate = toLocalDate(d.workDate);
               if (workDate >= dateFrom && workDate <= dateTo) {
                 if (!leaveMap[userId]) leaveMap[userId] = {};
                 leaveMap[userId][workDate] = {m:'请假', s: leaveTag};
@@ -239,13 +246,13 @@ async function main() {
   for (let i = 6; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    dates.push(d.toISOString().slice(0, 10));
+    dates.push(toLocalDate(d.getTime()));
   }
 
-  // 请假OA审批拉最近90天（分段请求避免超限）
+  // 请假OA审批拉最近95天（分段请求避免超限，留5天余量防止边界遗漏）
   const leaveDateFrom = new Date(today);
-  leaveDateFrom.setDate(leaveDateFrom.getDate() - 90);
-  const leaveDateFromStr = leaveDateFrom.toISOString().slice(0, 10);
+  leaveDateFrom.setDate(leaveDateFrom.getDate() - 95);
+  const leaveDateFromStr = toLocalDate(leaveDateFrom.getTime());
   const leaveDateToStr = dates[dates.length - 1];
 
   console.log('[4] 获取考勤记录...');
@@ -264,16 +271,11 @@ async function main() {
     var rawDate = r.workDate || r.userCheckTime;
     var date;
     if (typeof rawDate === 'number') {
-      // 10-digit = seconds, 13-digit = milliseconds. 阈值: > 100亿=毫秒
-      if (rawDate > 10000000000) {
-        date = new Date(rawDate).toISOString().slice(0, 10);
-      } else {
-        date = new Date(rawDate * 1000).toISOString().slice(0, 10);
-      }
+      date = toLocalDate(rawDate);
     } else if (/^\d{10}$/.test(String(rawDate))) {
-      date = new Date(Number(rawDate) * 1000).toISOString().slice(0, 10);
+      date = toLocalDate(Number(rawDate));
     } else if (/^\d{13}$/.test(String(rawDate))) {
-      date = new Date(Number(rawDate)).toISOString().slice(0, 10);
+      date = toLocalDate(Number(rawDate));
     } else {
       date = String(rawDate || '').slice(0, 10);
     }
@@ -299,7 +301,7 @@ async function main() {
   console.log('  ✅ 请假覆盖 ' + leaveOverlayCount + ' 个日期（' + leavePersonCount + ' 人）');
 
 
-  const todayStr = today.toISOString().slice(0, 10);
+  const todayStr = toLocalDate(today.getTime());
 
   // 加载已有数据，合并累积（而非覆盖）
   let existing = { users: [] };
