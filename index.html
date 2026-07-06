@@ -8100,33 +8100,34 @@ function renderWorkspace(){
   // Trainee tasks (管培生任务)
   try{ if(!tnData) loadTnData(); }catch(e){}
   if(tnData){
-    // Weekly tasks assigned to current user
+    var isAdmin = isGlobalAdmin(cu);
+    // Weekly tasks
     if(tnData.wtasks){
       tnData.wtasks.forEach(function(w){
-        if(w.person===cu && w.status==='active'){
-          pushes.push({type:'trainee',text:'周任务：'+w.name,meta:'W'+(w.week||''),urgent:false,tid:w.id,title:w.name});
-        }
+        if(!isAdmin && w.person!==cu) return;
+        if(w.status==='done') return;
+        pushes.push({type:'trainee',text:'周任务：'+w.name,meta:w.person+' · W'+(w.week||''),urgent:false,tid:w.id,title:w.name});
       });
     }
-    // Ref tasks where current user is executor
+    // Ref tasks (meeting-generated + external)
     if(tnData.refTasks){
       tnData.refTasks.forEach(function(r){
-        if((r.executors||[]).indexOf(cu)!==-1 && r.refStatus==='active'){
-          var taskName = r.name;
-          if(taskName.length > 30) taskName = taskName.substring(0,28)+'..';
-          pushes.push({type:'trainee',text:taskName,meta:r.sysName||'',urgent:false,tid:r.id,title:r.name});
-        }
+        if(!isAdmin && (r.executors||[]).indexOf(cu)===-1) return;
+        if(r.refStatus==='done') return;
+        var taskName = r.name;
+        if(taskName.length > 30) taskName = taskName.substring(0,28)+'..';
+        pushes.push({type:'trainee',text:taskName,meta:(r.executors||[]).join('、')+' · '+(r.sysName||''),urgent:false,tid:r.id,title:r.name});
       });
     }
-    // Meeting assignments for current user
+    // Meeting assignments
     if(tnData.meetings){
       tnData.meetings.forEach(function(m){
         if(m.assignments && m.assignments.length){
           m.assignments.forEach(function(a){
-            if(a.person===cu && a.text){
-              var aText = a.text.length > 25 ? a.text.substring(0,23)+'..' : a.text;
-              pushes.push({type:'trainee',text:'会议任务：'+aText,meta:m.title||'',urgent:false,mid:m.id,title:m.title});
-            }
+            if(!isAdmin && a.person!==cu) return;
+            if(!a.text) return;
+            var aText = a.text.length > 25 ? a.text.substring(0,23)+'..' : a.text;
+            pushes.push({type:'trainee',text:'会议任务：'+aText,meta:a.person+' · '+ (m.title||''),urgent:false,mid:m.id,title:m.title});
           });
         }
       });
