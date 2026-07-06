@@ -788,7 +788,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-topbar input[type=date] { padding: 7px 10px; border: none; border-radius: 8px; font-size: 12px; color: var(--text); background: var(--card); box-shadow: var(--shadow-xs); }
 .attend-topbar .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .attend-stats { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
-.attend-stat { font-size: 11px; color: var(--text-dim); display: inline-flex; align-items: center; gap: 4px; }
+.attend-stat { font-size: 11px; color: var(--text-dim); display: inline-flex; align-items: center; gap: 4px; cursor: pointer; padding: 3px 8px; border-radius: 6px; transition: background .15s; }
+.attend-stat:hover { background: var(--bg-surface); }
 .attend-stat .stat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .as-on { color: #8BA0B8; } .as-on .stat-dot { background: #8BA0B8; }
 .as-leave { color: #D4915E; } .as-leave .stat-dot { background: #D4915E; }
@@ -799,7 +800,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-bu-section { margin-bottom: 22px; }
 .attend-bu-title { font-size: 11px; font-weight: 500; color: var(--text-dim); padding: 3px 0; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.3px; }
 .attend-bu-title .bu-name { color: var(--text); font-weight: 600; }
-.attend-bu-title .bu-count { font-size: 9px; color: var(--text-muted); }
+.attend-bu-title .bu-count { font-size: 9px; color: var(--text-muted); margin-right: 8px; }
+.attend-bu-title .bu-stats-inline { display: inline-flex; gap: 6px; align-items: center; font-size: 9px; }
+.attend-bu-title .bu-stat { display: inline-flex; align-items: center; gap: 3px; cursor: pointer; padding: 1px 5px; border-radius: 4px; transition: background .15s; }
+.attend-bu-title .bu-stat:hover { background: var(--bg-surface-hover); }
+.attend-bu-title .bu-stat .stat-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
 .attend-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
 @media (max-width: 1400px) { .attend-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
 @media (max-width: 1000px) { .attend-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -5651,13 +5656,32 @@ function renderAttendView() {
   html += '<button class="btn btn-primary btn-sm" onclick="syncFromDingTalk()">同步钉钉</button>';
   html += '</div></div>';
 
-  // Compact stats inline
+  // Store for scroll access
+  window._attendFiltered = filtered;
+  window._attendData = attData;
+  window._attendDate = date;
+
+  // Jump helper
+  window.scrollToFirst = function(mainStatus) {
+    var list = window._attendFiltered || [];
+    var ad = window._attendData || {};
+    var d = window._attendDate || '';
+    for (var i = 0; i < list.length; i++) {
+      var obj2 = ensureObj(ad[d] && ad[d][list[i].id] ? ad[d][list[i].id] : null);
+      var m2 = obj2 ? obj2.m : '不在钉钉数据';
+      if (m2 === mainStatus) {
+        var el = document.getElementById('emp-'+list[i].id);
+        if (el) { el.scrollIntoView({behavior:'smooth',block:'center'}); el.style.boxShadow='0 0 0 3px var(--accent)'; setTimeout(function(){ el.style.boxShadow=''; }, 2000); }
+        return;
+      }
+    }
+  };
+
+  // Top summary
   html += '<div class="attend-stats">';
-  let shown = 0;
-  ATTEND_MAIN.forEach(s => {
+  ATTEND_MAIN.forEach(function(s) {
     if (counts[s] > 0) {
-      html += '<span class="attend-stat '+ATTEND_CSS[s]+'"><span class="stat-dot"></span>'+s+' '+counts[s]+'</span>';
-      shown++;
+      html += '<span class="attend-stat '+ATTEND_CSS[s]+'" onclick="scrollToFirst(\''+esc(s)+'\')" title="点击查看"><span class="stat-dot"></span>'+s+' <strong>'+counts[s]+'</strong></span>';
     }
   });
   html += '<span style="font-size:10px;color:var(--text-muted)">· '+filtered.length+'人</span>';
@@ -5684,7 +5708,7 @@ function renderAttendView() {
     if (dc === 'other') cardClass += ' other';
     else if (dc === 'nodd') cardClass += ' nodd';
     else if (isAb) cardClass += ' has-ab';
-    return '<div class="'+cardClass+'">'
+    return '<div class="'+cardClass+'" id="emp-'+e.id+'">'
       + '<span class="card-dot '+dc+'"></span>'
       + '<div class="card-body">'
       + '<div class="card-name">'+esc(e.name)+'</div>'
@@ -5706,8 +5730,22 @@ function renderAttendView() {
   buSet.forEach(bu => {
     const list = groups[bu];
     if (!list || !list.length) return;
+    // Per-BU summary
+    var buCounts = {};
+    ATTEND_MAIN.forEach(function(s){ buCounts[s] = 0; });
+    list.forEach(function(e){
+      var obj3 = ensureObj(attData[date][e.id]);
+      var m3 = obj3 ? obj3.m : '不在钉钉数据';
+      buCounts[m3] = (buCounts[m3] || 0) + 1;
+    });
+    var buStatsHtml = '';
+    ATTEND_MAIN.forEach(function(s){
+      if (buCounts[s] > 0) {
+        buStatsHtml += '<span class="bu-stat '+ATTEND_CSS[s]+'" onclick="event.stopPropagation();scrollToFirst(\''+esc(s)+'\')" title="点击查看"><span class="stat-dot"></span>'+s+' <strong>'+buCounts[s]+'</strong></span>';
+      }
+    });
     html += '<div class="attend-bu-section">';
-    html += '<div class="attend-bu-title">'+esc(bu)+' <span class="bu-count">'+list.length+'人</span></div>';
+    html += '<div class="attend-bu-title">'+esc(bu)+' <span class="bu-count">'+list.length+'人</span><span class="bu-stats-inline">'+buStatsHtml+'</span></div>';
     html += '<div class="attend-grid">';
     list.forEach(e => html += renderCard(e));
     html += '</div></div>';
