@@ -1378,6 +1378,29 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .sync-checkbox { display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text-dim); cursor:pointer; margin-bottom:12px; }
 .sync-checkbox input { accent-color:var(--accent); }
 
+/* ---- Task Assignment Cards ---- */
+.mt-assignments-section { margin-top:4px; margin-bottom:12px; }
+.mt-assignments-title { font-size:11px; font-weight:600; color:var(--text); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.mt-assignments-container { display:flex; flex-direction:column; gap:8px; }
+.mt-assignment-card { background:var(--bg-surface); border:1px solid var(--border-light); border-radius:10px; padding:10px 12px; transition:border-color .15s; }
+.mt-assignment-card:hover { border-color:var(--accent); }
+.mt-assignment-card-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.mt-assignment-person { font-size:11px; font-weight:600; color:var(--accent); }
+.mt-assignment-task-count { font-size:9px; color:var(--text-dim); }
+.mt-assignment-task-list { display:flex; flex-direction:column; gap:4px; }
+.mt-assignment-task-item { display:flex; align-items:center; gap:6px; padding:4px 8px; background:var(--card); border-radius:6px; transition:background .12s; }
+.mt-assignment-task-item:hover { background:#fff; }
+.mt-assignment-task-text { flex:1; font-size:10px; color:var(--text); line-height:1.4; word-break:break-word; }
+.mt-assignment-task-del { cursor:pointer; font-size:11px; color:var(--text-dim); border:none; background:none; padding:1px 5px; border-radius:3px; line-height:1; transition:all .12s; }
+.mt-assignment-task-del:hover { color:var(--danger); background:#fef2f2; }
+.mt-assignment-add-row { display:flex; gap:6px; margin-top:6px; }
+.mt-assignment-add-input { flex:1; padding:5px 8px; border:1px dashed var(--border-light); border-radius:6px; font-size:10px; background:var(--card); outline:none; font-family:inherit; color:var(--text); transition:border-color .12s; }
+.mt-assignment-add-input:focus { border-color:var(--accent); border-style:solid; }
+.mt-assignment-add-input::placeholder { color:var(--text-muted); }
+.mt-assignment-add-btn { font-size:9px; padding:4px 10px; border-radius:6px; border:1px solid var(--accent); background:var(--accent-wash); color:var(--accent); cursor:pointer; white-space:nowrap; transition:all .12s; }
+.mt-assignment-add-btn:hover { background:var(--accent); color:#fff; }
+.mt-assignment-empty { font-size:10px; color:var(--text-muted); padding:6px 0; text-align:center; }
+
 </style>
 </head>
 <body>
@@ -1748,6 +1771,15 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
               <div class="tn-report-field" style="margin-bottom:10px">
                 <label>会议纪要</label>
                 <textarea id="mtMinutes" placeholder="记录会议讨论内容、决议事项…" style="width:100%;height:150px;padding:12px;border:1px solid var(--border-light);border-radius:10px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;resize:vertical;box-sizing:border-box"></textarea>
+              </div>
+              <div class="mt-assignments-section" id="mtAssignmentsSection">
+                <div class="mt-assignments-title">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+                  任务分配 <span style="font-weight:400;font-size:9px;color:var(--text-muted)">（选择参会人员后自动生成卡片）</span>
+                </div>
+                <div class="mt-assignments-container" id="mtAssignmentsContainer">
+                  <div class="mt-assignment-empty" id="mtAssignmentsEmpty">请先选择参会人员</div>
+                </div>
               </div>
               <label class="sync-checkbox"><input type="checkbox" id="mtSyncTask" checked> 同步创建会议任务到任务看板</label>
               <div style="display:flex;gap:8px">
@@ -10228,6 +10260,7 @@ function switchReportSection(section){
 
 // All available people for meeting attendees (trainees + managers + external)
 var TN_MEETING_PEOPLE = ['Jenny','杜宪','王倩','汪顺','邵吴慧','黄一萧','蔡心宇','芦智蔚','黄欢欢','王妤杨','王力','陈双杰','陈锦','赵柳文','安子玥','黄燕婷','任梦超','陈圆'];
+var tnCurrentAssignments = {}; // { personName: [taskStr, ...] }
 
 function initTnAttendees(){
   var container = document.getElementById('mtAttendees');
@@ -10249,6 +10282,80 @@ function initTnAttendees(){
 
 function toggleTnAttendee(el){
   el.classList.toggle('selected');
+  renderTnAssignments();
+}
+
+// ---- Task Assignment Functions ----
+
+function renderTnAssignments(){
+  var container = document.getElementById('mtAssignmentsContainer');
+  var emptyEl = document.getElementById('mtAssignmentsEmpty');
+  if(!container) return;
+
+  var selected = getTnSelectedAttendees();
+
+  if(!selected.length){
+    container.innerHTML = '';
+    if(emptyEl) emptyEl.style.display = '';
+    return;
+  }
+
+  if(emptyEl) emptyEl.style.display = 'none';
+
+  var html = '';
+  selected.forEach(function(person){
+    var tasks = tnCurrentAssignments[person] || [];
+    html += '<div class="mt-assignment-card">';
+    html += '<div class="mt-assignment-card-header">';
+    html += '<span class="mt-assignment-person">' + person + '</span>';
+    if(tasks.length){
+      html += '<span class="mt-assignment-task-count">' + tasks.length + '项任务</span>';
+    }
+    html += '</div>';
+    if(tasks.length){
+      html += '<div class="mt-assignment-task-list">';
+      tasks.forEach(function(task, idx){
+        var safePerson = person.replace(/'/g,"\\'");
+        html += '<div class="mt-assignment-task-item">';
+        html += '<span class="mt-assignment-task-text">' + (idx+1) + '. ' + task + '</span>';
+        html += '<button class="mt-assignment-task-del" onclick="removeTnAssignmentTask(\'' + safePerson + '\',' + idx + ')" title="删除">&#x2715;</button>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+    var inputId = 'mtAddInput_' + person.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_');
+    var safePerson2 = person.replace(/'/g,"\\'");
+    html += '<div class="mt-assignment-add-row">';
+    html += '<input class="mt-assignment-add-input" id="' + inputId + '" placeholder="添加' + person + '的任务…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();addTnAssignmentTask(\'' + safePerson2 + '\')}">';
+    html += '<button class="mt-assignment-add-btn" onclick="addTnAssignmentTask(\'' + safePerson2 + '\')">添加</button>';
+    html += '</div>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function addTnAssignmentTask(person){
+  var inputId = 'mtAddInput_' + person.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_');
+  var input = document.getElementById(inputId);
+  if(!input) return;
+  var taskText = input.value.trim();
+  if(!taskText) return;
+
+  if(!tnCurrentAssignments[person]){
+    tnCurrentAssignments[person] = [];
+  }
+  tnCurrentAssignments[person].push(taskText);
+  input.value = '';
+  renderTnAssignments();
+}
+
+function removeTnAssignmentTask(person, index){
+  if(!tnCurrentAssignments[person]) return;
+  tnCurrentAssignments[person].splice(index, 1);
+  if(!tnCurrentAssignments[person].length){
+    delete tnCurrentAssignments[person];
+  }
+  renderTnAssignments();
 }
 
 // System multi-select chips
@@ -10384,12 +10491,21 @@ function saveTnMeeting(){
   var minutes = document.getElementById('mtMinutes').value;
   var syncTask = document.getElementById('mtSyncTask').checked;
 
+  // Collect assignments from current form state
+  var assignments = [];
+  Object.keys(tnCurrentAssignments).forEach(function(person){
+    var tasks = tnCurrentAssignments[person];
+    if(tasks && tasks.length){
+      assignments.push({person: person, tasks: tasks.slice()});
+    }
+  });
+
   if(!tnData) loadTnData();
   if(!tnData.meetings) tnData.meetings = [];
 
   // Check if editing existing meeting
   var editId = document.getElementById('mtTitle').getAttribute('data-edit-id');
-  var meeting, linkedTaskId;
+  var meeting;
 
   if(editId){
     // Update existing meeting
@@ -10402,69 +10518,85 @@ function saveTnMeeting(){
       meeting.date = date;
       meeting.systems = systems;
       meeting.attendees = attendees;
-            meeting.minutes = minutes;
-      linkedTaskId = meeting.linkedTaskId;
-      // Update linked task if exists
-      if(syncTask && linkedTaskId && tnData.refTasks){
-        for(var j=0;j<tnData.refTasks.length;j++){
-          if(tnData.refTasks[j].id===linkedTaskId){
-            tnData.refTasks[j].name = title;
-            tnData.refTasks[j].executors = attendees.slice();
-            tnData.refTasks[j].sys = systems[0];
-            tnData.refTasks[j].weeks = weekToWeeksArray(week);
-            break;
-          }
-        }
+      meeting.minutes = minutes;
+
+      // Clean up ALL old linked tasks
+      var oldTaskIds = meeting.linkedTaskIds ? meeting.linkedTaskIds.slice() : [];
+      if(meeting.linkedTaskId && oldTaskIds.indexOf(meeting.linkedTaskId) === -1){
+        oldTaskIds.push(meeting.linkedTaskId);
       }
+      oldTaskIds.forEach(function(oldId){
+        if(tnData.refTasks){
+          tnData.refTasks = tnData.refTasks.filter(function(r){ return r.id !== oldId; });
+        }
+      });
+
+      // Create new linked tasks (one per person with assignments)
+      var linkedTaskIds = [];
+      if(syncTask && assignments.length){
+        var sn = {yyda:'用印档案公司管理系统',rssw:'人事事务自动化系统',cwzw:'财务账务自动化系统',itpm:'IT项目管理系统'};
+        var sc = {yyda:'#7B8FC0',rssw:'#9A7D3E',cwzw:'#5A7868',itpm:'#8B6BAE'};
+        var sb = {yyda:'#F4F6FB',rssw:'#FDF8F2',cwzw:'#F2F6F4',itpm:'#F6F2FB'};
+        var taskSys = systems[0];
+        assignments.forEach(function(assign, i){
+          var taskId = 'mt_'+Date.now()+'_'+i;
+          var taskName = title + ' - ' + assign.person + ': ' + assign.tasks.join('; ');
+          tnData.refTasks.push({
+            id: taskId, sys: taskSys,
+            sysName: sn[taskSys]||'', sysColor: sc[taskSys]||'#8B6BAE', sysBg: sb[taskSys]||'#F6F2FB',
+            name: taskName, taskType: 'meeting', taskCategory: 'review',
+            executors: [assign.person],
+            approver: assign.person || attendees[0] || currentUser || '',
+            refStatus: 'active', priority: 'P2',
+            weeks: weekToWeeksArray(week), attachments: 0, _source: 'ref'
+          });
+          linkedTaskIds.push(taskId);
+        });
+      }
+
+      meeting.linkedTaskIds = linkedTaskIds;
+      meeting.linkedTaskId = linkedTaskIds[0] || '';
+      meeting.assignments = assignments;
     }
   } else {
     // Create new meeting
     var meetingId = 'm'+Date.now();
-    linkedTaskId = '';
+    var linkedTaskIds = [];
 
-    if(syncTask){
-      // Auto-create linked task in refTasks
-      linkedTaskId = 'mt_'+Date.now();
+    if(syncTask && assignments.length){
       if(!tnData.refTasks) tnData.refTasks = [];
-      var sysNames = {yyda:'用印档案公司管理系统',rssw:'人事事务自动化系统',cwzw:'财务账务自动化系统',itpm:'IT项目管理系统'};
-      var sysColors = {yyda:'#7B8FC0',rssw:'#9A7D3E',cwzw:'#5A7868',itpm:'#8B6BAE'};
-      var sysBgs = {yyda:'#F4F6FB',rssw:'#FDF8F2',cwzw:'#F2F6F4',itpm:'#F6F2FB'};
+      var sn = {yyda:'用印档案公司管理系统',rssw:'人事事务自动化系统',cwzw:'财务账务自动化系统',itpm:'IT项目管理系统'};
+      var sc = {yyda:'#7B8FC0',rssw:'#9A7D3E',cwzw:'#5A7868',itpm:'#8B6BAE'};
+      var sb = {yyda:'#F4F6FB',rssw:'#FDF8F2',cwzw:'#F2F6F4',itpm:'#F6F2FB'};
       var taskSys = systems[0];
-      tnData.refTasks.push({
-        id: linkedTaskId,
-        sys: taskSys,
-        sysName: sysNames[taskSys]||'',
-        sysColor: sysColors[taskSys]||'#8B6BAE',
-        sysBg: sysBgs[taskSys]||'#F6F2FB',
-        name: title,
-        taskType: 'meeting',
-        taskCategory: 'review',
-        executors: attendees.slice(),
-        approver: attendees[0] || currentUser || '',
-        refStatus: 'active',
-        priority: 'P2',
-        weeks: weekToWeeksArray(week),
-        attachments: 0,
-        _source: 'ref'
+      assignments.forEach(function(assign, i){
+        var taskId = 'mt_'+Date.now()+'_'+i;
+        var taskName = title + ' - ' + assign.person + ': ' + assign.tasks.join('; ');
+        tnData.refTasks.push({
+          id: taskId, sys: taskSys,
+          sysName: sn[taskSys]||'', sysColor: sc[taskSys]||'#8B6BAE', sysBg: sb[taskSys]||'#F6F2FB',
+          name: taskName, taskType: 'meeting', taskCategory: 'review',
+          executors: [assign.person],
+          approver: assign.person || attendees[0] || currentUser || '',
+          refStatus: 'active', priority: 'P2',
+          weeks: weekToWeeksArray(week), attachments: 0, _source: 'ref'
+        });
+        linkedTaskIds.push(taskId);
       });
     }
 
     meeting = {
-      id: meetingId,
-      title: title,
-      week: week,
-      date: date,
-      systems: systems.slice(),
-      attendees: attendees.slice(),
-      minutes: minutes,
-      linkedTaskId: linkedTaskId,
-      createdAt: new Date().toISOString(),
-      createdBy: currentUser || ''
+      id: meetingId, title: title, week: week, date: date,
+      systems: systems.slice(), attendees: attendees.slice(), minutes: minutes,
+      linkedTaskIds: linkedTaskIds, linkedTaskId: linkedTaskIds[0] || '',
+      assignments: assignments,
+      createdAt: new Date().toISOString(), createdBy: currentUser || ''
     };
     tnData.meetings.push(meeting);
   }
 
   saveTnData();
+  tnCurrentAssignments = {};
   clearTnMeetingForm();
   renderTnMeetingList();
   renderTraineeSummary();
@@ -10489,6 +10621,9 @@ function clearTnMeetingForm(){
   // Clear attendee selections
   var chips = document.querySelectorAll('#mtAttendees .meeting-attendee-chip');
   chips.forEach(function(c){ c.classList.remove('selected'); });
+  // Reset assignments
+  tnCurrentAssignments = {};
+  renderTnAssignments();
   // Reset week to current
   var now = new Date();
   var startDate = new Date(2026,5,1);
@@ -10513,9 +10648,17 @@ function loadTnMeeting(id){
   initTnSystems();
   setTnSelectedSystems(meeting.systems || [meeting.system] || []);
   document.getElementById('mtMinutes').value = meeting.minutes || '';
-  document.getElementById('mtSyncTask').checked = !!meeting.linkedTaskId;
+  document.getElementById('mtSyncTask').checked = !!(meeting.linkedTaskIds && meeting.linkedTaskIds.length) || !!meeting.linkedTaskId;
   initTnAttendees();
   setTnSelectedAttendees(meeting.attendees || []);
+  // Restore assignments
+  tnCurrentAssignments = {};
+  if(meeting.assignments && meeting.assignments.length){
+    meeting.assignments.forEach(function(a){
+      tnCurrentAssignments[a.person] = (a.tasks||[]).slice();
+    });
+  }
+  renderTnAssignments();
   // Switch to meeting section
   switchReportSection('meeting');
   document.getElementById('reportMeetingSection').scrollIntoView({behavior:'smooth'});
@@ -10529,8 +10672,15 @@ function deleteTnMeeting(id){
     if(tnData.meetings[i].id===id){ meeting = tnData.meetings[i]; break; }
   }
   if(!meeting) return;
-  // Remove linked task
-  if(meeting.linkedTaskId && tnData.refTasks){
+  // Remove all linked tasks (support both old and new format)
+  if(meeting.linkedTaskIds && meeting.linkedTaskIds.length){
+    meeting.linkedTaskIds.forEach(function(taskId){
+      if(tnData.refTasks){
+        tnData.refTasks = tnData.refTasks.filter(function(r){ return r.id !== taskId; });
+      }
+    });
+  } else if(meeting.linkedTaskId && tnData.refTasks){
+    // Backward compat: single linkedTaskId from older meetings
     tnData.refTasks = tnData.refTasks.filter(function(r){ return r.id !== meeting.linkedTaskId; });
   }
   // Remove meeting
@@ -10566,10 +10716,16 @@ function renderTnMeetingList(){
     var sysDisplay = (m.systems||[]).length ? m.systems.map(function(s){return sysNames[s]||s;}).join('、') : (sysNames[m.system]||m.system||'');
 	    html += '<div class="mt-meta">'+(m.date||'')+' · '+sysDisplay+' · '+attendeeStr+'</div>';
     html += '<div class="mt-meta" style="margin-top:2px">'+preview+'</div>';
+    // Show assignment summary if present
+    if(m.assignments && m.assignments.length){
+      var assignSummary = m.assignments.map(function(a){ return a.person + '(' + a.tasks.length + '项)'; }).join('，');
+      html += '<div class="mt-meta" style="margin-top:2px">任务分配: ' + assignSummary + '</div>';
+    }
     html += '<div class="mt-actions">';
     html += '<button onclick="event.stopPropagation();loadTnMeeting(\''+m.id+'\')">编辑</button>';
     html += '<button class="danger" onclick="event.stopPropagation();deleteTnMeeting(\''+m.id+'\')">删除</button>';
-    html += m.linkedTaskId ? '<span style="font-size:8px;color:var(--success);margin-left:auto">已关联任务</span>' : '';
+    var linkCount = (m.linkedTaskIds && m.linkedTaskIds.length) || (m.linkedTaskId ? 1 : 0);
+    html += linkCount ? '<span style="font-size:8px;color:var(--success);margin-left:auto">已关联'+linkCount+'个任务</span>' : '';
     html += '</div></div>';
   });
   container.innerHTML = html;
