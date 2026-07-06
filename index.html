@@ -5743,18 +5743,18 @@ function renderAttendView(skipAutoSync) {
       if (dM === 2) dim = 28; else if ([4,6,9,11].indexOf(dM) >= 0) dim = 30;
       if (dD > dim) { dD = 1; dM++; if (dM > 12) { dM = 1; dY++; } }
     }
+    // 只统计异常状态（请假/外勤/旷工），跳过在岗和不在钉钉数据
+    var FOCUS = ['请假','外勤','旷工'];
     var monthCounts = {};
     var monthSubCounts = {};
-    var monthPersonDays = 0;
-    var personDays = {};    // {name: {在岗:N, 请假:N, ...}}
-    var personDetails = {}; // {name: [{date, main, sub}]} — for dot matrix
+    var personDays = {};    // {name: {请假:N, 外勤:N, 旷工:N}}
+    var personDetails = {}; // {name: [{date, main, sub}]}
     var mTarget = filtered || empList.filter(function(e){return e.bu!=='董事会'});
     monthDates.forEach(function(md) {
       mTarget.forEach(function(e) {
         var obj = ensureObj((attData[md]||{})[e.id]);
         var main = obj ? obj.m : null;
-        if (!main) return;
-        monthPersonDays++;
+        if (!main || main === '在岗' || main === '不在钉钉数据') return;
         monthCounts[main] = (monthCounts[main] || 0) + 1;
         monthSubCounts[obj.s] = (monthSubCounts[obj.s] || 0) + 1;
         if (!personDays[e.name]) { personDays[e.name] = {}; personDetails[e.name] = []; }
@@ -5762,70 +5762,71 @@ function renderAttendView(skipAutoSync) {
         personDetails[e.name].push({d:md, m:main, s:obj.s});
       });
     });
-    var activePersonCount = Object.keys(personDays).length;
-    var totalDays = monthDates.length;
-    // 总人次（理论最大）= 人数 × 天数
-    var maxPersonDays = activePersonCount * totalDays;
+    var affectedPersonCount = Object.keys(personDays).length;
+    var totalAbnormalDays = (monthCounts['请假']||0) + (monthCounts['外勤']||0) + (monthCounts['旷工']||0);
 
-    // link each ATTEND_MAIN to its CSS class
-    var mainCSS = { '在岗':'on', '请假':'leave', '外勤':'out', '旷工':'other' };
+    var mainCSS = { '请假':'leave', '外勤':'out', '旷工':'other' };
 
     // --- collapsed header ---
     var collapseId = 'monthSum' + date;
     html += '<div class="month-summary" id="'+collapseId+'">';
     html += '<div class="month-summary-header" onclick="var el=document.getElementById(\''+collapseId+'\');el.classList.toggle(\'open\')">';
     html += '<span class="ms-chevron">▶</span>';
-    html += '<span class="ms-title">7月考勤</span>';
+    html += '<span class="ms-title">7月异常汇总</span>';
     html += '<span class="ms-date-range">7.1~'+date.slice(5)+'</span>';
-    html += '<span class="ms-inline-stats">';
-    ATTEND_MAIN.forEach(function(s){
-      if (monthCounts[s] > 0) {
-        var cls = mainCSS[s] || '';
-        html += '<span class="ms-inline-stat '+cls+'">'+s+' <strong>'+monthCounts[s]+'</strong>天</span>';
-      }
-    });
-    html += '</span>';
-    html += '<span class="ms-badge" style="background:var(--bg-surface);color:var(--text-dim);font-weight:400">'+activePersonCount+'人</span>';
+    if (totalAbnormalDays === 0) {
+      html += '<span class="ms-inline-stat" style="color:var(--text-muted)">暂无异常</span>';
+    } else {
+      html += '<span class="ms-inline-stats">';
+      FOCUS.forEach(function(s){
+        if (monthCounts[s] > 0) {
+          html += '<span class="ms-inline-stat '+mainCSS[s]+'">'+s+' <strong>'+monthCounts[s]+'</strong>天</span>';
+        }
+      });
+      html += '</span>';
+      html += '<span class="ms-badge" style="background:var(--bg-surface);color:var(--text-dim);font-weight:400">'+affectedPersonCount+'人</span>';
+    }
     html += '</div>';
 
     // --- expanded body ---
     html += '<div class="month-summary-body">';
-    // Bar chart
-    var maxCount = Math.max(1, monthCounts['在岗']||0, monthCounts['请假']||0, monthCounts['外勤']||0, monthCounts['旷工']||0);
-    ATTEND_MAIN.forEach(function(s){
-      var cnt = monthCounts[s] || 0;
-      if (cnt === 0) return;
-      var cls = mainCSS[s] || '';
-      var pct = Math.round(cnt / maxPersonDays * 100);
-      var barPct = Math.round(cnt / maxCount * 100);
-      html += '<div class="ms-bar-row">';
-      html += '<span class="ms-bar-label">'+s+'</span>';
-      html += '<span class="ms-bar-track"><span class="ms-bar-fill '+cls+'" style="width:'+barPct+'%"></span></span>';
-      html += '<span class="ms-bar-count">'+cnt+'天 <span style="color:var(--text-muted)">'+pct+'%</span></span>';
-      html += '</div>';
-    });
-    // Per-person detail for non-在岗 people
-    var abnormalPeople = [];
-    Object.keys(personDays).forEach(function(name){
-      var pd = personDays[name];
-      var total = (pd['请假']||0) + (pd['外勤']||0) + (pd['旷工']||0);
-      if (total > 0) abnormalPeople.push({name:name, pd:pd, total:total, details: personDetails[name]});
-    });
-    if (abnormalPeople.length > 0) {
+    if (totalAbnormalDays > 0) {
+      // Bar chart
+      var maxCount = Math.max(monthCounts['请假']||0, monthCounts['外勤']||0, monthCounts['旷工']||0);
+      var totalDays = monthDates.length;
+      var totalPerson = mTarget.length;
+      var maxPersonDays = totalDays * totalPerson;
+      FOCUS.forEach(function(s){
+        var cnt = monthCounts[s] || 0;
+        if (cnt === 0) return;
+        var pct = Math.round(cnt / maxPersonDays * 100);
+        var barPct = Math.round(cnt / maxCount * 100);
+        html += '<div class="ms-bar-row">';
+        html += '<span class="ms-bar-label" style="color:var(--text-dim)">'+s+'</span>';
+        html += '<span class="ms-bar-track"><span class="ms-bar-fill '+mainCSS[s]+'" style="width:'+barPct+'%"></span></span>';
+        html += '<span class="ms-bar-count">'+cnt+'天 <span style="color:var(--text-muted)">'+pct+'%</span></span>';
+        html += '</div>';
+      });
+      // Per-person detail
+      var abnormalPeople = [];
+      Object.keys(personDays).forEach(function(name){
+        var pd = personDays[name];
+        var total = (pd['请假']||0) + (pd['外勤']||0) + (pd['旷工']||0);
+        abnormalPeople.push({name:name, pd:pd, total:total, details: personDetails[name]});
+      });
       abnormalPeople.sort(function(a,b){ return b.total - a.total; });
       html += '<div class="ms-detail-section">';
-      html += '<div class="ms-detail-title">异常明细</div>';
+      html += '<div class="ms-detail-title">人员明细</div>';
       abnormalPeople.forEach(function(p){
         html += '<div class="ms-person-row">';
         html += '<span class="ms-person-name" title="'+esc(p.name)+'">'+esc(p.name)+'</span>';
-        // Dot matrix: one dot per day in month
         html += '<span class="ms-person-dots">';
         var detMap = {};
         (p.details||[]).forEach(function(dd){ detMap[dd.d] = dd; });
         monthDates.forEach(function(md){
           var det = detMap[md];
           var dotCls = det ? (mainCSS[det.m]||'') : 'empty';
-          var title = md + (det ? ' '+det.m+'/'+det.s : ' 无数据');
+          var title = md + (det ? ' '+det.m+'/'+det.s : ' 在岗');
           if (dotCls === 'empty') {
             html += '<span class="ms-person-dot" style="background:transparent" title="'+title+'"></span>';
           } else {
@@ -5833,10 +5834,9 @@ function renderAttendView(skipAutoSync) {
           }
         });
         html += '</span>';
-        // Text summary: e.g. "请假 10天"
         var summaries = [];
-        ATTEND_MAIN.forEach(function(s){
-          if (p.pd[s] > 0 && s !== '在岗') summaries.push(s+' '+p.pd[s]+'天');
+        FOCUS.forEach(function(s){
+          if (p.pd[s] > 0) summaries.push(s+' '+p.pd[s]+'天');
         });
         html += '<span class="ms-person-summary">'+summaries.join(' · ')+'</span>';
         html += '</div>';
