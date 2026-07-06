@@ -10430,6 +10430,7 @@ function addTnCustomAttendee(){
   var name = input.value.trim();
   if(!name) return;
   addTnCustomAttendeeChip(name, true);
+  renderTnAssignments();
   input.value = '';
 }
 
