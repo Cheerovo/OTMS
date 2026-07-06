@@ -654,6 +654,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
   .form-row { grid-template-columns:1fr; }
   .tl-date { min-width:80px; font-size:8px; }
   .gantt-name { width:160px; } .gantt-name-col { width:160px; }
+  .tn-gantt-name { width:160px; } .tn-gw-label-col { width:160px; } .tn-gantt-inner { min-width:720px; }
   .login-box { width:90%; padding:28px 20px; }
 }
 
@@ -803,8 +804,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 @media (max-width: 1400px) { .attend-grid { grid-template-columns: repeat(6, 1fr); } }
 @media (max-width: 1000px) { .attend-grid { grid-template-columns: repeat(4, 1fr); } }
 @media (max-width: 640px) { .attend-grid { grid-template-columns: repeat(3, 1fr); } }
-.attend-card { background: var(--card); border-radius: 6px; padding: 8px 10px; transition: var(--transition); display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-xs); }
-.attend-card:hover { box-shadow: var(--shadow-sm); }
+.attend-card { background: var(--card); border-radius: 8px; padding: 8px 10px; transition: var(--transition); display: flex; align-items: center; gap: 8px; border: 1px dashed var(--border-subtle); }
+.attend-card:hover { border-color: var(--border); box-shadow: var(--shadow-xs); }
 .attend-card .card-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .attend-card .card-dot.on { background: #EC4899; } .attend-card .card-dot.leave { background: #F59E0B; }
 .attend-card .card-dot.out { background: #8B5CF6; }
@@ -1674,7 +1675,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
         </div>
         <div class="tn-view-mode">
           <button class="active" onclick="tnViewMode='cards';document.querySelectorAll('.tn-view-mode button').forEach((b,i)=>b.classList.toggle('active',i===0));document.getElementById('tnGanttDims').style.display='none';renderTraineeTasks()">卡片</button>
-          <button onclick="tnViewMode='gantt';document.querySelectorAll('.tn-view-mode button').forEach((b,i)=>b.classList.toggle('active',i===1));document.getElementById('tnGanttDims').style.display='';renderTraineeTasks()">甘特图</button>
+          <button onclick="tnViewMode='gantt';document.querySelectorAll('.tn-view-mode button').forEach((b,i)=>b.classList.toggle('active',i===1));document.getElementById('tnGanttDims').style.display='flex';renderTraineeTasks()">甘特图</button>
         </div>
         <div id="tnGanttDims" style="display:none;gap:4px;align-items:center;margin-left:8px">
           <span style="font-size:8px;color:var(--text-muted);flex-shrink:0;margin-right:2px">分组:</span>
