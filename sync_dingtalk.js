@@ -88,6 +88,75 @@ function dedupUsers(users) {
   });
 }
 
+// 获取OA请假审批记录，覆盖考勤数据
+async function getLeaveApprovals(token, dateFrom, dateTo) {
+  const leaveCodes = [
+    'PROC-EF6Y0XWVO2-TGL2OSBZS8OLW2JJ9ZRW2-3K6KC1DI-64',  // 请假申请（除病假）
+    'PROC-2E9C6156-7F30-423C-8372-8801D16A3BBF',           // 病假申请
+    'PROC-379EF1B9-1E62-4E45-8B2B-911FC69F61B1',            // 产假申请
+  ];
+
+  const startTime = new Date(dateFrom + 'T00:00:00+08:00').getTime();
+  const endTime = new Date(dateTo + 'T23:59:59+08:00').getTime();
+
+  // leaveType tag → timeResult mapping
+  const leaveTypeMap = {
+    '年假': 'Leave', '病假': 'Leave', '婚假': 'Leave', '产假': 'Leave',
+    '陪产假': 'Leave', '丧假': 'Leave', '工伤假': 'Leave',
+    '事假': 'LeaveUnpaid',
+    '调休': 'LieuLeave'
+  };
+
+  const leaveMap = {};  // {name: {date: 'Leave'}}
+
+  for (const code of leaveCodes) {
+    const idsRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/processinstance/listids', { access_token: token }, {
+      process_code: code,
+      start_time: startTime,
+      end_time: endTime,
+      size: 20
+    });
+    if (idsRes.errcode !== 0) continue;
+    const idList = (idsRes.result?.list || []);
+
+    for (const id of idList) {
+      const detailRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/processinstance/get', { access_token: token }, {
+        process_instance_id: id
+      });
+      if (detailRes.errcode !== 0) continue;
+      const inst = detailRes.process_instance;
+      if (!inst || inst.status !== 'COMPLETED') continue;  // 只取已通过的
+
+      const userId = inst.originator_userid;
+      const holidayField = (inst.form_component_values || []).find(f => f.component_type === 'DDHolidayField');
+      if (!holidayField || !holidayField.ext_value) continue;
+
+      try {
+        const ext = JSON.parse(holidayField.ext_value);
+        // 获取请假类型
+        let leaveType = 'Leave';
+        if (ext.extension) {
+          const extTag = JSON.parse(ext.extension);
+          leaveType = leaveTypeMap[extTag.tag] || 'Leave';
+        }
+        const detailList = ext.detailList || [];
+        for (const d of detailList) {
+          const wd = d.workDate;
+          const workDate = new Date(wd > 10000000000 ? wd : wd * 1000).toISOString().slice(0, 10);
+          if (workDate >= dateFrom && workDate <= dateTo) {
+            if (!leaveMap[userId]) leaveMap[userId] = {};
+            leaveMap[userId][workDate] = leaveType;
+          }
+        }
+      } catch(_) { /* skip parse errors */ }
+      await sleep(200);
+    }
+    await sleep(300);
+  }
+
+  return leaveMap;
+}
+
 // 获取考勤记录
 async function getAttendance(token, userIds, dateFrom, dateTo) {
   const results = [];
@@ -152,8 +221,8 @@ async function main() {
   const attendance = await getAttendance(token, userIds, dates[0], dates[dates.length - 1]);
   console.log('  ✅ 共 ' + attendance.length + ' 条记录');
 
-  // 整理
-  console.log('[5] 整理输出...');
+  // 整理考勤状态
+  console.log('[5] 整理考勤数据...');
   const nameMap = {};
   allUsers.forEach(u => { nameMap[u.userid] = u; });
 
@@ -179,6 +248,23 @@ async function main() {
     if (!statusMap[name]) statusMap[name] = {};
     statusMap[name][date] = r.timeResult || 'Normal';
   });
+  console.log('  ✅ 考勤记录覆盖 ' + Object.keys(statusMap).length + ' 人');
+
+  // 用OA请假审批覆盖考勤状态
+  console.log('[6] 获取OA请假审批（' + dates[0] + ' ~ ' + dates[dates.length-1] + '）...');
+  const leaveMap = await getLeaveApprovals(token, dates[0], dates[dates.length - 1]);
+  let leaveOverlayCount = 0;
+  for (const [userId, dateMap] of Object.entries(leaveMap)) {
+    const name = nameMap[userId]?.name;
+    if (!name) continue;
+    if (!statusMap[name]) statusMap[name] = {};
+    for (const [date, st] of Object.entries(dateMap)) {
+      statusMap[name][date] = st;
+      leaveOverlayCount++;
+    }
+  }
+  const leavePersonCount = Object.keys(leaveMap).filter(uid => nameMap[uid]).length;
+  console.log('  ✅ 请假覆盖 ' + leaveOverlayCount + ' 个日期（' + leavePersonCount + ' 人）');
 
 
   const todayStr = today.toISOString().slice(0, 10);
@@ -196,11 +282,11 @@ async function main() {
   fs.writeFileSync(DATA_FILE, JSON.stringify(output, null, 2), 'utf8');
   console.log('');
   console.log('🎉 同步完成！输出: ' + DATA_FILE);
-  console.log('  部门: ' + allDeptIds.length + ' 个, 员工: ' + output.users.length + ' 人, 考勤: ' + attendance.length + ' 条');
+  console.log('  部门: ' + allDeptIds.length + ' 个, 员工: ' + output.users.length + ' 人, 考勤: ' + attendance.length + ' 条, 请假覆盖: ' + leaveOverlayCount + ' 天');
 
   console.log('');
   console.log('=== 今日在岗状态 ===');
-  const labels = { Normal: '✅在岗', Early: '⚠️早退', Late: '⚠️迟到', Absenteeism: '❌旷工', NotSigned: '❓缺卡', Leave: '📝请假', BusinessTravel: '✈️出差', Out: '🚶外出' };
+  const labels = { Normal: '✅在岗', Early: '⚠️早退', Late: '⚠️迟到', Absenteeism: '❌旷工', NotSigned: '❓缺卡', Leave: '📝请假(带薪)', LeaveUnpaid: '📝请假(无薪)', LieuLeave: '🔄调休', BusinessTravel: '✈️出差', Out: '🚶外出' };
   output.users.forEach(u => {
     const l = labels[u.todayStatus] || '—';
     console.log('  ' + u.name + ': ' + l);

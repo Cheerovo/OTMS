@@ -5743,7 +5743,7 @@ async function syncFromDingTalkSilent(date, attData, empList) {
     var dd = await resp.json();
     var ddMap = {};
     (dd.users || []).forEach(function(u) { ddMap[u.name] = u; });
-    var dtToLocal = { Normal: '在岗', Early: '迟到', Late: '迟到', Absenteeism: '其他', NotSigned: '其他', Leave: '请假(带薪)', BusinessTravel: '出差', Out: '外出公干' };
+    var dtToLocal = { Normal: '在岗', Early: '迟到', Late: '迟到', Absenteeism: '其他', NotSigned: '其他', Leave: '请假(带薪)', LeaveUnpaid: '请假(无薪)', LieuLeave: '调休', BusinessTravel: '出差', Out: '外出公干' };
 
     empList.forEach(function(e) {
       var ddUser = ddMap[e.name];
@@ -5773,7 +5773,7 @@ async function syncFromDingTalk() {
     var dtToLocal = {
       Normal: '在岗', Early: '迟到', Late: '迟到',
       Absenteeism: '其他', NotSigned: '其他',
-      Leave: '请假(带薪)', BusinessTravel: '出差', Out: '外出公干'
+      Leave: '请假(带薪)', LeaveUnpaid: '请假(无薪)', LieuLeave: '调休', BusinessTravel: '出差', Out: '外出公干'
     };
 
     const empList = loadEmployees();
