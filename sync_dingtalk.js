@@ -160,10 +160,26 @@ async function main() {
   const statusMap = {};
   attendance.forEach(r => {
     const name = r.userName || (nameMap[r.userId]?.name) || r.userId;
-    const date = String(r.workDate || '').slice(0, 10);
+    var rawDate = r.workDate || r.userCheckTime;
+    var date;
+    if (typeof rawDate === 'number') {
+      // 10-digit = seconds, 13-digit = milliseconds. 阈值: > 100亿=毫秒
+      if (rawDate > 10000000000) {
+        date = new Date(rawDate).toISOString().slice(0, 10);
+      } else {
+        date = new Date(rawDate * 1000).toISOString().slice(0, 10);
+      }
+    } else if (/^\d{10}$/.test(String(rawDate))) {
+      date = new Date(Number(rawDate) * 1000).toISOString().slice(0, 10);
+    } else if (/^\d{13}$/.test(String(rawDate))) {
+      date = new Date(Number(rawDate)).toISOString().slice(0, 10);
+    } else {
+      date = String(rawDate || '').slice(0, 10);
+    }
     if (!statusMap[name]) statusMap[name] = {};
     statusMap[name][date] = r.timeResult || 'Normal';
   });
+
 
   const todayStr = today.toISOString().slice(0, 10);
   const output = {
