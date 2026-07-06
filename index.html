@@ -5603,13 +5603,18 @@ function loadAttendance() {
 function saveAttendance(data) { localStorage.setItem('okr_attendance',JSON.stringify(data)); }
 
 function renderAttendView() {
-  const div = document.getElementById('orgAttendView');
-  const today = getTodayStr();
-  const dateInput = document.getElementById('attendDateInput');
-  const date = dateInput ? dateInput.value : today;
-  const empList = loadEmployees().filter(function(e) { return e.bu !== '董事会'; });
-  const attData = loadAttendance();
+  var div = document.getElementById('orgAttendView');
+  var today = getTodayStr();
+  var dateInput = document.getElementById('attendDateInput');
+  var date = dateInput ? dateInput.value : today;
+  var empList = loadEmployees().filter(function(e) { return e.bu !== '董事会'; });
+  var attData = loadAttendance();
   if (!attData[date]) attData[date] = {};
+
+  // Auto-sync from dingtalk_data.json if no data for today yet
+  if (date === today && Object.keys(attData[date]).length === 0) {
+    syncFromDingTalkSilent(date, attData, empList);
+  }
 
   const buSet = [...new Set(empList.map(e => e.bu).filter(Boolean))];
   buSet.sort((a,b) => { let oA=BU_ORDER.indexOf(a), oB=BU_ORDER.indexOf(b); if(oA===-1)oA=99; if(oB===-1)oB=99; return oA-oB; });
@@ -5734,41 +5739,74 @@ function batchSetStatus() {
 }
 
 // ===== DingTalk Sync =====
-async function syncFromDingTalk() {
-  const date = document.getElementById('attendDateInput') ? document.getElementById('attendDateInput').value : getTodayStr();
-  const empList = loadEmployees();
-  const usersWithDingId = empList.filter(e => e.dingId);
-  if (!usersWithDingId.length) {
-    alert('尚未配置员工的钉钉 UserID。\n\n请在员工花名册中编辑员工，填写"钉钉 UserID"字段。\n\n提示：启动后端后访问 /api/dingtalk/users 可获取钉钉用户列表。');
-    return;
-  }
+async function syncFromDingTalkSilent(date, attData, empList) {
   try {
-    const btn = document.querySelector('button[onclick="syncFromDingTalk()"]');
-    if (btn) { btn.textContent = '⏳ 同步中...'; btn.disabled = true; }
-    const resp = await fetch('/api/attendance/batch', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date, users: usersWithDingId.map(e => ({ id: e.id, dingId: e.dingId })) }),
-    });
-    if (!resp.ok) { const err = await resp.json(); throw new Error(err.error || '请求失败'); }
-    const data = await resp.json();
-    const statuses = data.statuses || {};
-    const attData = loadAttendance();
-    if (!attData[date]) attData[date] = {};
-    let synced = 0;
-    Object.entries(statuses).forEach(([empId, info]) => {
-      attData[date][empId] = info.status;
-      if (info.checkIn) attData[date][empId + '_note'] = '钉钉打卡: ' + info.checkIn;
-      synced++;
+    var resp = await fetch('dingtalk_data.json?t=' + Date.now());
+    if (!resp.ok) return;
+    var dd = await resp.json();
+    var ddMap = {};
+    (dd.users || []).forEach(function(u) { ddMap[u.name] = u; });
+    var dtToLocal = { Normal: '在岗', Early: '迟到', Late: '迟到', Absenteeism: '其他', NotSigned: '其他', Leave: '请假(带薪)', BusinessTravel: '出差', Out: '外出公干' };
+
+    empList.forEach(function(e) {
+      var ddUser = ddMap[e.name];
+      if (!ddUser) return;
+      var st = (ddUser.statusByDate && ddUser.statusByDate[date]) ? ddUser.statusByDate[date] : (ddUser.todayStatus || 'Normal');
+      attData[date][e.id] = dtToLocal[st] || '在岗';
     });
     saveAttendance(attData);
     renderAttendView();
-    if (btn) { btn.textContent = '🔄 同步钉钉'; btn.disabled = false; }
-    const remaining = usersWithDingId.length - synced;
-    alert('同步完成！\n已更新 ' + synced + ' 人' + (remaining > 0 ? '\n' + remaining + ' 人暂无考勤记录（可能未打卡）' : ''));
-  } catch (err) {
+  } catch(_) {}
+}
+
+async function syncFromDingTalk() {
+  const date = document.getElementById('attendDateInput') ? document.getElementById('attendDateInput').value : getTodayStr();
+  try {
     const btn = document.querySelector('button[onclick="syncFromDingTalk()"]');
+    if (btn) { btn.textContent = '⏳ 同步中...'; btn.disabled = true; }
+
+    // Load dingtalk data
+    const resp = await fetch('dingtalk_data.json?t=' + Date.now());
+    if (!resp.ok) throw new Error('dingtalk_data.json 不存在，请先运行 node sync_dingtalk.js');
+    const dd = await resp.json();
+    const ddMap = {};
+    (dd.users || []).forEach(function(u) { ddMap[u.name] = u; });
+
+    // DingTalk status → local status mapping
+    var dtToLocal = {
+      Normal: '在岗', Early: '迟到', Late: '迟到',
+      Absenteeism: '其他', NotSigned: '其他',
+      Leave: '请假(带薪)', BusinessTravel: '出差', Out: '外出公干'
+    };
+
+    const empList = loadEmployees();
+    const attData = loadAttendance();
+    if (!attData[date]) attData[date] = {};
+    var synced = 0;
+    var skipped = 0;
+
+    empList.forEach(function(e) {
+      var ddUser = ddMap[e.name];
+      if (!ddUser) { skipped++; return; }
+      var st = ddUser.todayStatus || (ddUser.statusByDate && ddUser.statusByDate[date]) || 'Normal';
+      var localSt = dtToLocal[st] || '在岗';
+      attData[date][e.id] = localSt;
+      // Also check statusByDate for the selected date
+      if (ddUser.statusByDate && ddUser.statusByDate[date]) {
+        var dateSt = ddUser.statusByDate[date];
+        attData[date][e.id] = dtToLocal[dateSt] || '在岗';
+      }
+      synced++;
+    });
+
+    saveAttendance(attData);
+    renderAttendView();
     if (btn) { btn.textContent = '🔄 同步钉钉'; btn.disabled = false; }
-    alert('同步失败：' + err.message + '\n\n请确认：\n1. 服务已启动（cd otms-server && npm start）\n2. .env 已配置钉钉 AppKey/AppSecret');
+    alert('同步完成！\n已匹配 ' + synced + ' 人' + (skipped > 0 ? '\n' + skipped + ' 人未在钉钉数据中找到' : '') + '\n\n数据来源: dingtalk_data.json (' + (dd.updated || '').slice(0,10) + ')');
+  } catch (err) {
+    var btn = document.querySelector('button[onclick="syncFromDingTalk()"]');
+    if (btn) { btn.textContent = '🔄 同步钉钉'; btn.disabled = false; }
+    alert('同步失败：' + err.message);
   }
 }
 
