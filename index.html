@@ -1738,8 +1738,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
                 <select id="mtSystem"><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option><option value="itpm">IT项目管理系统</option></select>
               </div>
               <div class="tn-report-field" style="margin-bottom:10px">
-                <label>参会人员</label>
+                <label>参会人员 <span style="font-weight:400;color:var(--text-dim)">（点击选择，下方可添加其他人）</span></label>
                 <div class="meeting-attendee-chips" id="mtAttendees"></div>
+                <div style="display:flex;gap:6px;margin-top:6px">
+                  <input id="mtCustomAttendee" placeholder="输入其他参会人员姓名，回车添加…" style="flex:1;padding:6px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:10px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none" onkeydown="if(event.key==='Enter'){event.preventDefault();addTnCustomAttendee();}">
+                  <button class="btn btn-outline btn-sm" onclick="addTnCustomAttendee()" style="font-size:9px;white-space:nowrap">添加</button>
+                </div>
               </div>
               <div class="tn-report-field" style="margin-bottom:10px">
                 <label>会议纪要</label>
@@ -10222,22 +10226,66 @@ function switchReportSection(section){
   else if(section==='report'){ loadTnReport(); renderTnReportHistory(); }
 }
 
+// All available people for meeting attendees (trainees + managers + external)
+var TN_MEETING_PEOPLE = ['Jenny','杜宪','王倩','汪顺','邵吴慧','黄一萧','蔡心宇','芦智蔚','黄欢欢','王妤杨','王力','Bella','陈双杰','陈锦','赵柳文','安子玥','黄燕婷','任梦超','陈圆'];
+
 function initTnAttendees(){
   var container = document.getElementById('mtAttendees');
   if(!container) return;
+  // Collect any custom names from existing chips not in default list
+  var existingCustom = [];
+  var existingChips = container.querySelectorAll('.meeting-attendee-chip.custom');
+  existingChips.forEach(function(c){ existingCustom.push(c.getAttribute('data-name')); });
   var html = '';
-  TN_TRAINEES.forEach(function(name){
+  TN_MEETING_PEOPLE.forEach(function(name){
     html += '<span class="meeting-attendee-chip" onclick="toggleTnAttendee(this)" data-name="'+name+'">'+name+'</span>';
   });
   container.innerHTML = html;
+  // Re-select any previously selected custom chips
+  if(existingCustom.length){
+    existingCustom.forEach(function(n){ addTnCustomAttendeeChip(n, true); });
+  }
 }
 
 function toggleTnAttendee(el){
   el.classList.toggle('selected');
 }
 
+function addTnCustomAttendee(){
+  var input = document.getElementById('mtCustomAttendee');
+  var name = input.value.trim();
+  if(!name) return;
+  addTnCustomAttendeeChip(name, true);
+  input.value = '';
+}
+
+function addTnCustomAttendeeChip(name, selected){
+  var container = document.getElementById('mtAttendees');
+  if(!container) return;
+  // Check if already exists
+  var existing = container.querySelector('.meeting-attendee-chip[data-name="'+name.replace(/"/g,'&quot;')+'"]');
+  if(existing){
+    if(selected) existing.classList.add('selected');
+    return;
+  }
+  var chip = document.createElement('span');
+  chip.className = 'meeting-attendee-chip custom' + (selected ? ' selected' : '');
+  chip.setAttribute('data-name', name);
+  chip.textContent = name;
+  chip.onclick = function(){ toggleTnAttendee(this); };
+  container.appendChild(chip);
+}
+
 function getTnSelectedAttendees(){
   var chips = document.querySelectorAll('#mtAttendees .meeting-attendee-chip.selected');
+  var names = [];
+  chips.forEach(function(c){ names.push(c.getAttribute('data-name')); });
+  return names;
+}
+
+function getAllTnAttendees(){
+  // Returns all attendee names (both predefined and custom)
+  var chips = document.querySelectorAll('#mtAttendees .meeting-attendee-chip');
   var names = [];
   chips.forEach(function(c){ names.push(c.getAttribute('data-name')); });
   return names;
@@ -10248,6 +10296,12 @@ function setTnSelectedAttendees(names){
   chips.forEach(function(c){
     if(names.indexOf(c.getAttribute('data-name'))!==-1) c.classList.add('selected');
     else c.classList.remove('selected');
+  });
+  // Add custom names that aren't in the default list
+  names.forEach(function(n){
+    if(TN_MEETING_PEOPLE.indexOf(n)===-1){
+      addTnCustomAttendeeChip(n, true);
+    }
   });
 }
 
