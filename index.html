@@ -8517,31 +8517,31 @@ function initEvalSystem(){
 function initSampleData(){
   var hasData = false;
   for(var i=0;i<EVAL_TRAINEES.length;i++){
-    var s = getEvalScore(EVAL_TRAINEES[i].id, 'W1');
+    var s = getEvalScore(EVAL_TRAINEES[i].name, 'W1');
     if(s){ hasData = true; break; }
   }
   if(hasData) return;
   var w1Scores = {
-    'chendshuangjie': {taskCompletion:29,workQuality:24,collaboration:20,responseSpeed:15,innovation:10},
-    'chenjin':        {taskCompletion:22,workQuality:19,collaboration:17,responseSpeed:11,innovation:7},
-    'zhaoliuwen':     {taskCompletion:29,workQuality:25,collaboration:19,responseSpeed:15,innovation:10},
-    'anziyue':        {taskCompletion:29,workQuality:25,collaboration:19,responseSpeed:15,innovation:10},
-    'huangyanting':   {taskCompletion:24,workQuality:20,collaboration:18,responseSpeed:12,innovation:7},
-    'renmengchao':    {taskCompletion:30,workQuality:25,collaboration:20,responseSpeed:14,innovation:9.5},
-    'chenyuan':       {taskCompletion:30,workQuality:25,collaboration:20,responseSpeed:14,innovation:9.5}
+    '陈双杰': {taskCompletion:29,workQuality:24,collaboration:20,responseSpeed:15,innovation:10},
+    '陈锦':   {taskCompletion:22,workQuality:19,collaboration:17,responseSpeed:11,innovation:7},
+    '赵柳文': {taskCompletion:29,workQuality:25,collaboration:19,responseSpeed:15,innovation:10},
+    '安子玥': {taskCompletion:29,workQuality:25,collaboration:19,responseSpeed:15,innovation:10},
+    '黄燕婷': {taskCompletion:24,workQuality:20,collaboration:18,responseSpeed:12,innovation:7},
+    '任梦超': {taskCompletion:30,workQuality:25,collaboration:20,responseSpeed:14,innovation:9.5},
+    '陈圆':   {taskCompletion:30,workQuality:25,collaboration:20,responseSpeed:14,innovation:9.5}
   };
   var w1Extras = {
-    'chendshuangjie': [{name:'数据看板搭建',score:'10',desc:'完成管培生数据看板V1.0'}],
-    'renmengchao':    [{name:'架构设计文档',score:'9',desc:'完成三链路架构设计文档'}],
-    'chenyuan':       [{name:'前端页面框架',score:'10',desc:'完成合同档案系统前端框架搭建'}]
+    '陈双杰': [{name:'数据看板搭建',score:'10',desc:'完成管培生数据看板V1.0'}],
+    '任梦超': [{name:'架构设计文档',score:'9',desc:'完成三链路架构设计文档'}],
+    '陈圆':   [{name:'前端页面框架',score:'10',desc:'完成合同档案系统前端框架搭建'}]
   };
   Object.keys(w1Scores).forEach(function(tid){
     setEvalScore(tid, 'W1', w1Scores[tid]);
     if(w1Extras[tid]) setEvalExtras(tid, 'W1', w1Extras[tid]);
   });
   var w2Scores = {
-    'chendshuangjie': {taskCompletion:27,workQuality:23,collaboration:19,responseSpeed:13,innovation:9.5},
-    'chenjin':        {taskCompletion:23,workQuality:19,collaboration:17,responseSpeed:11,innovation:6.5}
+    '陈双杰': {taskCompletion:27,workQuality:23,collaboration:19,responseSpeed:13,innovation:9.5},
+    '陈锦':   {taskCompletion:23,workQuality:19,collaboration:17,responseSpeed:11,innovation:6.5}
   };
   Object.keys(w2Scores).forEach(function(tid){
     setEvalScore(tid, 'W2', w2Scores[tid]);
@@ -8569,7 +8569,7 @@ function renderEvalWeekTabs(){
     var w = EVAL_WEEKS[i];
     var hasData = false;
     for(var j=0;j<EVAL_TRAINEES.length;j++){
-      if(getEvalScore(EVAL_TRAINEES[j].id, w.id)){ hasData = true; break; }
+      if(getEvalScore(EVAL_TRAINEES[j].name, w.id)){ hasData = true; break; }
     }
     html += '<button class="eval-week-tab'+(i===evalCurrentWeek?' active':'')+(hasData?' has-data':'')+'" onclick="evalCurrentWeek='+i+';renderEvalWeekTabs();renderEvalTraineeList();evalSelectedTrainee=null;document.getElementById(\'evalScorePanelContainer\').innerHTML=\'<div class=eval-empty>选择左侧学员查看评分详情</div>\';">'+w.label+'<span style="font-size:7px;display:block">'+w.start+'</span>'+(hasData?'<span class=wk-dot></span>':'')+'</button>';
   }
@@ -8584,21 +8584,21 @@ function renderEvalTraineeList(){
   for(var i=0;i<EVAL_TRAINEES.length;i++){
     var t = EVAL_TRAINEES[i];
     if(search && t.name.indexOf(search)===-1 && t.supervisor.toLowerCase().indexOf(search)===-1 && t.role.indexOf(search)===-1) continue;
-    var s = getEvalScore(t.id, weekId);
+    var s = getEvalScore(t.name, weekId);
     var total = calcTotalScore(s);
-    var extras = getEvalExtras(t.id, weekId);
+    var extras = getEvalExtras(t.name, weekId);
     var extraTotal = calcExtraTotal(extras);
     var prevWeekIdx = evalCurrentWeek - 1;
     var change = null;
     if(prevWeekIdx >= 0){
-      var prevScore = getEvalScore(t.id, EVAL_WEEKS[prevWeekIdx].id);
+      var prevScore = getEvalScore(t.name, EVAL_WEEKS[prevWeekIdx].id);
       var prevTotal = calcTotalScore(prevScore);
       if(prevTotal !== null && total !== null){
         change = Math.round((total - prevTotal) * 10) / 10;
       }
     }
     var initials = t.name.charAt(0);
-    html += '<div class="eval-trainee-card'+(evalSelectedTrainee===t.id?' selected':'')+'" onclick="selectEvalTrainee(\''+t.id+'\')">'+
+    html += '<div class="eval-trainee-card'+(evalSelectedTrainee===t.name?' selected':'')+'" onclick="selectEvalTrainee(\''+t.name+'\')">'+
       '<div class="eval-trainee-avatar" style="background:'+t.avatarBg+'">'+initials+'</div>'+
       '<div class="eval-trainee-info">'+
         '<div class="eval-trainee-name">'+t.name+'</div>'+
@@ -8620,12 +8620,12 @@ function selectEvalTrainee(traineeId){
 
 function renderEvalScorePanel(traineeId){
   var t = null;
-  for(var i=0;i<EVAL_TRAINEES.length;i++){ if(EVAL_TRAINEES[i].id===traineeId){ t=EVAL_TRAINEES[i]; break; } }
+  for(var i=0;i<EVAL_TRAINEES.length;i++){ if(EVAL_TRAINEES[i].name===traineeId){ t=EVAL_TRAINEES[i]; break; } }
   if(!t) return;
   var weekId = EVAL_WEEKS[evalCurrentWeek].id;
   var weekLabel = EVAL_WEEKS[evalCurrentWeek].label + ' (' + EVAL_WEEKS[evalCurrentWeek].start + ' - ' + EVAL_WEEKS[evalCurrentWeek].end + ')';
-  var s = getEvalScore(t.id, weekId) || {};
-  var extras = getEvalExtras(t.id, weekId) || [];
+  var s = getEvalScore(t.name, weekId) || {};
+  var extras = getEvalExtras(t.name, weekId) || [];
   var total = calcTotalScore(s);
   var extraTotal = calcExtraTotal(extras);
   var container = document.getElementById('evalScorePanelContainer');
@@ -8772,7 +8772,7 @@ function renderEvalCalendar(){
   for(var w=0;w<EVAL_WEEKS.length;w++){
     var weekScores = [];
     for(var t=0;t<EVAL_TRAINEES.length;t++){
-      var s = getEvalScore(EVAL_TRAINEES[t].id, EVAL_WEEKS[w].id);
+      var s = getEvalScore(EVAL_TRAINEES[t].name, EVAL_WEEKS[w].id);
       var total = calcTotalScore(s);
       if(total !== null){ weekScores.push(total); }
     }
@@ -8803,7 +8803,7 @@ function renderEvalCalendar(){
     var topTrainee = null;
     var topScore = -1;
     for(var t=0;t<EVAL_TRAINEES.length;t++){
-      var s = getEvalScore(EVAL_TRAINEES[t].id, wk.id);
+      var s = getEvalScore(EVAL_TRAINEES[t].name, wk.id);
       var total = calcTotalScore(s);
       if(total !== null){
         weekScores.push(total);
@@ -8842,11 +8842,11 @@ function renderEvalHistory(){
     html += '<tr><td style="font-weight:500;color:var(--text)">'+tr.name+'</td><td style="font-size:8px;color:var(--text-dim)">'+tr.supervisor+'<br>'+tr.level+'</td>';
     var allScores = [];
     for(var w=0;w<EVAL_WEEKS.length;w++){
-      var s = getEvalScore(tr.id, EVAL_WEEKS[w].id);
+      var s = getEvalScore(tr.name, EVAL_WEEKS[w].id);
       var total = calcTotalScore(s);
       if(total !== null){
         allScores.push(total);
-        html += '<td style="cursor:pointer" onclick="evalCurrentWeek='+w+';switchEvalView(\'weekly\');renderEvalWeekTabs();renderEvalTraineeList();selectEvalTrainee(\''+tr.id+'\')">'+total+'</td>';
+        html += '<td style="cursor:pointer" onclick="evalCurrentWeek='+w+';switchEvalView(\'weekly\');renderEvalWeekTabs();renderEvalTraineeList();selectEvalTrainee(\''+tr.name+'\')">'+total+'</td>';
       } else {
         html += '<td style="color:var(--text-muted)">—</td>';
       }
@@ -8910,7 +8910,7 @@ function exportEvalCSV(){
     csv += tr.name + ',' + tr.level + ',' + tr.supervisor;
     var allScores = [];
     for(var w=0;w<EVAL_WEEKS.length;w++){
-      var s = getEvalScore(tr.id, EVAL_WEEKS[w].id);
+      var s = getEvalScore(tr.name, EVAL_WEEKS[w].id);
       var total = calcTotalScore(s);
       csv += ',' + (total !== null ? total : '');
       if(total !== null) allScores.push(total);
@@ -9368,7 +9368,7 @@ function renderTraineeSummary(){
   var curWkId = 'W' + (curWkIdx + 1);
   var totalScore = 0, traineeCount = 0;
   EVAL_TRAINEES.forEach(function(tr){
-    var s = getEvalScore(tr.id, curWkId);
+    var s = getEvalScore(tr.name, curWkId);
     var ts = calcTotalScore(s);
     if(ts !== null){ totalScore += ts; traineeCount++; }
   });
@@ -10542,7 +10542,7 @@ function renderDashboard(){
   var cardsHtml = '';
   var avatarColors = ['#7B8FC0','#D4A76A','#5A7868','#C94F66','#A09DB5','#6C9BD2','#E8A87C'];
   EVAL_TRAINEES.forEach(function(tr, i){
-    var s = getEvalScore(tr.id, curWkId);
+    var s = getEvalScore(tr.name, curWkId);
     var ts = calcTotalScore(s);
     var scoreDisplay = ts !== null ? ts.toFixed(1) : '--';
     var comp = calcTaskCompletionForTrainee(tr.name, curWkId);
@@ -10577,7 +10577,7 @@ function render360Eval(wkId){
   var topTrainee = null, topScore = -1;
   var lowTrainee = null, lowScore = 999;
   EVAL_TRAINEES.forEach(function(tr){
-    var s = getEvalScore(tr.id, wkId);
+    var s = getEvalScore(tr.name, wkId);
     var ts = calcTotalScore(s);
     if(ts !== null){
       scores.push({name:tr.name,score:ts});
@@ -10662,7 +10662,7 @@ function drawRadarChart(wkId){
   // Plot each trainee
   var colors = ['#7B8FC0','#C94F66','#8BA89C','#D4A76A','#A09DB5','#5A7868','#E0556A'];
   EVAL_TRAINEES.forEach(function(tr, ti){
-    var s = getEvalScore(tr.id, wkId);
+    var s = getEvalScore(tr.name, wkId);
     if(!s) return;
     ctx.beginPath();
     var firstPoint = true;
@@ -10742,7 +10742,7 @@ function drawTrendChart(){
     ctx.beginPath();
     var firstPoint = true;
     for(var i=0;i<14;i++){
-      var s = getEvalScore(tr.id, 'W'+(i+1));
+      var s = getEvalScore(tr.name, 'W'+(i+1));
       var ts = calcTotalScore(s);
       if(ts === null) continue;
       var x = padL + pw*i/13;
@@ -10779,7 +10779,7 @@ function renderRanking(){
   
   var rows = [];
   EVAL_TRAINEES.forEach(function(tr){
-    var s = getEvalScore(tr.id, wkId);
+    var s = getEvalScore(tr.name, wkId);
     var ts = calcTotalScore(s);
     if(ts === null) return;
     var dimScores = {};
