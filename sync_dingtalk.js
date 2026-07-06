@@ -195,19 +195,25 @@ async function getAttendance(token, userIds, dateFrom, dateTo) {
   const results = [];
   for (let i = 0; i < userIds.length; i += 50) {
     const batch = userIds.slice(i, i + 50);
-    const res = await dingRequest('POST', 'oapi.dingtalk.com', '/attendance/list', { access_token: token }, {
-      workDateFrom: dateFrom + ' 00:00:00',
-      workDateTo: dateTo + ' 00:00:00',
-      userIdList: batch,
-      offset: 0,
-      limit: 50
-    });
-    if (res.errcode !== 0) {
-      console.warn('  ⚠️ 考勤查询失败(errcode=' + res.errcode + '): ' + (res.errmsg || ''));
-      continue;
+    let offset = 0;
+    while (true) {
+      const res = await dingRequest('POST', 'oapi.dingtalk.com', '/attendance/list', { access_token: token }, {
+        workDateFrom: dateFrom + ' 00:00:00',
+        workDateTo: dateTo + ' 00:00:00',
+        userIdList: batch,
+        offset: offset,
+        limit: 50
+      });
+      if (res.errcode !== 0) {
+        console.warn('  ⚠️ 考勤查询失败(errcode=' + res.errcode + '): ' + (res.errmsg || ''));
+        break;
+      }
+      const records = res.recordresult || [];
+      results.push(...records);
+      if (!res.hasMore) break;
+      offset += records.length;
+      await sleep(200);
     }
-    const records = res.recordresult || [];
-    results.push(...records);
     if (i + 50 < userIds.length) await sleep(300);
   }
   return results;
