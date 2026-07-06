@@ -9267,7 +9267,7 @@ function switchTraineeView(view){
   document.getElementById('tnDashboardView').style.display = view==='dashboard'?'':'none';
   document.getElementById('tnEvalView').style.display = view==='evaluation'?'':'none';
   document.querySelectorAll('.tn-sub-tab').forEach(function(b,i){
-    var views = ['tasks','reports','dashboard','evaluation'];
+    var views = ['tasks','reports','evaluation','dashboard'];
     b.classList.toggle('active', views[i]===view);
   });
   if(view==='tasks'){ renderTraineeSummary(); renderTraineeTasks(); }
