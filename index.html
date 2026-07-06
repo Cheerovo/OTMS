@@ -8099,16 +8099,13 @@ function renderWorkspace(){
   });
   // Trainee tasks (管培生任务)
   try{ if(!tnData) loadTnData(); }catch(e){}
-  console.log('[WS] tnData loaded:',!!tnData,'isAdmin:',isGlobalAdmin(cu),'cu:',cu);
   if(tnData){
     var isAdmin = isGlobalAdmin(cu);
-    var tnCount = 0;
     // Weekly tasks
     if(tnData.wtasks){
       tnData.wtasks.forEach(function(w){
         if(!isAdmin && w.person!==cu) return;
         if(w.status==='done') return;
-        tnCount++;
         pushes.push({type:'trainee',text:'周任务：'+w.name,meta:w.person+' · W'+(w.week||''),urgent:false,tid:w.id,title:w.name});
       });
     }
@@ -8117,7 +8114,6 @@ function renderWorkspace(){
       tnData.refTasks.forEach(function(r){
         if(!isAdmin && (r.executors||[]).indexOf(cu)===-1) return;
         if(r.refStatus==='done') return;
-        tnCount++;
         var taskName = r.name;
         if(taskName.length > 30) taskName = taskName.substring(0,28)+'..';
         pushes.push({type:'trainee',text:taskName,meta:(r.executors||[]).join('、')+' · '+(r.sysName||''),urgent:false,tid:r.id,title:r.name});
@@ -8130,14 +8126,12 @@ function renderWorkspace(){
           m.assignments.forEach(function(a){
             if(!isAdmin && a.person!==cu) return;
             if(!a.text) return;
-            tnCount++;
             var aText = a.text.length > 25 ? a.text.substring(0,23)+'..' : a.text;
             pushes.push({type:'trainee',text:'会议任务：'+aText,meta:a.person+' · '+ (m.title||''),urgent:false,mid:m.id,title:m.title});
           });
         }
       });
     }
-    console.log('[WS] trainee tasks pushed:',tnCount,'total pushes:',pushes.length);
   }
   // Reports (separate from pushes)
   const reportDues=[];
