@@ -816,9 +816,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-card.nodd { opacity: 0.6; }
 .attend-card.nodd:hover { opacity: 0.85; }
 .attend-card .card-body { flex: 1; min-width: 0; }
-.attend-card .card-top { display: flex; align-items: baseline; gap: 6px; margin-bottom: 1px; }
-.attend-card .card-name { font-size: 11px; font-weight: 600; color: var(--text); letter-spacing: 0.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
-.attend-card .card-status { font-size: 10px; font-weight: 500; white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 2px; }
+.attend-card .card-name { font-size: 11px; font-weight: 600; color: var(--text); letter-spacing: 0.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 1px; }
+.attend-card .card-status { font-size: 10px; font-weight: 500; white-space: nowrap; display: flex; align-items: center; gap: 2px; }
 .card-st-main { font-weight: 600; }
 .card-st-main.on { color: #7A8FA8; }
 .card-st-main.leave { color: #C57D48; }
@@ -835,7 +834,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-card.has-ab { border-color: #FED7AA; box-shadow: 0 1px 3px rgba(212,145,94,0.08); }
 .attend-card.other { background: #FFFBFB; border-color: #FECACA; box-shadow: 0 0 0 2px rgba(202,107,107,0.1), 0 2px 8px rgba(202,107,107,0.08); }
 .attend-card.other:hover { border-color: #FCA5A5; box-shadow: 0 0 0 2px rgba(202,107,107,0.15), 0 4px 16px rgba(202,107,107,0.12); }
-.attend-card .card-location { font-size: 9px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rank-I { background:#F2EFEB; color:#8D8883; }
 .rank-II { background:#E8F0EC; color:#5A7868; }
 .rank-III { background:#F9F2E7; color:#9A7D3E; }
@@ -5678,7 +5676,6 @@ function renderAttendView() {
     var raw = attData[date][e.id];
     var obj = ensureObj(raw) || {m:'不在钉钉数据', s:'不在钉钉数据'};
     var main = obj.m, sub = obj.s;
-    var location = e.location || e.bu || '';
     var dc = dotClass(main);
     var isAb = sub !== '正常';
     var subCls = 'card-st-sub' + (isAb ? ' ab '+dc : '');
@@ -5690,10 +5687,8 @@ function renderAttendView() {
     return '<div class="'+cardClass+'">'
       + '<span class="card-dot '+dc+'"></span>'
       + '<div class="card-body">'
-      + '<div class="card-top"><span class="card-name">'+esc(e.name)+'</span>'
-      + '<span class="card-status"><span class="card-st-main '+dc+'">'+esc(main)+'</span>'+subHtml+'</span>'
-      + '</div>'
-      + '<div class="card-location">'+esc(location)+'</div>'
+      + '<div class="card-name">'+esc(e.name)+'</div>'
+      + '<div class="card-status"><span class="card-st-main '+dc+'">'+esc(main)+'</span>'+subHtml+'</div>'
       + '</div></div>';
   }
 
