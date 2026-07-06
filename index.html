@@ -9100,11 +9100,28 @@ function getChildTasks(parentId){
 
 function buildParentOptions(currentTaskId, parentIdValue){
   var options = '<option value="">无父任务</option>';
+  // Collect IDs of tasks that are already child tasks (have a parent)
+  var childTaskIds = {};
+  // Plan task children (parentId stored in tnData.tasks)
+  if(tnData && tnData.tasks){
+    Object.keys(tnData.tasks).forEach(function(k){
+      if(tnData.tasks[k].parentId) childTaskIds[k] = true;
+    });
+  }
+  // Weekly task children
+  if(tnData && tnData.wtasks){
+    tnData.wtasks.forEach(function(w){ if(w.parentId) childTaskIds[w.id] = true; });
+  }
+  // Ref task children
+  var refs = tnData && tnData.refTasks ? tnData.refTasks : (typeof TN_REF_TASKS!=='undefined'?TN_REF_TASKS:[]);
+  refs.forEach(function(r){ if(r.parentId) childTaskIds[r.id] = true; });
+
   var allCandidates = [];
   // Plan tasks
   if(typeof TN_TASKS!=='undefined'){
     TN_TASKS.forEach(function(t){
       if(t.id === currentTaskId) return;
+      if(childTaskIds[t.id]) return; // 子任务不能作为父任务
       allCandidates.push({id:t.id, name:t.name, sys:t.sys});
     });
   }
@@ -9112,13 +9129,14 @@ function buildParentOptions(currentTaskId, parentIdValue){
   if(tnData && tnData.wtasks){
     tnData.wtasks.forEach(function(w){
       if(w.id === currentTaskId) return;
+      if(childTaskIds[w.id]) return;
       allCandidates.push({id:w.id, name:w.name, sys:w.sys});
     });
   }
   // Reference tasks
-  var refs = tnData && tnData.refTasks ? tnData.refTasks : (typeof TN_REF_TASKS!=='undefined'?TN_REF_TASKS:[]);
   refs.forEach(function(r){
     if(r.id === currentTaskId) return;
+    if(childTaskIds[r.id]) return;
     allCandidates.push({id:r.id, name:r.name, sys:r.sys});
   });
   // Group by system
