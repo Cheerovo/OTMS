@@ -103,6 +103,7 @@ const ATTEND_STATUS_MAP = {
 const DEFAULT_STATUS = {m:'在岗', s:'正常'};
 
 // 获取OA请假审批记录，覆盖考勤数据
+// 自动分段请求，每段30天，避免API时间范围超限
 async function getLeaveApprovals(token, dateFrom, dateTo) {
   const leaveCodes = [
     'PROC-EF6Y0XWVO2-TGL2OSBZS8OLW2JJ9ZRW2-3K6KC1DI-64',  // 请假申请（除病假）
@@ -110,54 +111,73 @@ async function getLeaveApprovals(token, dateFrom, dateTo) {
     'PROC-379EF1B9-1E62-4E45-8B2B-911FC69F61B1',            // 产假申请
   ];
 
-  const startTime = new Date(dateFrom + 'T00:00:00+08:00').getTime();
-  const endTime = new Date(dateTo + 'T23:59:59+08:00').getTime();
+  const fromDate = new Date(dateFrom + 'T00:00:00+08:00');
+  const toDate = new Date(dateTo + 'T23:59:59+08:00');
+  const leaveMap = {};
 
-  const leaveMap = {};  // {userid: {date: {m:'请假', s:'年假'}}}
+  // 按30天分段
+  const CHUNK_DAYS = 30;
+  let chunkStart = new Date(fromDate);
 
-  for (const code of leaveCodes) {
-    const idsRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/processinstance/listids', { access_token: token }, {
-      process_code: code,
-      start_time: startTime,
-      end_time: endTime,
-      size: 20
-    });
-    if (idsRes.errcode !== 0) continue;
-    const idList = (idsRes.result?.list || []);
+  while (chunkStart < toDate) {
+    let chunkEnd = new Date(chunkStart);
+    chunkEnd.setDate(chunkEnd.getDate() + CHUNK_DAYS - 1);
+    if (chunkEnd > toDate) chunkEnd = toDate;
 
-    for (const id of idList) {
-      const detailRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/processinstance/get', { access_token: token }, {
-        process_instance_id: id
-      });
-      if (detailRes.errcode !== 0) continue;
-      const inst = detailRes.process_instance;
-      if (!inst || inst.status !== 'COMPLETED') continue;  // 只取已通过的
+    const cStart = chunkStart.getTime();
+    const cEnd = chunkEnd.getTime();
+    const cLabel = chunkStart.toISOString().slice(0,10) + '~' + chunkEnd.toISOString().slice(0,10);
+    console.log('    OA分段: ' + cLabel);
 
-      const userId = inst.originator_userid;
-      const holidayField = (inst.form_component_values || []).find(f => f.component_type === 'DDHolidayField');
-      if (!holidayField || !holidayField.ext_value) continue;
-
+    for (const code of leaveCodes) {
       try {
-        const ext = JSON.parse(holidayField.ext_value);
-        // 获取请假具体类型标签
-        let leaveTag = '请假';
-        if (ext.extension) {
-          const extTag = JSON.parse(ext.extension);
-          leaveTag = extTag.tag || '请假';
+        const idsRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/processinstance/listids', { access_token: token }, {
+          process_code: code,
+          start_time: cStart,
+          end_time: cEnd,
+          size: 20
+        });
+        if (idsRes.errcode !== 0) { await sleep(300); continue; }
+        const idList = (idsRes.result?.list || []);
+
+        for (const id of idList) {
+          const detailRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/processinstance/get', { access_token: token }, {
+            process_instance_id: id
+          });
+          if (detailRes.errcode !== 0) continue;
+          const inst = detailRes.process_instance;
+          if (!inst || inst.status !== 'COMPLETED') continue;
+
+          const userId = inst.originator_userid;
+          const holidayField = (inst.form_component_values || []).find(f => f.component_type === 'DDHolidayField');
+          if (!holidayField || !holidayField.ext_value) continue;
+
+          try {
+            const ext = JSON.parse(holidayField.ext_value);
+            let leaveTag = '请假';
+            if (ext.extension) {
+              const extTag = JSON.parse(ext.extension);
+              leaveTag = extTag.tag || '请假';
+            }
+            const detailList = ext.detailList || [];
+            for (const d of detailList) {
+              const wd = d.workDate;
+              const workDate = new Date(wd > 10000000000 ? wd : wd * 1000).toISOString().slice(0, 10);
+              if (workDate >= dateFrom && workDate <= dateTo) {
+                if (!leaveMap[userId]) leaveMap[userId] = {};
+                leaveMap[userId][workDate] = {m:'请假', s: leaveTag};
+              }
+            }
+          } catch(_) { /* skip parse errors */ }
+          await sleep(200);
         }
-        const detailList = ext.detailList || [];
-        for (const d of detailList) {
-          const wd = d.workDate;
-          const workDate = new Date(wd > 10000000000 ? wd : wd * 1000).toISOString().slice(0, 10);
-          if (workDate >= dateFrom && workDate <= dateTo) {
-            if (!leaveMap[userId]) leaveMap[userId] = {};
-            leaveMap[userId][workDate] = {m:'请假', s: leaveTag};
-          }
-        }
-      } catch(_) { /* skip parse errors */ }
-      await sleep(200);
+      } catch(_) { /* skip chunk errors */ }
+      await sleep(300);
     }
-    await sleep(300);
+
+    // 下一段
+    chunkStart = new Date(chunkEnd);
+    chunkStart.setDate(chunkStart.getDate() + 1);
   }
 
   return leaveMap;
@@ -213,7 +233,7 @@ async function main() {
     return;
   }
 
-  // 最近7天考勤
+  // 考勤只能拉最近7天（API硬限制）
   const today = new Date();
   const dates = [];
   for (let i = 6; i >= 0; i--) {
@@ -221,6 +241,12 @@ async function main() {
     d.setDate(d.getDate() - i);
     dates.push(d.toISOString().slice(0, 10));
   }
+
+  // 请假OA审批拉最近90天（分段请求避免超限）
+  const leaveDateFrom = new Date(today);
+  leaveDateFrom.setDate(leaveDateFrom.getDate() - 90);
+  const leaveDateFromStr = leaveDateFrom.toISOString().slice(0, 10);
+  const leaveDateToStr = dates[dates.length - 1];
 
   console.log('[4] 获取考勤记录...');
   const userIds = allUsers.map(u => u.userid);
@@ -256,9 +282,9 @@ async function main() {
   });
   console.log('  ✅ 考勤记录覆盖 ' + Object.keys(statusMap).length + ' 人');
 
-  // 用OA请假审批覆盖考勤状态
-  console.log('[6] 获取OA请假审批（' + dates[0] + ' ~ ' + dates[dates.length-1] + '）...');
-  const leaveMap = await getLeaveApprovals(token, dates[0], dates[dates.length - 1]);
+  // 用OA请假审批覆盖考勤状态（拉90天，分段请求）
+  console.log('[6] 获取OA请假审批（' + leaveDateFromStr + ' ~ ' + leaveDateToStr + '）...');
+  const leaveMap = await getLeaveApprovals(token, leaveDateFromStr, leaveDateToStr);
   let leaveOverlayCount = 0;
   for (const [userId, dateMap] of Object.entries(leaveMap)) {
     const name = nameMap[userId]?.name;
