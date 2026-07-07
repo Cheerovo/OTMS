@@ -5728,8 +5728,8 @@ function renderAttendView(skipAutoSync) {
   var workDaysMap = loadWorkDays();
   var scheduleMap = loadSchedules();
   var BU_SHIFT_NOTES = {
-    '园区公寓BU': ['公寓中班 10:30-19:30', '12:00-21:00', '公寓维修早班 08:00-17:00', '公寓维修晚班 13:00-22:00'],
-    '园区物业BU': ['09:30-21:30', '安保白班1 07:00-19:00', '安保中班 12:00-00:00', '19:00-07:00', '安保队长白班 06:00-18:00', '安保队长夜班 18:00-06:00', '09:00-21:00', '外包保安早9班次 09:30-21:30', '外包保安早10班次 10:00-22:00']
+    '园区公寓BU': ['10:30-19:30', '12:00-21:00', '08:00-17:00', '13:00-22:00'],
+    '园区物业BU': ['09:30-21:30', '07:00-19:00', '12:00-00:00', '19:00-07:00', '06:00-18:00', '18:00-06:00', '09:00-21:00', '09:30-21:30', '10:00-22:00']
   };
   function isRestDay(name, dateStr) {
     var wd = workDaysMap[name];
@@ -5974,7 +5974,7 @@ function renderAttendView(skipAutoSync) {
       // 固定班制：有当日排班就显示
       var sched = schedByDate[date] || '';
       if (sched) {
-        sched = sched.replace('保安夜班21点', '保安夜班').replace('程璐一年哺乳假', '哺乳假').replace('安保白班 ', '').replace('安保夜班 ', '').replace('保安夜班 ', '').replace('公寓晚班 ', '').replace('物业安保值班 ', '');
+        sched = sched.replace(/^[\u4e00-\u9fa5][^\s]*\s*/, '');
         scheduleHtml = '<div class="card-schedule">'+esc(sched)+'</div>';
       }
     } else if (schedFlat) {
