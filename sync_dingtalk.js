@@ -294,32 +294,37 @@ async function main() {
     return result; // e.g., [1,2,3,4,5] = Mon-Fri
   }
 
-  // 从class_setting中提取班次时间字符串（如 9:00-18:00）
-  function extractClassTime(cls) {
-    try {
-      var sections = cls.sections || (cls.class_setting && cls.class_setting.sections) || [];
-      if (!sections.length) return null;
-      var allTimes = [];
-      sections.forEach(function(sec){
-        (sec.times || []).forEach(function(t){
-          var timeStr = (t.check_time || '').slice(11, 16); // "HH:MM"
-          if (timeStr) allTimes.push(timeStr);
-        });
-      });
-      if (allTimes.length >= 2) return allTimes[0] + '-' + allTimes[allTimes.length - 1];
-    } catch(_) {}
-    return null;
-  }
-
-  // 构建 class_id → 时间字符串 的映射
-  var classTimeMap = {};
+  // 收集所有班次ID并查询班次时间
+  var allShiftIds = new Set();
   for (const [gid, cfg] of groupCache) {
-    var classes = cfg.classes || [];
-    classes.forEach(function(cls){
-      var timeStr = extractClassTime(cls);
-      if (timeStr) classTimeMap[cls.class_id] = timeStr;
-    });
+    (cfg.shift_ids || []).forEach(function(sid){ allShiftIds.add(sid); });
   }
+  console.log('  查询班次详情: ' + allShiftIds.size + ' 个班次...');
+
+  var classTimeMap = {}; // shift_id → "9:00-18:00"
+  for (const sid of allShiftIds) {
+    try {
+      const shiftRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/attendance/shift/query', { access_token: token }, { shift_id: sid, op_user_id: allUsers[0].userid });
+      if (shiftRes.errcode === 0 && shiftRes.result) {
+        var shift = shiftRes.result;
+        var sections = shift.sections || [];
+        var allTimes = [];
+        sections.forEach(function(sec){
+          (sec.punches || []).forEach(function(p){
+            var timeStr = (p.check_time || '').slice(11, 16); // "HH:MM"
+            if (timeStr) allTimes.push(timeStr);
+          });
+        });
+        if (allTimes.length >= 2) {
+          var startTime = allTimes[0];
+          var endTime = allTimes[allTimes.length - 1];
+          classTimeMap[sid] = startTime + '-' + endTime;
+        }
+      }
+    } catch(_) {}
+    await sleep(100);
+  }
+  console.log('  ✅ 班次时间: ' + Object.keys(classTimeMap).length + ' 个');
 
   // 根据考勤组配置推断每人工作日 + 班制时间
   var userSchedule = {}; // userId → "9:00-18:00"
