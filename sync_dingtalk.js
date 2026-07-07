@@ -301,12 +301,14 @@ async function main() {
   }
   console.log('  查询班次详情: ' + allShiftIds.size + ' 个班次...');
 
-  var classTimeMap = {}; // shift_id → "9:00-18:00"
+  var classTimeMap = {};    // shift_id → "09:00-18:00"
+  var shiftNameMap = {};   // shift_id → "A" / "晚班"
   for (const sid of allShiftIds) {
     try {
       const shiftRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/attendance/shift/query', { access_token: token }, { shift_id: sid, op_user_id: allUsers[0].userid });
       if (shiftRes.errcode === 0 && shiftRes.result) {
         var shift = shiftRes.result;
+        shiftNameMap[sid] = shift.name || '';
         var sections = shift.sections || [];
         var allTimes = [];
         sections.forEach(function(sec){
@@ -316,9 +318,7 @@ async function main() {
           });
         });
         if (allTimes.length >= 2) {
-          var startTime = allTimes[0];
-          var endTime = allTimes[allTimes.length - 1];
-          classTimeMap[sid] = startTime + '-' + endTime;
+          classTimeMap[sid] = allTimes[0] + '-' + allTimes[allTimes.length - 1];
         }
       }
     } catch(_) {}
@@ -326,29 +326,52 @@ async function main() {
   }
   console.log('  ✅ 班次时间: ' + Object.keys(classTimeMap).length + ' 个');
 
-  // 根据考勤组配置推断每人工作日 + 班制时间
-  var userSchedule = {}; // userId → "9:00-18:00"
+  // 根据考勤组配置推断每人工作日（仅用于休息日过滤） + 班制时间（所有人）
+  var userSchedule = {}; // userId → "A 09:00-18:00"
   let fixedCount = 0, turnCount = 0, noneCount = 0;
   for (const [userId, grp] of Object.entries(userGroupMap)) {
     const cfg = groupCache.get(grp.group_id);
     if (!cfg) continue;
     if (cfg.type === 'NONE') { noneCount++; continue; }
+    else if (cfg.type === 'TURN') turnCount++;
+    else fixedCount++;
+
+    // 工作日过滤（仅用于休息日判断，只对FIXED有效）
     if (cfg.work_day_list && cfg.work_day_list.length === 7) {
       var wdParsed = parseWorkDays(cfg.work_day_list);
       if (wdParsed.length > 0 && wdParsed.length < 7) {
         workDaysByUser[userId] = wdParsed;
-        if (cfg.type === 'TURN') turnCount++; else fixedCount++;
       }
-      // 取第一个上班日的班次ID，查找对应时间
-      for (var wi = 0; wi < cfg.work_day_list.length; wi++) {
-        var shiftId = cfg.work_day_list[wi];
-        if (shiftId !== 0 && classTimeMap[shiftId]) {
-          userSchedule[userId] = classTimeMap[shiftId];
-          break;
+    }
+
+    // 提取班制时间（FIXED从work_day_list取，TURN从shift_ids取）
+    var candidateIds = [];
+    if (cfg.work_day_list && cfg.work_day_list.length === 7) {
+      // FIXED: work_day_list中有shift_id
+      cfg.work_day_list.forEach(function(sid){ if (sid !== 0) candidateIds.push(sid); });
+    } else if (cfg.shift_ids && cfg.shift_ids.length > 0) {
+      // TURN: 直接用shift_ids
+      candidateIds = cfg.shift_ids;
+    }
+    var parts = [];
+    var seen = {};
+    for (var wi = 0; wi < candidateIds.length; wi++) {
+      var sid = candidateIds[wi];
+      if (!sid || seen[sid]) continue;
+      seen[sid] = true;
+      var timeStr = classTimeMap[sid];
+      if (timeStr) {
+        var label = shiftNameMap[sid] || '';
+        if (label && label !== 'A') {
+          parts.push(label + ' ' + timeStr);
+        } else {
+          parts.push(timeStr);
         }
       }
     }
-    // work_day_list 全7天上班 或 无work_day_list → 无休息日过滤
+    if (parts.length > 0) {
+      userSchedule[userId] = parts.join(' · ');
+    }
   }
   console.log('  ✅ 工作日配置: FIXED=' + fixedCount + '人 TURN=' + turnCount + '人 NONE=' + noneCount + '人');
   var scheduleCount = Object.keys(userSchedule).length;
