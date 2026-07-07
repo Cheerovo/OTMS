@@ -5752,6 +5752,7 @@ function renderAttendView(skipAutoSync) {
 
   let counts = {};
   let subCounts = {};
+  let outOnDuty = 0; // 在岗/外出人数
   ATTEND_MAIN.forEach(s => counts[s] = 0);
   function ensureObj(st) { if (!st) return null; if (typeof st === 'string') { if (st==='在岗') return {m:'在岗',s:'正常'}; if (st==='迟到') return {m:'在岗',s:'迟到'}; if (st==='早退') return {m:'在岗',s:'早退'}; if (st.indexOf('请假')===0) return {m:'请假',s:st}; if (st==='出差'||st==='外出公干') return {m:'外勤',s:st}; if (st==='休息') return {m:'休息',s:'休息'}; if (st==='不在钉钉数据') return {m:'不在钉钉数据',s:st}; return {m:'在岗',s:st}; } return st; }
   filtered.forEach(e => {
@@ -5761,6 +5762,7 @@ function renderAttendView(skipAutoSync) {
     var sub = obj ? obj.s : fallback;
     counts[main] = (counts[main] || 0) + 1;
     subCounts[sub] = (subCounts[sub] || 0) + 1;
+    if (main === '在岗' && sub === '外出') outOnDuty++;
   });
 
   let html = '';
@@ -5937,6 +5939,7 @@ function renderAttendView(skipAutoSync) {
   ATTEND_MAIN.forEach(function(s) {
     if (counts[s] > 0) {
       var detail = (s === '在岗') ? onDutyDetail : '';
+      if (s === '在岗' && outOnDuty > 0) detail += '（外出<strong>'+outOnDuty+'</strong>）';
       html += '<span class="attend-stat '+ATTEND_CSS[s]+'" onclick="scrollToFirst(\''+esc(s)+'\')" title="点击查看"><span class="stat-dot"></span>'+s+' <strong>'+counts[s]+'</strong>'+detail+'</span>';
     }
   });
@@ -6007,6 +6010,7 @@ function renderAttendView(skipAutoSync) {
     // Per-BU summary
     var buCounts = {};
     var buSubCounts = {};
+    var buOutOnDuty = 0;
     ATTEND_MAIN.forEach(function(s){ buCounts[s] = 0; });
     list.forEach(function(e){
       var obj3 = ensureObj(attData[date][e.id]);
@@ -6014,6 +6018,7 @@ function renderAttendView(skipAutoSync) {
       var s3 = obj3 ? obj3.s : '不在钉钉数据';
       buCounts[m3] = (buCounts[m3] || 0) + 1;
       buSubCounts[s3] = (buSubCounts[s3] || 0) + 1;
+      if (m3 === '在岗' && s3 === '外出') buOutOnDuty++;
     });
     function buOnDutyDetail(){
       var parts = [];
@@ -6027,6 +6032,7 @@ function renderAttendView(skipAutoSync) {
     ATTEND_MAIN.forEach(function(s){
       if (buCounts[s] > 0) {
         var bd = (s === '在岗') ? buODD : '';
+        if (s === '在岗' && buOutOnDuty > 0) bd += '（外出<strong>'+buOutOnDuty+'</strong>）';
         buStatsHtml += '<span class="bu-stat '+ATTEND_CSS[s]+'" onclick="event.stopPropagation();scrollToFirst(\''+esc(s)+'\')" title="点击查看"><span class="stat-dot"></span>'+s+' <strong>'+buCounts[s]+'</strong>'+bd+'</span>';
       }
     });
