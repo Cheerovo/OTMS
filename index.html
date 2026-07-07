@@ -4957,15 +4957,23 @@ function deleteMeetingFile(mid,fid){
 
 // ===== Meeting Modal =====
 function getFrequentPeople() {
-  // 统计历史会议中每个人被邀请的次数，返回按频率排序的前20人
+  // 统计历史会议参会频率，合并员工名单，去重后返回（会议常客优先）
   var count = {};
   meetings.forEach(function(mt){
     var names = (mt.attendees || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
     names.forEach(function(n){ count[n] = (count[n] || 0) + 1; });
   });
-  var people = Object.keys(count).map(function(k){ return { name: k, count: count[k] }; });
-  people.sort(function(a,b){ return b.count - a.count; });
-  return people.slice(0, 20);
+  var seen = {};
+  var result = [];
+  // 先加会议常客（按频率排序）
+  var sorted = Object.keys(count).sort(function(a,b){ return count[b] - count[a]; });
+  sorted.forEach(function(n){ if (!seen[n]) { seen[n] = true; result.push(n); } });
+  // 再补全员工名单中没有会议记录的人
+  var empList = loadEmployees();
+  empList.forEach(function(e){
+    if (!seen[e.name]) { seen[e.name] = true; result.push(e.name); }
+  });
+  return result;
 }
 
 function toggleAttendeeChip(el, name) {
@@ -4987,19 +4995,17 @@ function openMeetingModal(id){
   var suggestHTML = '';
   var currentAttendees = m ? (m.attendees || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean) : [];
   var people = getFrequentPeople();
-  // 编辑时，把当前参会人不在常用列表中的也加上
+  // 编辑时，把当前参会人不在列表中的也补上
   if (m) {
     currentAttendees.forEach(function(n){
-      if (!people.some(function(p){ return p.name === n; })) {
-        people.push({ name: n, count: 0 });
-      }
+      if (people.indexOf(n) < 0) people.push(n);
     });
   }
   if (people.length > 0) {
-    suggestHTML = '<div class="attendee-suggest"><div class="attendee-suggest-label">常用参会人（点击选中/取消）</div><div class="attendee-suggest-chips">';
-    people.forEach(function(p){
-      var isSelected = m && currentAttendees.indexOf(p.name) >= 0;
-      suggestHTML += '<span class="attendee-chip'+(isSelected?' selected':'')+'" onclick="toggleAttendeeChip(this,\''+esc(p.name)+'\')">'+esc(p.name)+(p.count>0?'<span class="chip-count">'+p.count+'次</span>':'')+'</span>';
+    suggestHTML = '<div class="attendee-suggest"><div class="attendee-suggest-label">点击选择参会人</div><div class="attendee-suggest-chips">';
+    people.forEach(function(name){
+      var isSelected = m && currentAttendees.indexOf(name) >= 0;
+      suggestHTML += '<span class="attendee-chip'+(isSelected?' selected':'')+'" onclick="toggleAttendeeChip(this,\''+esc(name)+'\')">'+esc(name)+'</span>';
     });
     suggestHTML += '</div></div>';
   }
