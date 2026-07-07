@@ -5729,7 +5729,7 @@ function renderAttendView(skipAutoSync) {
   var scheduleMap = loadSchedules();
   var BU_SHIFT_NOTES = {
     '园区公寓': ['公寓中班 10:30-19:30', '公寓晚班 12:00-21:00', '公寓维修早班 08:00-17:00', '公寓维修晚班 13:00-22:00'],
-    '物业': ['安保白班 09:30-21:30', '安保白班1 07:00-19:00', '安保中班 12:00-00:00', '安保夜班 19:00-07:00', '安保队长白班 06:00-18:00', '安保队长夜班 18:00-06:00', '保安夜班21点 21:30-09:30', '物业安保值班 09:00-21:00', '外包保安早9班次 09:30-21:30', '外包保安早10班次 10:00-22:00']
+    '物业': ['安保白班 09:30-21:30', '安保白班1 07:00-19:00', '安保中班 12:00-00:00', '安保夜班 19:00-07:00', '安保队长白班 06:00-18:00', '安保队长夜班 18:00-06:00', '物业安保值班 09:00-21:00', '外包保安早9班次 09:30-21:30', '外包保安早10班次 10:00-22:00']
   };
   function isRestDay(name, dateStr) {
     var wd = workDaysMap[name];
@@ -5973,7 +5973,10 @@ function renderAttendView(skipAutoSync) {
     if (schedByDate && typeof schedByDate === 'object') {
       // 固定班制：有当日排班就显示
       var sched = schedByDate[date] || '';
-      if (sched) scheduleHtml = '<div class="card-schedule">'+esc(sched)+'</div>';
+      if (sched) {
+        sched = sched.replace('保安夜班21点', '保安夜班');
+        scheduleHtml = '<div class="card-schedule">'+esc(sched)+'</div>';
+      }
     } else if (schedFlat) {
       // 排班制：只显示"排班制"标签，具体班次见BU班次说明
       scheduleHtml = '<div class="card-schedule">排班制</div>';

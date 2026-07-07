@@ -308,7 +308,7 @@ async function main() {
       const shiftRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/attendance/shift/query', { access_token: token }, { shift_id: sid, op_user_id: allUsers[0].userid });
       if (shiftRes.errcode === 0 && shiftRes.result) {
         var shift = shiftRes.result;
-        shiftNameMap[sid] = shift.name || '';
+        shiftNameMap[sid] = (shift.name || '').replace('保安夜班21点', '保安夜班');
         var sections = shift.sections || [];
         var allTimes = [];
         sections.forEach(function(sec){
