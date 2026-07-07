@@ -4957,23 +4957,16 @@ function deleteMeetingFile(mid,fid){
 
 // ===== Meeting Modal =====
 function getFrequentPeople() {
-  // 统计历史会议参会频率，合并员工名单，去重后返回（会议常客优先）
+  // 统计历史会议参会频率，返回前9人（张毅/Jenny合并为Jenny）
   var count = {};
   meetings.forEach(function(mt){
     var names = (mt.attendees || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
     names.forEach(function(n){ count[n] = (count[n] || 0) + 1; });
   });
-  var seen = {};
-  var result = [];
-  // 先加会议常客（按频率排序）
+  // 张毅和Jenny合并
+  if (count['张毅']) { count['Jenny'] = (count['Jenny'] || 0) + count['张毅']; delete count['张毅']; }
   var sorted = Object.keys(count).sort(function(a,b){ return count[b] - count[a]; });
-  sorted.forEach(function(n){ if (!seen[n]) { seen[n] = true; result.push(n); } });
-  // 再补全员工名单中没有会议记录的人
-  var empList = loadEmployees();
-  empList.forEach(function(e){
-    if (!seen[e.name]) { seen[e.name] = true; result.push(e.name); }
-  });
-  return result;
+  return sorted.slice(0, 9);
 }
 
 function toggleAttendeeChip(el, name) {
@@ -4993,7 +4986,7 @@ function openMeetingModal(id){
   const m=id?meetings.find(x=>x.id===id):null,ov=document.getElementById('modalOverlay'),md=document.getElementById('modal');
   const tks=m?m.tempTasks||[]:[];
   var suggestHTML = '';
-  var currentAttendees = m ? (m.attendees || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean) : [];
+  var currentAttendees = m ? (m.attendees || '').split(',').map(function(s){ var t=s.trim(); return t==='张毅'?'Jenny':t; }).filter(Boolean) : [];
   var people = getFrequentPeople();
   // 编辑时，把当前参会人不在列表中的也补上
   if (m) {
