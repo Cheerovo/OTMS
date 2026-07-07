@@ -5839,7 +5839,27 @@ function renderAttendView(skipAutoSync) {
         html += '</span>';
         var summaries = [];
         FOCUS.forEach(function(s){
-          if (p.pd[s] > 0) summaries.push(s+' '+p.pd[s]+'天');
+          if (p.pd[s] > 0) {
+            // 按子状态分组统计
+            var subMap = {};
+            (p.details||[]).forEach(function(dd){
+              if (dd.m === s) {
+                var subName = dd.s;
+                // 去掉请假_前缀
+                if (subName.indexOf('请假_')===0) subName = subName.slice(3);
+                subMap[subName] = (subMap[subName] || 0) + 1;
+              }
+            });
+            var subParts = [];
+            Object.keys(subMap).forEach(function(k){
+              subParts.push(k+subMap[k]+'天');
+            });
+            if (subParts.length > 0) {
+              summaries.push(s+p.pd[s]+'天（'+subParts.join(' · ')+'）');
+            } else {
+              summaries.push(s+p.pd[s]+'天');
+            }
+          }
         });
         html += '<span class="ms-person-summary">'+summaries.join(' · ')+'</span>';
         html += '</div>';
