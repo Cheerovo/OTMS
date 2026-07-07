@@ -500,8 +500,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attendee-suggest { margin-top:8px; }
 .attendee-suggest-label { font-size:10px; color:var(--text-muted); margin-bottom:4px; }
 .attendee-suggest-chips { display:flex; flex-wrap:wrap; gap:6px; }
-.attendee-chip { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:16px; font-size:11px; cursor:pointer; transition:all .15s; color:var(--text-dim); max-width:320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.attendee-chip { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:16px; font-size:11px; cursor:pointer; transition:all .15s; color:var(--text-dim); max-width:320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:none; }
 .attendee-chip:hover { background:var(--accent-soft); border-color:var(--accent); color:var(--accent); }
+.attendee-chip.selected { background:var(--accent-soft); border-color:var(--accent); color:var(--accent); font-weight:500; }
 .attendee-chip .chip-count { font-size:9px; color:var(--text-muted); background:var(--bg-base); padding:1px 6px; border-radius:8px; flex-shrink:0; }
 
 /* Meeting */
@@ -4955,38 +4956,52 @@ function deleteMeetingFile(mid,fid){
 }
 
 // ===== Meeting Modal =====
-function getFrequentAttendeeGroups(excludeId) {
-  // 分析历史会议，返回常用参会组合（按频率排序，最多5组）
-  var setCount = {};
-  var sorted = meetings.slice().sort(function(a,b){ return (b.cat||0)-(a.cat||0); });
-  sorted.forEach(function(mt){
-    if (excludeId && mt.id === excludeId) return;
+function getFrequentPeople() {
+  // 统计历史会议中每个人被邀请的次数，返回按频率排序的前20人
+  var count = {};
+  meetings.forEach(function(mt){
     var names = (mt.attendees || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
-    if (names.length < 2) return;
-    names.sort();
-    var key = names.join(',');
-    setCount[key] = (setCount[key] || 0) + 1;
+    names.forEach(function(n){ count[n] = (count[n] || 0) + 1; });
   });
-  var groups = Object.keys(setCount).map(function(k){
-    return { names: k, count: setCount[k] };
-  });
-  groups.sort(function(a,b){ return b.count - a.count; });
-  return groups.slice(0, 5);
+  var people = Object.keys(count).map(function(k){ return { name: k, count: count[k] }; });
+  people.sort(function(a,b){ return b.count - a.count; });
+  return people.slice(0, 20);
+}
+
+function toggleAttendeeChip(el, name) {
+  el.classList.toggle('selected');
+  var input = document.getElementById('fMA');
+  var current = (input.value || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  var idx = current.indexOf(name);
+  if (idx >= 0) {
+    current.splice(idx, 1);
+  } else {
+    current.push(name);
+  }
+  input.value = current.join(',');
 }
 
 function openMeetingModal(id){
   const m=id?meetings.find(x=>x.id===id):null,ov=document.getElementById('modalOverlay'),md=document.getElementById('modal');
   const tks=m?m.tempTasks||[]:[];
   var suggestHTML = '';
-  if (!m) {
-    var groups = getFrequentAttendeeGroups(null);
-    if (groups.length > 0) {
-      suggestHTML = '<div class="attendee-suggest"><div class="attendee-suggest-label">常用参会组合（点击填充）</div><div class="attendee-suggest-chips">';
-      groups.forEach(function(g){
-        suggestHTML += '<span class="attendee-chip" onclick="document.getElementById(\'fMA\').value=\''+esc(g.names)+'\'" title="使用过'+g.count+'次">'+esc(g.names)+'<span class="chip-count">'+g.count+'次</span></span>';
-      });
-      suggestHTML += '</div></div>';
-    }
+  var currentAttendees = m ? (m.attendees || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean) : [];
+  var people = getFrequentPeople();
+  // 编辑时，把当前参会人不在常用列表中的也加上
+  if (m) {
+    currentAttendees.forEach(function(n){
+      if (!people.some(function(p){ return p.name === n; })) {
+        people.push({ name: n, count: 0 });
+      }
+    });
+  }
+  if (people.length > 0) {
+    suggestHTML = '<div class="attendee-suggest"><div class="attendee-suggest-label">常用参会人（点击选中/取消）</div><div class="attendee-suggest-chips">';
+    people.forEach(function(p){
+      var isSelected = m && currentAttendees.indexOf(p.name) >= 0;
+      suggestHTML += '<span class="attendee-chip'+(isSelected?' selected':'')+'" onclick="toggleAttendeeChip(this,\''+esc(p.name)+'\')">'+esc(p.name)+(p.count>0?'<span class="chip-count">'+p.count+'次</span>':'')+'</span>';
+    });
+    suggestHTML += '</div></div>';
   }
   md.innerHTML=`<div class="modal-header"><h2>${m?'编辑例会':'新建例会'}</h2><button class="btn-icon" onclick="closeModal()">✕</button></div>
   <div class="modal-body">
