@@ -5659,6 +5659,8 @@ function loadWorkDays() {
 
 function renderAttendView(skipAutoSync) {
   var div = document.getElementById('orgAttendView');
+  if (!div) return;
+  try {
   var today = getTodayStr();
   var dateInput = document.getElementById('attendDateInput');
   var date = dateInput ? dateInput.value : today;
@@ -5948,6 +5950,10 @@ function renderAttendView(skipAutoSync) {
   });
 
   div.innerHTML = html;
+  } catch(e) {
+    div.innerHTML = '<div style="padding:20px;color:#c00;background:#fff0f0;border:1px solid #c00;border-radius:8px;margin:16px;"><strong>渲染错误:</strong> ' + (e.message || e) + '<br><pre style="font-size:10px;margin-top:8px;white-space:pre-wrap;">' + (e.stack || '') + '</pre></div>';
+    console.error('renderAttendView error:', e);
+  }
 }
 
 function updateAttendStatus(empId, status, date) {
