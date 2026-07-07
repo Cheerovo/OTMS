@@ -4973,7 +4973,12 @@ function getFrequentPeople() {
   // 张毅和Jenny合并
   if (count['张毅']) { count['Jenny'] = (count['Jenny'] || 0) + count['张毅']; delete count['张毅']; }
   var sorted = Object.keys(count).sort(function(a,b){ return count[b] - count[a]; });
-  return sorted.slice(0, 9);
+  var result = sorted.slice(0, 9);
+  // 确保黄一萧、芦智蔚始终在可选列表中
+  ['黄一萧','芦智蔚'].forEach(function(n){
+    if (result.indexOf(n) < 0) result.push(n);
+  });
+  return result;
 }
 
 function toggleAttendeeChip(el, name) {
