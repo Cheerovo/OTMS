@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-07T02:14:04.054Z",
+  "updated": "2026-07-07T02:46:33.278Z",
   "users": [
     {
       "name": "张毅",
@@ -10,7 +10,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "黄一萧",
@@ -48,7 +49,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "郭双红",
@@ -86,7 +88,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "周梓荣",
@@ -132,7 +135,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "陈一卓",
@@ -202,7 +206,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "吴靖娴",
@@ -244,7 +249,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "杨崴",
@@ -302,7 +308,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "王雷",
@@ -319,7 +326,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "葛豪平",
@@ -365,7 +373,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "张祥",
@@ -407,7 +416,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "毛华英",
@@ -461,7 +471,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "杨漾",
@@ -503,7 +514,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "裘碧钰",
@@ -541,7 +553,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "郑昌杰",
@@ -591,7 +604,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "卢素丹",
@@ -629,7 +643,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "沈丽霞",
@@ -671,7 +686,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "侯心怡",
@@ -713,7 +729,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "王倩",
@@ -751,7 +768,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "贾东升",
@@ -777,13 +795,18 @@
         "2026-07-06": {
           "m": "在岗",
           "s": "正常"
+        },
+        "2026-07-07": {
+          "m": "在岗",
+          "s": "正常"
         }
       },
       "todayStatus": {
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "罗俊尧",
@@ -815,7 +838,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "吕相坠",
@@ -851,7 +875,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "林知峰",
@@ -889,7 +914,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "董宾宾",
@@ -929,7 +955,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "党红艳",
@@ -977,7 +1004,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "吴立军",
@@ -1009,7 +1037,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "韩喆",
@@ -1047,7 +1076,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "苏坤",
@@ -1089,7 +1119,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "邵吴慧",
@@ -1147,7 +1178,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "武敏辉",
@@ -1193,7 +1225,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "杜宪",
@@ -1231,7 +1264,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "李萍萍",
@@ -1273,7 +1307,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "周凯楠",
@@ -1315,7 +1350,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "汪顺",
@@ -1355,7 +1391,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "王力",
@@ -1503,7 +1540,8 @@
         "m": "请假",
         "s": "病假"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "程璐",
@@ -1549,7 +1587,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "王韬",
@@ -1593,7 +1632,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "方有保",
@@ -1645,7 +1685,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "胡金明",
@@ -1689,7 +1730,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "金学忠",
@@ -1725,7 +1767,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "贾飞龙",
@@ -1761,7 +1804,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "朱鑫沛",
@@ -1833,7 +1877,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "安东生",
@@ -1869,7 +1914,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "庄艳林",
@@ -1905,7 +1951,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "黄连兵",
@@ -1945,7 +1992,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "谢小强",
@@ -1985,7 +2033,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "史文奎",
@@ -2045,7 +2094,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "吴骏",
@@ -2065,7 +2115,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "胡程林",
@@ -2105,7 +2156,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "姚伟",
@@ -2145,7 +2197,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "朱朝甫",
@@ -2181,7 +2234,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "李军立",
@@ -2192,7 +2246,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "胡保林",
@@ -2224,7 +2279,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "蒋团伟",
@@ -2248,7 +2304,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "梁晓永",
@@ -2259,7 +2316,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "丁国朝",
@@ -2270,7 +2328,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "胡红卫",
@@ -2281,7 +2340,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "杨永宁",
@@ -2321,7 +2381,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "刘曦文",
@@ -2337,7 +2398,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "孔令波",
@@ -2377,7 +2439,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "贾元录",
@@ -2413,7 +2476,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "李俭波",
@@ -2449,7 +2513,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "刘鹏",
@@ -2485,7 +2550,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "吉庆",
@@ -2521,7 +2587,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "李浩涵",
@@ -2557,7 +2624,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "卢奕含",
@@ -2593,7 +2661,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "贾康",
@@ -2613,7 +2682,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "王海涛",
@@ -2653,7 +2723,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "马金超",
@@ -2689,7 +2760,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "李龙",
@@ -2729,7 +2801,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "宋英杰",
@@ -2769,7 +2842,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "李威威",
@@ -2809,7 +2883,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "朱家良",
@@ -2849,7 +2924,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "许磊",
@@ -2885,7 +2961,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "徐刘岸",
@@ -2925,7 +3002,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "杨永奋",
@@ -2961,7 +3039,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "安文波",
@@ -2972,7 +3051,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "王玉玺",
@@ -3012,7 +3092,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "宣国英",
@@ -3050,7 +3131,8 @@
         2,
         3,
         4
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "丁成英",
@@ -3090,7 +3172,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "高玉玲",
@@ -3126,7 +3209,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "孙建芳",
@@ -3162,7 +3246,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "殷德昌",
@@ -3198,7 +3283,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "翟建设",
@@ -3234,7 +3320,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "徐培珍",
@@ -3270,7 +3357,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "王建平",
@@ -3310,7 +3398,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "施玉芹",
@@ -3346,7 +3435,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "张林梅",
@@ -3357,7 +3447,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "刘顺兰",
@@ -3393,7 +3484,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "高光付",
@@ -3429,7 +3521,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "肖德云",
@@ -3465,7 +3558,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "王妤扬",
@@ -3507,7 +3601,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "季文菊",
@@ -3543,7 +3638,8 @@
         "m": "在岗",
         "s": "正常"
       },
-      "workDays": null
+      "workDays": null,
+      "schedule": null
     },
     {
       "name": "赵柳文",
@@ -3581,7 +3677,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "陈圆",
@@ -3627,7 +3724,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "安子玥",
@@ -3665,7 +3763,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "陈双杰",
@@ -3707,7 +3806,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "黄燕婷",
@@ -3745,7 +3845,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "賴淑賢",
@@ -3769,7 +3870,8 @@
         1,
         2,
         4
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "蔡心宇",
@@ -3823,7 +3925,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "王永佳",
@@ -3865,7 +3968,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "韩燕",
@@ -3907,7 +4011,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "芦智蔚",
@@ -3945,7 +4050,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "李蕾",
@@ -3983,7 +4089,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "黄欢欢",
@@ -4025,7 +4132,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "沈明明",
@@ -4067,7 +4175,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "季嘉莉",
@@ -4125,7 +4234,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "李佳",
@@ -4187,7 +4297,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "陈锦",
@@ -4225,7 +4336,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "蒋孝峰",
@@ -4271,7 +4383,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     },
     {
       "name": "杨美玲",
@@ -4309,7 +4422,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "schedule": null
     }
   ]
 }
