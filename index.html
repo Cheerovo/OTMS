@@ -5938,6 +5938,7 @@ function renderAttendView(skipAutoSync) {
     html += '</div>'; // month-summary
 
   // Top summary (当日)
+  html += '<div style="font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text)">今日汇总</div>';
   html += '<div class="attend-stats">';
   ATTEND_MAIN.forEach(function(s) {
     if (counts[s] > 0) {
