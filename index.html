@@ -6105,13 +6105,19 @@ async function syncFromDingTalkSilent(date, attData, empList) {
     (dd.users || []).forEach(function(u) { ddMap[u.name] = u; if (u.workDays) wdMap[u.name] = u.workDays; if (u.scheduleByDate) schedMap[u.name] = u.scheduleByDate; if (u.schedule) schedMap[u.name+'_flat'] = u.schedule; });
     localStorage.setItem('attendance_workdays', JSON.stringify(wdMap));
     localStorage.setItem('attendance_schedules', JSON.stringify(schedMap));
-    empList.forEach(function(e) {
-      var ddUser = ddMap[e.name];
-      if (!ddUser) { attData[date][e.id] = {m:'不在钉钉数据', s:'不在钉钉数据'}; return; }
-      var raw = (ddUser.statusByDate && ddUser.statusByDate[date]);
-      if (!raw) { delete attData[date][e.id]; return; }
-      if (typeof raw === 'string') { raw = {m:'在岗', s: raw}; }
-      attData[date][e.id] = raw;
+    // 同步所有日期（而非仅当天）
+    var allDates = new Set();
+    (dd.users || []).forEach(function(u) { Object.keys(u.statusByDate||{}).forEach(function(d){ allDates.add(d); }); });
+    allDates.forEach(function(d) {
+      if (!attData[d]) attData[d] = {};
+      empList.forEach(function(e) {
+        var ddUser = ddMap[e.name];
+        if (!ddUser) { attData[d][e.id] = {m:'不在钉钉数据', s:'不在钉钉数据'}; return; }
+        var raw = (ddUser.statusByDate && ddUser.statusByDate[d]);
+        if (!raw) { delete attData[d][e.id]; return; }
+        if (typeof raw === 'string') { raw = {m:'在岗', s: raw}; }
+        attData[d][e.id] = raw;
+      });
     });
     saveAttendance(attData);
     renderAttendView(true);
@@ -6137,25 +6143,31 @@ async function syncFromDingTalk() {
 
     const empList = loadEmployees();
     const attData = loadAttendance();
-    if (!attData[date]) attData[date] = {};
     var synced = 0;
     var skipped = 0;
+    var dateCount = 0;
 
-    empList.forEach(function(e) {
-      var ddUser = ddMap[e.name];
-      if (!ddUser) { attData[date][e.id] = {m:'不在钉钉数据', s:'不在钉钉数据'}; skipped++; return; }
-      // 只取 statusByDate 精确匹配日期的数据，不用 todayStatus 兜底
-      var raw = (ddUser.statusByDate && ddUser.statusByDate[date]);
-      if (!raw) { delete attData[date][e.id]; return; } // 该日期没有钉钉数据，清除脏数据
-      if (typeof raw === 'string') { raw = {m:'在岗', s: raw}; }
-      attData[date][e.id] = raw;
-      synced++;
+    // 同步所有日期（而非仅当天）
+    var allDates = new Set();
+    (dd.users || []).forEach(function(u) { Object.keys(u.statusByDate||{}).forEach(function(d){ allDates.add(d); }); });
+    allDates.forEach(function(d) {
+      dateCount++;
+      if (!attData[d]) attData[d] = {};
+      empList.forEach(function(e) {
+        var ddUser = ddMap[e.name];
+        if (!ddUser) { attData[d][e.id] = {m:'不在钉钉数据', s:'不在钉钉数据'}; skipped++; return; }
+        var raw = (ddUser.statusByDate && ddUser.statusByDate[d]);
+        if (!raw) { delete attData[d][e.id]; return; }
+        if (typeof raw === 'string') { raw = {m:'在岗', s: raw}; }
+        attData[d][e.id] = raw;
+        synced++;
+      });
     });
 
     saveAttendance(attData);
     renderAttendView(true);
     if (btn) { btn.textContent = '🔄 同步钉钉'; btn.disabled = false; }
-    alert('同步完成！\n已匹配 ' + synced + ' 人' + (skipped > 0 ? '\n' + skipped + ' 人不在钉钉数据中，已标记为"不在钉钉数据"' : '') + '\n\n数据来源: dingtalk_data.json (' + (dd.updated || '').slice(0,10) + ')');
+    alert('同步完成！\n已同步 ' + dateCount + ' 个日期，共匹配 ' + synced + ' 人次' + (skipped > 0 ? '\n' + skipped + ' 人次不在钉钉数据中' : '') + '\n\n数据来源: dingtalk_data.json (' + (dd.updated || '').slice(0,10) + ')');
   } catch (err) {
     var btn = document.querySelector('button[onclick="syncFromDingTalk()"]');
     if (btn) { btn.textContent = '🔄 同步钉钉'; btn.disabled = false; }
