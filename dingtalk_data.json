@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-07T02:54:23.774Z",
+  "updated": "2026-07-07T02:56:10.397Z",
   "users": [
     {
       "name": "张毅",
@@ -50,7 +50,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "郭双红",
@@ -89,7 +89,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "周梓荣",
@@ -136,7 +136,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "陈一卓",
@@ -207,7 +207,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "吴靖娴",
@@ -250,7 +250,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "杨崴",
@@ -309,7 +309,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "王雷",
@@ -327,7 +327,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "葛豪平",
@@ -374,7 +374,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "张祥",
@@ -417,7 +417,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "毛华英",
@@ -472,7 +472,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "杨漾",
@@ -515,7 +515,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "裘碧钰",
@@ -554,7 +554,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "郑昌杰",
@@ -605,7 +605,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "卢素丹",
@@ -644,7 +644,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "沈丽霞",
@@ -687,7 +687,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "侯心怡",
@@ -730,7 +730,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "王倩",
@@ -769,7 +769,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "贾东升",
@@ -915,7 +915,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "董宾宾",
@@ -1077,7 +1077,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "苏坤",
@@ -1120,7 +1120,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "邵吴慧",
@@ -1179,7 +1179,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "武敏辉",
@@ -1226,7 +1226,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "杜宪",
@@ -1265,7 +1265,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "李萍萍",
@@ -1308,7 +1308,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "周凯楠",
@@ -1351,7 +1351,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "汪顺",
@@ -1588,7 +1588,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-17:00"
     },
     {
       "name": "王韬",
@@ -3132,7 +3132,7 @@
         3,
         4
       ],
-      "schedule": null
+      "schedule": "08:00-17:00"
     },
     {
       "name": "丁成英",
@@ -3602,7 +3602,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-13:00"
     },
     {
       "name": "季文菊",
@@ -3678,7 +3678,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "陈圆",
@@ -3725,7 +3725,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "安子玥",
@@ -3764,7 +3764,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "陈双杰",
@@ -3807,7 +3807,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "黄燕婷",
@@ -3846,7 +3846,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "賴淑賢",
@@ -3871,7 +3871,7 @@
         2,
         4
       ],
-      "schedule": null
+      "schedule": "09:00-13:00"
     },
     {
       "name": "蔡心宇",
@@ -3926,7 +3926,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "王永佳",
@@ -3969,7 +3969,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "韩燕",
@@ -4012,7 +4012,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "芦智蔚",
@@ -4051,7 +4051,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "李蕾",
@@ -4090,7 +4090,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "黄欢欢",
@@ -4133,7 +4133,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "沈明明",
@@ -4176,7 +4176,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "季嘉莉",
@@ -4235,7 +4235,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "李佳",
@@ -4298,7 +4298,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "陈锦",
@@ -4337,7 +4337,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "蒋孝峰",
@@ -4384,7 +4384,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     },
     {
       "name": "杨美玲",
@@ -4423,7 +4423,7 @@
         4,
         5
       ],
-      "schedule": null
+      "schedule": "09:00-18:00"
     }
   ]
 }
