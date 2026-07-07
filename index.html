@@ -5977,6 +5977,9 @@ function renderAttendView(skipAutoSync) {
         sched = sched.replace(/^[\u4e00-\u9fa5][^\s]*\s*/, '');
         scheduleHtml = '<div class="card-schedule">'+esc(sched)+'</div>';
       }
+    } else if (schedFlat && e.name !== '王雷') {
+      // 排班制：只显示"排班制"标签
+      scheduleHtml = '<div class="card-schedule">排班制</div>';
     }
     return '<div class="'+cardClass+'" id="emp-'+e.id+'">'
       + '<span class="card-dot '+dc+'"></span>'
