@@ -557,6 +557,15 @@ async function main() {
   }
   if (manualCount > 0) console.log('  ✅ 手动补充排班: ' + manualCount + ' 人');
 
+  // 不打卡的人去掉排班
+  var skipScheduleNames = ['王雷'];
+  for (const [userId, grp] of Object.entries(userGroupMap)) {
+    var name = nameMap[userId]?.name;
+    if (name && skipScheduleNames.indexOf(name) >= 0) {
+      delete userScheduleByDate[userId];
+    }
+  }
+
   // 用OA请假审批覆盖考勤状态（拉90天，分段请求），过滤休息日
   console.log('[7] 获取OA请假审批（' + leaveDateFromStr + ' ~ ' + leaveDateToStr + '）...');
   const leaveMap = await getLeaveApprovals(token, leaveDateFromStr, leaveDateToStr);
