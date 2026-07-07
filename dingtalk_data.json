@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-07T06:40:33.993Z",
+  "updated": "2026-07-07T07:13:33.855Z",
   "users": [
     {
       "name": "张毅",
@@ -3114,6 +3114,19 @@
           "s": "正常"
         }
       },
+      "todayStatus": {
+        "m": "在岗",
+        "s": "正常"
+      },
+      "workDays": null,
+      "schedule": "10:00-22:00 · 09:30-21:30 · 19:00-07:00 · 07:00-19:00",
+      "scheduleByDate": null
+    },
+    {
+      "name": "李继承",
+      "mobile": "",
+      "deptName": "",
+      "statusByDate": {},
       "todayStatus": {
         "m": "在岗",
         "s": "正常"
