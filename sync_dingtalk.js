@@ -294,7 +294,35 @@ async function main() {
     return result; // e.g., [1,2,3,4,5] = Mon-Fri
   }
 
-  // 根据考勤组配置推断每人工作日（0=Sun...6=Sat，如 [1,2,3,4,5]=周一至周五）
+  // 从class_setting中提取班次时间字符串（如 9:00-18:00）
+  function extractClassTime(cls) {
+    try {
+      var sections = cls.sections || (cls.class_setting && cls.class_setting.sections) || [];
+      if (!sections.length) return null;
+      var allTimes = [];
+      sections.forEach(function(sec){
+        (sec.times || []).forEach(function(t){
+          var timeStr = (t.check_time || '').slice(11, 16); // "HH:MM"
+          if (timeStr) allTimes.push(timeStr);
+        });
+      });
+      if (allTimes.length >= 2) return allTimes[0] + '-' + allTimes[allTimes.length - 1];
+    } catch(_) {}
+    return null;
+  }
+
+  // 构建 class_id → 时间字符串 的映射
+  var classTimeMap = {};
+  for (const [gid, cfg] of groupCache) {
+    var classes = cfg.classes || [];
+    classes.forEach(function(cls){
+      var timeStr = extractClassTime(cls);
+      if (timeStr) classTimeMap[cls.class_id] = timeStr;
+    });
+  }
+
+  // 根据考勤组配置推断每人工作日 + 班制时间
+  var userSchedule = {}; // userId → "9:00-18:00"
   let fixedCount = 0, turnCount = 0, noneCount = 0;
   for (const [userId, grp] of Object.entries(userGroupMap)) {
     const cfg = groupCache.get(grp.group_id);
@@ -306,10 +334,20 @@ async function main() {
         workDaysByUser[userId] = wdParsed;
         if (cfg.type === 'TURN') turnCount++; else fixedCount++;
       }
+      // 取第一个上班日的班次ID，查找对应时间
+      for (var wi = 0; wi < cfg.work_day_list.length; wi++) {
+        var shiftId = cfg.work_day_list[wi];
+        if (shiftId !== 0 && classTimeMap[shiftId]) {
+          userSchedule[userId] = classTimeMap[shiftId];
+          break;
+        }
+      }
     }
     // work_day_list 全7天上班 或 无work_day_list → 无休息日过滤
   }
   console.log('  ✅ 工作日配置: FIXED=' + fixedCount + '人 TURN=' + turnCount + '人 NONE=' + noneCount + '人');
+  var scheduleCount = Object.keys(userSchedule).length;
+  console.log('  ✅ 班制时间: ' + scheduleCount + '人');
 
   // 考勤只能拉最近7天（API硬限制）
   const today = new Date();
@@ -399,13 +437,15 @@ async function main() {
       if (prev && prev.statusByDate) Object.assign(merged, prev.statusByDate);
       Object.assign(merged, newSBD);
       const wd = workDaysByUser[u.userid];
+      const schedule = userSchedule[u.userid] || null;
       return {
         name: u.name,
         mobile: u.mobile || '',
         deptName: u.dept_name_list || '',
         statusByDate: merged,
         todayStatus: newSBD[todayStr] || DEFAULT_STATUS,
-        workDays: wd || null  // null=未获取到考勤组配置（全勤，不过滤休息日）
+        workDays: wd || null,  // null=未获取到考勤组配置（全勤，不过滤休息日）
+        schedule: schedule     // "9:00-18:00" 或 null
       };
     })
   };
