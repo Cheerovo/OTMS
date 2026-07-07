@@ -259,6 +259,204 @@ async function getOutApprovals(token, dateFrom, dateTo) {
   return outMap;
 }
 
+// 从表单字段中提取日期列表（通用逻辑，支持多日期表单如加班）
+function extractDatesFromFields(fields, debugName) {
+  var dates = [];
+
+  // DDDateRange（日期范围，如出差起止日期）
+  var rf = fields.find(function(f){ return f.component_type === 'DDDateRange'; });
+  if (rf && rf.ext_value) {
+    try { var rv = JSON.parse(rf.ext_value); if (rv.beginDate) dates.push(toLocalDate(rv.beginDate)); } catch(_) {}
+  }
+  // DDGooutField: JSON数组 ["开始时间", "结束时间", ...]
+  var gf = fields.find(function(f){ return f.component_type === 'DDGooutField'; });
+  if (gf && gf.value) {
+    try { var gv = JSON.parse(gf.value); if (Array.isArray(gv) && gv[0]) dates.push(String(gv[0]).slice(0,10)); } catch(_) {}
+  }
+  // DDDateField（顶层）
+  var df = fields.find(function(f){ return f.component_type === 'DDDateField'; });
+  if (df && df.value) {
+    var ds = String(df.value).slice(0,10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(ds)) dates.push(ds);
+  }
+
+  // DDBizSuite：加班等复杂表单，嵌套TableField→DDDateField
+  var bizField = fields.find(function(f){ return f.component_type === 'DDBizSuite'; });
+  if (bizField && bizField.value) {
+    try {
+      var bizChildren = JSON.parse(bizField.value);
+      if (Array.isArray(bizChildren)) {
+        for (var bi = 0; bi < bizChildren.length; bi++) {
+          var child = bizChildren[bi];
+          // TableField 中有 rowValue，每个row包含加班日期
+          if (child.componentType === 'TableField' && child.value) {
+            try {
+              var rows = JSON.parse(child.value);
+              if (Array.isArray(rows)) {
+                for (var ri = 0; ri < rows.length; ri++) {
+                  var rowValue = rows[ri].rowValue;
+                  if (Array.isArray(rowValue)) {
+                    for (var rvi = 0; rvi < rowValue.length; rvi++) {
+                      var rv2 = rowValue[rvi];
+                      if (rv2.componentType === 'DDDateField' && rv2.value) {
+                        var rds = String(rv2.value).slice(0,10);
+                        if (/^\d{4}-\d{2}-\d{2}$/.test(rds)) dates.push(rds);
+                      }
+                    }
+                  }
+                }
+              }
+            } catch(_) {}
+          }
+          // 直接的 DDDateField 子组件
+          if (child.componentType === 'DDDateField' && child.value) {
+            var cds = String(child.value).slice(0,10);
+            if (/^\d{4}-\d{2}-\d{2}$/.test(cds)) dates.push(cds);
+          }
+        }
+      }
+    } catch(_) {}
+  }
+
+  // 通用：遍历所有字段，尝试从value或ext_value中提取日期
+  for (var i = 0; i < fields.length; i++) {
+    var f = fields[i];
+    if (f.component_type === 'DDBizSuite' || f.component_type === 'DDDateRange' ||
+        f.component_type === 'DDGooutField' || f.component_type === 'DDDateField') continue; // 已处理
+    if (f.value) {
+      try {
+        var fv = JSON.parse(f.value);
+        if (Array.isArray(fv) && fv[0] && typeof fv[0] === 'string') {
+          var ds2 = String(fv[0]).slice(0,10);
+          if (/^\d{4}-\d{2}-\d{2}$/.test(ds2)) dates.push(ds2);
+        }
+      } catch(_) {}
+      var ds3 = String(f.value).slice(0,10);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(ds3)) dates.push(ds3);
+    }
+    if (f.ext_value) {
+      try {
+        var ev = JSON.parse(f.ext_value);
+        if (ev.beginDate) dates.push(toLocalDate(ev.beginDate));
+        if (ev.startDate) dates.push(toLocalDate(ev.startDate));
+        if (ev.date) dates.push(toLocalDate(ev.date));
+      } catch(_) {}
+    }
+  }
+
+  // 去重
+  var seen = {};
+  dates = dates.filter(function(d){ if (seen[d]) return false; seen[d] = true; return true; });
+
+  return dates;
+}
+
+// 获取OA出差审批记录
+async function getBusinessTravelApprovals(token, dateFrom, dateTo) {
+  const code = 'PROC-EF6Y0XWVO2-IGL2LX89MWVYY2JS1RDA2-77UUC1DI-94';
+  const fromDate = new Date(dateFrom + 'T00:00:00+08:00');
+  const toDate = new Date(dateTo + 'T23:59:59+08:00');
+  const result = {};
+
+  const CHUNK_DAYS = 30;
+  let chunkStart = new Date(fromDate);
+
+  while (chunkStart < toDate) {
+    let chunkEnd = new Date(chunkStart);
+    chunkEnd.setDate(chunkEnd.getDate() + CHUNK_DAYS - 1);
+    if (chunkEnd > toDate) chunkEnd = toDate;
+
+    const cStart = chunkStart.getTime();
+    const cEnd = chunkEnd.getTime();
+
+    try {
+      const idsRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/processinstance/listids', { access_token: token }, {
+        process_code: code, start_time: cStart, end_time: cEnd, size: 20
+      });
+      if (idsRes.errcode !== 0) { chunkStart = new Date(chunkEnd); chunkStart.setDate(chunkStart.getDate() + 1); continue; }
+      const idList = (idsRes.result?.list || []);
+
+      for (const id of idList) {
+        const detailRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/processinstance/get', { access_token: token }, { process_instance_id: id });
+        if (detailRes.errcode !== 0) continue;
+        const inst = detailRes.process_instance;
+        if (!inst || inst.status !== 'COMPLETED') continue;
+
+        const userId = inst.originator_userid;
+        const dates = extractDatesFromFields(inst.form_component_values || []);
+
+        for (var di = 0; di < dates.length; di++) {
+          var dateFound = dates[di];
+          if (dateFound >= dateFrom && dateFound <= dateTo) {
+            if (!result[userId]) result[userId] = {};
+            result[userId][dateFound] = {m:'外勤', s:'出差'};
+          }
+        }
+        await sleep(200);
+      }
+    } catch(_) {}
+    await sleep(300);
+
+    chunkStart = new Date(chunkEnd);
+    chunkStart.setDate(chunkStart.getDate() + 1);
+  }
+
+  return result;
+}
+
+// 获取OA加班审批记录
+async function getOvertimeApprovals(token, dateFrom, dateTo) {
+  const code = 'PROC-EF6Y0XWVO2-LGL2JKYWTTC8D8IBNMRS1-DXLQC1DI-96';
+  const fromDate = new Date(dateFrom + 'T00:00:00+08:00');
+  const toDate = new Date(dateTo + 'T23:59:59+08:00');
+  const result = {};
+
+  const CHUNK_DAYS = 30;
+  let chunkStart = new Date(fromDate);
+
+  while (chunkStart < toDate) {
+    let chunkEnd = new Date(chunkStart);
+    chunkEnd.setDate(chunkEnd.getDate() + CHUNK_DAYS - 1);
+    if (chunkEnd > toDate) chunkEnd = toDate;
+
+    const cStart = chunkStart.getTime();
+    const cEnd = chunkEnd.getTime();
+
+    try {
+      const idsRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/processinstance/listids', { access_token: token }, {
+        process_code: code, start_time: cStart, end_time: cEnd, size: 20
+      });
+      if (idsRes.errcode !== 0) { chunkStart = new Date(chunkEnd); chunkStart.setDate(chunkStart.getDate() + 1); continue; }
+      const idList = (idsRes.result?.list || []);
+
+      for (const id of idList) {
+        const detailRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/processinstance/get', { access_token: token }, { process_instance_id: id });
+        if (detailRes.errcode !== 0) continue;
+        const inst = detailRes.process_instance;
+        if (!inst || inst.status !== 'COMPLETED') continue;
+
+        const userId = inst.originator_userid;
+        const dates = extractDatesFromFields(inst.form_component_values || []);
+
+        for (var di = 0; di < dates.length; di++) {
+          var dateFound = dates[di];
+          if (dateFound >= dateFrom && dateFound <= dateTo) {
+            if (!result[userId]) result[userId] = {};
+            result[userId][dateFound] = {m:'加班', s:'加班'};
+          }
+        }
+        await sleep(200);
+      }
+    } catch(_) {}
+    await sleep(300);
+
+    chunkStart = new Date(chunkEnd);
+    chunkStart.setDate(chunkStart.getDate() + 1);
+  }
+
+  return result;
+}
+
 // 获取考勤记录
 async function getAttendance(token, userIds, dateFrom, dateTo) {
   const results = [];
@@ -694,6 +892,46 @@ async function main() {
   }
   const outPersonCount = Object.keys(outMap).filter(uid => nameMap[uid]).length;
   console.log('  ✅ 外出覆盖 ' + outOverlayCount + ' 个日期（' + outPersonCount + ' 人）');
+
+  // 获取OA出差审批
+  console.log('[9] 获取OA出差审批...');
+  const travelMap = await getBusinessTravelApprovals(token, leaveDateFromStr, leaveDateToStr);
+  let travelOverlayCount = 0;
+  for (const [userId, dateMap] of Object.entries(travelMap)) {
+    const name = nameMap[userId]?.name;
+    if (!name) continue;
+    if (!statusMap[name]) statusMap[name] = {};
+    for (const [date, st] of Object.entries(dateMap)) {
+      // 出差：如果当天没有其他异常状态，标记为外勤/出差
+      var cur = statusMap[name][date];
+      if (!cur || cur.m === '在岗' || cur.m === '休息') {
+        statusMap[name][date] = st;
+        travelOverlayCount++;
+      }
+    }
+  }
+  const travelPersonCount = Object.keys(travelMap).filter(uid => nameMap[uid]).length;
+  console.log('  ✅ 出差覆盖 ' + travelOverlayCount + ' 个日期（' + travelPersonCount + ' 人）');
+
+  // 获取OA加班审批
+  console.log('[10] 获取OA加班审批...');
+  const overtimeMap = await getOvertimeApprovals(token, leaveDateFromStr, leaveDateToStr);
+  let overtimeOverlayCount = 0;
+  for (const [userId, dateMap] of Object.entries(overtimeMap)) {
+    const name = nameMap[userId]?.name;
+    if (!name) continue;
+    if (!statusMap[name]) statusMap[name] = {};
+    for (const [date, st] of Object.entries(dateMap)) {
+      // 加班：只覆盖休息日（工作日已有正常打卡状态）
+      var cur = statusMap[name][date];
+      if (!cur || cur.m === '休息') {
+        statusMap[name][date] = st;
+        overtimeOverlayCount++;
+      }
+    }
+  }
+  const overtimePersonCount = Object.keys(overtimeMap).filter(uid => nameMap[uid]).length;
+  console.log('  ✅ 加班覆盖 ' + overtimeOverlayCount + ' 个日期（' + overtimePersonCount + ' 人）');
 
 
   const todayStr = toLocalDate(today.getTime());

@@ -830,6 +830,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .ms-person-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
 .ms-person-dot.on { background: #C4D4E0; } .ms-person-dot.leave { background: #E8C9A8; }
 .ms-person-dot.out { background: #C8BFE0; } .ms-person-dot.other { background: #E0A8A8; }
+.ms-person-dot.overtime { background: #D4BF8A; }
 .ms-person-dot[style*="transparent"] { visibility: hidden; }
 .ms-person-summary { font-size: 10px; color: var(--text-dim); flex-shrink: 0; white-space: nowrap; }
 .attend-stats { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
@@ -840,6 +841,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .as-leave { color: #D4915E; } .as-leave .stat-dot { background: #D4915E; }
 .as-out { color: #9B8EC4; } .as-out .stat-dot { background: #9B8EC4; }
 .as-other { color: #CA6B6B; } .as-other .stat-dot { background: #CA6B6B; }
+.as-overtime { color: #C49B5E; } .as-overtime .stat-dot { background: #C49B5E; }
 .as-nodd { color: #B0B8C1; } .as-nodd .stat-dot { background: #D0D5DD; }
 .attend-divider { border: none; border-top: 1px solid var(--border-subtle); margin-bottom: 16px; }
 /* Card Grid */
@@ -862,6 +864,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-card .card-dot.leave { background: #D4915E; }
 .attend-card .card-dot.out { background: #9B8EC4; }
 .attend-card .card-dot.other { background: #CA6B6B; width: 8px; height: 8px; }
+.attend-card .card-dot.overtime { background: #C49B5E; }
 .attend-card .card-dot.nodd { background: #DDD9D4; }
 .as-nodd { color: #B5B0AA; } .as-nodd .stat-dot { background: #DDD9D4; }
 .attend-card.nodd { opacity: 0.6; }
@@ -5698,8 +5701,8 @@ function switchFuncSubView(sub, tab) {
 }
 
 // ===== Attendance View (在岗状态) =====
-const ATTEND_MAIN = ['在岗','请假','外勤','旷工','休息','不在钉钉数据'];
-const ATTEND_CSS = {'在岗':'as-on','请假':'as-leave','外勤':'as-out','旷工':'as-other','休息':'as-rest','不在钉钉数据':'as-nodd'};
+const ATTEND_MAIN = ['在岗','请假','外勤','旷工','加班','休息','不在钉钉数据'];
+const ATTEND_CSS = {'在岗':'as-on','请假':'as-leave','外勤':'as-out','旷工':'as-other','加班':'as-overtime','休息':'as-rest','不在钉钉数据':'as-nodd'};
 
 function getTodayStr() { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
@@ -5952,6 +5955,7 @@ function renderAttendView(skipAutoSync) {
   function dotClass(main) {
     if (main === '在岗') return 'on'; if (main === '请假') return 'leave';
     if (main === '外勤') return 'out'; if (main === '旷工') return 'other';
+    if (main === '加班') return 'overtime';
     if (main === '休息') return 'rest';
     if (main === '不在钉钉数据') return 'nodd'; return 'other';
   }
