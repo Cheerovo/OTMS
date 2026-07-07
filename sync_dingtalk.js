@@ -190,6 +190,75 @@ async function getLeaveApprovals(token, dateFrom, dateTo) {
   return leaveMap;
 }
 
+// 获取OA外出审批记录
+async function getOutApprovals(token, dateFrom, dateTo) {
+  const outCode = 'PROC-EF6YCS6WO2-KNL27FSMPPBM60V4TLPH3-06GZC1DI-F1';
+  const fromDate = new Date(dateFrom + 'T00:00:00+08:00');
+  const toDate = new Date(dateTo + 'T23:59:59+08:00');
+  const outMap = {};
+
+  const CHUNK_DAYS = 30;
+  let chunkStart = new Date(fromDate);
+
+  while (chunkStart < toDate) {
+    let chunkEnd = new Date(chunkStart);
+    chunkEnd.setDate(chunkEnd.getDate() + CHUNK_DAYS - 1);
+    if (chunkEnd > toDate) chunkEnd = toDate;
+
+    const cStart = chunkStart.getTime();
+    const cEnd = chunkEnd.getTime();
+
+    try {
+      const idsRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/processinstance/listids', { access_token: token }, {
+        process_code: outCode, start_time: cStart, end_time: cEnd, size: 20
+      });
+      if (idsRes.errcode !== 0) { chunkStart = new Date(chunkEnd); chunkStart.setDate(chunkStart.getDate() + 1); continue; }
+      const idList = (idsRes.result?.list || []);
+
+      for (const id of idList) {
+        const detailRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/processinstance/get', { access_token: token }, { process_instance_id: id });
+        if (detailRes.errcode !== 0) continue;
+        const inst = detailRes.process_instance;
+        if (!inst || inst.status !== 'COMPLETED') continue;
+
+        const userId = inst.originator_userid;
+        var dateFound = null;
+        var fields = inst.form_component_values || [];
+
+        // DDGooutField: 外出字段，value是JSON数组 ["开始时间", "结束时间", ...]
+        var gooutField = fields.find(function(f){ return f.component_type === 'DDGooutField'; });
+        if (gooutField && gooutField.value) {
+          try {
+            var gooutVal = JSON.parse(gooutField.value);
+            if (Array.isArray(gooutVal) && gooutVal[0]) {
+              dateFound = String(gooutVal[0]).slice(0, 10);
+            }
+          } catch(_) {}
+        }
+        // DDDateRange 日期范围
+        if (!dateFound) {
+          var rangeField = fields.find(function(f){ return f.component_type === 'DDDateRange'; });
+          if (rangeField && rangeField.ext_value) {
+            try { var rangeVal = JSON.parse(rangeField.ext_value); if (rangeVal.beginDate) dateFound = toLocalDate(rangeVal.beginDate); } catch(_) {}
+          }
+        }
+
+        if (dateFound && dateFound >= dateFrom && dateFound <= dateTo) {
+          if (!outMap[userId]) outMap[userId] = {};
+          outMap[userId][dateFound] = {m:'外勤', s:'外出'};
+        }
+        await sleep(200);
+      }
+    } catch(_) {}
+    await sleep(300);
+
+    chunkStart = new Date(chunkEnd);
+    chunkStart.setDate(chunkStart.getDate() + 1);
+  }
+
+  return outMap;
+}
+
 // 获取考勤记录
 async function getAttendance(token, userIds, dateFrom, dateTo) {
   const results = [];
@@ -590,6 +659,22 @@ async function main() {
   }
   const leavePersonCount = Object.keys(leaveMap).filter(uid => nameMap[uid]).length;
   console.log('  ✅ 请假覆盖 ' + leaveOverlayCount + ' 个日期（' + leavePersonCount + ' 人）' + (leaveSkipRest > 0 ? '，跳过 ' + leaveSkipRest + ' 个休息日请假' : ''));
+
+  // 获取OA外出审批
+  console.log('[8] 获取OA外出审批...');
+  const outMap = await getOutApprovals(token, leaveDateFromStr, leaveDateToStr);
+  let outOverlayCount = 0;
+  for (const [userId, dateMap] of Object.entries(outMap)) {
+    const name = nameMap[userId]?.name;
+    if (!name) continue;
+    if (!statusMap[name]) statusMap[name] = {};
+    for (const [date, st] of Object.entries(dateMap)) {
+      statusMap[name][date] = st;
+      outOverlayCount++;
+    }
+  }
+  const outPersonCount = Object.keys(outMap).filter(uid => nameMap[uid]).length;
+  console.log('  ✅ 外出覆盖 ' + outOverlayCount + ' 个日期（' + outPersonCount + ' 人）');
 
 
   const todayStr = toLocalDate(today.getTime());
