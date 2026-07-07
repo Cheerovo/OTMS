@@ -246,6 +246,71 @@ async function main() {
     return;
   }
 
+  // 获取考勤组配置 → 每人工作日
+  console.log('[4] 获取考勤组配置...');
+  const workDaysByUser = {}; // userId → [dayNum, ...]  (0=Sun, 1=Mon, ..., 6=Sat)
+  const groupCache = new Map();
+  const userGroupMap = {}; // userId → {group_id, name}
+  for (let i = 0; i < allUsers.length; i++) {
+    const u = allUsers[i];
+    try {
+      const res = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/attendance/getusergroup', { access_token: token }, { userid: u.userid });
+      if (res.errcode === 0 && res.result) userGroupMap[u.userid] = res.result;
+    } catch(_) {}
+    if (i > 0 && i % 20 === 0) {
+      console.log('  查询用户考勤组: ' + i + '/' + allUsers.length + '...');
+      await sleep(500);
+    }
+    await sleep(150);
+  }
+  const uniqueGroups = new Set(Object.values(userGroupMap).map(g => g.group_id).filter(Boolean));
+  const usersWithGroup = Object.keys(userGroupMap).length;
+  console.log('  ✅ ' + usersWithGroup + ' 人有所属考勤组, 共 ' + uniqueGroups.size + ' 个不同考勤组');
+
+  // 建立 group_id → 某个成员userId 的映射（用作 op_user_id）
+  const groupMemberMap = {}; // group_id → userId
+  for (const [userId, grp] of Object.entries(userGroupMap)) {
+    if (grp.group_id && !groupMemberMap[grp.group_id]) groupMemberMap[grp.group_id] = userId;
+  }
+
+  // 查每个考勤组的详情（班次、工作日）
+  for (const gid of uniqueGroups) {
+    try {
+      const opUserId = groupMemberMap[gid] || allUsers[0].userid;
+      const res = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/attendance/group/query', { access_token: token }, { group_id: gid, op_user_id: opUserId });
+      if (res.errcode === 0 && res.result) groupCache.set(gid, res.result);
+      else console.warn('  ⚠️ 考勤组' + gid + '查询失败: ' + (res.errmsg || res.errcode));
+    } catch(_) {}
+    await sleep(300);
+  }
+
+  // work_day_list 是7元素数组 [Sun, Mon, ..., Sat]，值=0休息，值>0为上班的shift_id
+  // 转换为工作日的 dayNum 数组（0=Sun, 1=Mon, ..., 6=Sat）
+  function parseWorkDays(wdl) {
+    var result = [];
+    for (var i = 0; i < wdl.length && i < 7; i++) {
+      if (wdl[i] !== 0) result.push(i);
+    }
+    return result; // e.g., [1,2,3,4,5] = Mon-Fri
+  }
+
+  // 根据考勤组配置推断每人工作日（0=Sun...6=Sat，如 [1,2,3,4,5]=周一至周五）
+  let fixedCount = 0, turnCount = 0, noneCount = 0;
+  for (const [userId, grp] of Object.entries(userGroupMap)) {
+    const cfg = groupCache.get(grp.group_id);
+    if (!cfg) continue;
+    if (cfg.type === 'NONE') { noneCount++; continue; }
+    if (cfg.work_day_list && cfg.work_day_list.length === 7) {
+      var wdParsed = parseWorkDays(cfg.work_day_list);
+      if (wdParsed.length > 0 && wdParsed.length < 7) {
+        workDaysByUser[userId] = wdParsed;
+        if (cfg.type === 'TURN') turnCount++; else fixedCount++;
+      }
+    }
+    // work_day_list 全7天上班 或 无work_day_list → 无休息日过滤
+  }
+  console.log('  ✅ 工作日配置: FIXED=' + fixedCount + '人 TURN=' + turnCount + '人 NONE=' + noneCount + '人');
+
   // 考勤只能拉最近7天（API硬限制）
   const today = new Date();
   const dates = [];
@@ -261,13 +326,13 @@ async function main() {
   const leaveDateFromStr = toLocalDate(leaveDateFrom.getTime());
   const leaveDateToStr = dates[dates.length - 1];
 
-  console.log('[4] 获取考勤记录...');
+  console.log('[5] 获取考勤记录...');
   const userIds = allUsers.map(u => u.userid);
   const attendance = await getAttendance(token, userIds, dates[0], dates[dates.length - 1]);
   console.log('  ✅ 共 ' + attendance.length + ' 条记录');
 
   // 整理考勤状态
-  console.log('[5] 整理考勤数据...');
+  console.log('[6] 整理考勤数据...');
   const nameMap = {};
   allUsers.forEach(u => { nameMap[u.userid] = u; });
 
@@ -290,36 +355,8 @@ async function main() {
   });
   console.log('  ✅ 考勤记录覆盖 ' + Object.keys(statusMap).length + ' 人');
 
-  // 根据考勤记录推断每人工作日（默认做五休二，周末有打卡才加）
-  const workDaysMap = {}; // name → Set of day numbers (1=Mon, 7=Sun)
-  // 默认周一到周五为工作日
-  attendance.forEach(r => {
-    const name = r.userName || (nameMap[r.userId]?.name) || r.userId;
-    if (!workDaysMap[name]) workDaysMap[name] = new Set([1,2,3,4,5]);
-    var rawDate = r.workDate || r.userCheckTime;
-    var date;
-    if (typeof rawDate === 'number') {
-      date = toLocalDate(rawDate);
-    } else if (/^\d{10}$/.test(String(rawDate))) {
-      date = toLocalDate(Number(rawDate));
-    } else if (/^\d{13}$/.test(String(rawDate))) {
-      date = toLocalDate(Number(rawDate));
-    } else {
-      date = String(rawDate || '').slice(0, 10);
-    }
-    var dow = new Date(date + 'T00:00:00+08:00').getDay(); // 0=Sun
-    var dayNum = dow === 0 ? 7 : dow; // 1=Mon ... 7=Sun
-    workDaysMap[name].add(dayNum);
-  });
-  // 为没有考勤记录的人设默认值
-  allUsers.forEach(u => {
-    if (!workDaysMap[nameMap[u.userid]?.name || u.name]) {
-      workDaysMap[u.name] = new Set([1,2,3,4,5]);
-    }
-  });
-
-  // 用OA请假审批覆盖考勤状态（拉90天，分段请求）
-  console.log('[6] 获取OA请假审批（' + leaveDateFromStr + ' ~ ' + leaveDateToStr + '）...');
+  // 用OA请假审批覆盖考勤状态（拉90天，分段请求），过滤休息日
+  console.log('[7] 获取OA请假审批（' + leaveDateFromStr + ' ~ ' + leaveDateToStr + '）...');
   const leaveMap = await getLeaveApprovals(token, leaveDateFromStr, leaveDateToStr);
   let leaveOverlayCount = 0;
   let leaveSkipRest = 0;
@@ -327,20 +364,19 @@ async function main() {
     const name = nameMap[userId]?.name;
     if (!name) continue;
     if (!statusMap[name]) statusMap[name] = {};
-    const wdSet = workDaysMap[name];
+    const wdList = workDaysByUser[userId];
     for (const [date, st] of Object.entries(dateMap)) {
-      // 如果该日是此人的休息日，跳过请假标记
-      if (wdSet && wdSet.size > 0) {
-        var dow = new Date(date + 'T00:00:00+08:00').getDay();
-        var dayNum = dow === 0 ? 7 : dow;
-        if (!wdSet.has(dayNum)) { leaveSkipRest++; continue; }
+      // 有考勤组工作日配置时，跳过休息日的请假标记
+      if (wdList) {
+        var dayNum = new Date(date + 'T00:00:00+08:00').getDay(); // 0=Sun
+        if (!wdList.includes(dayNum)) { leaveSkipRest++; continue; }
       }
       statusMap[name][date] = st;
       leaveOverlayCount++;
     }
   }
   const leavePersonCount = Object.keys(leaveMap).filter(uid => nameMap[uid]).length;
-  console.log('  ✅ 请假覆盖 ' + leaveOverlayCount + ' 个日期（' + leavePersonCount + ' 人）' + (leaveSkipRest > 0 ? '，跳过 ' + leaveSkipRest + ' 个休息日' : ''));
+  console.log('  ✅ 请假覆盖 ' + leaveOverlayCount + ' 个日期（' + leavePersonCount + ' 人）' + (leaveSkipRest > 0 ? '，跳过 ' + leaveSkipRest + ' 个休息日请假' : ''));
 
 
   const todayStr = toLocalDate(today.getTime());
@@ -362,14 +398,14 @@ async function main() {
       const merged = {};
       if (prev && prev.statusByDate) Object.assign(merged, prev.statusByDate);
       Object.assign(merged, newSBD);
-      const wdSet = workDaysMap[u.name];
+      const wd = workDaysByUser[u.userid];
       return {
         name: u.name,
         mobile: u.mobile || '',
         deptName: u.dept_name_list || '',
         statusByDate: merged,
         todayStatus: newSBD[todayStr] || DEFAULT_STATUS,
-        workDays: wdSet ? [...wdSet].sort((a,b) => a-b) : [1,2,3,4,5] // 默认做五休二
+        workDays: wd || null  // null=未获取到考勤组配置（全勤，不过滤休息日）
       };
     })
   };
@@ -377,7 +413,7 @@ async function main() {
   fs.writeFileSync(DATA_FILE, JSON.stringify(output, null, 2), 'utf8');
   console.log('');
   console.log('🎉 同步完成！输出: ' + DATA_FILE);
-  console.log('  部门: ' + allDeptIds.length + ' 个, 员工: ' + output.users.length + ' 人, 考勤: ' + attendance.length + ' 条, 请假覆盖: ' + leaveOverlayCount + ' 天');
+  console.log('  部门: ' + allDeptIds.length + ' 个, 员工: ' + output.users.length + ' 人, 考勤: ' + attendance.length + ' 条');
 
   console.log('');
   console.log('=== 今日在岗状态 ===');
