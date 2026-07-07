@@ -612,7 +612,7 @@ async function main() {
 
   // 手动补充：已知固定班次但打卡匹配失败的员工
   var manualSchedule = {
-    '汪顺': '09:00-18:00', '王力': '09:00-18:00', '王韬': '09:00-18:00', '安东生': '09:00-18:00',
+    '汪顺': '09:00-18:00', '王力': '09:00-18:00', '王韬': '09:00-18:00',
     '方有保': '08:00-17:00', '金学忠': '08:00-17:00', '胡金明': '08:00-17:00',
     '刘顺兰': '07:00-16:00',
     '肖德云': '08:00-17:00', '丁成英': '08:00-17:00', '高光付': '08:00-17:00', '孙建芳': '08:00-17:00', '徐培珍': '08:00-17:00', '施玉芹': '08:00-17:00', '殷德昌': '08:00-17:00', '翟建设': '08:00-17:00', '王建平': '08:00-17:00'
@@ -636,6 +636,19 @@ async function main() {
       delete userScheduleByDate[userId];
     }
   }
+
+  // 强制排班制：保安人员（不固定班次，按实际打卡匹配）
+  var forceTurnNames = ['朱鑫沛','安东生','庄艳林','黄连兵','谢小强','史文奎','胡程林','刘鹏','孔令波','吉庆','刘曦文','杨永宁','姚伟','李俭波','胡保林','李军立','贾元录','朱朝甫','徐刘岸','马金超','宋英杰','李龙','朱家良','杨永奋','李威威','王海涛','王玉玺','许磊'];
+  var forceTurnCount = 0;
+  for (const [userId, grp] of Object.entries(userGroupMap)) {
+    var name = nameMap[userId]?.name;
+    if (name && forceTurnNames.indexOf(name) >= 0) {
+      userSchedule[userId] = '排班制';
+      delete userScheduleByDate[userId];
+      forceTurnCount++;
+    }
+  }
+  if (forceTurnCount > 0) console.log('  ✅ 强制排班制: ' + forceTurnCount + ' 人');
 
   // 用OA请假审批覆盖考勤状态（拉90天，分段请求），过滤休息日
   console.log('[7] 获取OA请假审批（' + leaveDateFromStr + ' ~ ' + leaveDateToStr + '）...');
