@@ -669,7 +669,13 @@ async function main() {
     if (!name) continue;
     if (!statusMap[name]) statusMap[name] = {};
     for (const [date, st] of Object.entries(dateMap)) {
-      statusMap[name][date] = st;
+      // 有外出审批单：如果当天早晚正常打卡→在岗/外出；缺卡→外勤/外出
+      var cur = statusMap[name][date];
+      if (cur && cur.m === '在岗') {
+        statusMap[name][date] = {m:'在岗', s:'外出'};
+      } else {
+        statusMap[name][date] = {m:'外勤', s:'外出'};
+      }
       outOverlayCount++;
     }
   }
