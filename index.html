@@ -873,6 +873,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-card .card-name { font-size: 11px; font-weight: 600; color: var(--text); letter-spacing: 0.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 1px; }
 .attend-card .card-status { font-size: 10px; font-weight: 500; white-space: nowrap; display: flex; align-items: center; gap: 2px; }
 .attend-card .card-schedule { font-size: 9px; font-weight: 300; color: var(--text-muted); margin-top: 1px; }
+.bu-shift-link { font-size: 10px; color: var(--accent); text-decoration: underline; cursor: pointer; position: relative; display: inline-flex; align-items: center; white-space: nowrap; }
+.bu-shift-tip { display: none; position: absolute; top: 100%; left: 0; z-index: 1000; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 14px; font-size: 10px; line-height: 1.7; white-space: nowrap; box-shadow: 0 6px 20px rgba(0,0,0,0.18); color: var(--text); font-weight: 400; text-decoration: none; margin-top: 6px; }
+.bu-shift-link:hover .bu-shift-tip { display: block; }
 .card-st-main { font-weight: 600; }
 .card-st-main.on { color: #7A8FA8; }
 .card-st-main.leave { color: #C57D48; }
@@ -5724,6 +5727,10 @@ function renderAttendView(skipAutoSync) {
   if (!attData[date]) attData[date] = {};
   var workDaysMap = loadWorkDays();
   var scheduleMap = loadSchedules();
+  var BU_SHIFT_NOTES = {
+    '园区公寓': ['公寓中班 10:30-19:30', '公寓晚班 12:00-21:00', '公寓维修早班 08:00-17:00', '公寓维修晚班 13:00-22:00'],
+    '物业': ['安保白班 09:30-21:30', '安保白班1 07:00-19:00', '安保中班 12:00-00:00', '安保夜班 19:00-07:00', '安保队长白班 06:00-18:00', '安保队长夜班 18:00-06:00', '保安夜班21点 21:30-09:30', '物业安保值班 09:00-21:00', '外包保安早9班次 09:30-21:30', '外包保安早10班次 10:00-22:00']
+  };
   function isRestDay(name, dateStr) {
     var wd = workDaysMap[name];
     if (!wd || !Array.isArray(wd) || wd.length === 0) return false;
@@ -5961,8 +5968,16 @@ function renderAttendView(skipAutoSync) {
     else if (dc === 'rest') cardClass += ' rest';
     else if (isAb) cardClass += ' has-ab';
     var scheduleHtml = '';
-    var sched = scheduleMap[e.name];
-    if (sched) scheduleHtml = '<div class="card-schedule">'+esc(sched)+'</div>';
+    var schedByDate = scheduleMap[e.name];
+    var schedFlat = scheduleMap[e.name + '_flat'];
+    if (schedByDate && typeof schedByDate === 'object') {
+      // 固定班制：有当日排班就显示
+      var sched = schedByDate[date] || '';
+      if (sched) scheduleHtml = '<div class="card-schedule">'+esc(sched)+'</div>';
+    } else if (schedFlat) {
+      // 排班制：只显示"排班制"标签，具体班次见BU班次说明
+      scheduleHtml = '<div class="card-schedule">排班制</div>';
+    }
     return '<div class="'+cardClass+'" id="emp-'+e.id+'">'
       + '<span class="card-dot '+dc+'"></span>'
       + '<div class="card-body">'
@@ -6012,8 +6027,13 @@ function renderAttendView(skipAutoSync) {
         buStatsHtml += '<span class="bu-stat '+ATTEND_CSS[s]+'" onclick="event.stopPropagation();scrollToFirst(\''+esc(s)+'\')" title="点击查看"><span class="stat-dot"></span>'+s+' <strong>'+buCounts[s]+'</strong>'+bd+'</span>';
       }
     });
+    var shiftNoteHtml = '';
+    var shiftNote = BU_SHIFT_NOTES[bu];
+    if (shiftNote) {
+      shiftNoteHtml = ' <span class="bu-shift-link">班次说明<span class="bu-shift-tip">'+shiftNote.join('<br>')+'</span></span>';
+    }
     html += '<div class="attend-bu-section">';
-    html += '<div class="attend-bu-title">'+esc(bu)+' <span class="bu-count">'+list.length+'人</span><span class="bu-stats-inline">'+buStatsHtml+'</span></div>';
+    html += '<div class="attend-bu-title">'+esc(bu)+' <span class="bu-count">'+list.length+'人</span><span class="bu-stats-inline">'+buStatsHtml+'</span>'+shiftNoteHtml+'</div>';
     html += '<div class="attend-grid">';
     list.forEach(e => html += renderCard(e));
     html += '</div></div>';
@@ -6022,8 +6042,13 @@ function renderAttendView(skipAutoSync) {
   Object.keys(groups).filter(bu => !buSet.includes(bu)).forEach(bu => {
     const list = groups[bu];
     if (!list || !list.length) return;
+    var shiftNoteHtml2 = '';
+    var shiftNote2 = BU_SHIFT_NOTES[bu];
+    if (shiftNote2) {
+      shiftNoteHtml2 = ' <span class="bu-shift-link">班次说明<span class="bu-shift-tip">'+shiftNote2.join('<br>')+'</span></span>';
+    }
     html += '<div class="attend-bu-section">';
-    html += '<div class="attend-bu-title">'+esc(bu)+' <span class="bu-count">'+list.length+'人</span></div>';
+    html += '<div class="attend-bu-title">'+esc(bu)+' <span class="bu-count">'+list.length+'人</span>'+shiftNoteHtml2+'</div>';
     html += '<div class="attend-grid">';
     list.forEach(e => html += renderCard(e));
     html += '</div></div>';
@@ -6074,7 +6099,7 @@ async function syncFromDingTalkSilent(date, attData, empList) {
     var ddMap = {};
     var wdMap = {};
     var schedMap = {};
-    (dd.users || []).forEach(function(u) { ddMap[u.name] = u; if (u.workDays) wdMap[u.name] = u.workDays; if (u.schedule) schedMap[u.name] = u.schedule; });
+    (dd.users || []).forEach(function(u) { ddMap[u.name] = u; if (u.workDays) wdMap[u.name] = u.workDays; if (u.scheduleByDate) schedMap[u.name] = u.scheduleByDate; if (u.schedule) schedMap[u.name+'_flat'] = u.schedule; });
     localStorage.setItem('attendance_workdays', JSON.stringify(wdMap));
     localStorage.setItem('attendance_schedules', JSON.stringify(schedMap));
     empList.forEach(function(e) {
@@ -6103,7 +6128,7 @@ async function syncFromDingTalk() {
     const ddMap = {};
     const wdMap = {};
     const schedMap2 = {};
-    (dd.users || []).forEach(function(u) { ddMap[u.name] = u; if (u.workDays) wdMap[u.name] = u.workDays; if (u.schedule) schedMap2[u.name] = u.schedule; });
+    (dd.users || []).forEach(function(u) { ddMap[u.name] = u; if (u.workDays) wdMap[u.name] = u.workDays; if (u.scheduleByDate) schedMap2[u.name] = u.scheduleByDate; if (u.schedule) schedMap2[u.name+'_flat'] = u.schedule; });
     localStorage.setItem('attendance_workdays', JSON.stringify(wdMap));
     localStorage.setItem('attendance_schedules', JSON.stringify(schedMap2));
 

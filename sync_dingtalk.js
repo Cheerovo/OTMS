@@ -386,6 +386,61 @@ async function main() {
     dates.push(toLocalDate(d.getTime()));
   }
 
+  // 按日期查询排班（TURN类型每天排班不同，FIXED固定）
+  console.log('  查询每日排班...');
+  var userScheduleByDate = {}; // userId → { "2026-07-01": "09:00-18:00", ... }
+  var allUids = allUsers.map(function(u){ return u.userid; });
+  for (var di = 0; di < dates.length; di++) {
+    var workDate = dates[di];
+    // 分页查询（每页最多50人）
+    for (var offset = 0; offset < allUids.length; offset += 50) {
+      try {
+        var batchUids = allUids.slice(offset, offset + 50);
+        var schedRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/attendance/schedule/listbyday', { access_token: token }, { work_date: workDate, userids: batchUids, offset: 0, size: 50 });
+        if (schedRes.errcode === 0 && schedRes.result) {
+          var schedList = schedRes.result.schedule_list || schedRes.result.schedules || [];
+          schedList.forEach(function(item){
+            var uid = item.userid || item.user_id;
+            if (!uid) return;
+            if (!userScheduleByDate[uid]) userScheduleByDate[uid] = {};
+            var shiftId = item.shift_id || item.class_id || 0;
+            if (shiftId && classTimeMap[shiftId]) {
+              var label = shiftNameMap[shiftId] || '';
+              if (label && label !== 'A') {
+                userScheduleByDate[uid][workDate] = label + ' ' + classTimeMap[shiftId];
+              } else {
+                userScheduleByDate[uid][workDate] = classTimeMap[shiftId];
+              }
+            }
+          });
+        }
+      } catch(_) {}
+      await sleep(80);
+    }
+  }
+  // 对没有查到排班的FIXED用户，用固定班制填充所有工作日
+  for (const [userId, grp] of Object.entries(userGroupMap)) {
+    if (userScheduleByDate[userId]) continue; // 已经通过API查到了排班
+    var sched = userSchedule[userId];
+    if (!sched) continue;
+    var cfg = groupCache.get(grp.group_id);
+    if (!cfg || cfg.type !== 'FIXED') continue;
+    var wdList = workDaysByUser[userId];
+    if (!wdList || wdList.length === 0) {
+      // 全周上班的FIXED
+      wdList = [0,1,2,3,4,5,6];
+    }
+    userScheduleByDate[userId] = {};
+    dates.forEach(function(d){
+      var dayNum = new Date(d + 'T00:00:00+08:00').getDay();
+      if (wdList.indexOf(dayNum) >= 0) {
+        userScheduleByDate[userId][d] = sched;
+      }
+    });
+  }
+  var sbdCount = Object.keys(userScheduleByDate).length;
+  console.log('  ✅ 每日排班: ' + sbdCount + '人');
+
   // 请假OA审批拉最近95天（分段请求避免超限，留5天余量防止边界遗漏）
   const leaveDateFrom = new Date(today);
   leaveDateFrom.setDate(leaveDateFrom.getDate() - 95);
@@ -403,8 +458,11 @@ async function main() {
   allUsers.forEach(u => { nameMap[u.userid] = u; });
 
   const statusMap = {};
+  // 按 userId+date 分组考勤记录，用于匹配排班
+  const recordsByUserDate = {}; // userId_date → [{checkType, userCheckTime, ...}]
   attendance.forEach(r => {
-    const name = r.userName || (nameMap[r.userId]?.name) || r.userId;
+    const userId = r.userId;
+    const name = r.userName || (nameMap[userId]?.name) || userId;
     var rawDate = r.workDate || r.userCheckTime;
     var date;
     if (typeof rawDate === 'number') {
@@ -418,8 +476,70 @@ async function main() {
     }
     if (!statusMap[name]) statusMap[name] = {};
     statusMap[name][date] = ATTEND_STATUS_MAP[r.timeResult] || DEFAULT_STATUS;
+    // 按userId+date分组
+    var key = userId + '_' + date;
+    if (!recordsByUserDate[key]) recordsByUserDate[key] = [];
+    recordsByUserDate[key].push(r);
   });
   console.log('  ✅ 考勤记录覆盖 ' + Object.keys(statusMap).length + ' 人');
+
+  // 排班制用户：用实际打卡时间匹配对应班次
+  var turnScheduleMatched = 0;
+  for (const [key, records] of Object.entries(recordsByUserDate)) {
+    var parts = key.split('_');
+    var userId = parts[0];
+    var date = parts.slice(1).join('_');
+    // 只处理排班制且该日期没有排班数据的用户
+    if (userScheduleByDate[userId] && userScheduleByDate[userId][date]) continue;
+    var grp = userGroupMap[userId];
+    if (!grp) continue;
+    var cfg = groupCache.get(grp.group_id);
+    if (!cfg || cfg.type !== 'TURN') continue;
+    if (!cfg.shift_ids || cfg.shift_ids.length === 0) continue;
+
+    // 找到OnDuty打卡记录
+    var onDuty = records.find(function(r){ return r.checkType === 'OnDuty'; });
+    if (!onDuty) continue;
+
+    // 解析打卡时间
+    var checkMs = onDuty.userCheckTime;
+    if (typeof checkMs !== 'number') continue;
+    var checkMinOfDay = Math.floor(checkMs / 60000) % 1440;
+
+    // 匹配班次：找开始时间最接近的，考虑跨天
+    var bestShiftId = 0, bestDiff = Infinity;
+    for (var si = 0; si < cfg.shift_ids.length; si++) {
+      var sid = cfg.shift_ids[si];
+      var timeStr = classTimeMap[sid];
+      if (!timeStr) continue;
+      var startParts = timeStr.split('-')[0].split(':');
+      var startMin = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
+      var diff = Math.abs(checkMinOfDay - startMin);
+      diff = Math.min(diff, Math.abs(checkMinOfDay - (startMin + 1440)));
+      diff = Math.min(diff, Math.abs((checkMinOfDay + 1440) - startMin));
+      if (diff < bestDiff) { bestDiff = diff; bestShiftId = sid; }
+    }
+
+    // 阈值：3小时内匹配
+    if (bestShiftId && bestDiff <= 180) {
+      if (!userScheduleByDate[userId]) userScheduleByDate[userId] = {};
+      var label = shiftNameMap[bestShiftId] || '';
+      if (label && label !== 'A') {
+        userScheduleByDate[userId][date] = label + ' ' + classTimeMap[bestShiftId];
+      } else {
+        userScheduleByDate[userId][date] = classTimeMap[bestShiftId];
+      }
+      turnScheduleMatched++;
+    }
+  }
+  if (turnScheduleMatched > 0) {
+    var turnUsersWithSched = new Set();
+    for (const [key] of Object.entries(recordsByUserDate)) {
+      var uid = key.split('_')[0];
+      if (userScheduleByDate[uid]) turnUsersWithSched.add(uid);
+    }
+    console.log('  ✅ 排班制匹配: ' + turnScheduleMatched + ' 天（' + turnUsersWithSched.size + ' 人）');
+  }
 
   // 用OA请假审批覆盖考勤状态（拉90天，分段请求），过滤休息日
   console.log('[7] 获取OA请假审批（' + leaveDateFromStr + ' ~ ' + leaveDateToStr + '）...');
@@ -465,7 +585,8 @@ async function main() {
       if (prev && prev.statusByDate) Object.assign(merged, prev.statusByDate);
       Object.assign(merged, newSBD);
       const wd = workDaysByUser[u.userid];
-      const schedule = userSchedule[u.userid] || null;
+      const scheduleFlat = userSchedule[u.userid] || null;
+      const scheduleByDate = userScheduleByDate[u.userid] || null;
       return {
         name: u.name,
         mobile: u.mobile || '',
@@ -473,7 +594,8 @@ async function main() {
         statusByDate: merged,
         todayStatus: newSBD[todayStr] || DEFAULT_STATUS,
         workDays: wd || null,  // null=未获取到考勤组配置（全勤，不过滤休息日）
-        schedule: schedule     // "9:00-18:00" 或 null
+        schedule: scheduleFlat,           // 所有可能班次（排班制无法确定当日班次时的兜底）
+        scheduleByDate: scheduleByDate    // { "2026-07-01": "09:00-18:00", ... } 或 null，优先使用
       };
     })
   };
