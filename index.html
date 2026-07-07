@@ -496,6 +496,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .kr-form-item { background:var(--bg-base); border-radius:var(--radius-sm); padding:12px; margin-bottom:10px; position:relative; }
 .add-kr-btn { font-size:11px; color:var(--accent); cursor:pointer; border:none; background:none; margin-top:4px; }
 
+/* Smart attendee suggestions */
+.attendee-suggest { margin-top:8px; }
+.attendee-suggest-label { font-size:10px; color:var(--text-muted); margin-bottom:4px; }
+.attendee-suggest-chips { display:flex; flex-wrap:wrap; gap:6px; }
+.attendee-chip { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:16px; font-size:11px; cursor:pointer; transition:all .15s; color:var(--text-dim); max-width:320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.attendee-chip:hover { background:var(--accent-soft); border-color:var(--accent); color:var(--accent); }
+.attendee-chip .chip-count { font-size:9px; color:var(--text-muted); background:var(--bg-base); padding:1px 6px; border-radius:8px; flex-shrink:0; }
 
 /* Meeting */
 .meeting-list { display:flex; flex-direction:column; gap:12px; }
@@ -4948,13 +4955,43 @@ function deleteMeetingFile(mid,fid){
 }
 
 // ===== Meeting Modal =====
+function getFrequentAttendeeGroups(excludeId) {
+  // 分析历史会议，返回常用参会组合（按频率排序，最多5组）
+  var setCount = {};
+  var sorted = meetings.slice().sort(function(a,b){ return (b.cat||0)-(a.cat||0); });
+  sorted.forEach(function(mt){
+    if (excludeId && mt.id === excludeId) return;
+    var names = (mt.attendees || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+    if (names.length < 2) return;
+    names.sort();
+    var key = names.join(',');
+    setCount[key] = (setCount[key] || 0) + 1;
+  });
+  var groups = Object.keys(setCount).map(function(k){
+    return { names: k, count: setCount[k] };
+  });
+  groups.sort(function(a,b){ return b.count - a.count; });
+  return groups.slice(0, 5);
+}
+
 function openMeetingModal(id){
   const m=id?meetings.find(x=>x.id===id):null,ov=document.getElementById('modalOverlay'),md=document.getElementById('modal');
   const tks=m?m.tempTasks||[]:[];
+  var suggestHTML = '';
+  if (!m) {
+    var groups = getFrequentAttendeeGroups(null);
+    if (groups.length > 0) {
+      suggestHTML = '<div class="attendee-suggest"><div class="attendee-suggest-label">常用参会组合（点击填充）</div><div class="attendee-suggest-chips">';
+      groups.forEach(function(g){
+        suggestHTML += '<span class="attendee-chip" onclick="document.getElementById(\'fMA\').value=\''+esc(g.names)+'\'" title="使用过'+g.count+'次">'+esc(g.names)+'<span class="chip-count">'+g.count+'次</span></span>';
+      });
+      suggestHTML += '</div></div>';
+    }
+  }
   md.innerHTML=`<div class="modal-header"><h2>${m?'编辑例会':'新建例会'}</h2><button class="btn-icon" onclick="closeModal()">✕</button></div>
   <div class="modal-body">
     <div class="form-row"><div class="form-group"><label>会议标题 *</label><input id="fMT" value="${m?esc(m.title):''}"></div><div class="form-group"><label>会议日期 *</label><input type="date" id="fMD" value="${m?m.date:new Date().toISOString().slice(0,10)}"></div></div>
-    <div class="form-group"><label>参会人员（逗号分隔）</label><input id="fMA" value="${m?esc(m.attendees):''}" placeholder="杜宪,汪顺"></div>
+    <div class="form-group"><label>参会人员（逗号分隔）</label><input id="fMA" value="${m?esc(m.attendees):''}" placeholder="杜宪,汪顺">${suggestHTML}</div>
     <div class="form-group"><label>会议记录</label><textarea id="fMM" rows="5" placeholder="记录会议讨论内容、决议事项...">${m?esc(m.minutes||''):''}</textarea></div>
     <label style="font-size:10px;font-weight:400;color:var(--text2);margin:6px 0;display:block">临时任务</label>
     <div id="meetingTaskForms">${tks.map(tk=>meetingTaskForm(tk)).join('')}</div>
