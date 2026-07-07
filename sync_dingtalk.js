@@ -541,6 +541,22 @@ async function main() {
     console.log('  ✅ 排班制匹配: ' + turnScheduleMatched + ' 天（' + turnUsersWithSched.size + ' 人）');
   }
 
+  // 手动补充：已知固定班次但打卡匹配失败的员工
+  var manualSchedule = {
+    '汪顺': '09:00-18:00', '王力': '09:00-18:00',
+    '方有保': '08:00-17:00', '金学忠': '08:00-17:00', '胡金明': '08:00-17:00'
+  };
+  var manualCount = 0;
+  for (const [userId, grp] of Object.entries(userGroupMap)) {
+    var name = nameMap[userId]?.name;
+    if (!name || !manualSchedule[name]) continue;
+    if (userScheduleByDate[userId]) continue;
+    userScheduleByDate[userId] = {};
+    dates.forEach(function(d) { userScheduleByDate[userId][d] = manualSchedule[name]; });
+    manualCount++;
+  }
+  if (manualCount > 0) console.log('  ✅ 手动补充排班: ' + manualCount + ' 人');
+
   // 用OA请假审批覆盖考勤状态（拉90天，分段请求），过滤休息日
   console.log('[7] 获取OA请假审批（' + leaveDateFromStr + ' ~ ' + leaveDateToStr + '）...');
   const leaveMap = await getLeaveApprovals(token, leaveDateFromStr, leaveDateToStr);
