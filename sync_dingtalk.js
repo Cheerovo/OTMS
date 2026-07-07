@@ -310,7 +310,7 @@ async function main() {
         var shift = shiftRes.result;
         var rawName = shift.name || '';
         rawName = rawName.replace('保安夜班21点', '保安夜班').replace('程璐一年哺乳假', '哺乳假');
-        if (rawName === '安保白班' || rawName === '安保夜班') rawName = '';
+        if (rawName === '安保白班' || rawName === '安保夜班' || rawName === '保安夜班') rawName = '';
         shiftNameMap[sid] = rawName;
         var sections = shift.sections || [];
         var allTimes = [];

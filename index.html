@@ -5974,7 +5974,7 @@ function renderAttendView(skipAutoSync) {
       // 固定班制：有当日排班就显示
       var sched = schedByDate[date] || '';
       if (sched) {
-        sched = sched.replace('保安夜班21点', '保安夜班').replace('程璐一年哺乳假', '哺乳假').replace('安保白班 ', '').replace('安保夜班 ', '');
+        sched = sched.replace('保安夜班21点', '保安夜班').replace('程璐一年哺乳假', '哺乳假').replace('安保白班 ', '').replace('安保夜班 ', '').replace('保安夜班 ', '');
         scheduleHtml = '<div class="card-schedule">'+esc(sched)+'</div>';
       }
     } else if (schedFlat) {
