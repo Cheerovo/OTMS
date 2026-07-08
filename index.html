@@ -8216,9 +8216,8 @@ function renderBackendView() {
       </div>
     </div>
 
-    <!-- 第二层 -->
     <div style="margin-bottom:10px">
-      <div style="font-size:8px;letter-spacing:3px;color:var(--text-muted);margin-bottom:8px;padding-left:2px">第二层 · 技术开发 & 财务账务</div>
+      <div style="font-size:8px;letter-spacing:3px;color:var(--text-muted);margin-bottom:8px;padding-left:2px">技术开发 & 财务账务</div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
         ${[
           {n:'任梦超',r:'总负责(CS-北美)',b:'北美在线',d:'架构/权限/数据库/调试/页面联调，技术文档编写与知识转移',c:'#7B8FC0',bg:'#F4F6FB'},
@@ -8229,10 +8228,10 @@ function renderBackendView() {
       </div>
     </div>
 
-    <!-- 第三层 + 财务 -->
+    <!-- 财务 -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
       <div>
-        <div style="font-size:8px;letter-spacing:3px;color:var(--text-muted);margin-bottom:8px;padding-left:2px">第三层 · 法务方向</div>
+        <div style="font-size:8px;letter-spacing:3px;color:var(--text-muted);margin-bottom:8px;padding-left:2px">法务方向</div>
         ${[
           {n:'赵柳文',r:'法务管培生',b:'香港(6.7起)',d:'用印审批流程线上化，档案数字化闭环管理，股权信息台账模板设计'},
           {n:'安子玥',r:'法务管培生',b:'上海',d:'专攻劳动合同领域，公司人事制度和流程合规，构建AI数字员工'}
@@ -11127,7 +11126,7 @@ function openTraineeDetail(name){
   var tr = null;
   for(var i=0;i<EVAL_TRAINEES.length;i++){ if(EVAL_TRAINEES[i].name===name){ tr=EVAL_TRAINEES[i]; break; } }
   if(tr){
-    html += '<div style="font-size:9px;color:var(--text-dim)">'+tr.level+' · 导师：'+tr.supervisor+'</div>';
+    html += '<div style="font-size:9px;color:var(--text-dim)">导师：'+tr.supervisor+'</div>';
   }
   html += '</div><button class="tn-detail-close" onclick="this.closest(\'.tn-detail-overlay\').remove()">×</button></div>';
   
@@ -11249,7 +11248,7 @@ function renderDashboard(){
       '<div class="dash-avatar" style="background:'+avColor+'">'+tr.name.charAt(0)+'</div>'+
       '<div class="dash-num" style="color:'+scoreColor+'">'+scoreDisplay+'</div>'+
       '<div class="dash-lbl">'+tr.name+'</div>'+
-      '<div class="dash-sub">'+tr.level+' · 任务完成率 '+taskRate+'%</div>'+
+      '<div class="dash-sub">任务完成 '+comp.done+'/'+comp.total+' · '+taskRate+'%</div>'+
       '<div class="dash-mini-bar"><div class="dash-mini-fill" style="width:'+taskRate+'%;background:'+scoreColor+'"></div></div>'+
     '</div>';
   });
