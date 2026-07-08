@@ -6506,13 +6506,11 @@ function renderOrgChart() {
           var cnt = staff.filter(function(s2){ return s2.reportsTo === s.name; }).length;
           if (cnt > maxReports) { maxReports = cnt; headEmp = s; }
         });
-        // If no clear head found, use the highest-ranked person
-        if (!headEmp && staff.length > 0) {
-          var rankOrder = {'VII':7,'VI':6,'V':5,'IV':4,'III':3,'II':2,'I':1};
-          staff.forEach(function(s){
-            var rv = rankOrder[s.rank] || 0;
-            if (rv > (rankOrder[headEmp&&headEmp.rank]||0)) headEmp = s;
-          });
+        // Only auto-assign a head if someone actually has direct reports in this dept.
+        // If nobody has reports (e.g. single-person dept or all report outside), leave headEmp null
+        // so the reportTo detection below kicks in.
+        if (!headEmp && maxReports === 0) {
+          headEmp = null; // no auto-head — fall through to reportTo
         }
 
         // Check for concurrent head from BU_META (兼任部门负责人)
