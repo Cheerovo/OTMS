@@ -6553,6 +6553,8 @@ function renderOrgChart() {
           headRole: deptHeadRole,
           headLevel: deptHeadLevel,
           reportTo: reportTo,
+          _raw: staff.map(function(s){return s.name;}).join(','),
+          _filtered: staffList.map(function(s){return s.name;}).join(','),
           staff: (function(){
             try {
               var items = staffList.map(function(s){ return {n:s.name, r:s.position, l:s.rank||'I', reportsTo:s.reportsTo||''}; });
@@ -6701,7 +6703,7 @@ function renderOrgChart() {
       if (bu.head && dept.name === bu.name) return;
       const subStaff = dept.subdepts ? dept.subdepts.reduce((a,s)=>a+countStaff(s.staff)+(s.head?1:0),0) : 0;
       const deptTotal = countStaff(dept.staff) + (dept.head ? 1 : 0) + subStaff;
-      html += '<div class="oc-dept-block" style="background:'+bu.color+'08;" data-staff="'+dept.staff.map(function(s){return s.n;}).join(',')+'">';
+      html += '<div class="oc-dept-block" style="background:'+bu.color+'08;" data-raw="'+(dept._raw||'')+'" data-filtered="'+(dept._filtered||'')+'" data-staff="'+dept.staff.map(function(s){return s.n;}).join(',')+'">';
       html += '<div class="oc-dept-hd" style="color:'+bu.color+';border-bottom-color:'+bu.color+'33;" onclick="toggleDept(\'dept-'+bi+'-'+di+'\')">';
       let deptLabel = dept.name;
       if (!dept.head && dept.reportTo) {
