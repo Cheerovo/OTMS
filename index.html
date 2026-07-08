@@ -6701,7 +6701,7 @@ function renderOrgChart() {
       if (bu.head && dept.name === bu.name) return;
       const subStaff = dept.subdepts ? dept.subdepts.reduce((a,s)=>a+countStaff(s.staff)+(s.head?1:0),0) : 0;
       const deptTotal = countStaff(dept.staff) + (dept.head ? 1 : 0) + subStaff;
-      html += '<div class="oc-dept-block" style="background:'+bu.color+'08;">';
+      html += '<div class="oc-dept-block" style="background:'+bu.color+'08;" data-staff="'+dept.staff.map(function(s){return s.n;}).join(',')+'">';
       html += '<div class="oc-dept-hd" style="color:'+bu.color+';border-bottom-color:'+bu.color+'33;" onclick="toggleDept(\'dept-'+bi+'-'+di+'\')">';
       let deptLabel = dept.name;
       if (!dept.head && dept.reportTo) {
