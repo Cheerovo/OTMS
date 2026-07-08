@@ -6597,7 +6597,7 @@ function renderOrgChart() {
     if(!nameMap[cleanN]) nameMap[cleanN] = {type:'internal', positions:[]};
     let entry = nameMap[cleanN];
     if(level==='外部' || (role&&role.indexOf('外部')!==-1)) entry.type='external';
-    else if(role&&role.indexOf('外包')!==-1) entry.type='outsource';
+    else if(level==='外包' || (role&&role.indexOf('外包')!==-1)) entry.type='outsource';
     if(pos) entry.positions.push(pos);
   }
   let tbhCount = 0;
