@@ -6372,10 +6372,19 @@ function renderOrgChart() {
   // Dynamic org tree built from employee data (no more hardcoded names!)
   var BU_META = {
     '人力资源BU': { color:'#4A6FA5', head:'黄一萧', headRole:'总经理', headLevel:'V' },
-    '园区商办BU': { color:'#3D8B7E', head:null, headsNote:'张毅(兼)/黄一萧(兼)' },
+    '园区商办BU': { color:'#3D8B7E', head:null, headsNote:'张毅(兼)/黄一萧(兼)',
+      concurrentHeads: {
+        'AB区商办': {name:'张毅(兼)', role:'商办负责人', level:'VII'},
+        'C区商办': {name:'黄一萧(兼)', role:'商办负责人', level:'V'}
+      }
+    },
     '园区公寓BU': { color:'#C2795C', head:'王倩', headRole:'总经理', headLevel:'V' },
     '园区物业BU': { color:'#B8943E', head:'汪顺', headRole:'总经理', headLevel:'III' },
-    '职能后台':   { color:'#7B6B8A', head:null, headsNote:'蔡心宇/芦智蔚/黄欢欢/邵吴慧/杜宪/王倩(兼)' }
+    '职能后台':   { color:'#7B6B8A', head:null, headsNote:'蔡心宇/芦智蔚/黄欢欢/邵吴慧/杜宪/王倩(兼)',
+      concurrentHeads: {
+        '账务资产部': {name:'王倩(兼)', role:'账务资产负责人', level:'V'}
+      }
+    }
   };
   var BU_ORG_ORDER = ['人力资源BU','园区商办BU','园区公寓BU','园区物业BU','职能后台'];
 
@@ -6440,9 +6449,26 @@ function renderOrgChart() {
         var rankOrder2 = {'VII':7,'VI':6,'V':5,'IV':4,'III':3,'II':2,'I':1};
         staffList.sort(function(a,b){ var d=(rankOrder2[b.rank]||0)-(rankOrder2[a.rank]||0); if(d!==0)return d; return (a.n||'').localeCompare(b.n||'','zh'); });
 
+        // Check for concurrent head from BU_META (兼任部门负责人)
+        var ccHead = meta.concurrentHeads && meta.concurrentHeads[deptName];
+        var deptHead, deptHeadRole, deptHeadLevel;
+        if (ccHead) {
+          deptHead = ccHead.name;
+          deptHeadRole = ccHead.role;
+          deptHeadLevel = ccHead.level;
+        } else if (headEmp) {
+          deptHead = headEmp.name;
+          deptHeadRole = headEmp.position;
+          deptHeadLevel = headEmp.rank;
+        } else {
+          deptHead = null;
+          deptHeadRole = null;
+          deptHeadLevel = null;
+        }
+
         // If no head found, detect reportTo from most common reportsTo among staff
         var reportTo = null;
-        if (!headEmp && staff.length > 0) {
+        if (!deptHead && staff.length > 0) {
           var rtCount = {};
           staff.forEach(function(s){ if(s.reportsTo){ var rt = s.reportsTo.trim(); if(rt) rtCount[rt] = (rtCount[rt]||0)+1; } });
           var bestRt = null, bestCnt = 0;
@@ -6452,9 +6478,9 @@ function renderOrgChart() {
 
         depts.push({
           name: deptName,
-          head: headEmp ? headEmp.name : null,
-          headRole: headEmp ? headEmp.position : null,
-          headLevel: headEmp ? headEmp.rank : null,
+          head: deptHead,
+          headRole: deptHeadRole,
+          headLevel: deptHeadLevel,
           reportTo: reportTo,
           staff: staffList.map(function(s){
             return {n:s.name, r:s.position, l:s.rank||'I'};
