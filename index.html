@@ -6441,15 +6441,15 @@ function renderOrgChart() {
 
   // Dynamic org tree built from employee data (no more hardcoded names!)
   var BU_META = {
-    '人力资源BU': { color:'#4A6FA5', head:'黄一萧', headRole:'总经理', headLevel:'V' },
+    '人力资源BU': { color:'#4A6FA5', head:null, headsNote:'黄一萧/总经理' },
     '园区商办BU': { color:'#3D8B7E', head:null, headsNote:'张毅(兼)/黄一萧(兼)',
       concurrentHeads: {
         'AB区商办&H20': {name:'张毅(兼)', role:'商办负责人', level:'VII'},
         'C区商办': {name:'黄一萧(兼)', role:'商办负责人', level:'V'}
       }
     },
-    '园区公寓BU': { color:'#C2795C', head:'王倩', headRole:'总经理', headLevel:'V' },
-    '园区物业BU': { color:'#B8943E', head:'汪顺', headRole:'总经理', headLevel:'IV' },
+    '园区公寓BU': { color:'#C2795C', head:null, headsNote:'王倩/总经理' },
+    '园区物业BU': { color:'#B8943E', head:null, headsNote:'汪顺/总经理' },
     '职能后台':   { color:'#7B6B8A', head:null, headsNote:'蔡心宇/芦智蔚/黄欢欢/邵吴慧/杜宪/王倩(兼)',
       concurrentHeads: {
         '账务资产部': {name:'王倩(兼)', role:'账务资产负责人', level:'V'},
