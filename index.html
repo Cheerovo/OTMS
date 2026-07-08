@@ -6437,7 +6437,7 @@ function renderOrgChart() {
         var staffList = staff.filter(function(s){ return s !== headEmp; });
         // Sort staff by rank
         var rankOrder2 = {'Ⅶ':7,'Ⅵ':6,'Ⅴ':5,'Ⅳ':4,'Ⅲ':3,'Ⅱ':2,'Ⅰ':1};
-        staffList.sort(function(a,b){ return (rankOrder2[b.rank]||0) - (rankOrder2[a.rank]||0); });
+        staffList.sort(function(a,b){ var d=(rankOrder2[b.rank]||0)-(rankOrder2[a.rank]||0); if(d!==0)return d; return (a.n||'').localeCompare(b.n||'','zh'); });
 
         depts.push({
           name: deptName,
