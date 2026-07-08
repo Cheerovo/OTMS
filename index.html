@@ -6441,15 +6441,15 @@ function renderOrgChart() {
 
   // Dynamic org tree built from employee data (no more hardcoded names!)
   var BU_META = {
-    '人力资源BU': { color:'#4A6FA5', head:null, headsNote:'黄一萧/总经理' },
+    '人力资源BU': { color:'#4A6FA5', head:'黄一萧', headRole:'总经理', headLevel:'V' },
     '园区商办BU': { color:'#3D8B7E', head:null, headsNote:'张毅(兼)/黄一萧(兼)',
       concurrentHeads: {
         'AB区商办&H20': {name:'张毅(兼)', role:'商办负责人', level:'VII'},
         'C区商办': {name:'黄一萧(兼)', role:'商办负责人', level:'V'}
       }
     },
-    '园区公寓BU': { color:'#C2795C', head:null, headsNote:'王倩/总经理' },
-    '园区物业BU': { color:'#B8943E', head:null, headsNote:'汪顺/总经理' },
+    '园区公寓BU': { color:'#C2795C', head:'王倩', headRole:'总经理', headLevel:'V' },
+    '园区物业BU': { color:'#B8943E', head:'汪顺', headRole:'总经理', headLevel:'IV' },
     '职能后台':   { color:'#7B6B8A', head:null, headsNote:'蔡心宇/芦智蔚/黄欢欢/邵吴慧/杜宪/王倩(兼)',
       concurrentHeads: {
         '账务资产部': {name:'王倩(兼)', role:'账务资产负责人', level:'V'},
@@ -6689,7 +6689,7 @@ function renderOrgChart() {
       }
       html += deptLabel+' <span style="font-size:8px;color:var(--text2);">'+deptTotal+'人 ▼</span></div>';
       html += '<div class="oc-dept-body" id="dept-'+bi+'-'+di+'" style="display:block;">';
-      if (dept.head) {
+      if (dept.head && (!bu.head || renderName(dept.head) !== renderName(bu.head))) {
         html += '<div class="oc-staff-row" style="border-left:2px solid '+bu.color+';background:'+bu.color+'0D;">';
         html += '<div style="flex:1;min-width:0;"><div style="font-weight:500;font-size:10px;color:var(--text);">'+renderName(dept.head)+'</div>';
         html += '<div style="font-size:8px;color:var(--text2);">'+cleanRole(dept.headRole)+' '+renderBadge(dept.headLevel, dept.headRole)+'</div></div>';
