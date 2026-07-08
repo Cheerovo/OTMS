@@ -1468,11 +1468,15 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-dash-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
 .tn-dash-card { background:var(--card); border-radius:12px; padding:16px 14px; text-align:center; box-shadow:var(--shadow-xs); cursor:pointer; transition:all .15s; border:1px solid transparent; }
 .tn-dash-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.08); border-color:var(--accent-wash); }
-.tn-dash-card .dash-avatar { width:32px; height:32px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-size:14px; font-weight:700; margin-bottom:8px; }
-.tn-dash-card .dash-num { font-size:26px; font-weight:700; }
-.tn-dash-card .dash-lbl { font-size:10px; color:var(--text); font-weight:500; margin-top:2px; }
-.tn-dash-card .dash-sub { font-size:8px; color:var(--text-muted); margin-top:3px; }
-.tn-dash-card .dash-mini-bar { height:3px; background:var(--border-light); border-radius:2px; margin-top:8px; overflow:hidden; }
+.tn-dash-card .dash-avatar { width:32px; height:32px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-size:14px; font-weight:700; margin-bottom:6px; }
+.tn-dash-card .dash-lbl { font-size:11px; color:var(--text); font-weight:500; margin-bottom:10px; }
+.tn-dash-card .dash-metric { margin-top:6px; text-align:left; }
+.tn-dash-card .dash-metric-hd { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px; }
+.tn-dash-card .dash-metric-label { font-size:8px; color:var(--text-muted); }
+.tn-dash-card .dash-metric-score { font-size:14px; font-weight:700; }
+.tn-dash-card .dash-metric-max { font-size:8px; font-weight:400; color:var(--text-muted); }
+.tn-dash-card .dash-metric-divider { height:1px; background:var(--border-light); margin:8px 0 2px; }
+.tn-dash-card .dash-mini-bar { height:3px; background:var(--border-light); border-radius:2px; margin-top:4px; overflow:hidden; }
 .tn-dash-card .dash-mini-fill { height:100%; border-radius:2px; transition:width .4s; }
 .tn-dash-charts { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
 .tn-chart-box { background:var(--card); border-radius:12px; padding:16px; box-shadow:var(--shadow-xs); }
@@ -11147,10 +11151,13 @@ function openTraineeDetail(name){
   var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
   var curWkId = 'W' + (curWkIdx + 1);
   var comp = calcTaskCompletionForTrainee(name, curWkId);
-  html += '<div class="tn-detail-section"><h4>任务统计（本周 '+curWkId+'）</h4><div style="display:flex;gap:12px">';
-  html += '<div class="tn-dash-card" style="flex:1"><div class="dash-num" style="font-size:20px;color:#7B8FC0">'+comp.total+'</div><div class="dash-lbl">关联任务</div></div>';
-  html += '<div class="tn-dash-card" style="flex:1"><div class="dash-num" style="font-size:20px;color:#8BA89C">'+comp.done+'</div><div class="dash-lbl">已完成</div></div>';
-  html += '<div class="tn-dash-card" style="flex:1"><div class="dash-num" style="font-size:20px;color:#D4A76A">'+comp.rate+'%</div><div class="dash-lbl">完成率</div></div>';
+  var s = getEvalScore(name, curWkId);
+  var ts = calcTotalScore(s);
+  var autoScore = comp.suggestedScore;
+  var manualScore = ts !== null ? ts.toFixed(1) : '--';
+  html += '<div class="tn-detail-section"><h4>本周评估（'+curWkId+'）</h4><div style="display:flex;gap:12px">';
+  html += '<div class="tn-dash-card" style="flex:1"><div style="font-size:8px;color:var(--text-muted);margin-bottom:4px">任务完成 <span style="color:#2E7D32;font-weight:600">自动</span></div><div style="font-size:20px;font-weight:700;color:#8BA89C">'+autoScore.toFixed(1)+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/30</span></div><div class="dash-mini-bar" style="margin-top:6px"><div class="dash-mini-fill" style="width:'+comp.rate+'%;background:#8BA89C"></div></div><div style="font-size:8px;color:var(--text-muted);margin-top:4px">'+comp.done+'/'+comp.total+' 项 · '+comp.rate+'%</div></div>';
+  html += '<div class="tn-dash-card" style="flex:1"><div style="font-size:8px;color:var(--text-muted);margin-bottom:4px">综合评估</div><div style="font-size:20px;font-weight:700;color:'+(ts!==null?(ts>=80?'#8BA89C':ts>=60?'#D4A76A':'#C94F66'):'var(--text-dim)')+'">'+manualScore+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/100</span></div><div class="dash-mini-bar" style="margin-top:6px"><div class="dash-mini-fill" style="width:'+(ts!==null?Math.round(ts):0)+'%;background:'+(ts!==null?(ts>=80?'#8BA89C':ts>=60?'#D4A76A':'#C94F66'):'var(--text-dim)')+'"></div></div><div style="font-size:8px;color:var(--text-muted);margin-top:4px">5维评估</div></div>';
   html += '</div></div>';
   
   // Eval trend: last 6 weeks
@@ -11248,17 +11255,25 @@ function renderDashboard(){
   EVAL_TRAINEES.forEach(function(tr, i){
     var s = getEvalScore(tr.name, curWkId);
     var ts = calcTotalScore(s);
-    var scoreDisplay = ts !== null ? ts.toFixed(1) : '--';
+    var manualScore = ts !== null ? ts.toFixed(1) : '--';
+    var manualPct = ts !== null ? Math.round(ts) : 0;
     var comp = calcTaskCompletionForTrainee(tr.name, curWkId);
-    var taskRate = comp.rate;
+    var autoScore = comp.suggestedScore;
+    var autoPct = comp.rate;
     var scoreColor = ts !== null ? (ts >= 80 ? '#8BA89C' : ts >= 60 ? '#D4A76A' : '#C94F66') : 'var(--text-dim)';
     var avColor = avatarColors[i] || '#7B8FC0';
     cardsHtml += '<div class="tn-dash-card" onclick="openTraineeDetail(\''+tr.name+'\')">'+
       '<div class="dash-avatar" style="background:'+avColor+'">'+tr.name.charAt(0)+'</div>'+
-      '<div class="dash-num" style="color:'+scoreColor+'">'+scoreDisplay+'</div>'+
       '<div class="dash-lbl">'+tr.name+'</div>'+
-      '<div class="dash-sub">任务完成 '+comp.done+'/'+comp.total+' · '+taskRate+'%</div>'+
-      '<div class="dash-mini-bar"><div class="dash-mini-fill" style="width:'+taskRate+'%;background:'+scoreColor+'"></div></div>'+
+      '<div class="dash-metric-divider"></div>'+
+      '<div class="dash-metric">'+
+        '<div class="dash-metric-hd"><span class="dash-metric-label">任务完成 <span style="color:#2E7D32;font-weight:600">自动</span></span><span class="dash-metric-score" style="color:#8BA89C">'+autoScore.toFixed(1)+'<span class="dash-metric-max">/30</span></span></div>'+
+        '<div class="dash-mini-bar"><div class="dash-mini-fill" style="width:'+autoPct+'%;background:#8BA89C"></div></div>'+
+      '</div>'+
+      '<div class="dash-metric">'+
+        '<div class="dash-metric-hd"><span class="dash-metric-label">综合评估</span><span class="dash-metric-score" style="color:'+scoreColor+'">'+manualScore+'<span class="dash-metric-max">/100</span></span></div>'+
+        '<div class="dash-mini-bar"><div class="dash-mini-fill" style="width:'+manualPct+'%;background:'+scoreColor+'"></div></div>'+
+      '</div>'+
     '</div>';
   });
   document.getElementById('tnDashGrid').innerHTML = cardsHtml;
