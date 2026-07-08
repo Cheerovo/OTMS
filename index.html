@@ -9792,24 +9792,32 @@ function taskOverlapsWeek(task, weekIdx){
 // Cross-reference all task sources to calculate completion for a trainee in a given week
 function calcTaskCompletionForTrainee(traineeName, weekId){
   var weekIdx = parseInt(weekId.slice(1)) - 1;
-  var total = 0, done = 0;
+  var weekTotal = 0, weekDone = 0;
+  var allTotal = 0, allDone = 0;
 
   // 1. Plan tasks (TN_TASKS)
   TN_TASKS.forEach(function(t){
     if(t.R!==traineeName && t.A!==traineeName && (t.I||'').indexOf(traineeName)===-1) return;
-    if(!t.weeks || !t.weeks[weekIdx]) return;
-    total++;
     var td = getTnTask(t.id);
-    if((td && td.status)==='done' || (!td && t.status==='done')) done++;
+    var isDone = (td && td.status)==='done' || (!td && t.status==='done');
+    allTotal++;
+    if(isDone) allDone++;
+    if(t.weeks && t.weeks[weekIdx]){
+      weekTotal++;
+      if(isDone) weekDone++;
+    }
   });
 
   // 2. Weekly tasks (wtasks)
   if(tnData && tnData.wtasks){
     tnData.wtasks.forEach(function(w){
       if(w.person!==traineeName) return;
-      if(w.week !== weekId) return;
-      total++;
-      if(w.status==='done') done++;
+      allTotal++;
+      if(w.status==='done') allDone++;
+      if(w.week === weekId){
+        weekTotal++;
+        if(w.status==='done') weekDone++;
+      }
     });
   }
 
@@ -9817,14 +9825,23 @@ function calcTaskCompletionForTrainee(traineeName, weekId){
   var refTasks = tnData && tnData.refTasks ? tnData.refTasks : TN_REF_TASKS;
   refTasks.forEach(function(r){
     if(!r.executors || r.executors.indexOf(traineeName)===-1) return;
-    if(!r.weeks || !r.weeks[weekIdx]) return;
-    total++;
-    if(r.refStatus==='done') done++;
+    allTotal++;
+    if(r.refStatus==='done') allDone++;
+    if(r.weeks && r.weeks[weekIdx]){
+      weekTotal++;
+      if(r.refStatus==='done') weekDone++;
+    }
   });
 
-  var rate = total > 0 ? Math.round(done/total*100) : 0;
-  var suggestedScore = total > 0 ? Math.round(rate/100 * EVAL_DIMS[0].max * 10) / 10 : 0;
-  return {total:total, done:done, rate:rate, suggestedScore:suggestedScore};
+  var weekRate = weekTotal > 0 ? Math.round(weekDone/weekTotal*100) : 0;
+  var allRate = allTotal > 0 ? Math.round(allDone/allTotal*100) : 0;
+  var suggestedScore = weekTotal > 0 ? Math.round(weekRate/100 * EVAL_DIMS[0].max * 10) / 10 : 0;
+  return {
+    total: weekTotal, done: weekDone, rate: weekRate,
+    weekTotal: weekTotal, weekDone: weekDone, weekRate: weekRate,
+    allTotal: allTotal, allDone: allDone, allRate: allRate,
+    suggestedScore: suggestedScore
+  };
 }
 
 function getTnStorageKey(k){ return 'otms_trainee_'+k+'_v1'; }
@@ -11156,7 +11173,7 @@ function openTraineeDetail(name){
   var autoScore = comp.suggestedScore;
   var manualScore = ts !== null ? ts.toFixed(1) : '--';
   html += '<div class="tn-detail-section"><h4>本周评估（'+curWkId+'）</h4><div style="display:flex;gap:12px">';
-  html += '<div class="tn-dash-card" style="flex:1"><div style="font-size:8px;color:var(--text-muted);margin-bottom:4px">任务完成 <span style="color:#2E7D32;font-weight:600">自动</span></div><div style="font-size:20px;font-weight:700;color:#8BA89C">'+autoScore.toFixed(1)+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/30</span></div><div class="dash-mini-bar" style="margin-top:6px"><div class="dash-mini-fill" style="width:'+comp.rate+'%;background:#8BA89C"></div></div><div style="font-size:8px;color:var(--text-muted);margin-top:4px">'+comp.done+'/'+comp.total+' 项 · '+comp.rate+'%</div></div>';
+  html += '<div class="tn-dash-card" style="flex:1"><div style="font-size:8px;color:var(--text-muted);margin-bottom:4px">任务完成 <span style="color:#2E7D32;font-weight:600">自动</span></div><div style="font-size:20px;font-weight:700;color:#8BA89C">'+autoScore.toFixed(1)+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/30</span></div><div class="dash-mini-bar" style="margin-top:6px"><div class="dash-mini-fill" style="width:'+comp.weekRate+'%;background:#8BA89C"></div></div><div style="font-size:8px;color:var(--text-muted);margin-top:4px">本周 '+comp.weekDone+'/'+comp.weekTotal+' 项 · '+comp.weekRate+'%</div><div style="font-size:7px;color:var(--text-muted);margin-top:2px">累计 '+comp.allDone+'/'+comp.allTotal+' 项 · '+comp.allRate+'%</div></div>';
   html += '<div class="tn-dash-card" style="flex:1"><div style="font-size:8px;color:var(--text-muted);margin-bottom:4px">综合评估</div><div style="font-size:20px;font-weight:700;color:'+(ts!==null?(ts>=80?'#8BA89C':ts>=60?'#D4A76A':'#C94F66'):'var(--text-dim)')+'">'+manualScore+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/100</span></div><div class="dash-mini-bar" style="margin-top:6px"><div class="dash-mini-fill" style="width:'+(ts!==null?Math.round(ts):0)+'%;background:'+(ts!==null?(ts>=80?'#8BA89C':ts>=60?'#D4A76A':'#C94F66'):'var(--text-dim)')+'"></div></div><div style="font-size:8px;color:var(--text-muted);margin-top:4px">5维评估</div></div>';
   html += '</div></div>';
   
@@ -11269,6 +11286,7 @@ function renderDashboard(){
       '<div class="dash-metric">'+
         '<div class="dash-metric-hd"><span class="dash-metric-label">任务完成 <span style="color:#2E7D32;font-weight:600">自动</span></span><span class="dash-metric-score" style="color:#8BA89C">'+autoScore.toFixed(1)+'<span class="dash-metric-max">/30</span></span></div>'+
         '<div class="dash-mini-bar"><div class="dash-mini-fill" style="width:'+autoPct+'%;background:#8BA89C"></div></div>'+
+        '<div style="font-size:7px;color:var(--text-muted);margin-top:3px;display:flex;justify-content:space-between"><span>本周 '+comp.weekDone+'/'+comp.weekTotal+' 项</span><span>累计 '+comp.allDone+'/'+comp.allTotal+' 项</span></div>'+
       '</div>'+
       '<div class="dash-metric">'+
         '<div class="dash-metric-hd"><span class="dash-metric-label">综合评估</span><span class="dash-metric-score" style="color:'+scoreColor+'">'+manualScore+'<span class="dash-metric-max">/100</span></span></div>'+
