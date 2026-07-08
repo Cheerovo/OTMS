@@ -6508,6 +6508,11 @@ function renderOrgChart() {
           headEmp = null; // no auto-head — fall through to reportTo
         }
 
+        // If BU has a defined head and this is the BU's own department, use BU head
+        if (!headEmp && meta.head && deptName === buName) {
+          staff.forEach(function(s){ if (s.name === meta.head) headEmp = s; });
+        }
+
         // Check for concurrent head from BU_META (兼任部门负责人)
         var ccHead = meta.concurrentHeads && meta.concurrentHeads[deptName];
 
