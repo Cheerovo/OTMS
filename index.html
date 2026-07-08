@@ -6444,14 +6444,14 @@ function renderOrgChart() {
           });
         }
 
+        // Check for concurrent head from BU_META (兼任部门负责人)
+        var ccHead = meta.concurrentHeads && meta.concurrentHeads[deptName];
+
         // 如果是兼任负责人，不把自动检测到的headEmp从staff中移除（兼任的人不在本部门员工数据中）
         var staffList = ccHead ? staff.slice() : staff.filter(function(s){ return s !== headEmp; });
         // Sort staff by rank
         var rankOrder2 = {'VII':7,'VI':6,'V':5,'IV':4,'III':3,'II':2,'I':1};
         staffList.sort(function(a,b){ var d=(rankOrder2[b.rank]||0)-(rankOrder2[a.rank]||0); if(d!==0)return d; return (a.n||'').localeCompare(b.n||'','zh'); });
-
-        // Check for concurrent head from BU_META (兼任部门负责人)
-        var ccHead = meta.concurrentHeads && meta.concurrentHeads[deptName];
         var deptHead, deptHeadRole, deptHeadLevel;
         if (ccHead) {
           deptHead = ccHead.name;
