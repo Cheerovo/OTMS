@@ -6596,7 +6596,7 @@ function renderOrgChart() {
   tree.bus.forEach(bu => {
     if(bu.head){if(bu.head==='TBH')tbhCount++;else addPerson(bu.head, bu.headRole, bu.headLevel, bu.name+'负责人');}
     bu.depts.forEach(d => {
-      allDepts++;
+      if(!bu.head || d.name !== bu.name) allDepts++;
       if(d.head){if(d.head==='TBH')tbhCount++;else addPerson(d.head, d.headRole, d.headLevel, d.name+'负责人');}
       addStaffRecursive(d.staff, d.name);
       if(d.subdepts) d.subdepts.forEach(s => {
@@ -6666,7 +6666,7 @@ function renderOrgChart() {
     if(bu.head) addBuName(bu.head);
     function addStaffName(staffList){ (staffList||[]).forEach(s=>{addBuName(s.n); if(s.children)addStaffName(s.children);}); }
     function countStaff(staffList){let c=0;(staffList||[]).forEach(s=>{if(s.n!=='TBH')c++;if(s.children)c+=countStaff(s.children);});return c;}
-    bu.depts.forEach(d => { buDepts++; if(d.head)addBuName(d.head); addStaffName(d.staff); if(d.subdepts) d.subdepts.forEach(s=>{buDepts++; if(s.head)addBuName(s.head); addStaffName(s.staff);}); });
+    bu.depts.forEach(d => { if(bu.head && d.name === bu.name) return; buDepts++; if(d.head)addBuName(d.head); addStaffName(d.staff); if(d.subdepts) d.subdepts.forEach(s=>{buDepts++; if(s.head)addBuName(s.head); addStaffName(s.staff);}); });
     let buStaff = buNames.size;
 
     html += '<div style="flex:1 1 0;min-width:130px;max-width:210px;display:flex;flex-direction:column;">';
@@ -6684,6 +6684,8 @@ function renderOrgChart() {
     html += '<div class="oc-bu-detail" id="bu-detail-'+bi+'" style="display:block;">';
 
     bu.depts.forEach((dept, di) => {
+      // Skip the BU's own dept block when BU head card already shows the person
+      if (bu.head && dept.name === bu.name) return;
       const subStaff = dept.subdepts ? dept.subdepts.reduce((a,s)=>a+countStaff(s.staff)+(s.head?1:0),0) : 0;
       const deptTotal = countStaff(dept.staff) + (dept.head ? 1 : 0) + subStaff;
       html += '<div class="oc-dept-block" style="background:'+bu.color+'08;">';
