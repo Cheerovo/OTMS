@@ -2462,7 +2462,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 </div>
 
 <div style="text-align:center;padding:12px 0 20px;font-size:9px;color:var(--text2)">
-  v2026.07
+  v2026.07.01
 </div>
 
 
@@ -6612,7 +6612,7 @@ function renderOrgChart() {
     if(bu.head){if(bu.head==='TBH')tbhCount++;else addPerson(bu.head, bu.headRole, bu.headLevel, bu.name+'负责人');}
     bu.depts.forEach(d => {
       if(!bu.head || d.name !== bu.name) allDepts++;
-      if(d.head){if(d.head==='TBH')tbhCount++;else addPerson(d.head, d.headRole, d.headLevel, d.name+'负责人');}
+      if(d.head && !(bu.head && d.name === bu.name)){if(d.head==='TBH')tbhCount++;else addPerson(d.head, d.headRole, d.headLevel, d.name+'负责人');}
       addStaffRecursive(d.staff, d.name);
       if(d.subdepts) d.subdepts.forEach(s => {
         allDepts++;
@@ -6633,9 +6633,13 @@ function renderOrgChart() {
     else if(t==='outsource') wb2Count++;
     else zcCount++;
   });
-  // Count 兼 positions: people holding 2+ positions
+  // Count 兼 positions: people holding 2+ unique positions (dedup via Set)
   let jianCount = 0;
-  allNames.forEach(n => { let p = nameMap[n].positions; if(p.length >= 2) jianCount += p.length - 1; });
+  allNames.forEach(function(n) {
+    var seen = {}, unique = [];
+    nameMap[n].positions.forEach(function(pos) { if (!seen[pos]) { seen[pos] = true; unique.push(pos); } });
+    if (unique.length >= 2) jianCount += unique.length - 1;
+  });
   let statPositionTotal = totalPeople + jianCount + tbhCount;
 
   let html = '<div class="org-chart-wrap">';
