@@ -1767,7 +1767,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
     <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;background:var(--bg-surface);border-radius:10px;padding:3px;width:fit-content">
       <button class="tn-sub-tab active" onclick="switchTraineeView('tasks')">任务看板</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('reports')">每周反馈</button>
-      <button class="tn-sub-tab" onclick="switchTraineeView('evaluation')">管培生打分</button>
+      <button class="tn-sub-tab" onclick="switchTraineeView('evaluation')">管培生评估</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('dashboard')">管培生绩效</button>
     </div>
     <div class="tn-view" id="tnTaskView">
@@ -9327,8 +9327,16 @@ function renderEvalScorePanel(traineeId){
   for(var i=0;i<EVAL_DIMS.length;i++){
     var d = EVAL_DIMS[i];
     var val = s[d.id] || 0;
+    var autoBadge = '';
+    if(d.id==='taskCompletion'){
+      var autoResult = autoScoreTaskCompletion(t.name, weekId);
+      val = autoResult.score;
+      if(autoResult.auto){
+        autoBadge = '<span class="eval-auto-badge" title="基于任务看板自动生成：'+autoResult.comp.done+'/'+autoResult.comp.total+' 项已完成（'+autoResult.comp.rate+'%）">自动</span>';
+      }
+    }
     dimsHtml += '<div class="eval-dim-item">'+
-      '<div class="eval-dim-label"><div class="dim-name">'+d.name+'</div><div class="dim-weight">权重 '+d.weight+'%</div></div>'+
+      '<div class="eval-dim-label"><div class="dim-name">'+d.name+autoBadge+'</div><div class="dim-weight">权重 '+d.weight+'%</div></div>'+
       '<div class="eval-dim-score-input"><input type="number" value="'+val+'" min="0" max="'+d.max+'" step="0.5" onchange="if(!this.disabled)updateDimScore(\''+t.name+'\',\''+d.id+'\',this.value,\''+weekId+'\')" id="evalDim_'+d.id+'"'+dis+'></div>'+
       '<div class="eval-dim-max">/ '+d.max+'</div>'+
       '<div class="eval-dim-slider"><input type="range" value="'+val+'" min="0" max="'+d.max+'" step="0.5" oninput="var inp=document.getElementById(\'evalDim_'+d.id+'\');if(inp&&!inp.disabled){inp.value=this.value;updateDimScore(\''+t.name+'\',\''+d.id+'\',this.value,\''+weekId+'\');}"'+dis+'></div>'+
