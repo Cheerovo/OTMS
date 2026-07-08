@@ -2438,6 +2438,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
       <button class="btn btn-outline btn-sm" onclick="clearEmpFilters()" title="清除所有筛选">✕ 清除</button>
       <button class="btn btn-primary btn-sm" id="btnAddEmp" onclick="openEmployeeModal()" style="display:none">+ 新增员工</button>
       <button class="btn btn-outline btn-sm" id="btnBatchImport" onclick="openBatchImportModal()">📥 批量导入</button>
+      <button class="btn btn-outline btn-sm" id="btnExport" onclick="exportEmployeeTable()">📤 导出</button>
       <button class="btn btn-outline btn-sm" id="btnDeptMgmt" onclick="openDeptManageModal()" style="display:none">管理部门</button>
     </div>
     <div class="emp-table-wrap">
@@ -5362,6 +5363,75 @@ function clearEmpFilters(){
   empSortField='default';
   empSortDir=1;
   renderEmployeeTable();
+}
+
+function exportEmployeeTable(){
+  var allEmps = loadEmployees();
+  var q = (document.getElementById('empSearchInput').value||'').trim().toLowerCase();
+  var buFilter = document.getElementById('empBUFilter').value;
+  var buDeptFilter = document.getElementById('empBUDeptFilter').value;
+  var rptFilter = document.getElementById('empReportsToFilter').value;
+  var rankFilter = document.getElementById('empRankFilter').value;
+
+  var filtered = allEmps.map(function(e){ return Object.assign({}, e, {buDept: e.bu && e.bu !== e.department ? e.bu + '-' + e.department : e.department || e.bu || ''}); });
+  if (q) filtered = filtered.filter(function(e){ return e.name.toLowerCase().indexOf(q) !== -1 || (e.bu||'').toLowerCase().indexOf(q) !== -1 || (e.position||'').toLowerCase().indexOf(q) !== -1 || (e.department||'').toLowerCase().indexOf(q) !== -1 || (e.reportsTo||'').toLowerCase().indexOf(q) !== -1; });
+  if (buFilter !== 'all') filtered = filtered.filter(function(e){ return e.bu === buFilter; });
+  if (buDeptFilter !== 'all') filtered = filtered.filter(function(e){ return e.buDept === buDeptFilter; });
+  if (rptFilter !== 'all') filtered = filtered.filter(function(e){ return e.reportsTo === rptFilter; });
+  if (rankFilter !== 'all') filtered = filtered.filter(function(e){ return e.rank === rankFilter; });
+
+  // Sort same as default
+  filtered.sort(function(a, b){
+    var buA = BU_ORDER.indexOf(a.bu || ''), buB = BU_ORDER.indexOf(b.bu || '');
+    if (buA === -1) buA = 99; if (buB === -1) buB = 99;
+    if (buA !== buB) return buA - buB;
+    var deptOrder = DEPT_ORDER[a.bu] || [];
+    var diA = deptOrder.indexOf(a.department || ''), diB = deptOrder.indexOf(b.department || '');
+    if (diA === -1) diA = 99; if (diB === -1) diB = 99;
+    if (diA !== diB) return diA - diB;
+    var rA = RANK_ORDER.indexOf(a.rank || ''), rB = RANK_ORDER.indexOf(b.rank || '');
+    if (rA === -1) rA = 99; if (rB === -1) rB = 99;
+    return rA - rB;
+  });
+
+  // Build CSV with UTF-8 BOM
+  var rankDisplay = {'I':'Ⅰ','II':'Ⅱ','III':'Ⅲ','IV':'Ⅳ','V':'Ⅴ','VI':'Ⅵ','VII':'Ⅶ','外部':'外部','外包':'外包','管培':'管培'};
+  var header = ['姓名','BU','部门','汇报人','职位','职级','入职日期','手机号','钉钉UserID'];
+  var rows = [header.join(',')];
+  filtered.forEach(function(e){
+    var rank = e.rank ? (['外部','外包','管培'].indexOf(e.rank) !== -1 ? rankDisplay[e.rank] : (rankDisplay[e.rank] || e.rank) + '级') : '';
+    rows.push([
+      csvCell(e.name),
+      csvCell(e.bu),
+      csvCell(e.department),
+      csvCell(e.reportsTo),
+      csvCell(e.position),
+      csvCell(rank),
+      csvCell(e.hireDate),
+      csvCell(e.phone),
+      csvCell(e.dingId)
+    ].join(','));
+  });
+
+  var bom = '\uFEFF';
+  var blob = new Blob([bom + rows.join('\n')], {type: 'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '员工花名册_' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function csvCell(val){
+  if (val === null || val === undefined) return '';
+  var s = String(val);
+  if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1){
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
 }
 
 const RANK_LABELS = {'I':'Ⅰ','II':'Ⅱ','III':'Ⅲ','IV':'Ⅳ','V':'Ⅴ','VI':'Ⅵ','VII':'Ⅶ','外部':'外部','外包':'外包','管培':'管培'};
