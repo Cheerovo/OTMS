@@ -6358,10 +6358,10 @@ function renderOrgChart() {
     return '<span class="level-badge '+getLvl(l)+'">'+display+'级</span>';
   };
   var renderTag = function(l, r, n) {
-    if (r && r.indexOf('外包') !== -1) return '<span class="badge-icon badge-outsource">外包</span>';
+    if (l === '外包' || (r && r.indexOf('外包') !== -1)) return '<span class="badge-icon badge-outsource">外包</span>';
     if (l === '外部' || (r && r.indexOf('外部') !== -1)) return '<span class="badge-icon badge-external">外部</span>';
     if (n && n.indexOf('兼') !== -1) return '<span class="badge-icon badge-jian">兼任</span>';
-    if (r && r.indexOf('管培生') !== -1) return '<span class="badge-icon badge-trainee">管培</span>';
+    if (l === '管培' || (r && r.indexOf('管培生') !== -1)) return '<span class="badge-icon badge-trainee">管培</span>';
     return '';
   };
   var renderName = function(n) {
