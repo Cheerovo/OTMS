@@ -5204,7 +5204,7 @@ function migrateOldOrgData(){
 migrateOldOrgData();
 
 // --- Default data (versioned — bump DATA_VER to force refresh) ---
-const DATA_VER = 'v4';
+const DATA_VER = 'v5';
 const storedVer = localStorage.okr_data_version;
 if(!deptList.length || storedVer !== DATA_VER){
   deptList = ['董事会','人力资源BU','客户服务部','社保部','天津事业部','北京事业部','深圳事业部','园区商办BU','AB区商办&H20','C区商办','园区公寓BU','自营公寓','公寓维修部','餐厅','悦樘管理公寓','园区物业BU','物业维修部','物业管理部','物业安保部','物业保洁部','职能后台','财务部（1）','财务部（2）','账务部（1）','账务部（2）','法务部','香港办','总裁办'];
@@ -5256,7 +5256,7 @@ if(!empList.length || storedVer !== DATA_VER){
     {id:'e38',name:'悦樘销售②',bu:'园区公寓BU',department:'悦樘管理公寓',reportsTo:'悦樘驻场',position:'销售',rank:'外部',hireDate:'',phone:''},
     {id:'e39',name:'悦樘销售③',bu:'园区公寓BU',department:'悦樘管理公寓',reportsTo:'悦樘驻场',position:'销售',rank:'外部',hireDate:'',phone:''},
     // 园区物业BU
-    {id:'e40',name:'汪顺',bu:'园区物业BU',department:'园区物业BU',reportsTo:'张毅',position:'总经理',rank:'III',hireDate:'',phone:''},
+    {id:'e40',name:'汪顺',bu:'园区物业BU',department:'园区物业BU',reportsTo:'张毅',position:'总经理',rank:'IV',hireDate:'',phone:''},
     {id:'e41',name:'方有保',bu:'园区物业BU',department:'物业维修部',reportsTo:'汪顺',position:'物业维修主管',rank:'II',hireDate:'',phone:''},
     {id:'e42',name:'金学忠',bu:'园区物业BU',department:'物业维修部',reportsTo:'方有保',position:'维修工程师',rank:'I',hireDate:'',phone:''},
     {id:'e43',name:'胡金明',bu:'园区物业BU',department:'物业维修部',reportsTo:'方有保',position:'维修工程师',rank:'I',hireDate:'',phone:''},
@@ -6449,7 +6449,7 @@ function renderOrgChart() {
       }
     },
     '园区公寓BU': { color:'#C2795C', head:'王倩', headRole:'总经理', headLevel:'V' },
-    '园区物业BU': { color:'#B8943E', head:'汪顺', headRole:'总经理', headLevel:'III' },
+    '园区物业BU': { color:'#B8943E', head:'汪顺', headRole:'总经理', headLevel:'IV' },
     '职能后台':   { color:'#7B6B8A', head:null, headsNote:'蔡心宇/芦智蔚/黄欢欢/邵吴慧/杜宪/王倩(兼)',
       concurrentHeads: {
         '账务资产部': {name:'王倩(兼)', role:'账务资产负责人', level:'V'},
