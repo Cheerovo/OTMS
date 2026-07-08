@@ -6484,17 +6484,12 @@ function renderOrgChart() {
         deptMap[d].push(e);
       });
 
-      // Sort departments by highest rank level (desc), then by headcount
-      var deptRanks = {};
-      var rankVal = {'VII':7,'VI':6,'V':5,'IV':4,'III':3,'II':2,'I':1,'管培':0,'外包':-1,'外部':-2};
-      Object.keys(deptMap).forEach(function(d){
-        var best = -99;
-        deptMap[d].forEach(function(s){ var rv = rankVal[s.rank]!==undefined ? rankVal[s.rank] : -99; if (rv > best) best = rv; });
-        deptRanks[d] = best;
-      });
+      // Sort departments by DEPT_ORDER for this BU
+      var deptOrder = DEPT_ORDER[buName] || [];
       var deptNames = Object.keys(deptMap).sort(function(a,b){
-        if (deptRanks[a] !== deptRanks[b]) return deptRanks[b] - deptRanks[a];
-        return deptMap[b].length - deptMap[a].length;
+        var ia = deptOrder.indexOf(a), ib = deptOrder.indexOf(b);
+        if (ia === -1) ia = 99; if (ib === -1) ib = 99;
+        return ia - ib;
       });
 
       var depts = [];
