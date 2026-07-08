@@ -5204,7 +5204,7 @@ function migrateOldOrgData(){
 migrateOldOrgData();
 
 // --- Default data (versioned — bump DATA_VER to force refresh) ---
-const DATA_VER = 'v6';
+const DATA_VER = 'v7';
 const storedVer = localStorage.okr_data_version;
 if(!deptList.length || storedVer !== DATA_VER){
   deptList = ['董事会','人力资源BU','客户服务部','社保部','天津事业部','北京事业部','深圳事业部','园区商办BU','AB区商办&H20','C区商办','园区公寓BU','自营公寓','公寓维修部','餐厅','悦樘管理公寓','园区物业BU','物业管理部','物业维修部','物业保洁部','物业安保部','职能后台','财务部（1）','财务部（2）','账务部（1）','账务部（2）','法务部','总裁办','香港办'];
@@ -5236,6 +5236,7 @@ if(!empList.length || storedVer !== DATA_VER){
     {id:'e19',name:'武敏辉',bu:'园区商办BU',department:'AB区商办&H20',reportsTo:'张毅',position:'高级业务拓展经理',rank:'III',hireDate:'',phone:''},
     {id:'e20',name:'周凯楠',bu:'园区商办BU',department:'AB区商办&H20',reportsTo:'武敏辉',position:'服务专员',rank:'I',hireDate:'',phone:''},
     {id:'e21',name:'苏坤',bu:'园区商办BU',department:'AB区商办&H20',reportsTo:'张毅',position:'业务拓展经理',rank:'II',hireDate:'',phone:''},
+    {id:'e112',name:'TBH',bu:'园区商办BU',department:'AB区商办&H20',reportsTo:'苏坤',position:'服务专员',rank:'I',hireDate:'',phone:''},
     {id:'e22',name:'李萍萍',bu:'园区商办BU',department:'C区商办',reportsTo:'黄一萧',position:'业务拓展经理',rank:'II',hireDate:'',phone:''},
     {id:'e23',name:'王韬',bu:'园区商办BU',department:'C区商办',reportsTo:'黄一萧',position:'业务拓展经理',rank:'II',hireDate:'',phone:''},
     // 园区公寓BU
