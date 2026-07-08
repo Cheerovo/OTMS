@@ -1381,6 +1381,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 /* Eval task suggestion button */
 .eval-task-suggestion { display:inline-block; margin-left:8px; padding:1px 7px; border-radius:8px; background:var(--accent-wash); color:var(--accent); font-size:8px; font-weight:600; cursor:pointer; border:none; font-family:inherit; transition:all .15s; vertical-align:middle; }
 .eval-task-suggestion:hover { background:var(--accent); color:#fff; }
+.eval-auto-badge { display:inline-block; margin-left:8px; padding:1px 7px; border-radius:8px; background:#E8F5E9; color:#2E7D32; font-size:8px; font-weight:600; vertical-align:middle; }
 
 /* Date range display */
 .tn-date-range { font-size:8px; color:var(--text-muted); flex-shrink:0; white-space:nowrap; }
@@ -9322,13 +9323,16 @@ function renderEvalScorePanel(traineeId){
   for(var i=0;i<EVAL_DIMS.length;i++){
     var d = EVAL_DIMS[i];
     var val = s[d.id] || 0;
-    var suggestBtn = '';
-    if(d.id==='taskCompletion' && canEdit){
-      var comp = calcTaskCompletionForTrainee(t.name, weekId);
-      suggestBtn = '<button class="eval-task-suggestion" onclick="event.preventDefault();applyTaskSuggestion(\''+t.name+'\',\''+weekId+'\','+comp.suggestedScore+')" title="基于'+comp.total+'项任务中已完成'+comp.done+'项（完成率'+comp.rate+'%）">建议 '+comp.suggestedScore+'</button>';
+    var autoBadge = '';
+    if(d.id==='taskCompletion'){
+      var autoResult = autoScoreTaskCompletion(t.name, weekId);
+      val = autoResult.score;
+      if(autoResult.auto){
+        autoBadge = '<span class="eval-auto-badge" title="基于任务看板自动生成：'+autoResult.comp.done+'/'+autoResult.comp.total+' 项已完成（'+autoResult.comp.rate+'%）">自动</span>';
+      }
     }
     dimsHtml += '<div class="eval-dim-item">'+
-      '<div class="eval-dim-label"><div class="dim-name">'+d.name+suggestBtn+'</div><div class="dim-weight">权重 '+d.weight+'%</div></div>'+
+      '<div class="eval-dim-label"><div class="dim-name">'+d.name+autoBadge+'</div><div class="dim-weight">权重 '+d.weight+'%</div></div>'+
       '<div class="eval-dim-score-input"><input type="number" value="'+val+'" min="0" max="'+d.max+'" step="0.5" onchange="if(!this.disabled)updateDimScore(\''+t.name+'\',\''+d.id+'\',this.value,\''+weekId+'\')" id="evalDim_'+d.id+'"'+dis+'></div>'+
       '<div class="eval-dim-max">/ '+d.max+'</div>'+
       '<div class="eval-dim-slider"><input type="range" value="'+val+'" min="0" max="'+d.max+'" step="0.5" oninput="var inp=document.getElementById(\'evalDim_'+d.id+'\');if(inp&&!inp.disabled){inp.value=this.value;updateDimScore(\''+t.name+'\',\''+d.id+'\',this.value,\''+weekId+'\');}"'+dis+'></div>'+
@@ -9385,20 +9389,25 @@ function renderEvalScorePanel(traineeId){
     '</div>';
 }
 
-function applyTaskSuggestion(traineeId, weekId, suggestedScore){
-  var inp = document.getElementById('evalDim_taskCompletion');
-  if(inp){
-    inp.value = suggestedScore;
-    updateDimScore(traineeId, 'taskCompletion', suggestedScore, weekId);
-    // Also update the slider
-    var slider = inp.parentElement.parentElement.querySelector('.eval-dim-slider input');
-    if(slider) slider.value = suggestedScore;
+// Auto-score task completion from task board data
+function autoScoreTaskCompletion(traineeName, weekId){
+  var s = getEvalScore(traineeName, weekId) || {};
+  var comp = calcTaskCompletionForTrainee(traineeName, weekId);
+  var hasManual = s.taskCompletion !== undefined && s.taskCompletion !== null && !s._autoTaskCompletion;
+  if(!hasManual){
+    s.taskCompletion = comp.suggestedScore;
+    s._autoTaskCompletion = true;
+    setEvalScore(traineeName, weekId, s);
+    return {score: comp.suggestedScore, auto: true, comp: comp};
   }
+  return {score: s.taskCompletion, auto: false, comp: comp};
 }
 
 function updateDimScore(traineeId, dimId, value, weekId){
   var s = getEvalScore(traineeId, weekId) || {};
   s[dimId] = parseFloat(value) || 0;
+  // Clear auto flag when taskCompletion is manually edited
+  if(dimId==='taskCompletion') s._autoTaskCompletion = false;
   setEvalScore(traineeId, weekId, s);
   var total = calcTotalScore(s);
   var totalEl = document.querySelector('#evalScorePanelContainer .big-num');
