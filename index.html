@@ -6553,9 +6553,22 @@ function renderOrgChart() {
           headRole: deptHeadRole,
           headLevel: deptHeadLevel,
           reportTo: reportTo,
-          staff: staffList.map(function(s){
-            return {n:s.name, r:s.position, l:s.rank||'I'};
-          })
+          staff: (function(){
+            var items = staffList.map(function(s){ return {n:s.name, r:s.position, l:s.rank||'I', reportsTo:s.reportsTo}; });
+            var top = [], children = {};
+            items.forEach(function(s){
+              var parent = s.reportsTo;
+              if (parent) {
+                if (!children[parent]) children[parent] = [];
+                children[parent].push(s);
+              } else {
+                top.push(s);
+              }
+            });
+            // Attach children and return only top-level items
+            items.forEach(function(s){ if (children[s.n]) s.children = children[s.n]; });
+            return items.filter(function(s){ return !s.reportsTo || !staffList.some(function(st){ return st.name === s.reportsTo; }); });
+          })()
         });
       });
 
