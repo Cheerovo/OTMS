@@ -5505,7 +5505,7 @@ function openEmployeeModal(id){
   var buOptions = Array.from(buSet).map(function(b){ return '<option value="'+esc(b)+'">'+esc(b)+'</option>'; }).join('');
 
   // 汇报人列表：按职级排序
-  var rankOrder = {'Ⅶ':7,'Ⅵ':6,'Ⅴ':5,'Ⅳ':4,'Ⅲ':3,'Ⅱ':2,'Ⅰ':1};
+  var rankOrder = {'VII':7,'VI':6,'V':5,'IV':4,'III':3,'II':2,'I':1};
   var reportsToList = allEmps.map(function(emp){ return {name:emp.name, rank:rankOrder[emp.rank]||0}; });
   var seenNames = new Set();
   reportsToList = reportsToList.filter(function(x){ if(seenNames.has(x.name)) return false; seenNames.add(x.name); return true; });
@@ -6347,13 +6347,13 @@ async function syncFromDingTalk() {
 // ===== Org Tree Chart (from HR Policy System) =====
 function renderOrgChart() {
   const div = document.getElementById('orgTreeView');
-  const getLvl = l => { const m={'Ⅶ':'lvl-7','Ⅵ':'lvl-6','Ⅴ':'lvl-5','Ⅳ':'lvl-4','Ⅲ':'lvl-3','Ⅱ':'lvl-2','Ⅰ':'lvl-1'}; return m[l]||'lvl-1'; };
+  const getLvl = l => { const m={'VII':'lvl-7','VI':'lvl-6','V':'lvl-5','IV':'lvl-4','III':'lvl-3','II':'lvl-2','I':'lvl-1'}; return m[l]||'lvl-1'; };
   var cleanRole = function(r) {
     if (!r) return '';
     return r.replace('(外部)','').replace('(外包)','').replace('(管培生)','').replace('管培生','').trim();
   };
   var renderBadge = function(l, r) {
-    if (l === '外部' || l === '—' || (r && (r.indexOf('外部') !== -1 || r.indexOf('外包') !== -1))) return '';
+    if (l === '外部' || l === '外包' || l === '管培' || l === '—' || (r && (r.indexOf('外部') !== -1 || r.indexOf('外包') !== -1))) return '';
     return '<span class="level-badge '+getLvl(l)+'">'+l+'级</span>';
   };
   var renderTag = function(l, r, n) {
@@ -6370,10 +6370,10 @@ function renderOrgChart() {
 
   // Dynamic org tree built from employee data (no more hardcoded names!)
   var BU_META = {
-    '人力资源BU': { color:'#4A6FA5', head:'黄一萧', headRole:'总经理', headLevel:'Ⅴ' },
+    '人力资源BU': { color:'#4A6FA5', head:'黄一萧', headRole:'总经理', headLevel:'V' },
     '园区商办BU': { color:'#3D8B7E', head:null, headsNote:'张毅(兼)/黄一萧(兼)' },
-    '园区公寓BU': { color:'#C2795C', head:'王倩', headRole:'总经理', headLevel:'Ⅴ' },
-    '园区物业BU': { color:'#B8943E', head:'汪顺', headRole:'总经理', headLevel:'Ⅲ' },
+    '园区公寓BU': { color:'#C2795C', head:'王倩', headRole:'总经理', headLevel:'V' },
+    '园区物业BU': { color:'#B8943E', head:'汪顺', headRole:'总经理', headLevel:'III' },
     '职能后台':   { color:'#7B6B8A', head:null, headsNote:'蔡心宇/芦智蔚/黄欢欢/邵吴慧/杜宪/王倩(兼)' }
   };
   var BU_ORG_ORDER = ['人力资源BU','园区商办BU','园区公寓BU','园区物业BU','职能后台'];
@@ -6385,8 +6385,8 @@ function renderOrgChart() {
     var board = boardEmps.length > 0 ? {
       name: boardEmps[0].name,
       role: boardEmps[0].position || '执行董事',
-      level: boardEmps[0].rank || 'Ⅶ'
-    } : { name:'张毅', role:'执行董事/CFO', level:'Ⅶ' };
+      level: boardEmps[0].rank || 'VII'
+    } : { name:'张毅', role:'执行董事/CFO', level:'VII' };
 
     var bus = [];
     BU_ORG_ORDER.forEach(function(buName){
@@ -6405,7 +6405,7 @@ function renderOrgChart() {
 
       // Sort departments by highest rank level (desc), then by headcount
       var deptRanks = {};
-      var rankVal = {'Ⅶ':7,'Ⅵ':6,'Ⅴ':5,'Ⅳ':4,'Ⅲ':3,'Ⅱ':2,'Ⅰ':1,'管培':0,'外包':-1,'外部':-2};
+      var rankVal = {'VII':7,'VI':6,'V':5,'IV':4,'III':3,'II':2,'I':1,'管培':0,'外包':-1,'外部':-2};
       Object.keys(deptMap).forEach(function(d){
         var best = -99;
         deptMap[d].forEach(function(s){ var rv = rankVal[s.rank]!==undefined ? rankVal[s.rank] : -99; if (rv > best) best = rv; });
@@ -6427,7 +6427,7 @@ function renderOrgChart() {
         });
         // If no clear head found, use the highest-ranked person
         if (!headEmp && staff.length > 0) {
-          var rankOrder = {'Ⅶ':7,'Ⅵ':6,'Ⅴ':5,'Ⅳ':4,'Ⅲ':3,'Ⅱ':2,'Ⅰ':1};
+          var rankOrder = {'VII':7,'VI':6,'V':5,'IV':4,'III':3,'II':2,'I':1};
           staff.forEach(function(s){
             var rv = rankOrder[s.rank] || 0;
             if (rv > (rankOrder[headEmp&&headEmp.rank]||0)) headEmp = s;
@@ -6436,7 +6436,7 @@ function renderOrgChart() {
 
         var staffList = staff.filter(function(s){ return s !== headEmp; });
         // Sort staff by rank
-        var rankOrder2 = {'Ⅶ':7,'Ⅵ':6,'Ⅴ':5,'Ⅳ':4,'Ⅲ':3,'Ⅱ':2,'Ⅰ':1};
+        var rankOrder2 = {'VII':7,'VI':6,'V':5,'IV':4,'III':3,'II':2,'I':1};
         staffList.sort(function(a,b){ var d=(rankOrder2[b.rank]||0)-(rankOrder2[a.rank]||0); if(d!==0)return d; return (a.n||'').localeCompare(b.n||'','zh'); });
 
         depts.push({
@@ -6445,7 +6445,7 @@ function renderOrgChart() {
           headRole: headEmp ? headEmp.position : null,
           headLevel: headEmp ? headEmp.rank : null,
           staff: staffList.map(function(s){
-            return {n:s.name, r:s.position, l:s.rank||'Ⅰ'};
+            return {n:s.name, r:s.position, l:s.rank||'I'};
           })
         });
       });
