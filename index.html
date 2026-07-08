@@ -6354,7 +6354,8 @@ function renderOrgChart() {
   };
   var renderBadge = function(l, r) {
     if (l === '外部' || l === '外包' || l === '管培' || l === '—' || (r && (r.indexOf('外部') !== -1 || r.indexOf('外包') !== -1))) return '';
-    return '<span class="level-badge '+getLvl(l)+'">'+l+'级</span>';
+    var display = (RANK_LABELS[l]||l);
+    return '<span class="level-badge '+getLvl(l)+'">'+display+'级</span>';
   };
   var renderTag = function(l, r, n) {
     if (r && r.indexOf('外包') !== -1) return '<span class="badge-icon badge-outsource">外包</span>';
@@ -6370,21 +6371,11 @@ function renderOrgChart() {
 
   // Dynamic org tree built from employee data (no more hardcoded names!)
   var BU_META = {
-    '人力资源BU': { color:'#4A6FA5', head:'黄一萧', headRole:'总经理', headLevel:'V', concurrent:null },
-    '园区商办BU': { color:'#3D8B7E', head:null, headsNote:'张毅(兼)/黄一萧(兼)', concurrent:[
-      {name:'张毅', role:'总经理'},
-      {name:'黄一萧', role:'总经理'}
-    ]},
-    '园区公寓BU': { color:'#C2795C', head:'王倩', headRole:'总经理', headLevel:'V', concurrent:null },
-    '园区物业BU': { color:'#B8943E', head:'汪顺', headRole:'总经理', headLevel:'III', concurrent:null },
-    '职能后台':   { color:'#7B6B8A', head:null, headsNote:'蔡心宇/芦智蔚/黄欢欢/邵吴慧/杜宪/王倩(兼)', concurrent:[
-      {name:'蔡心宇', role:'负责人'},
-      {name:'芦智蔚', role:'负责人'},
-      {name:'黄欢欢', role:'负责人'},
-      {name:'邵吴慧', role:'负责人'},
-      {name:'杜宪', role:'负责人'},
-      {name:'王倩', role:'负责人(兼)'}
-    ]}
+    '人力资源BU': { color:'#4A6FA5', head:'黄一萧', headRole:'总经理', headLevel:'V' },
+    '园区商办BU': { color:'#3D8B7E', head:null, headsNote:'张毅(兼)/黄一萧(兼)' },
+    '园区公寓BU': { color:'#C2795C', head:'王倩', headRole:'总经理', headLevel:'V' },
+    '园区物业BU': { color:'#B8943E', head:'汪顺', headRole:'总经理', headLevel:'III' },
+    '职能后台':   { color:'#7B6B8A', head:null, headsNote:'蔡心宇/芦智蔚/黄欢欢/邵吴慧/杜宪/王倩(兼)' }
   };
   var BU_ORG_ORDER = ['人力资源BU','园区商办BU','园区公寓BU','园区物业BU','职能后台'];
 
@@ -6449,11 +6440,22 @@ function renderOrgChart() {
         var rankOrder2 = {'VII':7,'VI':6,'V':5,'IV':4,'III':3,'II':2,'I':1};
         staffList.sort(function(a,b){ var d=(rankOrder2[b.rank]||0)-(rankOrder2[a.rank]||0); if(d!==0)return d; return (a.n||'').localeCompare(b.n||'','zh'); });
 
+        // If no head found, detect reportTo from most common reportsTo among staff
+        var reportTo = null;
+        if (!headEmp && staff.length > 0) {
+          var rtCount = {};
+          staff.forEach(function(s){ if(s.reportsTo){ var rt = s.reportsTo.trim(); if(rt) rtCount[rt] = (rtCount[rt]||0)+1; } });
+          var bestRt = null, bestCnt = 0;
+          Object.keys(rtCount).forEach(function(rt){ if(rtCount[rt] > bestCnt){ bestCnt = rtCount[rt]; bestRt = rt; } });
+          reportTo = bestRt;
+        }
+
         depts.push({
           name: deptName,
           head: headEmp ? headEmp.name : null,
           headRole: headEmp ? headEmp.position : null,
           headLevel: headEmp ? headEmp.rank : null,
+          reportTo: reportTo,
           staff: staffList.map(function(s){
             return {n:s.name, r:s.position, l:s.rank||'I'};
           })
@@ -6497,9 +6499,6 @@ function renderOrgChart() {
   }
   tree.bus.forEach(bu => {
     if(bu.head){if(bu.head==='TBH')tbhCount++;else addPerson(bu.head, bu.headRole, bu.headLevel, bu.name+'负责人');}
-    // 兼任岗位也计入统计
-    var mc = BU_META[bu.name] && BU_META[bu.name].concurrent;
-    if(mc) mc.forEach(function(cc){ addPerson(cc.name, cc.role, 'I', bu.name+'兼任'); });
     bu.depts.forEach(d => {
       allDepts++;
       if(d.head){if(d.head==='TBH')tbhCount++;else addPerson(d.head, d.headRole, d.headLevel, d.name+'负责人');}
@@ -6548,7 +6547,7 @@ function renderOrgChart() {
   html += '<div class="board-label">集团董事会</div>';
   html += '<div class="board-name">'+tree.board.name+'</div>';
   html += '<div class="board-role">'+tree.board.role+'</div>';
-  html += '<span class="level-badge '+getLvl(tree.board.level)+'" style="font-size:9px;margin-top:3px;">'+tree.board.level+'级</span>';
+  html += '<span class="level-badge '+getLvl(tree.board.level)+'" style="font-size:9px;margin-top:3px;">'+(RANK_LABELS[tree.board.level]||tree.board.level)+'级</span>';
   html += '</div></div>';
 
   // SVG connector
@@ -6572,9 +6571,6 @@ function renderOrgChart() {
     function addStaffName(staffList){ (staffList||[]).forEach(s=>{addBuName(s.n); if(s.children)addStaffName(s.children);}); }
     function countStaff(staffList){let c=0;(staffList||[]).forEach(s=>{if(s.n!=='TBH')c++;if(s.children)c+=countStaff(s.children);});return c;}
     bu.depts.forEach(d => { buDepts++; if(d.head)addBuName(d.head); addStaffName(d.staff); if(d.subdepts) d.subdepts.forEach(s=>{buDepts++; if(s.head)addBuName(s.head); addStaffName(s.staff);}); });
-    // 兼任岗位也计入BU人数
-    var metaConcurrent = BU_META[bu.name] && BU_META[bu.name].concurrent;
-    if (metaConcurrent) metaConcurrent.forEach(function(cc){ if(cc.name) addBuName(cc.name); });
     let buStaff = buNames.size;
 
     html += '<div style="flex:1 1 0;min-width:130px;max-width:210px;display:flex;flex-direction:column;">';
@@ -6591,32 +6587,14 @@ function renderOrgChart() {
 
     html += '<div class="oc-bu-detail" id="bu-detail-'+bi+'" style="display:block;">';
 
-    // 兼任岗位
-    if (metaConcurrent && metaConcurrent.length > 0) {
-      var allEmpsForLookup = loadEmployees();
-      var empByName = {};
-      allEmpsForLookup.forEach(function(emp){ empByName[emp.name] = emp; });
-      html += '<div style="padding:8px 12px 4px;font-size:9px;letter-spacing:1px;color:var(--text-muted);">兼任岗位</div>';
-      metaConcurrent.forEach(function(cc){
-        var empData = empByName[cc.name];
-        var ccLevel = empData ? empData.rank : 'I';
-        html += '<div class="oc-staff-row" style="border-left:2px solid '+bu.color+'66;background:'+bu.color+'08;margin-bottom:2px;">';
-        html += '<div style="flex:1;min-width:0;"><div style="font-weight:400;font-size:9px;color:var(--text);">'+cc.name+'</div>';
-        html += '<div style="font-size:8px;color:var(--text2);">'+cc.role+' '+renderBadge(ccLevel, cc.role)+'</div></div>';
-        html += '<div style="flex-shrink:0;"><span class="badge-icon badge-jian">兼任</span></div>';
-        html += '</div>';
-      });
-    }
-
     bu.depts.forEach((dept, di) => {
       const subStaff = dept.subdepts ? dept.subdepts.reduce((a,s)=>a+countStaff(s.staff)+(s.head?1:0),0) : 0;
       const deptTotal = countStaff(dept.staff) + (dept.head ? 1 : 0) + subStaff;
       html += '<div class="oc-dept-block" style="background:'+bu.color+'08;">';
       html += '<div class="oc-dept-hd" style="color:'+bu.color+';border-bottom-color:'+bu.color+'33;" onclick="toggleDept(\'dept-'+bi+'-'+di+'\')">';
       let deptLabel = dept.name;
-      if (!dept.head) {
-        if (dept.reportTo) deptLabel += ' <span class="badge-report">→ '+dept.reportTo+'</span>';
-        else deptLabel += ' <span style="font-size:8px;color:var(--danger);margin-left:4px;">无主管</span>';
+      if (!dept.head && dept.reportTo) {
+        deptLabel += ' <span class="badge-report">汇报: '+dept.reportTo+'</span>';
       }
       html += deptLabel+' <span style="font-size:8px;color:var(--text2);">'+deptTotal+'人 ▼</span></div>';
       html += '<div class="oc-dept-body" id="dept-'+bi+'-'+di+'" style="display:block;">';
