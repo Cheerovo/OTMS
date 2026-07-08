@@ -5449,6 +5449,23 @@ function renderEmployeeTable(){
 }
 
 // --- Employee CRUD ---
+// 为新员工自动创建账号并授予所有模块查看权限
+function autoSetupUser(name) {
+  if (!name) return;
+  var users = loadUsers();
+  if (!users[name]) {
+    users[name] = {pw:'123123', role:'user', name:name};
+    saveUsers(users);
+  }
+  // 授予所有模块查看权限
+  var perms = loadPerms();
+  PERM_MODULES.forEach(function(m) {
+    if (perms[m].view.indexOf(name) < 0) {
+      perms[m].view.push(name);
+    }
+  });
+  savePerms(perms);
+}
 function openEmployeeModal(id){
   let e=id?empList.find(x=>x.id===id):null;
   let html=`<div class="modal-header"><h2>${e?'编辑员工':'新增员工'}</h2><button class="btn-icon" onclick="closeModal()">✕</button></div>`;
@@ -5479,7 +5496,9 @@ function openEmployeeModal(id){
 	      e.position=document.getElementById('empPosition').value.trim(); e.rank=document.getElementById('empRank').value; e.location=document.getElementById('empLocation').value.trim();
       e.hireDate=document.getElementById('empHireDate').value; e.phone=document.getElementById('empPhone').value.trim(); e.dingId=document.getElementById('empDingId').value.trim();
     }else{
-      empList.push({id:'emp'+Date.now(),name:nm,bu:document.getElementById('empBU').value.trim(),department:dept,reportsTo:document.getElementById('empReportsTo').value.trim(),position:document.getElementById('empPosition').value.trim(),rank:document.getElementById('empRank').value,location:document.getElementById('empLocation').value.trim(),hireDate:document.getElementById('empHireDate').value,phone:document.getElementById('empPhone').value.trim(),dingId:document.getElementById('empDingId').value.trim()});
+      var newEmp = {id:'emp'+Date.now(),name:nm,bu:document.getElementById('empBU').value.trim(),department:dept,reportsTo:document.getElementById('empReportsTo').value.trim(),position:document.getElementById('empPosition').value.trim(),rank:document.getElementById('empRank').value,location:document.getElementById('empLocation').value.trim(),hireDate:document.getElementById('empHireDate').value,phone:document.getElementById('empPhone').value.trim(),dingId:document.getElementById('empDingId').value.trim()};
+      empList.push(newEmp);
+      autoSetupUser(nm); // 自动创建账号并授权
     }
     saveEmployees(empList);
     closeModal();
@@ -6215,125 +6234,95 @@ function renderOrgChart() {
     return n || '';
   };
 
-  const tree = {
-    board: { name:'张毅', role:'执行董事/CFO', level:'Ⅶ' },
-    bus: [
-      {
-        name:'人力资源BU', head:'黄一萧', headRole:'总经理', headLevel:'Ⅴ', color:'#4A6FA5',
-        depts:[
-          { name:'客户服务部', head:'杨漾', headRole:'客服经理', headLevel:'Ⅲ', staff:[
-            {n:'裘碧钰',r:'高级客服专员',l:'Ⅱ'},{n:'沈丽霞',r:'高级客服专员',l:'Ⅱ'},{n:'侯心怡',r:'高级客服专员',l:'Ⅱ'},{n:'卢素丹',r:'客服专员',l:'Ⅰ'},{n:'郑昌杰',r:'客服专员',l:'Ⅰ'}
-          ]},
-          { name:'社保部', head:'葛豪平', headRole:'高级社保主管', headLevel:'Ⅲ', staff:[
-            {n:'张祥',r:'社保专员',l:'Ⅰ'},{n:'毛华英',r:'社保专员',l:'Ⅰ'}
-          ]},
-          { name:'天津事业部', head:'郭双红', headRole:'高级客服主管', headLevel:'Ⅲ', staff:[
-            {n:'陈一卓',r:'高级客服专员',l:'Ⅱ'},{n:'周梓荣',r:'客服专员',l:'Ⅰ'},{n:'吴靖娴',r:'客服专员',l:'Ⅰ'}
-          ]},
-          { name:'北京事业部', head:'杨崴', headRole:'高级客服主管', headLevel:'Ⅲ', staff:[
-            {n:'孟庆芳',r:'客服专员',l:'Ⅰ'}
-          ]},
-          { name:'深圳事业部', head:null, headRole:null, headLevel:null, reportTo:'黄一萧', staff:[
-            {n:'王雷',r:'客服专员',l:'Ⅰ'}
-          ]}
-        ]
-      },
-      {
-        name:'园区商办BU', head:null, headRole:null, headLevel:null, color:'#3D8B7E', headsNote:'张毅(兼)/黄一萧(兼)',
-        depts:[
-          { name:'AB区商办&H20', head:'张毅(兼)', headRole:'商办负责人', headLevel:'Ⅶ', staff:[
-            {n:'武敏辉',r:'高级业务拓展经理',l:'Ⅲ',children:[{n:'周凯楠',r:'服务专员',l:'Ⅰ'}]},{n:'苏坤',r:'业务拓展经理',l:'Ⅱ',children:[{n:'TBH',r:'服务专员',l:'Ⅰ'}]}
-          ]},
-          { name:'C区商办', head:'黄一萧(兼)', headRole:'商办负责人', headLevel:'Ⅴ', staff:[
-            {n:'李萍萍',r:'业务拓展经理',l:'Ⅱ'},{n:'王韬',r:'业务拓展经理',l:'Ⅱ'}
-          ]}
-        ]
-      },
-      {
-        name:'园区公寓BU', head:'王倩', headRole:'总经理', headLevel:'Ⅴ', color:'#C2795C',
-        depts:[
-          { name:'自营公寓', head:'林知峰', headRole:'副总经理', headLevel:'Ⅲ', staff:[
-            {n:'党红艳',r:'公寓管家',l:'Ⅰ'},{n:'贾东升',r:'公寓管家',l:'Ⅰ'},{n:'罗俊尧',r:'公寓管家',l:'Ⅰ'},{n:'吴立军',r:'公寓管家',l:'Ⅰ'}
-          ]},
-          { name:'公寓维修部', head:null, headRole:null, headLevel:null, reportTo:'林知峰', staff:[
-            {n:'董宾宾',r:'万能工',l:'Ⅰ'},{n:'吕相坠',r:'万能工',l:'Ⅰ'},{n:'方祥',r:'空调维修工',l:'Ⅰ'}
-          ]},
-          { name:'餐厅', head:null, headRole:null, headLevel:null, reportTo:'林知峰', staff:[
-            {n:'谢志毅',r:'主厨',l:'Ⅰ'},{n:'钱玉莲',r:'保洁',l:'Ⅰ'},{n:'蔡明燕',r:'服务员',l:'Ⅰ'}
-          ]},
-          { name:'悦樘管理公寓', head:'悦樘驻场', headRole:'店长(外部)', headLevel:'外部', staff:[
-            {n:'悦樘销售①',r:'销售(外部)',l:'外部'},{n:'悦樘销售②',r:'销售(外部)',l:'外部'},{n:'悦樘销售③',r:'销售(外部)',l:'外部'}
-          ]}
-        ]
-      },
-      {
-        name:'园区物业BU', head:'汪顺', headRole:'总经理', headLevel:'Ⅲ', color:'#B8943E',
-        depts:[
-          { name:'物业维修部', head:'方有保', headRole:'物业维修主管', headLevel:'Ⅱ', staff:[
-            {n:'金学忠',r:'维修工程师',l:'Ⅰ'},{n:'胡金明',r:'维修工程师',l:'Ⅰ'}
-          ]},
-          { name:'物业管理部', head:null, headRole:null, headLevel:null, reportTo:'汪顺', staff:[
-            {n:'王力',r:'MIS系统主管',l:'Ⅱ'},{n:'程璐',r:'行政服务专员',l:'Ⅰ'}
-          ]},
-          { name:'物业安保部', head:'贾飞龙', headRole:'保安队长', headLevel:'Ⅱ', staff:[],
-            subdepts:[
-              { name:'AB区安保部', staff:[
-                {n:'朱鑫沛',r:'保安副队长',l:'Ⅰ'},{n:'安东生',r:'保安副队长',l:'Ⅰ'},
-                {n:'庄艳林',r:'保安',l:'Ⅰ'},{n:'黄连兵',r:'保安',l:'Ⅰ'},{n:'谢小强',r:'保安',l:'Ⅰ'},{n:'史文奎',r:'保安',l:'Ⅰ'},
-                {n:'胡程林',r:'保安(外包)',l:'Ⅰ'},{n:'刘鹏',r:'保安(外包)',l:'Ⅰ'},{n:'孔令波',r:'保安(外包)',l:'Ⅰ'},{n:'吉庆',r:'保安(外包)',l:'Ⅰ'},{n:'刘曦文',r:'保安(外包)',l:'Ⅰ'},
-                {n:'杨永宁',r:'保安(外包)',l:'Ⅰ'},{n:'姚伟',r:'保安(外包)',l:'Ⅰ'},{n:'李俭波',r:'保安(外包)',l:'Ⅰ'},{n:'胡保林',r:'保安(外包)',l:'Ⅰ'},{n:'李军立',r:'保安(外包)',l:'Ⅰ'},
-                {n:'贾元录',r:'保安(外包)',l:'Ⅰ'},{n:'朱朝甫',r:'保安(外包)',l:'Ⅰ'}
-              ]},
-              { name:'D区安保部', staff:[
-                {n:'徐刘岸',r:'保安(外包)',l:'Ⅰ'},{n:'马金超',r:'保安(外包)',l:'Ⅰ'},{n:'宋英杰',r:'保安(外包)',l:'Ⅰ'},{n:'李龙',r:'保安(外包)',l:'Ⅰ'},{n:'朱家良',r:'保安(外包)',l:'Ⅰ'},
-                {n:'杨永奋',r:'保安(外包)',l:'Ⅰ'},{n:'李威威',r:'保安(外包)',l:'Ⅰ'},{n:'王海涛',r:'保安(外包)',l:'Ⅰ'},{n:'王玉玺',r:'保安(外包)',l:'Ⅰ'},{n:'许磊',r:'保安(外包)',l:'Ⅰ'}
-              ]}
-            ]
-          },
-          { name:'物业保洁部', head:'宣国英', headRole:'保洁服务主管', headLevel:'Ⅱ', staff:[
-            {n:'肖德云',r:'保洁',l:'Ⅰ'},{n:'丁成英',r:'保洁',l:'Ⅰ'},{n:'高光付',r:'保洁',l:'Ⅰ'},{n:'高玉玲',r:'保洁',l:'Ⅰ'},{n:'孙建芳',r:'保洁',l:'Ⅰ'},
-            {n:'徐培珍',r:'保洁',l:'Ⅰ'},{n:'施玉芹',r:'保洁',l:'Ⅰ'},{n:'殷德昌',r:'保洁',l:'Ⅰ'},{n:'翟建设',r:'保洁',l:'Ⅰ'},
-            {n:'王建平',r:'保洁',l:'Ⅰ'},{n:'杨美玲',r:'行政保洁',l:'Ⅰ'},{n:'刘顺兰',r:'行政保洁',l:'Ⅰ'}
-          ]}
-        ]
-      },
-      {
-        name:'职能后台', head:null, headRole:null, headLevel:null, color:'#7B6B8A',
-        headsNote:'蔡心宇/芦智蔚/黄欢欢/邵吴慧/杜宪/王倩(兼)',
-        depts:[
-          { name:'财务部（1）', head:'蔡心宇', headRole:'财务经理', headLevel:'Ⅲ', staff:[
-            {n:'韩燕',r:'高级会计',l:'Ⅱ'},{n:'王永佳',r:'会计',l:'Ⅰ'},{n:'蒋孝峰',r:'会计',l:'Ⅰ'}
-          ]},
-          { name:'财务部（2）', head:'芦智蔚', headRole:'财务经理', headLevel:'Ⅲ', staff:[
-            {n:'李蕾',r:'会计',l:'Ⅰ'},{n:'TBH',r:'会计',l:'Ⅰ'},{n:'吴松成',r:'成盈财务(外部)',l:'外部'},{n:'刘阳阳',r:'成盈财务(外部)',l:'外部'}
-          ]},
-          { name:'账务部（1）', head:'黄欢欢', headRole:'账务经理', headLevel:'Ⅲ', staff:[
-            {n:'季嘉莉',r:'账务专员',l:'Ⅰ'},{n:'沈明明',r:'账务系统专员',l:'Ⅰ'}
-          ]},
-          { name:'账务部（2）', head:'邵吴慧', headRole:'账务主管', headLevel:'Ⅱ', staff:[
-            {n:'陈锦',r:'账务助理(管培生)',l:'—'},{n:'陈双杰',r:'账务助理(管培生)',l:'—'}
-          ]},
-          { name:'法务部', head:'TBH', headRole:'法务经理', headLevel:'Ⅲ', staff:[
-            {n:'赵柳文',r:'法务助理(管培生)',l:'—'},{n:'安子玥',r:'法务助理(管培生)',l:'—'}
-          ]},
-          { name:'香港办', head:'王倩(兼)', headRole:'负责人', headLevel:'Ⅴ', subdepts:[
-            { name:'香港办', staff:[
-              {n:'李佳',r:'账务专员',l:'Ⅰ'},{n:'Yvonne Lai',r:'境外财务(外部)',l:'外部'}
-            ]},
-            { name:'家庭办', staff:[
-              {n:'林水桃',r:'驾驶员',l:'Ⅰ'},{n:'季文菊',r:'管家保洁',l:'Ⅰ'}
-            ]}
-          ]},
-          { name:'总裁办', head:'杜宪', headRole:'总裁秘书', headLevel:'Ⅱ',
-            subdepts:[
-              { name:'人事', staff:[{n:'黄燕婷',r:'人事专员',l:'Ⅰ'}]},
-              { name:'管培生团队', staff:[{n:'任梦超',r:'CS管培生(北美远程)',l:'—'},{n:'陈圆',r:'CS管培生',l:'—'}]}
-            ]}
-        ]
-      }
-    ]
+  // Dynamic org tree built from employee data (no more hardcoded names!)
+  var BU_META = {
+    '人力资源BU': { color:'#4A6FA5', head:'黄一萧', headRole:'总经理', headLevel:'Ⅴ' },
+    '园区商办BU': { color:'#3D8B7E', head:null, headsNote:'张毅(兼)/黄一萧(兼)' },
+    '园区公寓BU': { color:'#C2795C', head:'王倩', headRole:'总经理', headLevel:'Ⅴ' },
+    '园区物业BU': { color:'#B8943E', head:'汪顺', headRole:'总经理', headLevel:'Ⅲ' },
+    '职能后台':   { color:'#7B6B8A', head:null, headsNote:'蔡心宇/芦智蔚/黄欢欢/邵吴慧/杜宪/王倩(兼)' }
   };
+  var BU_ORG_ORDER = ['人力资源BU','园区商办BU','园区公寓BU','园区物业BU','职能后台'];
 
+  function buildOrgTree() {
+    var allEmps = loadEmployees();
+    // Board: 董事会成员
+    var boardEmps = allEmps.filter(function(e){ return e.bu === '董事会'; });
+    var board = boardEmps.length > 0 ? {
+      name: boardEmps[0].name,
+      role: boardEmps[0].position || '执行董事',
+      level: boardEmps[0].rank || 'Ⅶ'
+    } : { name:'张毅', role:'执行董事/CFO', level:'Ⅶ' };
+
+    var bus = [];
+    BU_ORG_ORDER.forEach(function(buName){
+      var meta = BU_META[buName];
+      if (!meta) return;
+      var buEmps = allEmps.filter(function(e){ return e.bu === buName; });
+      if (buEmps.length === 0) return;
+
+      // Group by department
+      var deptMap = {};
+      buEmps.forEach(function(e){
+        var d = e.department || '其他';
+        if (!deptMap[d]) deptMap[d] = [];
+        deptMap[d].push(e);
+      });
+
+      // Sort departments by employee count (largest first)
+      var deptNames = Object.keys(deptMap).sort(function(a,b){
+        return deptMap[b].length - deptMap[a].length;
+      });
+
+      var depts = [];
+      deptNames.forEach(function(deptName){
+        var staff = deptMap[deptName];
+        // Find department head: person with most direct reports in this dept
+        var headEmp = null, maxReports = 0;
+        staff.forEach(function(s){
+          var cnt = staff.filter(function(s2){ return s2.reportsTo === s.name; }).length;
+          if (cnt > maxReports) { maxReports = cnt; headEmp = s; }
+        });
+        // If no clear head found, use the highest-ranked person
+        if (!headEmp && staff.length > 0) {
+          var rankOrder = {'Ⅶ':7,'Ⅵ':6,'Ⅴ':5,'Ⅳ':4,'Ⅲ':3,'Ⅱ':2,'Ⅰ':1};
+          staff.forEach(function(s){
+            var rv = rankOrder[s.rank] || 0;
+            if (rv > (rankOrder[headEmp&&headEmp.rank]||0)) headEmp = s;
+          });
+        }
+
+        var staffList = staff.filter(function(s){ return s !== headEmp; });
+        // Sort staff by rank
+        var rankOrder2 = {'Ⅶ':7,'Ⅵ':6,'Ⅴ':5,'Ⅳ':4,'Ⅲ':3,'Ⅱ':2,'Ⅰ':1};
+        staffList.sort(function(a,b){ return (rankOrder2[b.rank]||0) - (rankOrder2[a.rank]||0); });
+
+        depts.push({
+          name: deptName,
+          head: headEmp ? headEmp.name : null,
+          headRole: headEmp ? headEmp.position : null,
+          headLevel: headEmp ? headEmp.rank : null,
+          staff: staffList.map(function(s){
+            return {n:s.name, r:s.position, l:s.rank||'Ⅰ'};
+          })
+        });
+      });
+
+      bus.push({
+        name: buName,
+        head: meta.head,
+        headRole: meta.headRole,
+        headLevel: meta.headLevel,
+        headsNote: meta.headsNote,
+        color: meta.color,
+        depts: depts
+      });
+    });
+
+    return { board:board, bus:bus };
+  }
+
+  const tree = buildOrgTree();
   // Compute stats — collect unique names to avoid double-counting 兼 positions
   let allDepts=0;
   let nameMap = {}; // name -> {type: 'internal'|'outsource'|'external', positions: []}
