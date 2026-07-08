@@ -5468,37 +5468,107 @@ function autoSetupUser(name) {
 }
 function openEmployeeModal(id){
   let e=id?empList.find(x=>x.id===id):null;
-  let html=`<div class="modal-header"><h2>${e?'编辑员工':'新增员工'}</h2><button class="btn-icon" onclick="closeModal()">✕</button></div>`;
-  html+=`<div class="modal-body">`;
-  html+=`<div class="form-group"><label>员工姓名 *</label><input id="empName" value="${esc(e?e.name:'')}" placeholder="例如：张三"></div>`;
-  html+=`<div class="form-group"><label>BU</label><input id="empBU" value="${esc(e?e.bu:'')}" placeholder="例如：人力资源BU"></div>`;
-  html+=`<div class="form-group"><label>部门 *</label><div style="display:flex;gap:6px"><select id="empDept" style="flex:1">${deptList.map(d=>`<option value="${esc(d)}" ${e&&e.department===d?'selected':''}>${esc(d)}</option>`).join('')}</select><button class="btn btn-outline btn-sm" onclick="quickAddDept()" title="快速添加部门" style="flex-shrink:0">+</button></div></div>`;
-	  html+=`<div class="form-group"><label>办公地点</label><input id="empLocation" value="${esc(e?e.location||'':'')}" placeholder="例如：A栋3楼 / 远程"></div>`;
-  html+=`<div class="form-group"><label>汇报人</label><input id="empReportsTo" value="${esc(e?e.reportsTo:'')}" placeholder="例如：杜宪"></div>`;
-  html+=`<div class="form-group"><label>职位</label><input id="empPosition" value="${esc(e?e.position:'')}" placeholder="例如：部门经理"></div>`;
-  html+=`<div class="form-group"><label>职级</label><select id="empRank"><option value="">-- 无 --</option>${Object.entries(RANK_LABELS).map(([k,v])=>`<option value="${k}" ${e&&e.rank===k?'selected':''}>${['外部','外包','管培'].includes(k)?v:v+'级'}</option>`).join('')}</select></div>`;
+  var allEmps = loadEmployees();
 
-  html+=`<div class="form-group"><label>钉钉 UserID</label><input id="empDingId" value="${esc(e?e.dingId||'':'')}" placeholder="同步钉钉考勤用，选填"></div>`;
-  html+=`<div class="form-group"><label>入职日期</label><input id="empHireDate" type="date" value="${esc(e?e.hireDate:'')}"></div>`;
-  html+=`<div class="form-group"><label>手机号</label><input id="empPhone" value="${esc(e?e.phone:'')}" placeholder="选填"></div>`;
-  html+=`</div><div class="modal-footer">`;
-  html+=`<button class="btn btn-outline" onclick="closeModal()">取消</button>`;
-  html+=`<button class="btn btn-primary" id="empSave">${e?'保存':'添加'}</button></div>`;
+  // 从现有数据提取常用选项
+  var BU_LIST = ['人力资源BU','园区商办BU','园区公寓BU','园区物业BU','职能后台','董事会'];
+  var buSet = new Set(BU_LIST);
+  allEmps.forEach(function(emp){ if(emp.bu) buSet.add(emp.bu); });
+  var buOptions = Array.from(buSet).map(function(b){ return '<option value="'+esc(b)+'">'+esc(b)+'</option>'; }).join('');
+
+  // 汇报人列表：按职级排序
+  var rankOrder = {'Ⅶ':7,'Ⅵ':6,'Ⅴ':5,'Ⅳ':4,'Ⅲ':3,'Ⅱ':2,'Ⅰ':1};
+  var reportsToList = allEmps.map(function(emp){ return {name:emp.name, rank:rankOrder[emp.rank]||0}; });
+  var seenNames = new Set();
+  reportsToList = reportsToList.filter(function(x){ if(seenNames.has(x.name)) return false; seenNames.add(x.name); return true; });
+  reportsToList.sort(function(a,b){ return b.rank - a.rank; });
+  var reportsToOptions = reportsToList.map(function(x){ return '<option value="'+esc(x.name)+'">'+esc(x.name)+'</option>'; }).join('');
+
+  // 职位列表：从现有员工提取常见职位
+  var posCount = {};
+  allEmps.forEach(function(emp){ if(emp.position){ var p = emp.position.replace(/\([^)]*\)/g,'').trim(); posCount[p] = (posCount[p]||0)+1; } });
+  var posSorted = Object.keys(posCount).sort(function(a,b){ return (posCount[b]||0) - (posCount[a]||0); }).slice(0,20);
+  ['总经理','副总经理','部门经理','主管','高级专员','专员','助理','经理','工程师','保安','保洁','万能工','会计','管家','客服专员','业务拓展经理','销售'].forEach(function(p){
+    if (posSorted.indexOf(p) < 0) posSorted.push(p);
+  });
+  var positionOptions = posSorted.map(function(p){ return '<option value="'+esc(p)+'">'+esc(p)+'</option>'; }).join('');
+
+  // 办公地点
+  var locSet = new Set(['A栋','B栋','C区','D区','H20','远程','总部']);
+  allEmps.forEach(function(emp){ if(emp.location) locSet.add(emp.location); });
+  var locationOptions = Array.from(locSet).map(function(l){ return '<option value="'+esc(l)+'">'+esc(l)+'</option>'; }).join('');
+
+  // 部门列表（按BU分组）
+  var deptByBU = {};
+  allEmps.forEach(function(emp){
+    var bu = emp.bu || '其他';
+    var dept = emp.department;
+    if (!dept) return;
+    if (!deptByBU[bu]) deptByBU[bu] = new Set();
+    deptByBU[bu].add(dept);
+  });
+  (loadDepts()||[]).forEach(function(d){
+    if (!deptByBU['通用']) deptByBU['通用'] = new Set();
+    deptByBU['通用'].add(d);
+  });
+  var deptOptions = '';
+  Object.keys(deptByBU).forEach(function(bu){
+    deptOptions += '<optgroup label="'+esc(bu)+'">';
+    var depts = Array.from(deptByBU[bu]).sort();
+    depts.forEach(function(d){
+      deptOptions += '<option value="'+esc(d)+'" '+(e&&e.department===d?'selected':'')+'>'+esc(d)+'</option>';
+    });
+    deptOptions += '</optgroup>';
+  });
+
+  var buVal = esc(e?e.bu:'');
+  var html='';
+  html+='<div class="modal-header"><h2>'+(e?'编辑员工':'新增员工')+'</h2><button class="btn-icon" onclick="closeModal()">✕</button></div>';
+  html+='<div class="modal-body" style="max-height:70vh;overflow-y:auto">';
+  html+='<div class="form-group"><label>员工姓名 *</label><input id="empName" value="'+esc(e?e.name:'')+'" placeholder="例如：张三" autofocus></div>';
+  html+='<div class="form-group"><label>BU *</label><input id="empBU" list="buList" value="'+buVal+'" placeholder="选择或输入BU" onchange="onBUChange()"><datalist id="buList">'+buOptions+'</datalist></div>';
+  html+='<div class="form-group"><label>部门 *</label><div style="display:flex;gap:6px"><select id="empDept" style="flex:1"><option value="">-- 请选择 --</option>'+deptOptions+'</select><button class="btn btn-outline btn-sm" onclick="quickAddDept()" title="快速添加部门" style="flex-shrink:0">+</button></div></div>';
+  html+='<div class="form-group"><label>办公地点</label><input id="empLocation" list="locationList" value="'+esc(e?e.location||'':'')+'" placeholder="选择或输入"><datalist id="locationList">'+locationOptions+'</datalist></div>';
+  html+='<div class="form-group"><label>汇报人</label><input id="empReportsTo" list="reportsToList" value="'+esc(e?e.reportsTo:'')+'" placeholder="搜索并选择汇报人"><datalist id="reportsToList">'+reportsToOptions+'</datalist></div>';
+  html+='<div class="form-group"><label>职位</label><input id="empPosition" list="positionList" value="'+esc(e?e.position:'')+'" placeholder="选择或输入职位"><datalist id="positionList">'+positionOptions+'</datalist></div>';
+  html+='<div class="form-group"><label>职级</label><select id="empRank"><option value="">-- 无 --</option>'+Object.entries(RANK_LABELS).map(function(kv){ var k=kv[0],v=kv[1]; return '<option value="'+k+'" '+(e&&e.rank===k?'selected':'')+'>'+(['外部','外包','管培'].includes(k)?v:v+'级')+'</option>'; }).join('')+'</select></div>';
+  html+='<div class="form-group"><label>入职日期</label><input id="empHireDate" type="date" value="'+esc(e?e.hireDate:'')+'"></div>';
+  html+='<div class="form-group"><label>钉钉 UserID</label><input id="empDingId" value="'+esc(e?e.dingId||'':'')+'" placeholder="同步钉钉考勤用，选填"></div>';
+  html+='<div class="form-group"><label>手机号</label><input id="empPhone" value="'+esc(e?e.phone:'')+'" placeholder="选填"></div>';
+  html+='</div><div class="modal-footer">';
+  html+='<button class="btn btn-outline" onclick="closeModal()">取消</button>';
+  html+='<button class="btn btn-primary" id="empSave">'+(e?'保存':'添加')+'</button></div>';
   document.getElementById('modal').innerHTML=html;
   document.getElementById('modalOverlay').classList.add('show');
+
+  // BU变化时联动部门
+  window.onBUChange = function(){
+    var selBU = document.getElementById('empBU').value.trim();
+    var deptSel = document.getElementById('empDept');
+    for (var i=0; i<deptSel.options.length; i++){
+      var opt = deptSel.options[i];
+      if (opt.parentNode && opt.parentNode.label === selBU){
+        deptSel.value = opt.value;
+        return;
+      }
+    }
+  };
+
   document.getElementById('empSave').onclick=function(){
     let nm=document.getElementById('empName').value.trim();
+    let bu=document.getElementById('empBU').value.trim();
     let dept=document.getElementById('empDept').value;
     if(!nm){alert('请输入员工姓名');return;}
+    if(!bu){alert('请选择BU');return;}
     if(!dept){alert('请选择部门');return;}
     if(e){
-      e.name=nm; e.bu=document.getElementById('empBU').value.trim(); e.department=dept; e.reportsTo=document.getElementById('empReportsTo').value.trim();
-	      e.position=document.getElementById('empPosition').value.trim(); e.rank=document.getElementById('empRank').value; e.location=document.getElementById('empLocation').value.trim();
+      e.name=nm; e.bu=bu; e.department=dept; e.reportsTo=document.getElementById('empReportsTo').value.trim();
+      e.position=document.getElementById('empPosition').value.trim(); e.rank=document.getElementById('empRank').value; e.location=document.getElementById('empLocation').value.trim();
       e.hireDate=document.getElementById('empHireDate').value; e.phone=document.getElementById('empPhone').value.trim(); e.dingId=document.getElementById('empDingId').value.trim();
     }else{
-      var newEmp = {id:'emp'+Date.now(),name:nm,bu:document.getElementById('empBU').value.trim(),department:dept,reportsTo:document.getElementById('empReportsTo').value.trim(),position:document.getElementById('empPosition').value.trim(),rank:document.getElementById('empRank').value,location:document.getElementById('empLocation').value.trim(),hireDate:document.getElementById('empHireDate').value,phone:document.getElementById('empPhone').value.trim(),dingId:document.getElementById('empDingId').value.trim()};
+      var newEmp = {id:'emp'+Date.now(),name:nm,bu:bu,department:dept,reportsTo:document.getElementById('empReportsTo').value.trim(),position:document.getElementById('empPosition').value.trim(),rank:document.getElementById('empRank').value,location:document.getElementById('empLocation').value.trim(),hireDate:document.getElementById('empHireDate').value,phone:document.getElementById('empPhone').value.trim(),dingId:document.getElementById('empDingId').value.trim()};
       empList.push(newEmp);
-      autoSetupUser(nm); // 自动创建账号并授权
+      autoSetupUser(nm);
     }
     saveEmployees(empList);
     closeModal();
@@ -5506,6 +5576,7 @@ function openEmployeeModal(id){
   };
   document.getElementById('modalOverlay').onclick=function(ev){if(ev.target===this)closeModal();};
 }
+
 
 function deleteEmployee(id){
   let e=empList.find(x=>x.id===id); if(!e)return;
