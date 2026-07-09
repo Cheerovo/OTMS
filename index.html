@@ -1089,6 +1089,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .ws-todo-tag.report { background:var(--success-bg); color:var(--success-text); }
 .ws-todo-tag.ding { background:#fdf2f8; color:#9d81d9; }
 .ws-todo-tag.feedback { background:#fef9f2; color:#D4A76A; }
+.ws-activity-item { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--border-subtle); font-size:9px; }
+.ws-activity-item:last-child { border-bottom:none; }
+.ws-activity-dot { width:6px; height:6px; border-radius:50%; margin-top:4px; flex-shrink:0; }
+.ws-activity-body { flex:1; min-width:0; }
+.ws-activity-title { color:var(--text); font-weight:500; }
+.ws-activity-detail { color:var(--text-dim); font-size:8px; margin-top:1px; }
+.ws-activity-time { color:var(--text-muted); font-size:7px; white-space:nowrap; }
 .ws-approval-item { display:flex; align-items:center; gap:12px; padding:12px 22px; cursor:pointer; transition:background .12s; border-bottom:1px solid var(--border-subtle); }
 .ws-approval-item:last-child { border-bottom:none; }
 .ws-approval-item:hover { background:var(--bg-surface-hover); }
@@ -2262,6 +2269,16 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
           <div class="ws-section-hd" onclick="this.parentElement.classList.toggle('collapsed')"><h3><span class="ws-toggle">▾</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#D4A76A;flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 任务反馈</h3><span class="ws-count" id="wsFbNotifCount">0条</span></div>
           <div class="ws-section-body" id="wsFbNotifList"></div>
         </div>
+      </div>
+      <div class="ws-col">
+        <div class="ws-module-hd">我的记录</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <span style="font-size:9px;color:var(--text-dim)">筛选：</span>
+          <select id="wsActivityFilter" onchange="renderWsActivityLog()" style="padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;font-size:9px;font-family:inherit;background:var(--bg-surface)">
+            <option value="mine">只看我的</option>
+          </select>
+        </div>
+        <div id="wsActivityLog" style="max-height:400px;overflow-y:auto"></div>
       </div>
     </div>
   </div>
@@ -4195,6 +4212,7 @@ function nudgeOKR(oid){
   saveOKRs(okrs);
   renderOKR();
   updateBellBadge();
+  logActivity('Ding一下', o.title, '→ '+o.owner);
 }
 function clearNudge(oid){
   const o=okrs.find(x=>x.id===oid);
@@ -8761,6 +8779,73 @@ function renderBackendView() {
   </div>
   `;
 }
+// ===== Activity Log =====
+var activityLog = [];
+function loadActivityLog(){
+  try{ activityLog = JSON.parse(localStorage.otms_activity_log) || []; }catch(e){ activityLog = []; }
+  return activityLog;
+}
+function saveActivityLog(){
+  try{ localStorage.otms_activity_log = JSON.stringify(activityLog.slice(-500)); }catch(e){}
+}
+function logActivity(action, target, detail){
+  var cu = currentUser || '未登录';
+  var entry = {
+    id: 'al_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    user: cu,
+    action: action,
+    target: target || '',
+    detail: detail || '',
+    date: new Date().toISOString()
+  };
+  activityLog.push(entry);
+  saveActivityLog();
+}
+loadActivityLog();
+
+var ACTION_COLORS = {
+  '创建任务':'#8BA89C','编辑任务':'#7B8FC0','删除任务':'#C94F66',
+  '反馈':'#D4A76A','管培生反馈':'#D4A76A',
+  'Ding一下':'#9d81d9',
+  '提交报表':'#059669','上传附件':'#7B8FC0',
+  '新增员工':'#8BA89C','编辑员工':'#7B8FC0','删除员工':'#C94F66'
+};
+function renderWsActivityLog(){
+  var el = document.getElementById('wsActivityLog');
+  if(!el) return;
+  var cu = currentUser || '';
+  var filter = document.getElementById('wsActivityFilter') ? document.getElementById('wsActivityFilter').value : 'mine';
+  var isAdmin = isGlobalAdmin(currentUser);
+
+  // Update filter dropdown
+  var sel = document.getElementById('wsActivityFilter');
+  if(sel && isAdmin) sel.innerHTML = '<option value="mine">只看我的</option><option value="all">全部记录</option>';
+
+  var logs = activityLog.slice().reverse();
+  if(filter === 'mine' || !isAdmin) logs = logs.filter(function(l){ return l.user === cu; });
+
+  if(!logs.length){
+    el.innerHTML = '<div class="ws-empty"><p>暂无操作记录</p></div>';
+    return;
+  }
+
+  var html = '';
+  logs.slice(0, 100).forEach(function(l){
+    var color = ACTION_COLORS[l.action] || 'var(--text-dim)';
+    var time = new Date(l.date);
+    var timeStr = (time.getMonth()+1)+'/'+time.getDate()+' '+String(time.getHours()).padStart(2,'0')+':'+String(time.getMinutes()).padStart(2,'0');
+    html += '<div class="ws-activity-item">'+
+      '<span class="ws-activity-dot" style="background:'+color+'"></span>'+
+      '<div class="ws-activity-body">'+
+        '<div class="ws-activity-title">'+l.user+' · '+l.action+'</div>'+
+        '<div class="ws-activity-detail">'+(l.target||'')+(l.detail?' — '+l.detail:'')+'</div>'+
+      '</div>'+
+      '<span class="ws-activity-time">'+timeStr+'</span>'+
+    '</div>';
+  });
+  el.innerHTML = html;
+}
+
 function renderWorkspace(){
   const cu=currentUser;
   const today=new Date().toISOString().slice(0,10);
@@ -8778,6 +8863,7 @@ function renderWorkspace(){
     document.getElementById('wsPushList').innerHTML='<div class="ws-empty"><div class="icon">📋</div><p>请先登录</p><p style="font-size:9px">点击右上角或任意功能进入登录页面</p></div>';
     document.getElementById('wsReportList').innerHTML='';
     document.getElementById('wsFbNotifList').innerHTML='';
+    document.getElementById('wsActivityLog').innerHTML='';
     document.getElementById('wsDingLogList').innerHTML='';
     document.getElementById('wsOkrList').innerHTML='';
     document.getElementById('wsKpiList').innerHTML='';
@@ -9050,6 +9136,9 @@ function renderWorkspace(){
       '</div>';
     }).join('');
   }
+
+  // ====== Render 操作记录 ======
+  renderWsActivityLog();
 
   // ====== Render Ding记录 ======
   const dlEl=document.getElementById('wsDingLogList');
@@ -10792,6 +10881,10 @@ function saveInlineFeedback(taskId){
   renderTraineeTasks();
   renderTraineeSummary();
   updateBellBadge();
+  // Activity log
+  var taskTitle = '';
+  for(var i=0;i<TN_TASKS.length;i++){ if(TN_TASKS[i].id===taskId){ taskTitle = TN_TASKS[i].name; break; } }
+  logActivity('反馈', taskTitle, '['+type+'] '+content.slice(0,30));
 }
 
 function editInlineFeedback(taskId, fbId){
@@ -11197,6 +11290,8 @@ function saveUnifiedTask(){
   closeUnifiedTaskModal();
   renderTraineeSummary();
   renderTraineeTasks();
+  var act = (unifiedEditSource==='none') ? '创建任务' : '编辑任务';
+  logActivity(act, name, '系统: '+sys);
 }
 
 function deleteUnifiedTask(){
@@ -11236,6 +11331,7 @@ function deleteUnifiedTask(){
   closeUnifiedTaskModal();
   renderTraineeSummary();
   renderTraineeTasks();
+  logActivity('删除任务', unifiedEditTaskId, '');
 }
 
 // ===== TRAINEE DETAIL POPUP =====
@@ -11344,6 +11440,7 @@ function saveModalFeedback(){
   renderTraineeSummary();
   renderTnFeedbackHistory();
   document.querySelector('.tn-detail-overlay').remove();
+  logActivity('管培生反馈', trainee, '['+type+'] '+content.slice(0,30));
 }
 
 // ===== PERFORMANCE DASHBOARD =====
