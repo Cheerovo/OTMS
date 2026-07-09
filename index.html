@@ -2970,6 +2970,30 @@ function renderPermUI(){
     h+='<button type="button" class="btn btn-xs" style="border:1px dashed var(--border);background:none;border-radius:10px;padding:2px 8px;font-size:9px;color:var(--text2);cursor:pointer" onclick="addSubTabExc(\''+key+'\');return false;">+ 添加</button>';
     h+='</div>';
     h+='<div id="excAdd_'+escAttr(key)+'" style="margin-top:6px"></div>';
+    // Who can see this sub-tab
+    h+='<div class="perm-st-section">';
+    h+='<div class="perm-st-section-title" onclick="var lst=document.getElementById(\'permSeeList_'+escAttr(key)+'\');lst.style.display=lst.style.display===\'none\'?\'block\':\'none\'" style="cursor:pointer">当前可见用户 ▾</div>';
+    h+='<div id="permSeeList_'+escAttr(key)+'" style="display:none;font-size:9px;color:var(--text2);max-height:120px;overflow-y:auto;margin-top:4px">';
+    var seeList=[];
+    nonAdmin.forEach(function(uid){
+      if(canViewSubTab(uid,PERM_SELMOD,st)){
+        var reason='';
+        var hasExc=perm.exceptions&&perm.exceptions[uid]&&perm.exceptions[uid].subtabs&&perm.exceptions[uid].subtabs[key]==='visible';
+        var role=getUserRole(uid);
+        if(hasExc)reason='例外';
+        else if(role)reason='角色·'+role;
+        else reason='默认';
+        seeList.push({name:users[uid].name,reason:reason});
+      }
+    });
+    if(seeList.length){
+      seeList.forEach(function(s){
+        h+='<span style="display:inline-block;background:var(--bg-surface);border-radius:3px;padding:1px 4px;margin:1px 2px">'+esc(s.name)+'<span style="color:var(--text-muted);font-size:8px">·'+esc(s.reason)+'</span></span>';
+      });
+    }else{
+      h+='<span style="color:var(--text-muted)">无</span>';
+    }
+    h+='</div>';
     h+='</div>';
     h+='</div></div>';
   });
