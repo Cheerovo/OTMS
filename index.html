@@ -10928,7 +10928,6 @@ function renderTraineeTasks(){
       var editBtnSVG = '<button class="tn-task-edit-btn" onclick="event.stopPropagation();openUnifiedTaskModal(\''+t._source+'\',\''+t.id+'\')" title="编辑任务"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
 
       // Card view
-      if(isCards){
         // Description text (needed by both child and full card)
         var descText = '';
         if(isWeekly || isRef){ descText = t.desc || ''; }
@@ -11042,62 +11041,6 @@ function renderTraineeTasks(){
         html += '<button onclick="saveInlineFeedback(\''+t.id+'\')">发送</button>';
         html += '</div></div>';
         } // end if(isChild)
-      } else {
-        // List view (compact)
-        if(isChild){
-          html += '<div class="tn-child-task-row">';
-          html += '<span class="tn-child-connector"></span>';
-          html += '<span class="tn-task-status-dot '+stCls+'"></span>';
-          html += '<div class="tn-child-task-body">';
-          html += '<span class="tn-child-task-name" onclick="openUnifiedTaskModal(\''+t._source+'\',\''+t.id+'\')" title="编辑">'+t.name+'</span>';
-          if(isWeekly){ html += '<span class="tn-child-task-meta">'+t.person+'</span>'; }
-          else if(isRef){ html += '<span class="tn-child-task-meta">'+(t.executors||[]).join(',')+'</span>'; }
-          else { html += '<span class="tn-child-task-meta">'+(td&&td.R?td.R:t.R)+'</span>'; }
-          html += '</div>';
-          html += '<div class="tn-child-task-actions">';
-          if(isWeekly){
-            html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\'pending\':\'active\',\'active\':\'done\',\'done\':\'pending\'};setWeeklyTaskStatus(\''+t.id+'\',next[\''+st+'\'])">'+(st==='done'?'✓':st==='active'?'▶':'○')+'</button>';
-            html += '<button class="tn-child-task-del" onclick="event.stopPropagation();deleteWeeklyTask(\''+t.id+'\')" title="删除任务"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';
-          } else if(isRef){
-            html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\'pending\':\'active\',\'active\':\'done\',\'done\':\'pending\'};setRefTaskStatus(\''+t.id+'\',next[\''+st+'\'])">'+(st==='done'?'✓':st==='active'?'▶':'○')+'</button>';
-            html += '<button class="tn-child-task-del" onclick="event.stopPropagation();deleteRefTask(\''+t.id+'\')" title="删除任务"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';
-          } else {
-            html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\'pending\':\'active\',\'active\':\'done\',\'done\':\'pending\'};setTnTaskStatus(\''+t.id+'\',next[\''+st+'\'])">'+(st==='done'?'✓':st==='active'?'▶':'○')+'</button>';
-            html += '<button class="tn-child-task-del" onclick="event.stopPropagation();deleteTnTask(\''+t.id+'\')" title="删除任务"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';
-          }
-          html += editBtnSVG;
-          html += '</div></div>';
-        } else {
-        html += '<div class="tn-task-card">';
-        html += '<div class="tn-task-priority '+prio+'" style="width:4px;height:18px;border-radius:2px;flex-shrink:0"></div>';
-        html += '<span class="tn-task-status '+stCls+'"></span>';
-        var metaHtml = srcBadge + taskTypeBadge + catBadge;
-        if(isWeekly) metaHtml += ' <b>负责人</b> '+t.person;
-        else if(isRef) metaHtml += ' <b>执行人</b> '+(t.executors||[]).join(',')+' · <b>审批</b> '+(t.approver||'');
-        else metaHtml += ' <b>R</b> '+(td&&td.R?td.R:t.R)+' · <b>A</b> '+(td&&td.A?td.A:t.A);
-        html += '<div class="tn-task-info"><div class="tn-task-name">'+t.name+'</div><div class="tn-task-meta">'+metaHtml+'</div></div>';
-        html += '<div class="tn-task-progress" style="width:60px"><div class="tn-progress-bar-wrap"><div class="tn-progress-bar-fill '+progCls+'" style="width:'+progressPct+'%"></div></div><div class="tn-progress-text">'+progressPct+'%</div></div>';
-        html += '<div class="tn-task-actions">';
-        if(isWeekly){
-          html += '<button class="'+(st==='active'?'tn-active-status':'')+'" onclick="setWeeklyTaskStatus(\''+t.id+'\',\'active\')">进行中</button>';
-          html += '<button class="'+(st==='done'?'tn-active-status':'')+'" onclick="setWeeklyTaskStatus(\''+t.id+'\',\'done\')">完成</button>';
-          html += '<button onclick="setWeeklyTaskStatus(\''+t.id+'\',\'pending\')">重置</button>';
-          html += '<button class="tn-wtask-del" onclick="deleteWeeklyTask(\''+t.id+'\')" title="删除任务"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';
-        } else if(isRef){
-          html += '<button class="'+(st==='active'?'tn-active-status':'')+'" onclick="setRefTaskStatus(\''+t.id+'\',\'active\')">进行中</button>';
-          html += '<button class="'+(st==='done'?'tn-active-status':'')+'" onclick="setRefTaskStatus(\''+t.id+'\',\'done\')">完成</button>';
-          html += '<button onclick="setRefTaskStatus(\''+t.id+'\',\'pending\')">重置</button>';
-          html += '<button class="tn-wtask-del" onclick="deleteRefTask(\''+t.id+'\')" title="删除任务"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';
-        } else {
-          html += '<button class="'+(st==='active'?'tn-active-status':'')+'" onclick="setTnTaskStatus(\''+t.id+'\',\'active\')">进行中</button>';
-          html += '<button class="'+(st==='done'?'tn-active-status':'')+'" onclick="setTnTaskStatus(\''+t.id+'\',\'done\')">完成</button>';
-          html += '<button onclick="setTnTaskStatus(\''+t.id+'\',\'pending\')">重置</button>';
-          html += '<button class="tn-wtask-del" onclick="deleteTnTask(\''+t.id+'\')" title="删除任务"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';
-        }
-        html += '<button class="tn-task-edit-btn-inline" onclick="openUnifiedTaskModal(\''+t._source+'\',\''+t.id+'\')" title="编辑"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
-        html += '</div></div>';
-        }
-      }
     });
     
     html += '</div></div>';
