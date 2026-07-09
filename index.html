@@ -1825,6 +1825,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
     <div class="trainee-summary" id="traineeSummary"></div>
     <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;background:var(--bg-surface);border-radius:10px;padding:3px;width:fit-content">
       <button class="tn-sub-tab active" onclick="switchTraineeView('tasks')">任务看板</button>
+      <button class="tn-sub-tab" onclick="switchTraineeView('gantt')">任务甘特图</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('reports')">每周反馈</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('evaluation')">管培生打分</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('dashboard')">管培生绩效</button>
@@ -1836,18 +1837,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
           <button class="tn-chip" onclick="tnQuickFilter='mine';updateQuickFilters();saveTnFilterState();renderTraineeTasks()">我的任务</button>
           <button class="tn-chip" onclick="tnQuickFilter='active';updateQuickFilters();saveTnFilterState();renderTraineeTasks()">进行中</button>
           <button class="tn-chip" onclick="tnQuickFilter='week';updateQuickFilters();saveTnFilterState();renderTraineeTasks()">本周任务</button>
-        </div>
-        <div class="tn-view-mode">
-          <button class="active" onclick="tnViewMode='cards';document.querySelectorAll('.tn-view-mode button').forEach((b,i)=>b.classList.toggle('active',i===0));document.getElementById('tnGanttDims').style.display='none';saveTnFilterState();renderTraineeTasks()">卡片</button>
-          <button onclick="tnViewMode='gantt';document.querySelectorAll('.tn-view-mode button').forEach((b,i)=>b.classList.toggle('active',i===1));document.getElementById('tnGanttDims').style.display='flex';saveTnFilterState();renderTraineeTasks()">甘特图</button>
-        </div>
-        <div id="tnGanttDims" style="display:none;gap:4px;align-items:center;margin-left:8px">
-          <span style="font-size:8px;color:var(--text-muted);flex-shrink:0;margin-right:2px">分组:</span>
-          <button class="tn-chip active" onclick="tnGanttGroup='system';updateGanttDims();saveTnFilterState();renderTraineeTasks()">按系统</button>
-          <button class="tn-chip" onclick="tnGanttGroup='person';updateGanttDims();saveTnFilterState();renderTraineeTasks()">按人员</button>
-          <button class="tn-chip" onclick="tnGanttGroup='status';updateGanttDims();saveTnFilterState();renderTraineeTasks()">按状态</button>
-          <span style="width:1px;height:14px;background:var(--border-light);margin:0 4px"></span>
-          <button class="tn-chip" onclick="var gs=document.querySelectorAll('.tn-gantt-group');var any=Array.from(gs).some(function(g){return!g.classList.contains('collapsed')});gs.forEach(function(g){g.classList.toggle('collapsed',any)})" title="展开/折叠全部">▸▾</button>
         </div>
       </div>
       <div class="filter-row" style="margin-bottom:14px" id="tnFilterRow">
@@ -2001,6 +1990,36 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
           </div>
         </div>
       </div>
+    </div>
+    <div class="tn-view" id="tnGanttView" style="display:none">
+      <div class="tn-view-toggle-bar">
+        <div class="tn-quick-filters" id="ganttQuickFilters">
+          <button class="tn-chip active" onclick="tnGanttQuickFilter='all';updateGanttQuickFilters();saveGanttFilterState();renderGanttTab()">全部</button>
+          <button class="tn-chip" onclick="tnGanttQuickFilter='mine';updateGanttQuickFilters();saveGanttFilterState();renderGanttTab()">我的任务</button>
+          <button class="tn-chip" onclick="tnGanttQuickFilter='active';updateGanttQuickFilters();saveGanttFilterState();renderGanttTab()">进行中</button>
+          <button class="tn-chip" onclick="tnGanttQuickFilter='week';updateGanttQuickFilters();saveGanttFilterState();renderGanttTab()">本周任务</button>
+        </div>
+        <div id="ganttDims" style="display:flex;gap:4px;align-items:center;margin-left:8px">
+          <span style="font-size:8px;color:var(--text-muted);flex-shrink:0;margin-right:2px">分组:</span>
+          <button class="tn-chip active" onclick="tnGanttGroup='system';updateGanttDims();saveGanttFilterState();renderGanttTab()">按系统</button>
+          <button class="tn-chip" onclick="tnGanttGroup='person';updateGanttDims();saveGanttFilterState();renderGanttTab()">按人员</button>
+          <button class="tn-chip" onclick="tnGanttGroup='status';updateGanttDims();saveGanttFilterState();renderGanttTab()">按状态</button>
+          <span style="width:1px;height:14px;background:var(--border-light);margin:0 4px"></span>
+          <button class="tn-chip" onclick="var gs=document.querySelectorAll('#ganttBoard .tn-gantt-group');var any=Array.from(gs).some(function(g){return!g.classList.contains('collapsed')});gs.forEach(function(g){g.classList.toggle('collapsed',any)})" title="展开/折叠全部">▸▾</button>
+        </div>
+      </div>
+      <div class="filter-row" style="margin-bottom:14px">
+        <input type="text" id="ganttSearchInput" placeholder="搜索任务名..." oninput="renderGanttTab()" style="padding:6px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:10px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;width:120px">
+        <select id="ganttSystemFilter" onchange="saveGanttFilterState();renderGanttTab()"><option value="all">全部系统</option><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option><option value="itpm">IT项目管理系统</option></select>
+        <select id="ganttStatusFilter" onchange="renderGanttTab()"><option value="all">全部状态</option><option value="pending">待开始</option><option value="active">进行中</option><option value="done">已完成</option></select>
+        <select id="ganttWeekFilter" onchange="renderGanttTab()"><option value="all">全部周次</option><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option></select>
+        <select id="ganttPersonFilter" onchange="renderGanttTab()"><option value="all">全部执行者</option></select>
+        <select id="ganttParentFilter" onchange="renderGanttTab()"><option value="all">全部层级</option><option value="parent">仅父任务</option><option value="child">仅子任务</option><option value="independent">仅独立任务</option></select>
+        <select id="ganttPriorityFilter" onchange="renderGanttTab()"><option value="all">全部优先级</option><option value="P0">P0·紧急</option><option value="P1">P1·重要</option><option value="P2">P2·普通</option></select>
+        <select id="ganttSortBy" onchange="saveGanttFilterState();renderGanttTab()"><option value="default">默认排序</option><option value="priority-desc">优先级高→低</option><option value="priority-asc">优先级低→高</option><option value="name-asc">名称A→Z</option><option value="name-desc">名称Z→A</option></select>
+        <span style="margin-left:auto;font-size:10px;color:var(--text-dim)" id="ganttTaskCount"></span>
+      </div>
+      <div id="ganttBoard"></div>
     </div>
     <div class="tn-view" id="tnReportView" style="display:none">
       <!-- Internal section tabs -->
@@ -10503,7 +10522,7 @@ function hasCircularRef(taskId, parentId){
 }
 
 var tnQuickFilter = 'all';
-var tnViewMode = 'cards';
+var tnGanttQuickFilter = 'all';
 var tnGanttGroup = 'system';
 
 function updateQuickFilters(){
@@ -10513,12 +10532,21 @@ function updateQuickFilters(){
     }[tnQuickFilter]);
   });
 }
+function updateGanttQuickFilters(){
+  document.querySelectorAll('#ganttQuickFilters .tn-chip').forEach(function(c){
+    c.classList.toggle('active', c.textContent === {
+      'all':'全部','mine':'我的任务','active':'进行中','week':'本周任务'
+    }[tnGanttQuickFilter]);
+  });
+}
 
 function initTraineeSystem(){
   loadTnData();
   // Populate person filter
   var sel = document.getElementById('tnPersonFilter');
   sel.innerHTML = '<option value="all">全部执行者</option>' + TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
+  var ganttSel = document.getElementById('ganttPersonFilter');
+  if(ganttSel) ganttSel.innerHTML = '<option value="all">全部执行者</option>' + TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
   // Populate week selectors for report and feedback
   var weekOpts = '';
   for(var i=0;i<14;i++){ var w='W'+(i+1); var st=TN_WEEK_LABELS[i]?TN_WEEK_LABELS[i]:''; weekOpts += '<option value="'+w+'">'+w+' (06/'+String(i*7+1).padStart(2,'0')+')</option>'; }
@@ -10542,28 +10570,30 @@ function initTraineeSystem(){
 function switchTraineeView(view){
   tnCurrentView = view;
   document.getElementById('tnTaskView').style.display = view==='tasks'?'':'none';
+  document.getElementById('tnGanttView').style.display = view==='gantt'?'':'none';
   document.getElementById('tnReportView').style.display = view==='reports'?'':'none';
   document.getElementById('tnDashboardView').style.display = view==='dashboard'?'':'none';
   document.getElementById('tnEvalView').style.display = view==='evaluation'?'':'none';
   document.querySelectorAll('.tn-sub-tab').forEach(function(b,i){
-    var views = ['tasks','reports','evaluation','dashboard'];
+    var views = ['tasks','gantt','reports','evaluation','dashboard'];
     b.classList.toggle('active', views[i]===view);
   });
-  if(view==='tasks'){ loadTnFilterState(); renderTraineeSummary(); renderTraineeTasks(); saveTnFilterState(); document.getElementById('tnGanttDims').style.display = tnViewMode==='gantt'?'flex':'none'; }
+  if(view==='tasks'){ loadTnFilterState(); renderTraineeSummary(); renderTraineeTasks(); saveTnFilterState(); }
+  else if(view==='gantt'){ loadGanttFilterState(); renderTraineeSummary(); renderGanttTab(); saveGanttFilterState(); }
   else if(view==='reports'){ renderTraineeSummary(); initTnAttendees(); clearTnMeetingForm(); renderTnMeetingList(); switchReportSection('meeting'); }
   else if(view==='dashboard'){ renderTraineeSummary(); renderDashboard(); }
   else if(view==='evaluation'){ initEvalSystem(); }
 }
 
 function updateGanttDims(){
-  document.querySelectorAll('#tnGanttDims .tn-chip').forEach(function(c,i){
+  document.querySelectorAll('#ganttDims .tn-chip').forEach(function(c,i){
     var vals = ['system','person','status'];
     c.classList.toggle('active', vals[i]===tnGanttGroup);
   });
 }
 
 function saveTnFilterState(){
-  var state = {viewMode:tnViewMode, ganttGroup:tnGanttGroup, quickFilter:tnQuickFilter};
+  var state = {quickFilter:tnQuickFilter};
   var sf = document.getElementById('tnSystemFilter'); if(sf) state.sysFilter = sf.value;
   var ss = document.getElementById('tnStatusFilter'); if(ss) state.statusFilter = ss.value;
   var sw = document.getElementById('tnWeekFilter'); if(sw) state.weekFilter = sw.value;
@@ -10577,10 +10607,7 @@ function loadTnFilterState(){
   try{
     var s = JSON.parse(localStorage.getItem('otms_tn_filter_state'));
     if(!s) return;
-    if(s.viewMode) tnViewMode = s.viewMode;
-    if(s.ganttGroup) tnGanttGroup = s.ganttGroup;
     if(s.quickFilter) tnQuickFilter = s.quickFilter;
-    // Restore DOM elements after they exist
     setTimeout(function(){
       if(s.sysFilter){ var sf=document.getElementById('tnSystemFilter'); if(sf) sf.value=s.sysFilter; }
       if(s.statusFilter){ var ss=document.getElementById('tnStatusFilter'); if(ss) ss.value=s.statusFilter; }
@@ -10590,14 +10617,130 @@ function loadTnFilterState(){
       if(s.priorityFilter){ var sq=document.getElementById('tnPriorityFilter'); if(sq) sq.value=s.priorityFilter; }
       if(s.sortBy){ var so=document.getElementById('tnSortBy'); if(so) so.value=s.sortBy; }
       updateQuickFilters();
-      if(tnViewMode==='gantt'){ document.getElementById('tnGanttDims').style.display='flex'; updateGanttDims(); }
-      var vmBtns = document.querySelectorAll('.tn-view-mode button');
-      vmBtns.forEach(function(b,i){ b.classList.toggle('active', (i===0?'cards':'gantt')===tnViewMode); });
+    }, 50);
+  }catch(e){}
+}
+function saveGanttFilterState(){
+  var state = {ganttGroup:tnGanttGroup, quickFilter:tnGanttQuickFilter};
+  var sf = document.getElementById('ganttSystemFilter'); if(sf) state.sysFilter = sf.value;
+  var ss = document.getElementById('ganttStatusFilter'); if(ss) state.statusFilter = ss.value;
+  var sw = document.getElementById('ganttWeekFilter'); if(sw) state.weekFilter = sw.value;
+  var sp = document.getElementById('ganttPersonFilter'); if(sp) state.personFilter = sp.value;
+  var sr = document.getElementById('ganttParentFilter'); if(sr) state.parentFilter = sr.value;
+  var sq = document.getElementById('ganttPriorityFilter'); if(sq) state.priorityFilter = sq.value;
+  var so = document.getElementById('ganttSortBy'); if(so) state.sortBy = so.value;
+  try{localStorage.setItem('otms_gantt_filter_state',JSON.stringify(state));}catch(e){}
+}
+function loadGanttFilterState(){
+  try{
+    var s = JSON.parse(localStorage.getItem('otms_gantt_filter_state'));
+    if(!s) return;
+    if(s.ganttGroup) tnGanttGroup = s.ganttGroup;
+    if(s.quickFilter) tnGanttQuickFilter = s.quickFilter;
+    setTimeout(function(){
+      if(s.sysFilter){ var sf=document.getElementById('ganttSystemFilter'); if(sf) sf.value=s.sysFilter; }
+      if(s.statusFilter){ var ss=document.getElementById('ganttStatusFilter'); if(ss) ss.value=s.statusFilter; }
+      if(s.weekFilter){ var sw=document.getElementById('ganttWeekFilter'); if(sw) sw.value=s.weekFilter; }
+      if(s.personFilter){ var sp=document.getElementById('ganttPersonFilter'); if(sp) sp.value=s.personFilter; }
+      if(s.parentFilter){ var sr=document.getElementById('ganttParentFilter'); if(sr) sr.value=s.parentFilter; }
+      if(s.priorityFilter){ var sq=document.getElementById('ganttPriorityFilter'); if(sq) sq.value=s.priorityFilter; }
+      if(s.sortBy){ var so=document.getElementById('ganttSortBy'); if(so) so.value=s.sortBy; }
+      updateGanttQuickFilters();
+      updateGanttDims();
     }, 50);
   }catch(e){}
 }
 
 // ===== TASK BOARD =====
+function filterTraineeTasksData(opts){
+  var sysFilter = opts.sysFilter || 'all';
+  var statusFilter = opts.statusFilter || 'all';
+  var weekFilter = opts.weekFilter || 'all';
+  var personFilter = opts.personFilter || 'all';
+  var parentFilter = opts.parentFilter || 'all';
+  var priorityFilter = opts.priorityFilter || 'all';
+  var searchText = (opts.searchText||'').trim().toLowerCase();
+  var quickFilter = opts.quickFilter || 'all';
+  var weekIdx = weekFilter !== 'all' ? parseInt(weekFilter.slice(1)) - 1 : -1;
+
+  var now = new Date();
+  var startDate = new Date(2026,5,1);
+  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
+  if(diffDays < 0) diffDays = 0;
+  var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
+
+  var filtered = [];
+
+  // Plan tasks (TN_TASKS RACI plan)
+  if(typeof TN_TASKS!=='undefined'){
+    TN_TASKS.forEach(function(t){
+      if(sysFilter!=='all' && t.sys!==sysFilter) return;
+      if(searchText && t.name.toLowerCase().indexOf(searchText)===-1) return;
+      var td = getTnTask(t.id);
+      var st = (td && td.status) ? td.status : t.status;
+      if(statusFilter!=='all' && st!==statusFilter) return;
+      if(quickFilter === 'active' && st !== 'active') return;
+      var tw = (td && td.weeks) ? td.weeks : t.weeks;
+      if(weekIdx >= 0 && !tw[weekIdx]) return;
+      if(quickFilter === 'week' && !tw[curWkIdx]) return;
+      if(personFilter!=='all' && t.R!==personFilter && t.A!==personFilter && (t.I||'').indexOf(personFilter)===-1) return;
+      if(quickFilter === 'mine' && currentUser && t.R!==currentUser && t.A!==currentUser) return;
+      var tChildren = getChildTasks(t.id);
+      if(parentFilter==='parent' && !tChildren.length) return;
+      var tParentId = (td && td.parentId) ? td.parentId : '';
+      if(parentFilter==='child' && !tParentId) return;
+      if(parentFilter==='independent' && (tParentId || tChildren.length)) return;
+      if(priorityFilter!=='all'){ var tp=(td&&td.priority)?td.priority:t.priority; if(tp!==priorityFilter) return; }
+      t._source = 'plan';
+      filtered.push(t);
+    });
+  }
+
+  // Weekly tasks
+  var wtasks = tnData && tnData.wtasks ? tnData.wtasks : [];
+  wtasks.forEach(function(w){
+    if(sysFilter!=='all' && w.sys!==sysFilter) return;
+    if(searchText && (w.name||'').toLowerCase().indexOf(searchText)===-1) return;
+    if(statusFilter!=='all' && w.status!==statusFilter) return;
+    if(weekIdx >= 0 && w.week !== ('W'+(weekIdx+1))) return;
+    if(quickFilter === 'week' && w.week !== ('W'+(curWkIdx+1))) return;
+    if(quickFilter === 'active' && w.status !== 'active') return;
+    if(personFilter!=='all' && w.person !== personFilter) return;
+    if(quickFilter === 'mine' && currentUser && w.person !== currentUser) return;
+    var wChildren = getChildTasks(w.id);
+    if(parentFilter==='parent' && !wChildren.length) return;
+    if(parentFilter==='child' && !w.parentId) return;
+    if(parentFilter==='independent' && (w.parentId || wChildren.length)) return;
+    if(priorityFilter!=='all' && w.priority!==priorityFilter) return;
+    w._source = 'weekly';
+    filtered.push(w);
+  });
+
+  // Reference tasks
+  var refTasks = tnData && tnData.refTasks ? tnData.refTasks : TN_REF_TASKS;
+  refTasks.forEach(function(r){
+    if(sysFilter!=='all' && r.sys!==sysFilter) return;
+    if(searchText && r.name.toLowerCase().indexOf(searchText)===-1) return;
+    var st = r.refStatus || 'pending';
+    if(statusFilter!=='all' && st!==statusFilter) return;
+    if(quickFilter === 'active' && st !== 'active') return;
+    var rw = r.weeks || [];
+    if(weekIdx >= 0 && !rw[weekIdx]) return;
+    if(quickFilter === 'week' && !rw[curWkIdx]) return;
+    if(personFilter!=='all' && (r.executors||[]).indexOf(personFilter)===-1) return;
+    if(quickFilter === 'mine' && currentUser && (r.executors||[]).indexOf(currentUser)===-1) return;
+    var rChildren = getChildTasks(r.id);
+    if(parentFilter==='parent' && !rChildren.length) return;
+    if(parentFilter==='child' && !r.parentId) return;
+    if(parentFilter==='independent' && (r.parentId || rChildren.length)) return;
+    if(priorityFilter!=='all' && r.priority!==priorityFilter) return;
+    r._source = 'ref';
+    filtered.push(r);
+  });
+
+  return {filtered: filtered, curWkIdx: curWkIdx};
+}
+
 function renderTraineeSummary(){
   var total = 0;
   var pending = 0, active = 0, done = 0;
@@ -10648,90 +10791,18 @@ function renderTraineeSummary(){
 }
 
 function renderTraineeTasks(){
-  var sysFilter = document.getElementById('tnSystemFilter').value;
-  var statusFilter = document.getElementById('tnStatusFilter').value;
-  var weekFilter = document.getElementById('tnWeekFilter').value;
-  var personFilter = document.getElementById('tnPersonFilter').value;
-  var parentFilter = document.getElementById('tnParentFilter') ? document.getElementById('tnParentFilter').value : 'all';
-  var priorityFilter = document.getElementById('tnPriorityFilter') ? document.getElementById('tnPriorityFilter').value : 'all';
-  var searchText = (document.getElementById('tnSearchInput').value||'').trim().toLowerCase();
-  var weekIdx = weekFilter !== 'all' ? parseInt(weekFilter.slice(1)) - 1 : -1;
-  
-  // Apply quick filter
-  var now = new Date();
-  var startDate = new Date(2026,5,1);
-  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
-  if(diffDays < 0) diffDays = 0;
-  var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
-  
-  var filtered = [];
-
-  // Plan tasks (TN_TASKS RACI plan)
-  if(typeof TN_TASKS!=='undefined'){
-    TN_TASKS.forEach(function(t){
-      if(sysFilter!=='all' && t.sys!==sysFilter) return;
-      if(searchText && t.name.toLowerCase().indexOf(searchText)===-1) return;
-      var td = getTnTask(t.id);
-      var st = (td && td.status) ? td.status : t.status;
-      if(statusFilter!=='all' && st!==statusFilter) return;
-      if(tnQuickFilter === 'active' && st !== 'active') return;
-      var tw = (td && td.weeks) ? td.weeks : t.weeks;
-      if(weekIdx >= 0 && !tw[weekIdx]) return;
-      if(tnQuickFilter === 'week' && !tw[curWkIdx]) return;
-      if(personFilter!=='all' && t.R!==personFilter && t.A!==personFilter && (t.I||'').indexOf(personFilter)===-1) return;
-      if(tnQuickFilter === 'mine' && currentUser && t.R!==currentUser && t.A!==currentUser) return;
-      var tChildren = getChildTasks(t.id);
-      if(parentFilter==='parent' && !tChildren.length) return;
-      var tParentId = (td && td.parentId) ? td.parentId : '';
-      if(parentFilter==='child' && !tParentId) return;
-      if(parentFilter==='independent' && (tParentId || tChildren.length)) return;
-      if(priorityFilter!=='all'){ var tp=(td&&td.priority)?td.priority:t.priority; if(tp!==priorityFilter) return; }
-      t._source = 'plan';
-      filtered.push(t);
-    });
-  }
-
-  // Weekly tasks
-  var wtasks = tnData && tnData.wtasks ? tnData.wtasks : [];
-  wtasks.forEach(function(w){
-    if(sysFilter!=='all' && w.sys!==sysFilter) return;
-    if(searchText && (w.name||'').toLowerCase().indexOf(searchText)===-1) return;
-    if(statusFilter!=='all' && w.status!==statusFilter) return;
-    if(weekIdx >= 0 && w.week !== ('W'+(weekIdx+1))) return;
-    if(tnQuickFilter === 'week' && w.week !== ('W'+(curWkIdx+1))) return;
-    if(tnQuickFilter === 'active' && w.status !== 'active') return;
-    if(personFilter!=='all' && w.person !== personFilter) return;
-    if(tnQuickFilter === 'mine' && currentUser && w.person !== currentUser) return;
-    var wChildren = getChildTasks(w.id);
-    if(parentFilter==='parent' && !wChildren.length) return;
-    if(parentFilter==='child' && !w.parentId) return;
-    if(parentFilter==='independent' && (w.parentId || wChildren.length)) return;
-    if(priorityFilter!=='all' && w.priority!==priorityFilter) return;
-    w._source = 'weekly';
-    filtered.push(w);
+  var result = filterTraineeTasksData({
+    sysFilter: document.getElementById('tnSystemFilter').value,
+    statusFilter: document.getElementById('tnStatusFilter').value,
+    weekFilter: document.getElementById('tnWeekFilter').value,
+    personFilter: document.getElementById('tnPersonFilter').value,
+    parentFilter: (document.getElementById('tnParentFilter')||{}).value || 'all',
+    priorityFilter: (document.getElementById('tnPriorityFilter')||{}).value || 'all',
+    searchText: (document.getElementById('tnSearchInput').value||''),
+    quickFilter: tnQuickFilter
   });
-
-  // Reference tasks (from external task management system)
-  var refTasks = tnData && tnData.refTasks ? tnData.refTasks : TN_REF_TASKS;
-  refTasks.forEach(function(r){
-    if(sysFilter!=='all' && r.sys!==sysFilter) return;
-    if(searchText && r.name.toLowerCase().indexOf(searchText)===-1) return;
-    var st = r.refStatus || 'pending';
-    if(statusFilter!=='all' && st!==statusFilter) return;
-    if(tnQuickFilter === 'active' && st !== 'active') return;
-    var rw = r.weeks || [];
-    if(weekIdx >= 0 && !rw[weekIdx]) return;
-    if(tnQuickFilter === 'week' && !rw[curWkIdx]) return;
-    if(personFilter!=='all' && (r.executors||[]).indexOf(personFilter)===-1) return;
-    if(tnQuickFilter === 'mine' && currentUser && (r.executors||[]).indexOf(currentUser)===-1) return;
-    var rChildren = getChildTasks(r.id);
-    if(parentFilter==='parent' && !rChildren.length) return;
-    if(parentFilter==='child' && !r.parentId) return;
-    if(parentFilter==='independent' && (r.parentId || rChildren.length)) return;
-    if(priorityFilter!=='all' && r.priority!==priorityFilter) return;
-    r._source = 'ref';
-    filtered.push(r);
-  });
+  var filtered = result.filtered;
+  var curWkIdx = result.curWkIdx;
 
   document.getElementById('tnTaskCount').textContent = filtered.length + ' 项任务';
 
@@ -10753,16 +10824,7 @@ function renderTraineeTasks(){
   sysOrder.forEach(function(s){ groups[s] = []; });
   filtered.forEach(function(t){ groups[t.sys].push(t); });
 
-  var isCards = tnViewMode === 'cards';
-  var isGantt = tnViewMode === 'gantt';
   var html = '';
-
-  if(isGantt){
-    saveTnFilterState();
-    renderTraineeGantt(filtered, curWkIdx);
-    return;
-  }
-  
   sysOrder.forEach(function(sys){
     var tasks = groups[sys];
     if(!tasks.length) return;
@@ -11045,8 +11107,40 @@ function renderTraineeTasks(){
 }
 
 // ===== TRAINEE GANTT CHART =====
-function renderTraineeGantt(filtered, curWkIdx){
-  var board = document.getElementById('tnTaskBoard');
+function renderGanttTab(){
+  var result = filterTraineeTasksData({
+    sysFilter: (document.getElementById('ganttSystemFilter')||{}).value || 'all',
+    statusFilter: (document.getElementById('ganttStatusFilter')||{}).value || 'all',
+    weekFilter: (document.getElementById('ganttWeekFilter')||{}).value || 'all',
+    personFilter: (document.getElementById('ganttPersonFilter')||{}).value || 'all',
+    parentFilter: (document.getElementById('ganttParentFilter')||{}).value || 'all',
+    priorityFilter: (document.getElementById('ganttPriorityFilter')||{}).value || 'all',
+    searchText: (document.getElementById('ganttSearchInput')||{}).value || '',
+    quickFilter: tnGanttQuickFilter
+  });
+  var filtered = result.filtered;
+  var curWkIdx = result.curWkIdx;
+
+  document.getElementById('ganttTaskCount').textContent = filtered.length + ' 项任务';
+
+  // Sort
+  var sortBy = (document.getElementById('ganttSortBy')||{}).value || 'default';
+  if(sortBy !== 'default'){
+    var prioOrder = {P0:0, P1:1, P2:2};
+    filtered.sort(function(a,b){
+      if(sortBy === 'priority-desc') return (prioOrder[a.priority||'P2']||2) - (prioOrder[b.priority||'P2']||2);
+      if(sortBy === 'priority-asc')  return (prioOrder[b.priority||'P2']||2) - (prioOrder[a.priority||'P2']||2);
+      if(sortBy === 'name-asc')  return (a.name||'').localeCompare(b.name||'','zh');
+      if(sortBy === 'name-desc') return (b.name||'').localeCompare(a.name||'','zh');
+      return 0;
+    });
+  }
+
+  renderTraineeGantt(filtered, curWkIdx, 'ganttBoard');
+}
+
+function renderTraineeGantt(filtered, curWkIdx, boardId){
+  var board = document.getElementById(boardId || 'tnTaskBoard');
   var hasRef = false;
   for(var i=0;i<filtered.length;i++){ if(filtered[i]._source==='ref'){ hasRef=true; break; } }
   var weekLabels = hasRef ? TN_ALL_WEEKS : TN_WEEK_LABELS;
