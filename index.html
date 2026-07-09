@@ -1953,13 +1953,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
           <span style="width:1px;height:14px;background:var(--border-light);margin:0 4px"></span>
           <button class="tn-chip" onclick="var gs=document.querySelectorAll('#ganttBoard .tn-gantt-group');var any=Array.from(gs).some(function(g){return!g.classList.contains('collapsed')});gs.forEach(function(g){g.classList.toggle('collapsed',any)})" title="展开/折叠全部">▸▾</button>
           <span style="width:1px;height:14px;background:var(--border-light);margin:0 4px"></span>
-          <button class="tn-chip active" id="tnZoomWeekBtn" onclick="tnGanttZoom='week';updateGanttZoomBtns();saveGanttFilterState();renderGanttTab()">按周</button>
-          <button class="tn-chip" id="tnZoomBiWeekBtn" onclick="tnGanttZoom='biweek';updateGanttZoomBtns();saveGanttFilterState();renderGanttTab()">双周</button>
-          <span style="width:1px;height:14px;background:var(--border-light);margin:0 4px"></span>
-          <label class="tn-chip" id="tnMilestoneToggle" style="cursor:pointer;display:flex;align-items:center;gap:4px">
-            <input type="checkbox" id="tnShowMilestones" checked onchange="tnShowMilestones=this.checked;saveGanttFilterState();renderGanttTab()" style="margin:0;width:10px;height:10px;accent-color:var(--accent)"> 里程碑
-          </label>
-          <span style="width:1px;height:14px;background:var(--border-light);margin:0 4px"></span>
           <button class="tn-chip" onclick="exportGanttAsPNG()" title="导出甘特图为图片">导出图片</button>
         </div>
       </div>
@@ -11380,9 +11373,6 @@ function renderTraineeGantt(filtered, curWkIdx, boardId){
         ganttDoneWeeks = st==='done'?1:0;
       } else {
         for(var wii=0;wii<wks.length;wii++){ if(wks[wii]){ ganttTotalWeeks++; if(wii <= curWkIdx) ganttDoneWeeks++; } }
-      }
-      if(ganttTotalWeeks > 0){
-        html += '<span style="font-size:7px;color:var(--text-muted);flex-shrink:0;background:var(--bg-surface);padding:1px 5px;border-radius:3px">'+ganttDoneWeeks+'/'+ganttTotalWeeks+'周</span>';
       }
       html += '</div>';
       html += '<div class="tn-gantt-timeline">';
