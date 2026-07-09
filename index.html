@@ -1826,24 +1826,27 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
     <div class="tn-view" id="tnTaskView">
       <div class="tn-view-toggle-bar">
         <div class="tn-quick-filters" id="tnQuickFilters">
-          <button class="tn-chip active" onclick="tnQuickFilter='all';updateQuickFilters();renderTraineeTasks()">全部</button>
-          <button class="tn-chip" onclick="tnQuickFilter='mine';updateQuickFilters();renderTraineeTasks()">我的任务</button>
-          <button class="tn-chip" onclick="tnQuickFilter='active';updateQuickFilters();renderTraineeTasks()">进行中</button>
-          <button class="tn-chip" onclick="tnQuickFilter='week';updateQuickFilters();renderTraineeTasks()">本周任务</button>
+          <button class="tn-chip active" onclick="tnQuickFilter='all';updateQuickFilters();saveTnFilterState();renderTraineeTasks()">全部</button>
+          <button class="tn-chip" onclick="tnQuickFilter='mine';updateQuickFilters();saveTnFilterState();renderTraineeTasks()">我的任务</button>
+          <button class="tn-chip" onclick="tnQuickFilter='active';updateQuickFilters();saveTnFilterState();renderTraineeTasks()">进行中</button>
+          <button class="tn-chip" onclick="tnQuickFilter='week';updateQuickFilters();saveTnFilterState();renderTraineeTasks()">本周任务</button>
         </div>
         <div class="tn-view-mode">
-          <button class="active" onclick="tnViewMode='cards';document.querySelectorAll('.tn-view-mode button').forEach((b,i)=>b.classList.toggle('active',i===0));document.getElementById('tnGanttDims').style.display='none';renderTraineeTasks()">卡片</button>
-          <button onclick="tnViewMode='gantt';document.querySelectorAll('.tn-view-mode button').forEach((b,i)=>b.classList.toggle('active',i===1));document.getElementById('tnGanttDims').style.display='flex';renderTraineeTasks()">甘特图</button>
+          <button class="active" onclick="tnViewMode='cards';document.querySelectorAll('.tn-view-mode button').forEach((b,i)=>b.classList.toggle('active',i===0));document.getElementById('tnGanttDims').style.display='none';saveTnFilterState();renderTraineeTasks()">卡片</button>
+          <button onclick="tnViewMode='gantt';document.querySelectorAll('.tn-view-mode button').forEach((b,i)=>b.classList.toggle('active',i===1));document.getElementById('tnGanttDims').style.display='flex';saveTnFilterState();renderTraineeTasks()">甘特图</button>
         </div>
         <div id="tnGanttDims" style="display:none;gap:4px;align-items:center;margin-left:8px">
           <span style="font-size:8px;color:var(--text-muted);flex-shrink:0;margin-right:2px">分组:</span>
-          <button class="tn-chip active" onclick="tnGanttGroup='system';updateGanttDims();renderTraineeTasks()">按系统</button>
-          <button class="tn-chip" onclick="tnGanttGroup='person';updateGanttDims();renderTraineeTasks()">按人员</button>
-          <button class="tn-chip" onclick="tnGanttGroup='status';updateGanttDims();renderTraineeTasks()">按状态</button>
+          <button class="tn-chip active" onclick="tnGanttGroup='system';updateGanttDims();saveTnFilterState();renderTraineeTasks()">按系统</button>
+          <button class="tn-chip" onclick="tnGanttGroup='person';updateGanttDims();saveTnFilterState();renderTraineeTasks()">按人员</button>
+          <button class="tn-chip" onclick="tnGanttGroup='status';updateGanttDims();saveTnFilterState();renderTraineeTasks()">按状态</button>
+          <span style="width:1px;height:14px;background:var(--border-light);margin:0 4px"></span>
+          <button class="tn-chip" onclick="var gs=document.querySelectorAll('.tn-gantt-group');var any=Array.from(gs).some(function(g){return!g.classList.contains('collapsed')});gs.forEach(function(g){g.classList.toggle('collapsed',any)})" title="展开/折叠全部">▸▾</button>
         </div>
       </div>
       <div class="filter-row" style="margin-bottom:14px" id="tnFilterRow">
-        <select id="tnSystemFilter" onchange="renderTraineeTasks()"><option value="all">全部系统</option><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option><option value="itpm">IT项目管理系统</option></select>
+        <input type="text" id="tnSearchInput" placeholder="搜索任务名..." oninput="renderTraineeTasks()" style="padding:6px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:10px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;width:120px">
+        <select id="tnSystemFilter" onchange="saveTnFilterState();renderTraineeTasks()"><option value="all">全部系统</option><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option><option value="itpm">IT项目管理系统</option></select>
         <select id="tnStatusFilter" onchange="renderTraineeTasks()"><option value="all">全部状态</option><option value="pending">待开始</option><option value="active">进行中</option><option value="done">已完成</option></select>
         <select id="tnWeekFilter" onchange="renderTraineeTasks()"><option value="all">全部周次</option><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option></select>
         <select id="tnPersonFilter" onchange="renderTraineeTasks()"><option value="all">全部执行者</option></select>
@@ -10539,7 +10542,7 @@ function switchTraineeView(view){
     var views = ['tasks','reports','evaluation','dashboard'];
     b.classList.toggle('active', views[i]===view);
   });
-  if(view==='tasks'){ renderTraineeSummary(); renderTraineeTasks(); document.getElementById('tnGanttDims').style.display = tnViewMode==='gantt'?'flex':'none'; }
+  if(view==='tasks'){ loadTnFilterState(); renderTraineeSummary(); renderTraineeTasks(); saveTnFilterState(); document.getElementById('tnGanttDims').style.display = tnViewMode==='gantt'?'flex':'none'; }
   else if(view==='reports'){ renderTraineeSummary(); initTnAttendees(); clearTnMeetingForm(); renderTnMeetingList(); switchReportSection('meeting'); }
   else if(view==='dashboard'){ renderTraineeSummary(); renderDashboard(); }
   else if(view==='evaluation'){ initEvalSystem(); }
@@ -10550,6 +10553,39 @@ function updateGanttDims(){
     var vals = ['system','person','status'];
     c.classList.toggle('active', vals[i]===tnGanttGroup);
   });
+}
+
+function saveTnFilterState(){
+  var state = {viewMode:tnViewMode, ganttGroup:tnGanttGroup, quickFilter:tnQuickFilter};
+  var sf = document.getElementById('tnSystemFilter'); if(sf) state.sysFilter = sf.value;
+  var ss = document.getElementById('tnStatusFilter'); if(ss) state.statusFilter = ss.value;
+  var sw = document.getElementById('tnWeekFilter'); if(sw) state.weekFilter = sw.value;
+  var sp = document.getElementById('tnPersonFilter'); if(sp) state.personFilter = sp.value;
+  var sr = document.getElementById('tnParentFilter'); if(sr) state.parentFilter = sr.value;
+  var sq = document.getElementById('tnPriorityFilter'); if(sq) state.priorityFilter = sq.value;
+  try{localStorage.setItem('otms_tn_filter_state',JSON.stringify(state));}catch(e){}
+}
+function loadTnFilterState(){
+  try{
+    var s = JSON.parse(localStorage.getItem('otms_tn_filter_state'));
+    if(!s) return;
+    if(s.viewMode) tnViewMode = s.viewMode;
+    if(s.ganttGroup) tnGanttGroup = s.ganttGroup;
+    if(s.quickFilter) tnQuickFilter = s.quickFilter;
+    // Restore DOM elements after they exist
+    setTimeout(function(){
+      if(s.sysFilter){ var sf=document.getElementById('tnSystemFilter'); if(sf) sf.value=s.sysFilter; }
+      if(s.statusFilter){ var ss=document.getElementById('tnStatusFilter'); if(ss) ss.value=s.statusFilter; }
+      if(s.weekFilter){ var sw=document.getElementById('tnWeekFilter'); if(sw) sw.value=s.weekFilter; }
+      if(s.personFilter){ var sp=document.getElementById('tnPersonFilter'); if(sp) sp.value=s.personFilter; }
+      if(s.parentFilter){ var sr=document.getElementById('tnParentFilter'); if(sr) sr.value=s.parentFilter; }
+      if(s.priorityFilter){ var sq=document.getElementById('tnPriorityFilter'); if(sq) sq.value=s.priorityFilter; }
+      updateQuickFilters();
+      if(tnViewMode==='gantt'){ document.getElementById('tnGanttDims').style.display='flex'; updateGanttDims(); }
+      var vmBtns = document.querySelectorAll('.tn-view-mode button');
+      vmBtns.forEach(function(b,i){ b.classList.toggle('active', (i===0?'cards':'gantt')===tnViewMode); });
+    }, 50);
+  }catch(e){}
 }
 
 // ===== TASK BOARD =====
@@ -10609,6 +10645,7 @@ function renderTraineeTasks(){
   var personFilter = document.getElementById('tnPersonFilter').value;
   var parentFilter = document.getElementById('tnParentFilter') ? document.getElementById('tnParentFilter').value : 'all';
   var priorityFilter = document.getElementById('tnPriorityFilter') ? document.getElementById('tnPriorityFilter').value : 'all';
+  var searchText = (document.getElementById('tnSearchInput').value||'').trim().toLowerCase();
   var weekIdx = weekFilter !== 'all' ? parseInt(weekFilter.slice(1)) - 1 : -1;
   
   // Apply quick filter
@@ -10624,6 +10661,7 @@ function renderTraineeTasks(){
   if(typeof TN_TASKS!=='undefined'){
     TN_TASKS.forEach(function(t){
       if(sysFilter!=='all' && t.sys!==sysFilter) return;
+      if(searchText && t.name.toLowerCase().indexOf(searchText)===-1) return;
       var td = getTnTask(t.id);
       var st = (td && td.status) ? td.status : t.status;
       if(statusFilter!=='all' && st!==statusFilter) return;
@@ -10648,6 +10686,7 @@ function renderTraineeTasks(){
   var wtasks = tnData && tnData.wtasks ? tnData.wtasks : [];
   wtasks.forEach(function(w){
     if(sysFilter!=='all' && w.sys!==sysFilter) return;
+    if(searchText && (w.name||'').toLowerCase().indexOf(searchText)===-1) return;
     if(statusFilter!=='all' && w.status!==statusFilter) return;
     if(weekIdx >= 0 && w.week !== ('W'+(weekIdx+1))) return;
     if(tnQuickFilter === 'week' && w.week !== ('W'+(curWkIdx+1))) return;
@@ -10667,6 +10706,7 @@ function renderTraineeTasks(){
   var refTasks = tnData && tnData.refTasks ? tnData.refTasks : TN_REF_TASKS;
   refTasks.forEach(function(r){
     if(sysFilter!=='all' && r.sys!==sysFilter) return;
+    if(searchText && r.name.toLowerCase().indexOf(searchText)===-1) return;
     var st = r.refStatus || 'pending';
     if(statusFilter!=='all' && st!==statusFilter) return;
     if(tnQuickFilter === 'active' && st !== 'active') return;
@@ -10696,6 +10736,7 @@ function renderTraineeTasks(){
   var html = '';
 
   if(isGantt){
+    saveTnFilterState();
     renderTraineeGantt(filtered, curWkIdx);
     return;
   }
@@ -10992,7 +11033,19 @@ function renderTraineeGantt(filtered, curWkIdx){
   var groupKeys = Object.keys(groups);
   if(!groupKeys.length){ board.innerHTML = '<div class="tn-gantt-empty">无匹配任务</div>'; return; }
 
-  var html = '';
+  // Color legend
+  var html = '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:10px;padding:6px 12px;background:var(--bg-surface);border-radius:8px;font-size:9px;color:var(--text-muted)">';
+  html += '<span>图例：</span>';
+  var legendItems = [
+    {color:'#C94F66',label:'P1·紧急'},{color:'#D4A76A',label:'P2·重要'},
+    {color:'#7B8FC0',label:'P3·普通'},{color:'#7BA89C',label:'已完成'},
+    {color:'var(--accent)',label:'今日',style:'width:12px;height:12px;border-radius:50%'}
+  ];
+  legendItems.forEach(function(li){
+    var st = li.style||'';
+    html += '<span style="display:inline-flex;align-items:center;gap:3px"><span style="display:inline-block;width:16px;height:10px;border-radius:3px;background:'+li.color+';flex-shrink:0;'+st+'"></span>'+li.label+'</span>';
+  });
+  html += '</div>';
   groupKeys.forEach(function(groupKey){
     var group = groups[groupKey];
     var tasks = group.tasks;
@@ -11050,6 +11103,17 @@ function renderTraineeGantt(filtered, curWkIdx){
       html += '<span class="task-name-text">'+esc(t.name)+'</span>';
       html += '<span class="task-src-tag '+srcTagClass+'">'+srcTagLabel+'</span>';
       html += '<span class="task-meta">'+esc(personLabel)+'</span>';
+      // Progress numbers
+      var ganttTotalWeeks = 0, ganttDoneWeeks = 0;
+      if(isWeekly){
+        ganttTotalWeeks = 1;
+        ganttDoneWeeks = st==='done'?1:0;
+      } else {
+        for(var wii=0;wii<wks.length;wii++){ if(wks[wii]){ ganttTotalWeeks++; if(wii <= curWkIdx) ganttDoneWeeks++; } }
+      }
+      if(ganttTotalWeeks > 0){
+        html += '<span style="font-size:7px;color:var(--text-muted);flex-shrink:0;background:var(--bg-surface);padding:1px 5px;border-radius:3px">'+ganttDoneWeeks+'/'+ganttTotalWeeks+'周</span>';
+      }
       html += '</div>';
       html += '<div class="tn-gantt-timeline">';
       for(var c=0;c<weekCount;c++){
