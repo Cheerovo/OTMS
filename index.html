@@ -3139,27 +3139,7 @@ const KPI_BU_COLORS={shangban:'#4b7bec',gongyu:'#e69f67',wuye:'#62bb92',hr:'#9d8
 const KPI_BU_ORDER=['shangban','gongyu','wuye','hr'];
 
 function mkHistory(arr){const h={};arr.forEach(([m,v])=>{h[m]=v;});return h;}
-function defaultKPIs(){return[
-  {id:'i1',name:'商办业务收入（不含H20）',cat:'revenue',bu:'shangban',target:1900,cur:800,u:'万',owner:'Jenny',cycle:'monthly',history:mkHistory([['2026-01',680],['2026-02',700],['2026-03',730],['2026-04',750],['2026-05',780],['2026-06',800]])},
-  {id:'i2',name:'H20收入',cat:'revenue',bu:'shangban',target:80,cur:30,u:'万',owner:'黄一萧',cycle:'monthly',history:mkHistory([['2026-01',8],['2026-02',12],['2026-03',18],['2026-04',22],['2026-05',27],['2026-06',30]])},
-  {id:'i3',name:'AB区出租率',cat:'quality',bu:'shangban',target:95,cur:82,u:'%',owner:'Jenny',cycle:'monthly',history:mkHistory([['2026-01',75],['2026-02',76],['2026-03',78],['2026-04',79],['2026-05',81],['2026-06',82]])},
-  {id:'i4',name:'C区出租率',cat:'quality',bu:'shangban',target:95,cur:78,u:'%',owner:'黄一萧',cycle:'monthly',history:mkHistory([['2026-01',70],['2026-02',71],['2026-03',73],['2026-04',75],['2026-05',76],['2026-06',78]])},
-  {id:'i5',name:'BD月均带看客户数',cat:'efficiency',bu:'shangban',target:50,cur:35,u:'组',owner:'Jenny',cycle:'monthly',history:mkHistory([['2026-01',28],['2026-02',30],['2026-03',32],['2026-04',33],['2026-05',34],['2026-06',35]])},
-  {id:'i6',name:'BD客户转化率',cat:'efficiency',bu:'shangban',target:30,cur:22,u:'%',owner:'Jenny',cycle:'monthly',history:mkHistory([['2026-01',15],['2026-02',17],['2026-03',18],['2026-04',20],['2026-05',21],['2026-06',22]])},
-  {id:'i7',name:'当月回款率',cat:'revenue',bu:'shangban',target:90,cur:85,u:'%',owner:'Jenny',cycle:'monthly',history:mkHistory([['2026-01',78],['2026-02',80],['2026-03',81],['2026-04',83],['2026-05',84],['2026-06',85]])},
-  {id:'i13',name:'公寓出租率',cat:'quality',bu:'gongyu',target:90,cur:65,u:'%',owner:'王倩',cycle:'monthly',history:mkHistory([['2026-01',55],['2026-02',58],['2026-03',60],['2026-04',62],['2026-05',64],['2026-06',65]])},
-  {id:'i14',name:'公寓收入（年）',cat:'revenue',bu:'gongyu',target:500,cur:180,u:'万',owner:'王倩',cycle:'monthly',history:mkHistory([['2026-01',130],['2026-02',140],['2026-03',150],['2026-04',160],['2026-05',170],['2026-06',180]])},
-  {id:'i15',name:'公寓客户续租率',cat:'quality',bu:'gongyu',target:80,cur:55,u:'%',owner:'王倩',cycle:'quarterly',history:mkHistory([['2026-01',48],['2026-02',50],['2026-03',52],['2026-04',53],['2026-05',54],['2026-06',55]])},
-  {id:'i8',name:'物业工单48h闭环率',cat:'quality',bu:'wuye',target:85,cur:60,u:'%',owner:'汪顺',cycle:'monthly',history:mkHistory([['2026-01',45],['2026-02',50],['2026-03',53],['2026-04',56],['2026-05',58],['2026-06',60]])},
-  {id:'i11',name:'2000元以上资产盘点覆盖率',cat:'quality',bu:'wuye',target:100,cur:15,u:'%',owner:'王力',cycle:'quarterly',history:mkHistory([['2026-01',5],['2026-02',8],['2026-03',10],['2026-04',12],['2026-05',13],['2026-06',15]])},
-  {id:'i16',name:'物业费收缴率',cat:'revenue',bu:'wuye',target:95,cur:72,u:'%',owner:'汪顺',cycle:'monthly',history:mkHistory([['2026-01',60],['2026-02',63],['2026-03',65],['2026-04',68],['2026-05',70],['2026-06',72]])},
-  {id:'i17',name:'设备设施完好率',cat:'quality',bu:'wuye',target:98,cur:85,u:'%',owner:'汪顺',cycle:'monthly',history:mkHistory([['2026-01',78],['2026-02',80],['2026-03',82],['2026-04',83],['2026-05',84],['2026-06',85]])},
-  {id:'i9',name:'财务报表准时提交率',cat:'efficiency',bu:'hr',target:95,cur:80,u:'%',owner:'蔡心宇',cycle:'monthly',history:mkHistory([['2026-01',72],['2026-02',75],['2026-03',76],['2026-04',78],['2026-05',79],['2026-06',80]])},
-  {id:'i10',name:'大后台服务满意度',cat:'quality',bu:'hr',target:90,cur:0,u:'%',owner:'杜宪',cycle:'quarterly',history:mkHistory([['2026-01',0],['2026-02',0],['2026-03',0],['2026-04',0],['2026-05',0],['2026-06',0]])},
-  {id:'i12',name:'人事档案数字化完成率',cat:'efficiency',bu:'hr',target:100,cur:30,u:'%',owner:'黄欢欢',cycle:'quarterly',history:mkHistory([['2026-01',10],['2026-02',15],['2026-03',20],['2026-04',23],['2026-05',27],['2026-06',30]])},
-  {id:'i18',name:'核心岗位平均招聘周期',cat:'efficiency',bu:'hr',target:30,cur:42,u:'天',owner:'黄欢欢',cycle:'monthly',history:mkHistory([['2026-01',50],['2026-02',48],['2026-03',46],['2026-04',44],['2026-05',43],['2026-06',42]])},
-  {id:'i19',name:'员工培训覆盖率',cat:'quality',bu:'hr',target:100,cur:45,u:'%',owner:'王妤扬',cycle:'quarterly',history:mkHistory([['2026-01',20],['2026-02',28],['2026-03',33],['2026-04',38],['2026-05',42],['2026-06',45]])}
-];}
+function defaultKPIs(){return[];}
 
 function loadKPIs(){try{return JSON.parse(localStorage.kpi_data)||defaultKPIs()}catch(e){return defaultKPIs()}}
 function saveKPIs(d){try{localStorage.kpi_data=JSON.stringify(d)}catch(e){alert('存储空间不足，请清理旧数据后重试。\n错误：'+e.message);throw e}}
