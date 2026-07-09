@@ -1936,87 +1936,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
           </div>
         </div>
       </div>
-      <!-- Unified task edit modal -->
-      <div class="tn-detail-overlay" id="unifiedTaskModal" style="display:none" onclick="if(event.target===this)closeUnifiedTaskModal()">
-        <div class="tn-detail-modal" style="width:520px;max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-            <h4 style="margin:0;font-size:14px" id="unifiedModalTitle">编辑任务</h4>
-            <span style="font-size:9px;padding:2px 8px;border-radius:10px;background:var(--bg-surface)" id="unifiedModalSourceTag"></span>
-            <button style="margin-left:auto;border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-dim)" onclick="closeUnifiedTaskModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-          </div>
-          <!-- Common fields -->
-          <div class="tn-report-field" style="margin-bottom:10px">
-            <label>任务名称</label>
-            <input id="umName" placeholder="输入任务名称…" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box">
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:10px">
-            <div class="tn-report-field" style="flex:1">
-              <label>所属系统</label>
-              <select id="umSystem"><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option></select>
-            </div>
-            <div class="tn-report-field" style="flex:1">
-              <label>优先级</label>
-              <select id="umPriority"><option value="P0">P0 · 紧急</option><option value="P1">P1 · 重要</option><option value="P2">P2 · 普通</option></select>
-            </div>
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:10px">
-            <div class="tn-report-field" style="flex:1">
-              <label>任务类型</label>
-              <select id="umTaskType"><option value="normal">普通任务</option><option value="meeting">会议任务</option></select>
-            </div>
-            <div class="tn-report-field" style="flex:1">
-              <label>任务类别</label>
-              <select id="umTaskCategory"><option value="deliverable">交付物</option><option value="okr">OKR</option><option value="milestone">里程碑</option><option value="review">评审</option></select>
-            </div>
-          </div>
-          <div class="tn-report-field" style="margin-bottom:12px">
-            <label>状态</label>
-            <select id="umStatus"><option value="pending">待开始</option><option value="active">进行中</option><option value="done">已完成</option></select>
-          </div>
-          <div class="tn-report-field" style="margin-bottom:12px">
-            <label>任务描述</label>
-            <textarea id="umDesc" placeholder="添加任务详细说明、备注…" rows="3" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box;resize:vertical"></textarea>
-          </div>
-          <div class="tn-report-field" style="margin-bottom:12px">
-            <label>父任务（可选）</label>
-            <div style="display:flex;gap:6px">
-              <select id="umParentId" onchange="document.getElementById('umClearParent').style.display=this.value?'':'none'" style="flex:1;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:10px;font-family:inherit;background:var(--bg-surface);color:var(--text);outline:none">
-                <option value="">无父任务</option>
-              </select>
-              <button id="umClearParent" onclick="document.getElementById('umParentId').value='';this.style.display='none'" style="display:none;padding:4px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:9px;font-family:inherit;background:var(--card);color:var(--text-dim);cursor:pointer;white-space:nowrap" title="清除父任务">清除</button>
-            </div>
-          </div>
-          <!-- Plan task fields -->
-          <div id="umPlanFields" style="display:none">
-            <div style="font-size:10px;font-weight:600;color:var(--text-dim);margin-bottom:8px">RACI 分配</div>
-            <div style="display:flex;gap:10px;margin-bottom:10px">
-              <div class="tn-report-field" style="flex:1"><label>R · 执行人</label><select id="umR"></select></div>
-              <div class="tn-report-field" style="flex:1"><label>A · 负责人</label><input id="umA" placeholder="负责人姓名" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box"></div>
-            </div>
-            <div class="tn-report-field" style="margin-bottom:10px"><label>I · 知会人（多人用逗号分隔）</label><input id="umI" placeholder="知会人姓名" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box"></div>
-            <div style="font-size:10px;font-weight:600;color:var(--text-dim);margin-bottom:6px">周次分配</div>
-            <div id="umWeeks" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px"></div>
-          </div>
-          <!-- Weekly task fields -->
-          <div id="umWeeklyFields" style="display:none">
-            <div style="display:flex;gap:10px;margin-bottom:10px">
-              <div class="tn-report-field" style="flex:1"><label>所属周次</label><select id="umWeek"></select></div>
-              <div class="tn-report-field" style="flex:1"><label>负责人</label><select id="umPerson"></select></div>
-            </div>
-          </div>
-          <!-- Reference task fields -->
-          <div id="umRefFields" style="display:none">
-            <div class="tn-report-field" style="margin-bottom:10px"><label>审批人</label><input id="umApprover" placeholder="审批人姓名" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box"></div>
-            <div class="tn-report-field" style="margin-bottom:10px"><label>执行人（多人用逗号分隔）</label><input id="umExecutors" placeholder="执行人姓名" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box"></div>
-            <div class="tn-report-field" style="margin-bottom:10px"><label>所属周次</label><div id="umWeekCheckboxes" style="display:flex;flex-wrap:wrap;gap:4px"></div></div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:16px">
-            <button class="btn btn-outline btn-sm" onclick="closeUnifiedTaskModal()" style="flex:1">取消</button>
-            <button class="btn btn-outline btn-sm" id="umDeleteBtn" style="flex:1;color:var(--danger);border-color:var(--danger)" onclick="deleteUnifiedTask()">删除任务</button>
-            <button class="btn btn-primary btn-sm" onclick="saveUnifiedTask()" style="flex:1">保存任务</button>
-          </div>
-        </div>
-      </div>
     </div>
     <div class="tn-view" id="tnGanttView" style="display:none">
       <div class="tn-view-toggle-bar">
@@ -2056,6 +1975,63 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
         <span style="margin-left:auto;font-size:10px;color:var(--text-dim)" id="ganttTaskCount"></span>
       </div>
       <div id="ganttBoard"></div>
+    </div>
+    <!-- Unified task edit modal (shared across all trainee views) -->
+    <div class="tn-detail-overlay" id="unifiedTaskModal" style="display:none" onclick="if(event.target===this)closeUnifiedTaskModal()">
+      <div class="tn-detail-modal" style="width:520px;max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <h4 style="margin:0;font-size:14px" id="unifiedModalTitle">编辑任务</h4>
+          <span style="font-size:9px;padding:2px 8px;border-radius:10px;background:var(--bg-surface)" id="unifiedModalSourceTag"></span>
+          <button style="margin-left:auto;border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-dim)" onclick="closeUnifiedTaskModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="tn-report-field" style="margin-bottom:10px">
+          <label>任务名称</label>
+          <input id="umName" placeholder="输入任务名称…" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box">
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:10px">
+          <div class="tn-report-field" style="flex:1"><label>所属系统</label><select id="umSystem"><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option></select></div>
+          <div class="tn-report-field" style="flex:1"><label>优先级</label><select id="umPriority"><option value="P0">P0 · 紧急</option><option value="P1">P1 · 重要</option><option value="P2">P2 · 普通</option></select></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:10px">
+          <div class="tn-report-field" style="flex:1"><label>任务类型</label><select id="umTaskType"><option value="normal">普通任务</option><option value="meeting">会议任务</option></select></div>
+          <div class="tn-report-field" style="flex:1"><label>任务类别</label><select id="umTaskCategory"><option value="deliverable">交付物</option><option value="okr">OKR</option><option value="milestone">里程碑</option><option value="review">评审</option></select></div>
+        </div>
+        <div class="tn-report-field" style="margin-bottom:12px"><label>状态</label><select id="umStatus"><option value="pending">待开始</option><option value="active">进行中</option><option value="done">已完成</option></select></div>
+        <div class="tn-report-field" style="margin-bottom:12px"><label>任务描述</label><textarea id="umDesc" placeholder="添加任务详细说明、备注…" rows="3" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box;resize:vertical"></textarea></div>
+        <div class="tn-report-field" style="margin-bottom:12px">
+          <label>父任务（可选）</label>
+          <div style="display:flex;gap:6px">
+            <select id="umParentId" onchange="document.getElementById('umClearParent').style.display=this.value?'':'none'" style="flex:1;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:10px;font-family:inherit;background:var(--bg-surface);color:var(--text);outline:none"><option value="">无父任务</option></select>
+            <button id="umClearParent" onclick="document.getElementById('umParentId').value='';this.style.display='none'" style="display:none;padding:4px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:9px;font-family:inherit;background:var(--card);color:var(--text-dim);cursor:pointer;white-space:nowrap" title="清除父任务">清除</button>
+          </div>
+        </div>
+        <div id="umPlanFields" style="display:none">
+          <div style="font-size:10px;font-weight:600;color:var(--text-dim);margin-bottom:8px">RACI 分配</div>
+          <div style="display:flex;gap:10px;margin-bottom:10px">
+            <div class="tn-report-field" style="flex:1"><label>R · 执行人</label><select id="umR"></select></div>
+            <div class="tn-report-field" style="flex:1"><label>A · 负责人</label><input id="umA" placeholder="负责人姓名" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box"></div>
+          </div>
+          <div class="tn-report-field" style="margin-bottom:10px"><label>I · 知会人（多人用逗号分隔）</label><input id="umI" placeholder="知会人姓名" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box"></div>
+          <div style="font-size:10px;font-weight:600;color:var(--text-dim);margin-bottom:6px">周次分配</div>
+          <div id="umWeeks" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px"></div>
+        </div>
+        <div id="umWeeklyFields" style="display:none">
+          <div style="display:flex;gap:10px;margin-bottom:10px">
+            <div class="tn-report-field" style="flex:1"><label>所属周次</label><select id="umWeek"></select></div>
+            <div class="tn-report-field" style="flex:1"><label>负责人</label><select id="umPerson"></select></div>
+          </div>
+        </div>
+        <div id="umRefFields" style="display:none">
+          <div class="tn-report-field" style="margin-bottom:10px"><label>审批人</label><input id="umApprover" placeholder="审批人姓名" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box"></div>
+          <div class="tn-report-field" style="margin-bottom:10px"><label>执行人（多人用逗号分隔）</label><input id="umExecutors" placeholder="执行人姓名" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box"></div>
+          <div class="tn-report-field" style="margin-bottom:10px"><label>所属周次</label><div id="umWeekCheckboxes" style="display:flex;flex-wrap:wrap;gap:4px"></div></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-outline btn-sm" onclick="closeUnifiedTaskModal()" style="flex:1">取消</button>
+          <button class="btn btn-outline btn-sm" id="umDeleteBtn" style="flex:1;color:var(--danger);border-color:var(--danger)" onclick="deleteUnifiedTask()">删除任务</button>
+          <button class="btn btn-primary btn-sm" onclick="saveUnifiedTask()" style="flex:1">保存任务</button>
+        </div>
+      </div>
     </div>
     <div class="tn-view" id="tnReportView" style="display:none">
       <!-- Internal section tabs -->
