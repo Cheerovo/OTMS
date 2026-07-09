@@ -2946,7 +2946,7 @@ function renderPermUI(){
       var rv=roles[rn].subtabs&&roles[rn].subtabs[key]?roles[rn].subtabs[key]:'';
       h+='<div class="perm-role-chip"><span style="font-size:9px;color:var(--text2)">'+esc(rn)+'</span>';
       h+='<select onchange="event.stopPropagation();setRoleSubTab(\''+esc(rn)+'\',\''+key+'\',this.value)" style="padding:2px 4px;font-size:9px;border:1px solid var(--border-light);border-radius:4px;background:var(--card);font-family:inherit">';
-      h+='<option value=""'+(rv===''?' selected':'')+'>继承</option>';
+      h+='<option value=""'+(rv===''?' selected':'')+'>默认</option>';
       h+='<option value="visible"'+(rv==='visible'?' selected':'')+'>可见</option>';
       h+='<option value="hidden"'+(rv==='hidden'?' selected':'')+'>隐藏</option>';
       h+='</select></div>';
