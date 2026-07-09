@@ -417,11 +417,17 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-gantt-timeline { flex:1; display:flex; min-width:0; position:relative; height:34px; }
 .tn-gantt-timeline .tn-gw-cell { flex:1; min-width:44px; border-right:1px solid var(--border-subtle); position:relative; height:100%; }
 .tn-gantt-timeline .tn-gw-cell.current { background:rgba(201,79,102,0.03); }
-.tn-gantt-bar { position:absolute; top:8px; height:18px; border-radius:4px; min-width:6px; cursor:pointer; transition:opacity .15s,filter .15s; z-index:2; }
+.tn-gantt-bar { position:absolute; top:8px; height:18px; border-radius:4px; min-width:6px; cursor:pointer; transition:opacity .15s,filter .15s; z-index:2; display:flex; align-items:center; justify-content:center; overflow:hidden; }
 .tn-gantt-bar:hover { filter:brightness(0.85); box-shadow:0 1px 4px rgba(0,0,0,0.15); }
 .tn-gantt-bar.pending { opacity:0.45; }
 .tn-gantt-bar.active { opacity:0.75; }
 .tn-gantt-bar.done { opacity:0.9; }
+.tn-gantt-bar-label { font-size:9px; font-weight:600; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3); white-space:nowrap; pointer-events:none; padding:0 4px; }
+.tn-gantt-bar.tn-urg-overdue { background:#C94F66 !important; opacity:0.9; }
+.tn-gantt-bar.tn-urg-critical { background:#D4855E !important; opacity:0.85; }
+.tn-gantt-bar.tn-urg-warning { background:#C9A84C !important; opacity:0.8; }
+.tn-gantt-bar.tn-urg-normal { opacity:0.7; }
+.tn-gantt-bar.tn-urg-done { background:#7BA89C !important; opacity:0.85; }
 .tn-gantt-today-line { position:absolute; top:0; bottom:0; width:2px; background:var(--accent); opacity:0.6; z-index:10; pointer-events:none; }
 .tn-gantt-empty { padding:40px; text-align:center; font-size:11px; color:var(--text-muted); }
 
@@ -11134,11 +11140,25 @@ function renderGanttBar(wks, st, sysColor, weekCount){
   }
   if(inSeg) segments.push([segStart,weekCount-1]);
   if(!segments.length) return '';
+  // Calculate days remaining
+  var startDate = new Date(2026,5,1);
+  var now = new Date();
+  var lastWeekIdx = segments[segments.length-1][1];
+  var endDate = new Date(startDate.getTime() + (lastWeekIdx+1)*7*24*60*60*1000);
+  var remaining = Math.ceil((endDate.getTime() - now.getTime()) / (1000*60*60*24));
+  var urgency = '', label = '';
+  if(st==='done'){ urgency='tn-urg-done'; label='已完成'; }
+  else if(remaining<0){ urgency='tn-urg-overdue'; label='超'+Math.abs(remaining)+'天'; }
+  else if(remaining<=7){ urgency='tn-urg-critical'; label='剩'+remaining+'天'; }
+  else if(remaining<=14){ urgency='tn-urg-warning'; label='剩'+remaining+'天'; }
+  else { urgency='tn-urg-normal'; label='剩'+remaining+'天'; }
   var html = '';
   segments.forEach(function(seg){
     var leftPct = (seg[0]/weekCount)*100;
     var widthPct = ((seg[1]-seg[0]+1)/weekCount)*100;
-    html += '<div class="tn-gantt-bar '+st+'" style="left:'+leftPct+'%;width:'+widthPct+'%;background:'+sysColor+'" title="W'+(seg[0]+1)+'-W'+(seg[1]+1)+'"></div>';
+    html += '<div class="tn-gantt-bar '+st+' '+urgency+'" style="left:'+leftPct+'%;width:'+widthPct+'%;background:'+sysColor+'" title="W'+(seg[0]+1)+'-W'+(seg[1]+1)+' | '+(remaining<0?'已超期'+Math.abs(remaining)+'天':(st==='done'?'已完成':'还剩'+remaining+'天'))+'">';
+    html += '<span class="tn-gantt-bar-label">'+label+'</span>';
+    html += '</div>';
   });
   return html;
 }
