@@ -2682,7 +2682,7 @@ function migrateOldPerms(oldData){
 }
 function savePerms(p){try{localStorage.okr_permissions=JSON.stringify(p);}catch(e){}}
 function isGlobalAdmin(user){var u=users[user];return u&&u.role==='admin';}
-function getUserRole(uid){var p=loadPerms();return p.userRoles[uid]||null;}
+function getUserRole(uid){var p=loadPerms();return p.userRoles[uid]||'标准员工';}
 function canEditModule(user,mod){if(!user||!mod)return false;if(isGlobalAdmin(user))return true;if(mod==='org')return false;var p=loadPerms();if(p.exceptions&&p.exceptions[user]&&p.exceptions[user].modules&&p.exceptions[user].modules[mod]!==undefined)return p.exceptions[user].modules[mod]==='edit';var role=getUserRole(user);if(role&&p.roles[role]&&p.roles[role].modules&&p.roles[role].modules[mod]!==undefined)return p.roles[role].modules[mod]==='edit';return false;}
 function canViewModule(user,mod){if(!user||!mod)return false;if(isGlobalAdmin(user))return true;if(mod==='org')return !!user;var p=loadPerms();if(p.exceptions&&p.exceptions[user]&&p.exceptions[user].modules&&p.exceptions[user].modules[mod]!==undefined)return p.exceptions[user].modules[mod]!=='none';var role=getUserRole(user);if(role&&p.roles[role]&&p.roles[role].modules&&p.roles[role].modules[mod]!==undefined)return p.roles[role].modules[mod]!=='none';return false;}
 function canViewSubTab(user,mod,st){if(!user||!mod||!st)return false;if(isGlobalAdmin(user))return true;var key=mod+'_'+st;var p=loadPerms();if(p.exceptions&&p.exceptions[user]&&p.exceptions[user].subtabs&&p.exceptions[user].subtabs[key]!==undefined){var v=p.exceptions[user].subtabs[key];if(v==='visible')return true;if(v==='hidden')return false;}var role=getUserRole(user);if(role&&p.roles[role]&&p.roles[role].subtabs&&p.roles[role].subtabs[key]!==undefined){var rv=p.roles[role].subtabs[key];if(rv==='visible')return true;if(rv==='hidden')return false;}if(mod==='org'||mod==='vision')return !!user;return canViewModule(user,mod);}
@@ -3046,7 +3046,6 @@ function toggleSubTabCard(key){
 }
 
 function setAllRolesSubTab(key,value){
-  console.log('setAllRolesSubTab called',key,value);
   var p=loadPerms();
   var roles=p.roles||{};
   Object.keys(roles).forEach(function(rn){
@@ -3055,11 +3054,8 @@ function setAllRolesSubTab(key,value){
     else delete roles[rn].subtabs[key];
   });
   savePerms(p);
-  console.log('perms saved, roles:',JSON.stringify(p.roles));
   var el=document.getElementById('permContent');
-  console.log('permContent element found:',!!el);
-  if(el){console.log('calling refreshPermUI');refreshPermUI();console.log('refreshPermUI done');}
-  else{console.log('permContent NOT FOUND');}
+  if(el)refreshPermUI();
 }
 
 function setRoleSubTab(role,key,value){
