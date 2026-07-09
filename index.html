@@ -425,9 +425,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-gantt-bar.done { opacity:0.9; }
 .tn-gantt-bar-label { font-size:9px; font-weight:600; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3); white-space:nowrap; pointer-events:none; padding:0 4px; }
 .tn-gantt-bar.done { opacity:0.9; }
-.tn-gantt-bar.tn-prio-p1 { opacity:0.9; }
-.tn-gantt-bar.tn-prio-p2 { opacity:0.85; }
-.tn-gantt-bar.tn-prio-p3 { opacity:0.8; }
+.tn-gantt-bar.tn-prio-p0 { opacity:0.9; }
+.tn-gantt-bar.tn-prio-p1 { opacity:0.85; }
+.tn-gantt-bar.tn-prio-p2 { opacity:0.8; }
 .tn-gantt-bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:3px 0 0 3px;background:rgba(255,255,255,0.3);pointer-events:none;z-index:0}
 .tn-gantt-today-line { position:absolute; top:0; bottom:0; width:2px; background:var(--accent); opacity:0.6; z-index:10; pointer-events:none; }
 .tn-gantt-empty { padding:40px; text-align:center; font-size:11px; color:var(--text-muted); }
@@ -11037,8 +11037,8 @@ function renderTraineeGantt(filtered, curWkIdx){
   var html = '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:10px;padding:6px 12px;background:var(--bg-surface);border-radius:8px;font-size:9px;color:var(--text-muted)">';
   html += '<span>图例：</span>';
   var legendItems = [
-    {color:'#C94F66',label:'P1·紧急'},{color:'#D4A76A',label:'P2·重要'},
-    {color:'#7B8FC0',label:'P3·普通'},{color:'#7BA89C',label:'已完成'},
+    {color:'#C94F66',label:'P0·紧急'},{color:'#D4A76A',label:'P1·重要'},
+    {color:'#7B8FC0',label:'P2·普通'},{color:'#7BA89C',label:'已完成'},
     {color:'var(--accent)',label:'今日',style:'width:12px;height:12px;border-radius:50%'}
   ];
   legendItems.forEach(function(li){
@@ -11226,7 +11226,7 @@ function renderGanttBar(wks, st, sysColor, weekCount, prio, curWkIdx){
   // Color by priority
   prio = prio||'P2';
   var prioCls = 'tn-prio-'+prio.toLowerCase();
-  var prioColors = {p1:'#C94F66', p2:'#D4A76A', p3:'#7B8FC0'};
+  var prioColors = {p0:'#C94F66', p1:'#D4A76A', p2:'#7B8FC0'};
   var barColor = st==='done'?'#7BA89C':(prioColors[prio.toLowerCase()]||sysColor);
   var html = '';
   segments.forEach(function(seg){
