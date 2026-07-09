@@ -3019,15 +3019,23 @@ function renderPermUI(){
   return h;
 }
 
+function refreshPermUI(){
+  // Save open card states
+  var openIds=[];
+  var cards=document.querySelectorAll('.perm-st-card.open');
+  for(var i=0;i<cards.length;i++){openIds.push(cards[i].id);}
+  var el=document.getElementById('permContent');
+  if(el)refreshPermUI();
+  // Restore open card states
+  for(var j=0;j<openIds.length;j++){
+    var card=document.getElementById(openIds[j]);
+    if(card)card.classList.add('open');
+  }
+}
+
 function switchPermModule(mod){
   PERM_SELMOD=mod;
-  var el=document.getElementById('permContent');
-  if(el)el.innerHTML=renderPermUI();
-  else{
-    // Re-render entire modal body
-    document.querySelector('.modal-body').innerHTML=renderPermUI();
-  }
-  // Update active tab
+  refreshPermUI();
   var tabs=document.querySelectorAll('.perm-module-tab');
   tabs.forEach(function(t){t.classList.remove('active');if(t.textContent===MOD_LABELS[mod])t.classList.add('active');});
 }
@@ -3047,7 +3055,7 @@ function setAllRolesSubTab(key,value){
   });
   savePerms(p);
   var el=document.getElementById('permContent');
-  if(el)el.innerHTML=renderPermUI();
+  if(el)refreshPermUI();
 }
 
 function setRoleSubTab(role,key,value){
@@ -3058,7 +3066,7 @@ function setRoleSubTab(role,key,value){
   else delete p.roles[role].subtabs[key];
   savePerms(p);
   var el=document.getElementById('permContent');
-  if(el)el.innerHTML=renderPermUI();
+  if(el)refreshPermUI();
 }
 
 function addSubTabExc(key){
@@ -3079,7 +3087,7 @@ function addSubTabExc(key){
     h+='<option value="hidden"'+(cur==='hidden'?' selected':'')+'>隐藏</option>';
     h+='</select></div>';
   });
-  h+='<button onclick="var el=document.getElementById(\'permContent\');if(el)el.innerHTML=renderPermUI()" style="margin-top:4px;font-size:9px;border:none;background:var(--card);cursor:pointer;padding:2px 8px;border-radius:4px">关闭</button></div>';
+  h+='<button onclick="var el=document.getElementById(\'permContent\');if(el)refreshPermUI()" style="margin-top:4px;font-size:9px;border:none;background:var(--card);cursor:pointer;padding:2px 8px;border-radius:4px">关闭</button></div>';
   panel.innerHTML=h;
 }
 
@@ -3117,7 +3125,7 @@ function saveRolePerms(roleName){
   });
   savePerms(p);
   var pel=document.getElementById('permContent');
-  if(pel)pel.innerHTML=renderPermUI();
+  if(pel)refreshPermUI();
 }
 
 function deleteRolePerms(roleName){
@@ -3129,7 +3137,7 @@ function deleteRolePerms(roleName){
   for(var uid in p.userRoles){if(p.userRoles[uid]===roleName)delete p.userRoles[uid];}
   savePerms(p);
   var el=document.getElementById('permContent');
-  if(el)el.innerHTML=renderPermUI();
+  if(el)refreshPermUI();
 }
 
 function createNewRole(){
@@ -3141,7 +3149,7 @@ function createNewRole(){
   p.roles[name]={modules:{},subtabs:{}};
   savePerms(p);
   var el=document.getElementById('permContent');
-  if(el)el.innerHTML=renderPermUI();
+  if(el)refreshPermUI();
 }
 
 function assignRoleToUsers(roleName){
@@ -3192,7 +3200,7 @@ function applyPreset(type){
   nonAdmin.forEach(function(uid){p.userRoles[uid]=targetRole;});
   savePerms(p);
   var el=document.getElementById('permContent');
-  if(el)el.innerHTML=renderPermUI();
+  if(el)refreshPermUI();
 }
 
 function copyPermsFrom(){
