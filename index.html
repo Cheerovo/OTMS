@@ -2932,9 +2932,9 @@ function renderPermUI(){
     h+='<div class="perm-st-body">';
     // Quick actions
     h+='<div class="perm-st-actions">';
-    h+='<button class="btn btn-xs btn-primary" onclick="event.stopPropagation();setAllRolesSubTab(\''+key+'\',\'visible\')">全员可见</button>';
-    h+='<button class="btn btn-xs btn-outline" onclick="event.stopPropagation();setAllRolesSubTab(\''+key+'\',\'hidden\')">全员不可见</button>';
-    h+='<button class="btn btn-xs btn-outline" onclick="event.stopPropagation();setAllRolesSubTab(\''+key+'\',\'\')">由角色决定</button>';
+    h+='<button type="button" class="btn btn-xs btn-primary" onclick="setAllRolesSubTab(\''+key+'\',\'visible\');return false;">全员可见</button>';
+    h+='<button type="button" class="btn btn-xs btn-outline" onclick="setAllRolesSubTab(\''+key+'\',\'hidden\');return false;">全员不可见</button>';
+    h+='<button type="button" class="btn btn-xs btn-outline" onclick="setAllRolesSubTab(\''+key+'\',\'\');return false;">由角色决定</button>';
     h+='<span style="font-size:8px;color:var(--text-muted)">修改所有角色的此子标签</span>';
     h+='</div>';
     // Per-role settings
@@ -2967,7 +2967,7 @@ function renderPermUI(){
     }else{
       h+='<span style="font-size:9px;color:var(--text-muted)">无</span>';
     }
-    h+='<button class="btn btn-xs" style="border:1px dashed var(--border);background:none;border-radius:10px;padding:2px 8px;font-size:9px;color:var(--text2);cursor:pointer" onclick="event.stopPropagation();addSubTabExc(\''+key+'\')">+ 添加</button>';
+    h+='<button type="button" class="btn btn-xs" style="border:1px dashed var(--border);background:none;border-radius:10px;padding:2px 8px;font-size:9px;color:var(--text2);cursor:pointer" onclick="addSubTabExc(\''+key+'\');return false;">+ 添加</button>';
     h+='</div>';
     h+='<div id="excAdd_'+escAttr(key)+'" style="margin-top:6px"></div>';
     h+='</div>';
