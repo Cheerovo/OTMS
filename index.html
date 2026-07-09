@@ -2292,7 +2292,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 
   <div class="oc-sub-tabs" style="margin-bottom:20px">
     <button class="oc-sub-tab active" onclick="switchVisionSubView('strategy',this)">战略总览</button>
-    <button class="oc-sub-tab" onclick="switchVisionSubView('trainee',this)">管培生计划</button>
+    <button class="oc-sub-tab" id="visionTraineeTabBtn" onclick="switchVisionSubView('trainee',this)">管培生计划</button>
     <button class="oc-sub-tab" onclick="switchVisionSubView('backend',this)">大后台系统</button>
   </div>
 
@@ -7388,6 +7388,7 @@ document.addEventListener('click',function(e){
 // ===== My Workspace =====
 let visionSubView = 'strategy';
 function switchVisionSubView(view, tab) {
+  if(view === 'trainee' && !(currentUser && isGlobalAdmin(currentUser))) return;
   visionSubView = view;
   document.querySelectorAll('#tabVision .oc-sub-tab').forEach(t => t.classList.remove('active'));
   if (tab) tab.classList.add('active');
@@ -7397,7 +7398,14 @@ function switchVisionSubView(view, tab) {
   if (view === 'trainee') renderTraineeView();
   if (view === 'backend') renderBackendView();
 }
-function renderVision(){ /* static content, no refresh needed */ }
+function renderVision(){
+  var isAdmin = currentUser && isGlobalAdmin(currentUser);
+  var traineeBtn = document.getElementById('visionTraineeTabBtn');
+  if(traineeBtn) traineeBtn.style.display = isAdmin ? '' : 'none';
+  if(!isAdmin && visionSubView === 'trainee'){
+    switchVisionSubView('strategy');
+  }
+}
 function renderTraineeView() {
   var el = document.getElementById('visionTraineeView');
   if (!el) return;
