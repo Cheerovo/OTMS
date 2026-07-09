@@ -437,6 +437,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-gantt-bar-tooltip .tt-meta{color:#aaa;font-size:8px}
 .tn-gantt-today-line { position:absolute; top:0; bottom:0; width:2px; background:var(--accent); opacity:0.6; z-index:10; pointer-events:none; }
 .tn-gantt-empty { padding:40px; text-align:center; font-size:11px; color:var(--text-muted); }
+.tn-milestone-line { position:absolute; top:0; bottom:0; width:1px; border-left:2px dashed var(--accent); opacity:0.3; pointer-events:none; z-index:1; }
+.tn-milestone-marker { position:absolute; top:-12px; z-index:12; pointer-events:none; transform:translateX(-50%); }
+.tn-milestone-diamond { width:8px; height:8px; background:var(--accent); transform:rotate(45deg); margin:0 auto 2px; }
+.tn-milestone-label { font-size:7px; color:var(--accent); white-space:nowrap; text-align:center; font-weight:600; }
 
 /* Timeline */
 .tl-section { margin-top:14px; }
@@ -1508,6 +1512,17 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-child-count.has-children { background:var(--accent-wash); color:var(--accent); font-weight:600; cursor:pointer; }
 .tn-child-count.has-children:hover { background:var(--accent); color:#fff; }
 #umParentId { font-size:10px; }
+/* Drag handle */
+.tn-drag-handle { cursor:grab; color:var(--text-muted); padding:2px 4px; flex-shrink:0; user-select:none; opacity:0; transition:opacity .15s; font-size:10px; line-height:1; }
+.tn-task-card-new:hover .tn-drag-handle, .tn-child-task-row:hover .tn-drag-handle { opacity:1; }
+.tn-drag-handle:active { cursor:grabbing; }
+.tn-task-card-new.dragging, .tn-child-task-row.dragging { opacity:0.4; }
+.tn-task-card-new.drag-over, .tn-child-task-row.drag-over { border-top:2px solid var(--accent); }
+/* Batch selection */
+.tn-select-checkbox { width:14px; height:14px; border-radius:3px; cursor:pointer; accent-color:var(--accent); flex-shrink:0; }
+.tn-panel-select-all { width:14px; height:14px; border-radius:3px; cursor:pointer; accent-color:var(--accent); flex-shrink:0; margin-right:6px; }
+.tn-batch-bar { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:8px; padding:10px 20px; background:var(--card); border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.12); z-index:300; }
+#tnBatchCount { font-size:10px; color:var(--text-dim); white-space:nowrap; margin-right:4px; }
 #umParentId option { font-size:10px; }
 
 /* Trainee detail popup */
@@ -1852,6 +1867,18 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
         <button class="btn btn-primary btn-sm" onclick="openWeeklyTaskModal()" style="font-size:9px;padding:6px 14px;border-radius:8px;margin-left:8px">+ 新增任务</button>
       </div>
       <div id="tnTaskBoard"></div>
+      <div id="tnBatchBar" class="tn-batch-bar" style="display:none">
+        <span id="tnBatchCount">已选 0 项</span>
+        <button class="tn-chip" onclick="batchSetStatus('active')">标记进行中</button>
+        <button class="tn-chip" onclick="batchSetStatus('done')">标记已完成</button>
+        <select id="batchPriority" onchange="batchSetPriority(this);this.value=''" style="padding:4px 8px;border:1px solid var(--border-light);border-radius:16px;font-size:9px;font-family:inherit;color:var(--text);background:var(--card);cursor:pointer">
+          <option value="">修改优先级</option>
+          <option value="P0">P0·紧急</option>
+          <option value="P1">P1·重要</option>
+          <option value="P2">P2·普通</option>
+        </select>
+        <button class="tn-chip" onclick="clearBatchSelection()" style="background:var(--bg-surface);color:var(--text-dim)">取消选择</button>
+      </div>
       <!-- Weekly task modal -->
       <div class="tn-detail-overlay" id="weeklyTaskModal" style="display:none" onclick="if(event.target===this)closeWeeklyTaskModal()">
         <div class="tn-detail-modal" style="width:440px;max-height:90vh" onclick="event.stopPropagation()">
@@ -2006,6 +2033,15 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
           <button class="tn-chip" onclick="tnGanttGroup='status';updateGanttDims();saveGanttFilterState();renderGanttTab()">按状态</button>
           <span style="width:1px;height:14px;background:var(--border-light);margin:0 4px"></span>
           <button class="tn-chip" onclick="var gs=document.querySelectorAll('#ganttBoard .tn-gantt-group');var any=Array.from(gs).some(function(g){return!g.classList.contains('collapsed')});gs.forEach(function(g){g.classList.toggle('collapsed',any)})" title="展开/折叠全部">▸▾</button>
+          <span style="width:1px;height:14px;background:var(--border-light);margin:0 4px"></span>
+          <button class="tn-chip active" id="tnZoomWeekBtn" onclick="tnGanttZoom='week';updateGanttZoomBtns();saveGanttFilterState();renderGanttTab()">按周</button>
+          <button class="tn-chip" id="tnZoomBiWeekBtn" onclick="tnGanttZoom='biweek';updateGanttZoomBtns();saveGanttFilterState();renderGanttTab()">双周</button>
+          <span style="width:1px;height:14px;background:var(--border-light);margin:0 4px"></span>
+          <label class="tn-chip" id="tnMilestoneToggle" style="cursor:pointer;display:flex;align-items:center;gap:4px">
+            <input type="checkbox" id="tnShowMilestones" checked onchange="tnShowMilestones=this.checked;saveGanttFilterState();renderGanttTab()" style="margin:0;width:10px;height:10px;accent-color:var(--accent)"> 里程碑
+          </label>
+          <span style="width:1px;height:14px;background:var(--border-light);margin:0 4px"></span>
+          <button class="tn-chip" onclick="exportGanttAsPNG()" title="导出甘特图为图片">导出图片</button>
         </div>
       </div>
       <div class="filter-row" style="margin-bottom:14px">
@@ -10524,6 +10560,12 @@ function hasCircularRef(taskId, parentId){
 var tnQuickFilter = 'all';
 var tnGanttQuickFilter = 'all';
 var tnGanttGroup = 'system';
+var tnGanttZoom = 'week';
+var tnShowMilestones = true;
+var TN_MILESTONES = [{week:7, label:'中期回顾'}, {week:13, label:'结业汇报'}];
+var tnTaskOrder = {};
+var dragSrcId = null;
+var tnSelectedTasks = new Set();
 
 function updateQuickFilters(){
   document.querySelectorAll('#tnQuickFilters .tn-chip').forEach(function(c){
@@ -10542,6 +10584,7 @@ function updateGanttQuickFilters(){
 
 function initTraineeSystem(){
   loadTnData();
+  loadTnTaskOrder();
   // Populate person filter
   var sel = document.getElementById('tnPersonFilter');
   sel.innerHTML = '<option value="all">全部执行者</option>' + TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
@@ -10569,6 +10612,7 @@ function initTraineeSystem(){
 
 function switchTraineeView(view){
   tnCurrentView = view;
+  clearBatchSelection();
   document.getElementById('tnTaskView').style.display = view==='tasks'?'':'none';
   document.getElementById('tnGanttView').style.display = view==='gantt'?'':'none';
   document.getElementById('tnReportView').style.display = view==='reports'?'':'none';
@@ -10590,6 +10634,18 @@ function updateGanttDims(){
     var vals = ['system','person','status'];
     c.classList.toggle('active', vals[i]===tnGanttGroup);
   });
+}
+function updateGanttZoomBtns(){
+  var wkBtn = document.getElementById('tnZoomWeekBtn');
+  var bwBtn = document.getElementById('tnZoomBiWeekBtn');
+  if(wkBtn) wkBtn.classList.toggle('active', tnGanttZoom==='week');
+  if(bwBtn) bwBtn.classList.toggle('active', tnGanttZoom==='biweek');
+}
+function toBiWeeklyWks(wks){
+  if(!wks) return [];
+  var result = [];
+  for(var i=0;i<wks.length;i+=2){ result.push((wks[i]||wks[i+1])?1:0); }
+  return result;
 }
 
 function saveTnFilterState(){
@@ -10621,7 +10677,7 @@ function loadTnFilterState(){
   }catch(e){}
 }
 function saveGanttFilterState(){
-  var state = {ganttGroup:tnGanttGroup, quickFilter:tnGanttQuickFilter};
+  var state = {ganttGroup:tnGanttGroup, quickFilter:tnGanttQuickFilter, zoom:tnGanttZoom, showMilestones:tnShowMilestones};
   var sf = document.getElementById('ganttSystemFilter'); if(sf) state.sysFilter = sf.value;
   var ss = document.getElementById('ganttStatusFilter'); if(ss) state.statusFilter = ss.value;
   var sw = document.getElementById('ganttWeekFilter'); if(sw) state.weekFilter = sw.value;
@@ -10637,6 +10693,8 @@ function loadGanttFilterState(){
     if(!s) return;
     if(s.ganttGroup) tnGanttGroup = s.ganttGroup;
     if(s.quickFilter) tnGanttQuickFilter = s.quickFilter;
+    if(s.zoom) tnGanttZoom = s.zoom;
+    if(s.showMilestones !== undefined) tnShowMilestones = s.showMilestones;
     setTimeout(function(){
       if(s.sysFilter){ var sf=document.getElementById('ganttSystemFilter'); if(sf) sf.value=s.sysFilter; }
       if(s.statusFilter){ var ss=document.getElementById('ganttStatusFilter'); if(ss) ss.value=s.statusFilter; }
@@ -10647,6 +10705,9 @@ function loadGanttFilterState(){
       if(s.sortBy){ var so=document.getElementById('ganttSortBy'); if(so) so.value=s.sortBy; }
       updateGanttQuickFilters();
       updateGanttDims();
+      updateGanttZoomBtns();
+      var msCb = document.getElementById('tnShowMilestones');
+      if(msCb) msCb.checked = tnShowMilestones;
     }, 50);
   }catch(e){}
 }
@@ -10845,6 +10906,7 @@ function renderTraineeTasks(){
     var panelId = 'tnPanel_'+sys;
     html += '<div class="tn-system-panel" id="'+panelId+'">';
     html += '<div class="tn-panel-header" onclick="var p=document.getElementById(\''+panelId+'\');p.classList.toggle(\'collapsed\')">';
+    html += '<input type="checkbox" class="tn-panel-select-all" onclick="event.stopPropagation();togglePanelSelection(\''+sys+'\',this)" title="全选/取消全选">';
     html += '<span class="tn-panel-icon" style="background:'+sysInfo.sysColor+'">'+(sys==='yyda'?'印':sys==='rssw'?'人':sys==='cwzw'?'财':'IT')+'</span>';
     html += '<span class="tn-panel-title">'+sysInfo.sysName+'</span>';
     html += '<div class="tn-panel-stats">';
@@ -10884,6 +10946,22 @@ function renderTraineeTasks(){
       });
     });
     tasks.forEach(function(ct){ if(childTaskIds[ct.id] && !addedChildIds[ct.id]) orderedTasks.push(ct); });
+
+    // Apply custom drag order if saved
+    var customOrder = tnTaskOrder[sys];
+    if(customOrder && customOrder.length){
+      var taskMap = {}; orderedTasks.forEach(function(ot){ taskMap[ot.id] = ot; });
+      var newOrder = []; var used = {};
+      customOrder.forEach(function(cid){
+        if(taskMap[cid] && !used[cid]){ newOrder.push(taskMap[cid]); used[cid] = true;
+          orderedTasks.forEach(function(child){
+            if(getTaskParentId(child)===cid && taskMap[child.id] && !used[child.id]){ newOrder.push(child); used[child.id] = true; }
+          });
+        }
+      });
+      Object.keys(taskMap).forEach(function(k){ if(!used[k]) newOrder.push(taskMap[k]); });
+      orderedTasks = newOrder;
+    }
 
     orderedTasks.forEach(function(t){
       var isWeekly = t._source === 'weekly';
@@ -10935,8 +11013,10 @@ function renderTraineeTasks(){
 
         if(isChild){
           // Compact child row
-          html += '<div class="tn-child-task-row" id="tnCard_'+t.id+'">';
+          html += '<div class="tn-child-task-row" id="tnCard_'+t.id+'" draggable="true" ondragstart="handleDragStart(event,\''+t.id+'\')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,\''+t.id+'\',\''+sys+'\')" ondragend="handleDragEnd(event)">';
           html += '<span class="tn-child-connector"></span>';
+          html += '<span class="tn-drag-handle">⋮⋮</span>';
+          html += '<input type="checkbox" class="tn-select-checkbox" onclick="event.stopPropagation();toggleTaskSelection(\''+t.id+'\',this)"'+(tnSelectedTasks.has(t.id)?' checked':'')+'>';
           html += '<span class="tn-task-status-dot '+stCls+'"></span>';
           html += '<div class="tn-child-task-body">';
           html += '<span class="tn-child-task-name" onclick="openUnifiedTaskModal(\''+t._source+'\',\''+t.id+'\')" title="编辑任务">'+t.name+'</span>';
@@ -10972,8 +11052,10 @@ function renderTraineeTasks(){
           html += '</div></div>';
         } else {
           // Full card for parent/independent tasks
-        html += '<div class="tn-task-card-new" id="tnCard_'+t.id+'" onclick="var el=document.getElementById(\'tnCard_'+t.id+'\');el.classList.toggle(\'expanded\')">';
+        html += '<div class="tn-task-card-new" id="tnCard_'+t.id+'" draggable="true" ondragstart="handleDragStart(event,\''+t.id+'\')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,\''+t.id+'\',\''+sys+'\')" ondragend="handleDragEnd(event)" onclick="if(!event.target.closest(\'.tn-drag-handle\')){var el=document.getElementById(\'tnCard_'+t.id+'\');el.classList.toggle(\'expanded\')}">';
         html += '<div class="tn-task-priority '+prio+'"></div>';
+        html += '<span class="tn-drag-handle" onclick="event.stopPropagation()">⋮⋮</span>';
+        html += '<input type="checkbox" class="tn-select-checkbox" onclick="event.stopPropagation();toggleTaskSelection(\''+t.id+'\',this)"'+(tnSelectedTasks.has(t.id)?' checked':'')+'>';
         html += '<span class="tn-task-status-dot '+stCls+'"></span>';
         html += '<div class="tn-task-body">';
         html += '<div class="tn-task-title-row">';
@@ -11049,6 +11131,141 @@ function renderTraineeTasks(){
   document.getElementById('tnTaskBoard').innerHTML = html || '<div class="eval-empty">无匹配任务</div>';
 }
 
+function loadTnTaskOrder(){
+  try{ var raw = localStorage.getItem('otms_trainee_task_order'); if(raw) tnTaskOrder = JSON.parse(raw); }catch(e){ tnTaskOrder = {}; }
+}
+function saveTnTaskOrder(){
+  try{ localStorage.setItem('otms_trainee_task_order', JSON.stringify(tnTaskOrder)); }catch(e){}
+}
+function handleDragStart(e, taskId){
+  dragSrcId = taskId;
+  var row = e.target.closest('.tn-task-card-new, .tn-child-task-row');
+  if(row) row.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', taskId);
+}
+function handleDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  var row = e.target.closest('.tn-task-card-new, .tn-child-task-row');
+  if(row && !row.classList.contains('dragging')) row.classList.add('drag-over');
+}
+function handleDragLeave(e){
+  var row = e.target.closest('.tn-task-card-new, .tn-child-task-row');
+  if(row && !row.contains(e.relatedTarget)) row.classList.remove('drag-over');
+}
+function handleDrop(e, targetId, sysKey){
+  e.preventDefault();
+  var row = e.target.closest('.tn-task-card-new, .tn-child-task-row');
+  if(row) row.classList.remove('drag-over');
+  if(!dragSrcId || dragSrcId === targetId) return;
+  var list = document.querySelector('#tnPanel_'+sysKey+' .tn-task-list');
+  if(!list) return;
+  var cards = list.querySelectorAll('.tn-task-card-new, .tn-child-task-row');
+  var newOrder = [];
+  cards.forEach(function(card){ var id = card.id.replace('tnCard_',''); if(id) newOrder.push(id); });
+  tnTaskOrder[sysKey] = newOrder;
+  saveTnTaskOrder();
+  renderTraineeTasks();
+}
+function handleDragEnd(e){
+  var row = e.target.closest('.tn-task-card-new, .tn-child-task-row');
+  if(row) row.classList.remove('dragging');
+  dragSrcId = null;
+  document.querySelectorAll('.drag-over').forEach(function(el){ el.classList.remove('drag-over'); });
+}
+
+// Batch operations
+function toggleTaskSelection(taskId, cb){
+  if(cb.checked) tnSelectedTasks.add(taskId);
+  else tnSelectedTasks.delete(taskId);
+  updateBatchBar();
+}
+function togglePanelSelection(sys, selectAllCb){
+  var panel = document.getElementById('tnPanel_'+sys);
+  if(!panel) return;
+  var checkboxes = panel.querySelectorAll('.tn-select-checkbox');
+  checkboxes.forEach(function(cb){
+    cb.checked = selectAllCb.checked;
+    var rowEl = cb.closest('.tn-task-card-new, .tn-child-task-row');
+    var taskId = rowEl ? rowEl.id.replace('tnCard_','') : '';
+    if(taskId){
+      if(selectAllCb.checked) tnSelectedTasks.add(taskId);
+      else tnSelectedTasks.delete(taskId);
+    }
+  });
+  updateBatchBar();
+}
+function updateBatchBar(){
+  var bar = document.getElementById('tnBatchBar');
+  if(!bar) return;
+  if(tnSelectedTasks.size > 0){
+    bar.style.display = 'flex';
+    document.getElementById('tnBatchCount').textContent = '已选 '+tnSelectedTasks.size+' 项';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+function clearBatchSelection(){
+  tnSelectedTasks.clear();
+  document.querySelectorAll('.tn-select-checkbox, .tn-panel-select-all').forEach(function(cb){ cb.checked = false; });
+  updateBatchBar();
+}
+function batchSetStatus(status){
+  if(!tnSelectedTasks.size) return;
+  tnSelectedTasks.forEach(function(taskId){
+    if(taskId.startsWith('w')){ setWeeklyTaskStatusSilent(taskId, status); }
+    else if(taskId.startsWith('r')){ setRefTaskStatusSilent(taskId, status); }
+    else { setTnTaskStatusSilent(taskId, status); }
+  });
+  saveTnData();
+  clearBatchSelection();
+  renderTraineeSummary();
+  renderTraineeTasks();
+}
+function batchSetPriority(select){
+  var prio = select.value;
+  if(!prio || !tnSelectedTasks.size) return;
+  tnSelectedTasks.forEach(function(taskId){
+    if(taskId.startsWith('w')){ setWeeklyTaskPriority(taskId, prio); }
+    else if(taskId.startsWith('r')){ setRefTaskPriority(taskId, prio); }
+    else { setTnTaskPriority(taskId, prio); }
+  });
+  saveTnData();
+  clearBatchSelection();
+  renderTraineeTasks();
+}
+
+// Silent status/priority setters (no re-render)
+function setTnTaskStatusSilent(taskId, status){
+  var td = getTnTask(taskId) || {};
+  td.status = status;
+  setTnTask(taskId, td);
+}
+function setWeeklyTaskStatusSilent(wid, status){
+  if(!tnData||!tnData.wtasks) return;
+  for(var i=0;i<tnData.wtasks.length;i++){ if(tnData.wtasks[i].id===wid){ tnData.wtasks[i].status=status; break; } }
+}
+function setRefTaskStatusSilent(rid, status){
+  if(!tnData) loadTnData();
+  if(!tnData.refTasks) tnData.refTasks = JSON.parse(JSON.stringify(TN_REF_TASKS));
+  for(var i=0;i<tnData.refTasks.length;i++){ if(tnData.refTasks[i].id===rid){ tnData.refTasks[i].refStatus=status; break; } }
+}
+function setTnTaskPriority(taskId, prio){
+  var td = getTnTask(taskId) || {};
+  td.priority = prio;
+  setTnTask(taskId, td);
+}
+function setWeeklyTaskPriority(wid, prio){
+  if(!tnData||!tnData.wtasks) return;
+  for(var i=0;i<tnData.wtasks.length;i++){ if(tnData.wtasks[i].id===wid){ tnData.wtasks[i].priority=prio; break; } }
+}
+function setRefTaskPriority(rid, prio){
+  if(!tnData) loadTnData();
+  if(!tnData.refTasks) tnData.refTasks = JSON.parse(JSON.stringify(TN_REF_TASKS));
+  for(var i=0;i<tnData.refTasks.length;i++){ if(tnData.refTasks[i].id===rid){ tnData.refTasks[i].priority=prio; break; } }
+}
+
 // ===== TRAINEE GANTT CHART =====
 function renderGanttTab(){
   var result = filterTraineeTasksData({
@@ -11088,6 +11305,14 @@ function renderTraineeGantt(filtered, curWkIdx, boardId){
   for(var i=0;i<filtered.length;i++){ if(filtered[i]._source==='ref'){ hasRef=true; break; } }
   var weekLabels = hasRef ? TN_ALL_WEEKS : TN_WEEK_LABELS;
   var weekCount = weekLabels.length;
+  // Zoom: effective labels/count
+  var effectiveWeekLabels = weekLabels, effectiveWeekCount = weekCount;
+  if(tnGanttZoom==='biweek'){
+    effectiveWeekLabels = [];
+    for(var bwi=0; bwi<weekCount; bwi+=2){ effectiveWeekLabels.push(weekLabels[bwi]+'-'+(weekLabels[bwi+1]||weekLabels[bwi])); }
+    effectiveWeekCount = effectiveWeekLabels.length;
+  }
+  var effectiveCurWkIdx = tnGanttZoom==='biweek' ? Math.floor(curWkIdx/2) : curWkIdx;
   var groups = groupTasksForGantt(filtered);
   var groupKeys = Object.keys(groups);
   if(!groupKeys.length){ board.innerHTML = '<div class="tn-gantt-empty">无匹配任务</div>'; return; }
@@ -11123,9 +11348,18 @@ function renderTraineeGantt(filtered, curWkIdx, boardId){
     // Week header
     html += '<div class="tn-gantt-weeks">';
     html += '<div class="tn-gw-label-col">任务名称</div>';
-    for(var w=0;w<weekCount;w++){
-      var isCurWk = (w===curWkIdx);
-      html += '<div class="tn-gw-wk'+(isCurWk?' current':'')+'">'+weekLabels[w]+'</div>';
+    for(var w=0;w<effectiveWeekCount;w++){
+      var isCurWk = (w===effectiveCurWkIdx);
+      html += '<div class="tn-gw-wk'+(isCurWk?' current':'')+'">'+effectiveWeekLabels[w]+'</div>';
+    }
+    // Milestone markers in header
+    if(tnShowMilestones){
+      TN_MILESTONES.forEach(function(ms){
+        var msWeekIdx = ms.week - 1;
+        if(tnGanttZoom==='biweek') msWeekIdx = Math.floor(msWeekIdx/2);
+        var msPct = (msWeekIdx / effectiveWeekCount) * 100;
+        html += '<div class="tn-milestone-marker" style="left:calc(250px + '+msPct+'% * (100% - 250px) / 100)"><div class="tn-milestone-diamond"></div><div class="tn-milestone-label">'+ms.label+'</div></div>';
+      });
     }
     html += '</div>';
 
@@ -11149,6 +11383,7 @@ function renderTraineeGantt(filtered, curWkIdx, boardId){
       } else {
         wks = (td&&td.weeks)?td.weeks:t.weeks;
       }
+      var ganttWks = tnGanttZoom==='biweek' ? toBiWeeklyWks(wks) : wks;
       var personLabel = isWeekly?t.person:(isRefT?(t.executors||[]).join(','):((td&&td.R)?td.R:t.R));
       var srcTagClass = isWeekly?'weekly':(isRefT?'ref':'plan');
       var srcTagLabel = isWeekly?t.week:(isRefT?'R':'P');
@@ -11162,7 +11397,7 @@ function renderTraineeGantt(filtered, curWkIdx, boardId){
       html += '<span class="task-name-text">'+esc(t.name)+'</span>';
       html += '<span class="task-src-tag '+srcTagClass+'">'+srcTagLabel+'</span>';
       html += '<span class="task-meta">'+esc(personLabel)+'</span>';
-      // Progress numbers
+      // Progress numbers (use original wks for accurate count)
       var ganttTotalWeeks = 0, ganttDoneWeeks = 0;
       if(isWeekly){
         ganttTotalWeeks = 1;
@@ -11175,11 +11410,18 @@ function renderTraineeGantt(filtered, curWkIdx, boardId){
       }
       html += '</div>';
       html += '<div class="tn-gantt-timeline">';
-      for(var c=0;c<weekCount;c++){
-        html += '<div class="tn-gw-cell'+(c===curWkIdx?' current':'')+'"></div>';
+      for(var c=0;c<effectiveWeekCount;c++){
+        html += '<div class="tn-gw-cell'+(c===effectiveCurWkIdx?' current':'')+'"></div>';
       }
-      html += renderGanttBar(wks, st, sysColor, weekCount, prio, curWkIdx, t.name, personLabel, srcTagLabel);
-      html += '<div class="tn-gantt-today-line" style="left:'+(curWkIdx/weekCount*100)+'%"></div>';
+      html += renderGanttBar(ganttWks, st, sysColor, effectiveWeekCount, prio, effectiveCurWkIdx, t.name, personLabel, srcTagLabel, t._source, t.id);
+      html += '<div class="tn-gantt-today-line" style="left:'+(effectiveCurWkIdx/effectiveWeekCount*100)+'%"></div>';
+      if(tnShowMilestones){
+        TN_MILESTONES.forEach(function(ms){
+          var msWeekIdx = ms.week - 1;
+          if(tnGanttZoom==='biweek') msWeekIdx = Math.floor(msWeekIdx/2);
+          html += '<div class="tn-milestone-line" style="left:'+(msWeekIdx/effectiveWeekCount*100)+'%"></div>';
+        });
+      }
       html += '</div>';
       html += '</div>';
     });
@@ -11190,6 +11432,48 @@ function renderTraineeGantt(filtered, curWkIdx, boardId){
     html += '</div>'; // .tn-gantt-wrap
   });
   board.innerHTML = html;
+}
+
+function exportGanttAsPNG(){
+  var board = document.getElementById('ganttBoard');
+  if(!board || !board.innerHTML){ alert('没有甘特图可导出'); return; }
+  // Expand all collapsed groups for capture
+  var collapsed = board.querySelectorAll('.tn-gantt-group.collapsed');
+  collapsed.forEach(function(g){ g.classList.remove('collapsed'); });
+  if(typeof html2canvas !== 'undefined'){
+    doGanttCapture(board, collapsed);
+  } else {
+    var script = document.createElement('script');
+    script.src = 'https://html2canvas.hertzen.com/dist/html2canvas.min.js';
+    script.onload = function(){ doGanttCapture(board, collapsed); };
+    script.onerror = function(){ alert('加载导出库失败，请检查网络连接'); collapsed.forEach(function(g){ g.classList.add('collapsed'); }); };
+    document.head.appendChild(script);
+  }
+}
+function doGanttCapture(board, collapsed){
+  var clone = board.cloneNode(true);
+  clone.style.position = 'fixed';
+  clone.style.left = '-9999px';
+  clone.style.top = '0';
+  clone.style.width = board.scrollWidth + 'px';
+  clone.style.zIndex = '-1';
+  clone.style.overflow = 'visible';
+  clone.querySelectorAll('.tn-gantt-group.collapsed').forEach(function(g){ g.classList.remove('collapsed'); });
+  clone.querySelectorAll('.tn-gantt-scroll').forEach(function(s){ s.style.overflow = 'visible'; });
+  clone.querySelectorAll('.tn-gantt-inner').forEach(function(s){ s.style.minWidth = 'auto'; });
+  document.body.appendChild(clone);
+  html2canvas(clone, {backgroundColor:'#FFFFFF', scale:2, useCORS:true, logging:false}).then(function(canvas){
+    document.body.removeChild(clone);
+    collapsed.forEach(function(g){ g.classList.add('collapsed'); });
+    var link = document.createElement('a');
+    link.download = '甘特图_' + new Date().toISOString().slice(0,10) + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }).catch(function(err){
+    document.body.removeChild(clone);
+    collapsed.forEach(function(g){ g.classList.add('collapsed'); });
+    alert('导出失败: ' + err.message);
+  });
 }
 
 function getGanttSysColor(sys){
@@ -11261,7 +11545,7 @@ function buildGanttOrderedTasks(tasks, childIds){
   return ordered;
 }
 
-function renderGanttBar(wks, st, sysColor, weekCount, prio, curWkIdx, taskName, person, srcTag){
+function renderGanttBar(wks, st, sysColor, weekCount, prio, curWkIdx, taskName, person, srcTag, source, taskId){
   if(!wks) return '';
   var segments = [], inSeg=false, segStart=-1;
   for(var i=0;i<weekCount;i++){
@@ -11299,7 +11583,7 @@ function renderGanttBar(wks, st, sysColor, weekCount, prio, curWkIdx, taskName, 
     var ttPerson = person||'';
     var ttWeeks = 'W'+(seg[0]+1)+' ~ W'+(seg[1]+1);
     var ttTag = srcTag||'';
-    html += '<div class="tn-gantt-bar '+st+' '+prioCls+'" style="left:'+leftPct+'%;width:'+widthPct+'%;background:'+barColor+'" title="'+esc(ttTitle)+' | '+prio+' | '+label+'">';
+    html += '<div class="tn-gantt-bar '+st+' '+prioCls+'" style="left:'+leftPct+'%;width:'+widthPct+'%;background:'+barColor+'" title="'+esc(ttTitle)+' | '+prio+' | '+label+'"'+(source&&taskId?' onclick="event.stopPropagation();openUnifiedTaskModal(\''+source+'\',\''+taskId+'\')"':'')+'>';
     if(fillPct > 0) html += '<div class="tn-gantt-bar-fill" style="width:'+fillPct+'%"></div>';
     html += '<span class="tn-gantt-bar-label">'+label+'</span>';
     if(ttTitle) html += '<div class="tn-gantt-bar-tooltip"><div class="tt-name">'+esc(ttTitle)+'</div><div class="tt-meta">'+esc(ttPerson)+(ttTag?' · '+ttTag:'')+' · '+ttWeeks+' · '+prio+' · '+label+'</div></div>';
