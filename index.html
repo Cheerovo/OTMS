@@ -3046,6 +3046,7 @@ function toggleSubTabCard(key){
 }
 
 function setAllRolesSubTab(key,value){
+  console.log('setAllRolesSubTab called',key,value);
   var p=loadPerms();
   var roles=p.roles||{};
   Object.keys(roles).forEach(function(rn){
@@ -3054,8 +3055,11 @@ function setAllRolesSubTab(key,value){
     else delete roles[rn].subtabs[key];
   });
   savePerms(p);
+  console.log('perms saved, roles:',JSON.stringify(p.roles));
   var el=document.getElementById('permContent');
-  if(el)refreshPermUI();
+  console.log('permContent element found:',!!el);
+  if(el){console.log('calling refreshPermUI');refreshPermUI();console.log('refreshPermUI done');}
+  else{console.log('permContent NOT FOUND');}
 }
 
 function setRoleSubTab(role,key,value){
