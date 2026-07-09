@@ -1088,6 +1088,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .ws-todo-tag.trainee { background:#f2f4fb; color:#7B8FC0; }
 .ws-todo-tag.report { background:var(--success-bg); color:var(--success-text); }
 .ws-todo-tag.ding { background:#fdf2f8; color:#9d81d9; }
+.ws-todo-tag.feedback { background:#fef9f2; color:#D4A76A; }
 .ws-approval-item { display:flex; align-items:center; gap:12px; padding:12px 22px; cursor:pointer; transition:background .12s; border-bottom:1px solid var(--border-subtle); }
 .ws-approval-item:last-child { border-bottom:none; }
 .ws-approval-item:hover { background:var(--bg-surface-hover); }
@@ -2256,6 +2257,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
         <div class="ws-section" id="wsReportSection">
           <div class="ws-section-hd" onclick="this.parentElement.classList.toggle('collapsed')"><h3><span class="ws-toggle">▾</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#059669;flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> 报表待提交</h3><span class="ws-count" id="wsReportCount">0项</span></div>
           <div class="ws-section-body" id="wsReportList"></div>
+        </div>
+        <div class="ws-section" id="wsFbNotifSection">
+          <div class="ws-section-hd" onclick="this.parentElement.classList.toggle('collapsed')"><h3><span class="ws-toggle">▾</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#D4A76A;flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 任务反馈</h3><span class="ws-count" id="wsFbNotifCount">0条</span></div>
+          <div class="ws-section-body" id="wsFbNotifList"></div>
         </div>
       </div>
     </div>
@@ -3928,8 +3933,23 @@ function renderNotify(){
     if(r.nudge&&r.nudge.by&&getOwners(r.owner).includes(cu))
       items.push({type:'rptNudge',icon:NI.nudge,title:esc(r.name),sub:`${r.nudge.by} Ding了你（报表）`,meta:r.nudge.date?new Date(r.nudge.date).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}):'',rid:r.id});
   });
+  // Feedback notifications
+  if(tnData && tnData.notifications){
+    tnData.notifications.forEach(function(n){
+      if(n.forUser !== cu || n.seen || n.type !== 'feedback') return;
+      var typeLabel = n.feedbackType==='positive'?'表扬':n.feedbackType==='negative'?'需改进':'建议';
+      items.push({
+        type:'fbFeedback', icon:NI.task,
+        title: n.feedbackBy + ' 留下反馈',
+        sub: '['+typeLabel+'] '+n.content,
+        meta: n.date ? new Date(n.date).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}) : '',
+        fid: n.feedbackId, tid: n.taskId, nid: n.id
+      });
+    });
+  }
+
   // Sort
-  items.sort((a,b)=>{const ord={nudge:0,nudgeReply:1,approval:2,checkin:3,rptDue:4,rptNudge:5};return (ord[a.type]||9)-(ord[b.type]||9);});
+  items.sort((a,b)=>{const ord={nudge:0,nudgeReply:1,approval:2,checkin:3,fbFeedback:4,rptDue:5,rptNudge:6};return (ord[a.type]||9)-(ord[b.type]||9);});
 
   updateBellBadge(items.length);
   const el=document.getElementById('notifyBody');
@@ -3969,12 +3989,33 @@ function renderNotify(){
     if(!hasDingLog)html+='<div class="nd-empty">暂无待办事项</div>';
   }else{
     html+='<div class="nd-section-hd">待办</div>';
-    html+=items.map(i=>{let click;if(i.type==='task'){click=`event.stopPropagation();switchTab('meeting');setTimeout(()=>document.querySelector('.meeting-card[data-id=\\'${i.mid}\\']')?.scrollIntoView({behavior:'smooth'}),200)`;}else if(i.type==='rptDue'||i.type==='rptNudge'){click=`event.stopPropagation();switchTab('report');setTimeout(()=>{const el2=document.querySelector('.report-card[data-id=\\'${i.rid}\\']')||document.querySelector('.report-card[data-group]');if(el2){el2.classList.add('open');el2.scrollIntoView({behavior:'smooth'})}},200)`;}else if(i.type==='approval'){click=`event.stopPropagation();saveFilters('okr',Object.assign(loadFilters('okr'),{approval:'draft',status:'all'}));switchTab('okr');setTimeout(()=>{const c=document.querySelector('.okr-card[data-id=\\'${i.oid}\\']');if(c){c.classList.add('open');c.scrollIntoView({behavior:'smooth'})}},300)`;}else if(i.type==='nudgeReply'){click=`event.stopPropagation();var o2=okrs.find(function(x){return x.id==='${i.oid}';});if(o2)delete o2.nudgeReply;saveOKRs(okrs);switchTab('okr');setTimeout(()=>{const c=document.querySelector('.okr-card[data-id=\\'${i.oid}\\']');if(c){c.classList.add('open');c.scrollIntoView({behavior:'smooth'})}},300)`;}else if(i.type==='checkin'){click=`event.stopPropagation();switchTab('workspace');setTimeout(()=>{document.getElementById('wsCheckinSection').scrollIntoView({behavior:'smooth'})},200)`;}else{click=`event.stopPropagation();switchTab('okr');setTimeout(()=>{const c=document.querySelector('.okr-card[data-id=\\'${i.oid}\\']');if(c){c.classList.add('open');c.scrollIntoView({behavior:'smooth'})}},300)`;}let subStyle=(i.type==='deadline'||i.type==='overdue'||i.type==='approval'||i.type==='nudge'||i.type==='nudgeReply'||i.type==='rptNudge')?' style="color:var(--danger)"':'';return `<div class="nd-item" onclick="${click};document.getElementById('notifyDrop').classList.remove('show');decBellBadge()"><span class="nd-icon">${i.icon}</span><div class="nd-text"><div class="nd-title">${i.title}</div><div class="nd-sub"${subStyle}>${i.sub}</div></div><div class="nd-meta">${i.meta}</div></div>`;}).join('');
+    html+=items.map(i=>{let click;if(i.type==='task'){click=`event.stopPropagation();switchTab('meeting');setTimeout(()=>document.querySelector('.meeting-card[data-id=\\'${i.mid}\\']')?.scrollIntoView({behavior:'smooth'}),200)`;}else if(i.type==='rptDue'||i.type==='rptNudge'){click=`event.stopPropagation();switchTab('report');setTimeout(()=>{const el2=document.querySelector('.report-card[data-id=\\'${i.rid}\\']')||document.querySelector('.report-card[data-group]');if(el2){el2.classList.add('open');el2.scrollIntoView({behavior:'smooth'})}},200)`;}else if(i.type==='approval'){click=`event.stopPropagation();saveFilters('okr',Object.assign(loadFilters('okr'),{approval:'draft',status:'all'}));switchTab('okr');setTimeout(()=>{const c=document.querySelector('.okr-card[data-id=\\'${i.oid}\\']');if(c){c.classList.add('open');c.scrollIntoView({behavior:'smooth'})}},300)`;}else if(i.type==='nudgeReply'){click=`event.stopPropagation();var o2=okrs.find(function(x){return x.id==='${i.oid}';});if(o2)delete o2.nudgeReply;saveOKRs(okrs);switchTab('okr');setTimeout(()=>{const c=document.querySelector('.okr-card[data-id=\\'${i.oid}\\']');if(c){c.classList.add('open');c.scrollIntoView({behavior:'smooth'})}},300)`;}else if(i.type==='checkin'){click=`event.stopPropagation();switchTab('workspace');setTimeout(()=>{document.getElementById('wsCheckinSection').scrollIntoView({behavior:'smooth'})},200)`;}else if(i.type==='fbFeedback'){click=`event.stopPropagation();goToFbNotif('${i.nid}','${i.tid}')`;}else{click=`event.stopPropagation();switchTab('okr');setTimeout(()=>{const c=document.querySelector('.okr-card[data-id=\\'${i.oid}\\']');if(c){c.classList.add('open');c.scrollIntoView({behavior:'smooth'})}},300)`;}let subStyle=(i.type==='deadline'||i.type==='overdue'||i.type==='approval'||i.type==='nudge'||i.type==='nudgeReply'||i.type==='rptNudge')?' style="color:var(--danger)"':'';return `<div class="nd-item" onclick="${click};document.getElementById('notifyDrop').classList.remove('show');decBellBadge()"><span class="nd-icon">${i.icon}</span><div class="nd-text"><div class="nd-title">${i.title}</div><div class="nd-sub"${subStyle}>${i.sub}</div></div><div class="nd-meta">${i.meta}</div></div>`;}).join('');
   }
   if(items.length||hasDingLog)html+='<div class="nd-footer" onclick="event.stopPropagation();switchTab(\'workspace\');document.getElementById(\'notifyDrop\').classList.remove(\'show\')">在工作台查看全部 →</div>';
   el.innerHTML=html;
 }
 
+function markFbNotifSeen(nid){
+  if(!tnData || !tnData.notifications) return;
+  for(var i=0;i<tnData.notifications.length;i++){
+    if(tnData.notifications[i].id === nid){ tnData.notifications[i].seen = true; break; }
+  }
+  saveTnData();
+}
+function goToFbNotif(nid, taskId){
+  markFbNotifSeen(nid);
+  switchTab('kpi');
+  document.getElementById('notifyDrop').classList.remove('show');
+  decBellBadge();
+  setTimeout(function(){
+    var tt = document.querySelector('.tn-task[data-id="'+taskId+'"]');
+    if(tt){
+      tt.scrollIntoView({behavior:'smooth'});
+      var fb = tt.querySelector('.tn-inline-fb');
+      if(fb) fb.classList.add('expanded');
+    }
+  }, 300);
+}
 function decBellBadge(){
   const b=document.getElementById('bellBadge');
   const v=parseInt(b.textContent)||0;
@@ -8756,6 +8797,7 @@ function renderWorkspace(){
     document.getElementById('wsCheckinList').innerHTML='';
     document.getElementById('wsPushList').innerHTML='<div class="ws-empty"><div class="icon">📋</div><p>请先登录</p><p style="font-size:9px">点击右上角或任意功能进入登录页面</p></div>';
     document.getElementById('wsReportList').innerHTML='';
+    document.getElementById('wsFbNotifList').innerHTML='';
     document.getElementById('wsDingLogList').innerHTML='';
     document.getElementById('wsOkrList').innerHTML='';
     document.getElementById('wsKpiList').innerHTML='';
@@ -8765,6 +8807,7 @@ function renderWorkspace(){
     document.getElementById('wsCheckinCount').textContent='0项';
     document.getElementById('wsPushCount').textContent='0项';
     document.getElementById('wsReportCount').textContent='0项';
+    document.getElementById('wsFbNotifCount').textContent='0条';
     document.getElementById('wsDingLogCount').textContent='0条';
     document.getElementById('wsOkrCount').textContent='0项';
     document.getElementById('wsKpiCount').textContent='0项';
@@ -9003,6 +9046,28 @@ function renderWorkspace(){
         <span class="ws-todo-text"><span class="t">${esc(r.text)}</span><span class="sub">${esc(r.meta)}</span></span>
         <span class="ws-todo-tag report">报表</span>
       </div>`;
+    }).join('');
+  }
+
+  // ====== Render 任务反馈通知 ======
+  var fbNotifs = [];
+  if(tnData && tnData.notifications){
+    fbNotifs = tnData.notifications.filter(function(n){ return n.forUser === cu && n.type === 'feedback'; }).reverse();
+  }
+  const fbnEl=document.getElementById('wsFbNotifList');
+  const fbnCnt=document.getElementById('wsFbNotifCount');
+  fbnCnt.textContent=fbNotifs.length+'条';
+  if(!fbNotifs.length){
+    fbnEl.innerHTML='<div class="ws-empty"><p>暂无任务反馈</p></div>';
+  }else{
+    fbnEl.innerHTML=fbNotifs.slice(0,15).map(function(n){
+      var typeLabel = n.feedbackType==='positive'?'表扬':n.feedbackType==='negative'?'需改进':'建议';
+      var seenCls = n.seen ? '' : ' unread';
+      return '<div class="ws-todo-item'+seenCls+'" onclick="goToFbNotif(\''+n.id+'\',\''+n.taskId+'\')">'+
+        '<span class="ws-todo-dot'+(n.seen?'':' u')+'"></span>'+
+        '<span class="ws-todo-text"><span class="t">'+n.feedbackBy+' ['+typeLabel+']</span><span class="sub">'+esc(n.content)+'</span></span>'+
+        '<span class="ws-todo-tag feedback">反馈</span>'+
+      '</div>';
     }).join('');
   }
 
@@ -9856,6 +9921,7 @@ function loadTnData(){
         saveTnData();
       }
       if(!tnData.meetings) tnData.meetings = [];
+      if(!tnData.notifications) tnData.notifications = [];
       if(!tnData._version) tnData._version = 2;
       // Migration: add desc/parentId to existing tasks
       if(tnData.wtasks){ tnData.wtasks.forEach(function(w){ if(w.desc===undefined) w.desc=''; if(w.parentId===undefined) w.parentId=''; }); }
@@ -9864,7 +9930,7 @@ function loadTnData(){
       return;
     }
   }catch(e){}
-  tnData = {tasks:{}, reports:{}, feedback:[], wtasks:[], meetings:[], refTasks:(typeof TN_REF_TASKS!=='undefined'?JSON.parse(JSON.stringify(TN_REF_TASKS)):[]), _version:2};
+  tnData = {tasks:{}, reports:{}, feedback:[], wtasks:[], meetings:[], notifications:[], refTasks:(typeof TN_REF_TASKS!=='undefined'?JSON.parse(JSON.stringify(TN_REF_TASKS)):[]), _version:2};
 }
 
 function saveTnData(){
@@ -10680,23 +10746,72 @@ function renderInlineFeedback(taskId){
   return html;
 }
 
+// Get task-related persons (R/A) for notification
+function getTaskPersons(taskId){
+  var persons = [];
+  // Check plan tasks
+  for(var i=0;i<TN_TASKS.length;i++){
+    var t = TN_TASKS[i];
+    if(t.id === taskId){
+      if(t.R) persons.push(t.R);
+      if(t.A && t.A !== t.R) persons.push(t.A);
+      return persons;
+    }
+  }
+  // Check weekly tasks
+  if(tnData && tnData.wtasks){
+    for(var i=0;i<tnData.wtasks.length;i++){
+      var w = tnData.wtasks[i];
+      if(w.id === taskId && w.person){ persons.push(w.person); return persons; }
+    }
+  }
+  // Check ref tasks
+  var refs = tnData && tnData.refTasks ? tnData.refTasks : (typeof TN_REF_TASKS!=='undefined'?TN_REF_TASKS:[]);
+  for(var i=0;i<refs.length;i++){
+    var r = refs[i];
+    if(r.id === taskId && r.executors){ persons = r.executors.slice(); return persons; }
+  }
+  return persons;
+}
+
 function saveInlineFeedback(taskId){
   var content = document.getElementById('tnFbContent_'+taskId).value;
   var type = document.getElementById('tnFbType_'+taskId).value;
   if(!content.trim()) return;
   if(!tnData) loadTnData();
   if(!tnData.feedback) tnData.feedback = [];
+  var fbId = 'fb_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
   tnData.feedback.push({
-    id: 'fb_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),
+    id: fbId,
     taskId: taskId,
     content: content,
     type: type,
     by: currentUser || '王妤扬',
     date: new Date().toISOString()
   });
+  // Create notifications for task R/A (exclude feedback giver)
+  var giver = currentUser || '王妤扬';
+  var persons = getTaskPersons(taskId);
+  if(!tnData.notifications) tnData.notifications = [];
+  persons.forEach(function(p){
+    if(p === giver) return;
+    tnData.notifications.push({
+      id: 'nf_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),
+      type: 'feedback',
+      taskId: taskId,
+      feedbackId: fbId,
+      feedbackBy: giver,
+      feedbackType: type,
+      content: content.length > 40 ? content.slice(0,40)+'...' : content,
+      forUser: p,
+      date: new Date().toISOString(),
+      seen: false
+    });
+  });
   saveTnData();
   renderTraineeTasks();
   renderTraineeSummary();
+  updateBellBadge();
 }
 
 function editInlineFeedback(taskId, fbId){
