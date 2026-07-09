@@ -418,7 +418,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-gantt-timeline { flex:1; display:flex; min-width:0; position:relative; height:34px; }
 .tn-gantt-timeline .tn-gw-cell { flex:1; min-width:44px; border-right:1px solid var(--border-subtle); position:relative; height:100%; }
 .tn-gantt-timeline .tn-gw-cell.current { background:rgba(201,79,102,0.03); }
-.tn-gantt-bar { position:absolute; top:8px; height:18px; border-radius:4px; min-width:6px; cursor:pointer; transition:opacity .15s,filter .15s; z-index:2; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.tn-gantt-bar { position:absolute; top:8px; height:18px; border-radius:4px; min-width:6px; cursor:pointer; transition:opacity .15s,filter .15s; z-index:2; display:flex; align-items:center; justify-content:center; overflow:visible; }
+.tn-gantt-bar:hover { z-index:25; }
 .tn-gantt-bar:hover { filter:brightness(0.85); box-shadow:0 1px 4px rgba(0,0,0,0.15); }
 .tn-gantt-bar.pending { opacity:0.45; }
 .tn-gantt-bar.active { opacity:0.75; }
@@ -428,7 +429,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-gantt-bar.tn-prio-p0 { opacity:0.9; }
 .tn-gantt-bar.tn-prio-p1 { opacity:0.85; }
 .tn-gantt-bar.tn-prio-p2 { opacity:0.8; }
-.tn-gantt-bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:3px 0 0 3px;background:rgba(255,255,255,0.3);pointer-events:none;z-index:0}
+.tn-gantt-bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:3px 0 0 3px;background:rgba(255,255,255,0.3);pointer-events:none;z-index:0;overflow:hidden}
+.tn-gantt-bar-tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(20,20,32,0.94);color:#eee;font-size:9px;padding:5px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;z-index:30;opacity:0;transition:opacity .12s;line-height:1.45;box-shadow:0 2px 12px rgba(0,0,0,0.25);max-width:220px;text-align:center}
+.tn-gantt-bar-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:rgba(20,20,32,0.94)}
+.tn-gantt-bar:hover .tn-gantt-bar-tooltip{opacity:1}
+.tn-gantt-bar-tooltip .tt-name{font-weight:600;font-size:10px;color:#fff;margin-bottom:1px}
+.tn-gantt-bar-tooltip .tt-meta{color:#aaa;font-size:8px}
 .tn-gantt-today-line { position:absolute; top:0; bottom:0; width:2px; background:var(--accent); opacity:0.6; z-index:10; pointer-events:none; }
 .tn-gantt-empty { padding:40px; text-align:center; font-size:11px; color:var(--text-muted); }
 
@@ -1852,6 +1858,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
         <select id="tnPersonFilter" onchange="renderTraineeTasks()"><option value="all">全部执行者</option></select>
         <select id="tnParentFilter" onchange="renderTraineeTasks()"><option value="all">全部层级</option><option value="parent">仅父任务</option><option value="child">仅子任务</option><option value="independent">仅独立任务</option></select>
         <select id="tnPriorityFilter" onchange="renderTraineeTasks()"><option value="all">全部优先级</option><option value="P0">P0·紧急</option><option value="P1">P1·重要</option><option value="P2">P2·普通</option></select>
+        <select id="tnSortBy" onchange="saveTnFilterState();renderTraineeTasks()"><option value="default">默认排序</option><option value="priority-desc">优先级高→低</option><option value="priority-asc">优先级低→高</option><option value="name-asc">名称A→Z</option><option value="name-desc">名称Z→A</option></select>
         <span style="margin-left:auto;font-size:10px;color:var(--text-dim)" id="tnTaskCount"></span>
         <button class="btn btn-primary btn-sm" onclick="openWeeklyTaskModal()" style="font-size:9px;padding:6px 14px;border-radius:8px;margin-left:8px">+ 新增任务</button>
       </div>
@@ -10563,6 +10570,7 @@ function saveTnFilterState(){
   var sp = document.getElementById('tnPersonFilter'); if(sp) state.personFilter = sp.value;
   var sr = document.getElementById('tnParentFilter'); if(sr) state.parentFilter = sr.value;
   var sq = document.getElementById('tnPriorityFilter'); if(sq) state.priorityFilter = sq.value;
+  var so = document.getElementById('tnSortBy'); if(so) state.sortBy = so.value;
   try{localStorage.setItem('otms_tn_filter_state',JSON.stringify(state));}catch(e){}
 }
 function loadTnFilterState(){
@@ -10580,6 +10588,7 @@ function loadTnFilterState(){
       if(s.personFilter){ var sp=document.getElementById('tnPersonFilter'); if(sp) sp.value=s.personFilter; }
       if(s.parentFilter){ var sr=document.getElementById('tnParentFilter'); if(sr) sr.value=s.parentFilter; }
       if(s.priorityFilter){ var sq=document.getElementById('tnPriorityFilter'); if(sq) sq.value=s.priorityFilter; }
+      if(s.sortBy){ var so=document.getElementById('tnSortBy'); if(so) so.value=s.sortBy; }
       updateQuickFilters();
       if(tnViewMode==='gantt'){ document.getElementById('tnGanttDims').style.display='flex'; updateGanttDims(); }
       var vmBtns = document.querySelectorAll('.tn-view-mode button');
@@ -10725,6 +10734,19 @@ function renderTraineeTasks(){
   });
 
   document.getElementById('tnTaskCount').textContent = filtered.length + ' 项任务';
+
+  // Sort
+  var sortBy = (document.getElementById('tnSortBy')||{}).value || 'default';
+  if(sortBy !== 'default'){
+    var prioOrder = {P0:0, P1:1, P2:2};
+    filtered.sort(function(a,b){
+      if(sortBy === 'priority-desc') return (prioOrder[a.priority||'P2']||2) - (prioOrder[b.priority||'P2']||2);
+      if(sortBy === 'priority-asc')  return (prioOrder[b.priority||'P2']||2) - (prioOrder[a.priority||'P2']||2);
+      if(sortBy === 'name-asc')  return (a.name||'').localeCompare(b.name||'','zh');
+      if(sortBy === 'name-desc') return (b.name||'').localeCompare(a.name||'','zh');
+      return 0;
+    });
+  }
 
   var groups = {};
   var sysOrder = ['yyda','rssw','cwzw','itpm'];
@@ -11119,7 +11141,7 @@ function renderTraineeGantt(filtered, curWkIdx){
       for(var c=0;c<weekCount;c++){
         html += '<div class="tn-gw-cell'+(c===curWkIdx?' current':'')+'"></div>';
       }
-      html += renderGanttBar(wks, st, sysColor, weekCount, prio, curWkIdx);
+      html += renderGanttBar(wks, st, sysColor, weekCount, prio, curWkIdx, t.name, personLabel, srcTagLabel);
       html += '<div class="tn-gantt-today-line" style="left:'+(curWkIdx/weekCount*100)+'%"></div>';
       html += '</div>';
       html += '</div>';
@@ -11202,7 +11224,8 @@ function buildGanttOrderedTasks(tasks, childIds){
   return ordered;
 }
 
-function renderGanttBar(wks, st, sysColor, weekCount, prio, curWkIdx){
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function renderGanttBar(wks, st, sysColor, weekCount, prio, curWkIdx, taskName, person, srcTag){
   if(!wks) return '';
   var segments = [], inSeg=false, segStart=-1;
   for(var i=0;i<weekCount;i++){
@@ -11236,9 +11259,14 @@ function renderGanttBar(wks, st, sysColor, weekCount, prio, curWkIdx){
     var segDoneWeeks = 0, segTotal = seg[1]-seg[0]+1;
     for(var wi = seg[0]; wi <= seg[1]; wi++){ if(wi <= (curWkIdx||0)) segDoneWeeks++; }
     var fillPct = segTotal > 0 ? (segDoneWeeks/segTotal)*100 : 0;
-    html += '<div class="tn-gantt-bar '+st+' '+prioCls+'" style="left:'+leftPct+'%;width:'+widthPct+'%;background:'+barColor+'" title="W'+(seg[0]+1)+'-W'+(seg[1]+1)+' | '+prio+' | '+label+'">';
+    var ttTitle = taskName||'';
+    var ttPerson = person||'';
+    var ttWeeks = 'W'+(seg[0]+1)+' ~ W'+(seg[1]+1);
+    var ttTag = srcTag||'';
+    html += '<div class="tn-gantt-bar '+st+' '+prioCls+'" style="left:'+leftPct+'%;width:'+widthPct+'%;background:'+barColor+'" title="'+esc(ttTitle)+' | '+prio+' | '+label+'">';
     if(fillPct > 0) html += '<div class="tn-gantt-bar-fill" style="width:'+fillPct+'%"></div>';
     html += '<span class="tn-gantt-bar-label">'+label+'</span>';
+    if(ttTitle) html += '<div class="tn-gantt-bar-tooltip"><div class="tt-name">'+esc(ttTitle)+'</div><div class="tt-meta">'+esc(ttPerson)+(ttTag?' · '+ttTag:'')+' · '+ttWeeks+' · '+prio+' · '+label+'</div></div>';
     html += '</div>';
   });
   return html;
