@@ -2207,6 +2207,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
         <button class="eval-sub-tab" onclick="switchEvalView('history')">历史评估</button>
       </div>
       <div class="eval-header-actions" style="margin-left:auto">
+        <button onclick="openMentorAssignModal()" id="evalMentorBtn" style="display:none">带教分配</button>
         <button onclick="exportEvalData()">导出</button>
         <button onclick="importEvalData()">导入</button>
       </div>
@@ -2246,8 +2247,24 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
       <input class="eval-search" type="text" id="evalHistorySearch" placeholder="搜索管培生姓名或直属上级..." oninput="renderEvalHistory()">
       <div class="eval-history-table-wrap" id="evalHistoryTable"></div>
     </div>
-  </div>
 
+    <!-- Mentor assignment modal -->
+    <div class="tn-detail-overlay" id="mentorAssignModal" style="display:none" onclick="if(event.target===this)closeMentorAssignModal()">
+      <div class="tn-detail-modal" style="width:90vw;max-width:1100px;max-height:85vh;overflow:auto" onclick="event.stopPropagation()">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <h4 style="margin:0;font-size:14px">带教老师分配</h4>
+          <span style="font-size:9px;color:var(--text-dim)">按管培生 × 周次设置评估负责人</span>
+          <button style="margin-left:auto;border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-dim)" onclick="closeMentorAssignModal()">✕</button>
+        </div>
+        <div style="margin-bottom:12px;font-size:9px;color:var(--text-dim)">空白表示使用默认带教老师，选择后将覆盖默认值。</div>
+        <div style="overflow-x:auto" id="mentorMatrix"></div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-outline btn-sm" onclick="resetMentorAssign()" style="flex:1">重置为默认</button>
+          <button class="btn btn-outline btn-sm" onclick="closeMentorAssignModal()" style="flex:1">取消</button>
+          <button class="btn btn-primary btn-sm" onclick="saveMentorAssign()" style="flex:1">保存分配</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -9628,6 +9645,7 @@ var evalCurrentView = 'weekly';
 var evalCurrentWeek = 0;
 var evalSelectedTrainee = null;
 var evalData = null;
+var MENTOR_LIST = ['Jenny','Bella','王倩','Shaun','王妤扬','杜宪','张毅'];
 
 var EVAL_TRAINEES = [
   {id:'chendshuangjie',name:'陈双杰',role:'DS小队长',level:'第二层',supervisor:'Jenny',location:'香港(6.7到港)',color:'#7B8FC0',avatarBg:'#7B8FC0'},
@@ -9669,9 +9687,9 @@ function getEvalStorageKey(){ return 'otms_trainee_eval_v1'; }
 function loadEvalData(){
   try{
     var raw = localStorage.getItem(getEvalStorageKey());
-    if(raw){ evalData = JSON.parse(raw); return; }
+    if(raw){ evalData = JSON.parse(raw); if(!evalData.mentors) evalData.mentors = {}; return; }
   }catch(e){}
-  evalData = {scores:{}, extras:{}};
+  evalData = {scores:{}, extras:{}, mentors:{}};
 }
 
 function saveEvalData(){
@@ -9688,6 +9706,18 @@ function getEvalExtras(traineeId, weekId){
   if(!evalData) loadEvalData();
   var key = traineeId + '|' + weekId;
   return evalData.extras[key] || [];
+}
+
+function getWeekMentor(traineeName, weekId){
+  if(!evalData) loadEvalData();
+  if(evalData.mentors){
+    var key = traineeName + '|' + weekId;
+    if(evalData.mentors[key]) return evalData.mentors[key];
+  }
+  for(var i=0;i<EVAL_TRAINEES.length;i++){
+    if(EVAL_TRAINEES[i].name===traineeName) return EVAL_TRAINEES[i].supervisor;
+  }
+  return '';
 }
 
 function setEvalScore(traineeId, weekId, scores){
@@ -9723,6 +9753,9 @@ function initEvalSystem(){
   var cu = currentUser || '王妤扬';
   document.getElementById('evalAvatar').textContent = (cu||'评').charAt(0);
   document.getElementById('evalName').textContent = cu || '评分人';
+  // Show mentor assign button for admins only
+  var mentorBtn = document.getElementById('evalMentorBtn');
+  if(mentorBtn) mentorBtn.style.display = isGlobalAdmin(currentUser) ? '' : 'none';
   var now = new Date();
   var startDate = new Date(2026,5,1);
   var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
@@ -9816,11 +9849,12 @@ function renderEvalTraineeList(){
       }
     }
     var initials = t.name.charAt(0);
+    var currentMentor = getWeekMentor(t.name, EVAL_WEEKS[evalCurrentWeek].id);
     html += '<div class="eval-trainee-card'+(evalSelectedTrainee===t.name?' selected':'')+'" onclick="selectEvalTrainee(\''+t.name+'\')">'+
       '<div class="eval-trainee-avatar" style="background:'+t.avatarBg+'">'+initials+'</div>'+
       '<div class="eval-trainee-info">'+
         '<div class="eval-trainee-name">'+t.name+'</div>'+
-        '<div class="eval-trainee-meta">'+t.supervisor+'</div>'+
+        '<div class="eval-trainee-meta">'+currentMentor+'</div>'+
       '</div>'+
       '<div class="eval-trainee-score">'+
         (total !== null ? ('<div class="score-num">'+total+'</div>'+(change !== null && change !== 0 ? '<div class="score-change '+(change>0?'up':'down')+'">'+(change>0?'+':'')+change+'</div>' : '')+(extraTotal > 0 ? '<div style="font-size:8px;color:var(--accent);margin-top:2px">+'+extraTotal+'</div>' : '')) : '<div class="score-num" style="color:var(--text-muted);font-size:13px">—</div>')+
@@ -9840,9 +9874,10 @@ function renderEvalScorePanel(traineeId){
   var t = null;
   for(var i=0;i<EVAL_TRAINEES.length;i++){ if(EVAL_TRAINEES[i].name===traineeId){ t=EVAL_TRAINEES[i]; break; } }
   if(!t) return;
-  // Permission: only supervisor (by display name) or admin can edit scores
+  // Permission: only week mentor (by display name) or admin can edit scores
   var currentUserName = currentUser && users[currentUser] ? users[currentUser].name : '';
-  var canEdit = isGlobalAdmin(currentUser) || (currentUserName === t.supervisor);
+  var weekMentor = getWeekMentor(t.name, EVAL_WEEKS[evalCurrentWeek].id);
+  var canEdit = isGlobalAdmin(currentUser) || (currentUserName === weekMentor);
   var dis = canEdit ? '' : ' disabled';
   var readonly = canEdit ? '' : ' readonly';
   var weekId = EVAL_WEEKS[evalCurrentWeek].id;
@@ -9897,11 +9932,11 @@ function renderEvalScorePanel(traineeId){
 
   var saveBtn = canEdit ? '<button class="eval-btn-save" onclick="saveCurrentEval(\''+t.name+'\',\''+weekId+'\')">保存评分</button>' : '';
 
-  var readonlyBanner = !canEdit ? '<div style="text-align:center;padding:6px;background:#FDF6EC;border-radius:8px;margin-bottom:12px;font-size:9px;color:#9A7D3E">仅限直属上级（'+t.supervisor+'）或管理员编辑评分</div>' : '';
+  var readonlyBanner = !canEdit ? '<div style="text-align:center;padding:6px;background:#FDF6EC;border-radius:8px;margin-bottom:12px;font-size:9px;color:#9A7D3E">仅限该周带教老师（'+weekMentor+'）或管理员编辑评分</div>' : '';
   container.innerHTML =
     '<div class="eval-score-panel">'+
       '<div class="eval-score-panel-hd">'+
-        '<div><div class="name">'+t.name+'</div><div class="meta">'+t.supervisor+' · '+weekLabel+'</div></div>'+
+        '<div><div class="name">'+t.name+'</div><div class="meta">'+weekMentor+' · '+weekLabel+'</div></div>'+
         '<div style="text-align:right"><div style="font-size:8px;color:var(--text-muted)">综合得分</div><div style="font-size:10px;color:var(--text-muted)">通用满分 100 分（个性化分数仅作展示，不计入总分）</div></div>'+
       '</div>'+
       readonlyBanner +
@@ -9920,6 +9955,66 @@ function renderEvalScorePanel(traineeId){
 }
 
 // Auto-score task completion from task board data
+// Mentor assignment
+function openMentorAssignModal(){
+  if(!evalData) loadEvalData();
+  var html = '<table style="width:100%;border-collapse:collapse;font-size:10px">';
+  // Header row
+  html += '<thead><tr><th style="position:sticky;left:0;background:var(--bg-surface);z-index:2;text-align:left;padding:8px;min-width:80px;border-bottom:1px solid var(--border-light)">管培生</th>';
+  for(var w=0;w<EVAL_WEEKS.length;w++){
+    html += '<th style="padding:6px 4px;text-align:center;border-bottom:1px solid var(--border-light);font-size:8px;min-width:60px">'+EVAL_WEEKS[w].label+'<br><span style="font-weight:400;color:var(--text-dim)">'+EVAL_WEEKS[w].start+'</span></th>';
+  }
+  html += '</tr></thead><tbody>';
+  // Trainee rows
+  EVAL_TRAINEES.forEach(function(t){
+    html += '<tr><td style="position:sticky;left:0;background:var(--card);z-index:1;padding:8px;border-bottom:1px solid var(--border-light);font-weight:500;white-space:nowrap">'+t.name+'<br><span style="font-size:8px;color:var(--text-dim);font-weight:400">默认:'+t.supervisor+'</span></td>';
+    for(var w=0;w<EVAL_WEEKS.length;w++){
+      var key = t.name+'|'+EVAL_WEEKS[w].id;
+      var curVal = (evalData.mentors&&evalData.mentors[key])||'';
+      html += '<td style="padding:4px;border-bottom:1px solid var(--border-light);text-align:center">';
+      html += '<select id="mtr_'+t.id+'_'+EVAL_WEEKS[w].id+'" style="width:100%;padding:4px;border:1px solid var(--border-light);border-radius:4px;font-size:9px;font-family:inherit;background:var(--bg-surface);color:var(--text);outline:none;cursor:pointer">';
+      html += '<option value="">'+t.supervisor+'</option>';
+      MENTOR_LIST.forEach(function(m){
+        html += '<option value="'+m+'"'+(curVal===m?' selected':'')+'>'+m+'</option>';
+      });
+      html += '</select></td>';
+    }
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('mentorMatrix').innerHTML = html;
+  document.getElementById('mentorAssignModal').style.display = '';
+}
+function closeMentorAssignModal(){
+  document.getElementById('mentorAssignModal').style.display = 'none';
+}
+function saveMentorAssign(){
+  if(!evalData) loadEvalData();
+  if(!evalData.mentors) evalData.mentors = {};
+  EVAL_TRAINEES.forEach(function(t){
+    for(var w=0;w<EVAL_WEEKS.length;w++){
+      var sel = document.getElementById('mtr_'+t.id+'_'+EVAL_WEEKS[w].id);
+      if(!sel) continue;
+      var key = t.name+'|'+EVAL_WEEKS[w].id;
+      if(sel.value){
+        evalData.mentors[key] = sel.value;
+      } else {
+        delete evalData.mentors[key];
+      }
+    }
+  });
+  saveEvalData();
+  closeMentorAssignModal();
+  renderEvalTraineeList();
+  if(evalSelectedTrainee) renderEvalScorePanel(evalSelectedTrainee);
+}
+function resetMentorAssign(){
+  if(!evalData) loadEvalData();
+  evalData.mentors = {};
+  saveEvalData();
+  openMentorAssignModal();
+}
+
 function autoScoreTaskCompletion(traineeName, weekId){
   var s = getEvalScore(traineeName, weekId) || {};
   var comp = calcTaskCompletionForTrainee(traineeName, weekId);
