@@ -399,7 +399,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-gantt-row { display:flex; align-items:center; border-bottom:1px solid var(--border-light); transition:background .1s; position:relative; min-height:34px; }
 .tn-gantt-row:hover { background:var(--bg-row-hover, #F8F9FB); }
 .tn-gantt-row:last-child { border-bottom:none; }
-.tn-gantt-row.child { background:var(--bg-surface); }
+.tn-gantt-row.child { background:var(--bg-surface); position:relative; }
+.tn-gantt-row.child::before{content:'';position:absolute;left:6px;top:0;bottom:0;border-left:1.5px dashed var(--accent);opacity:0.3;pointer-events:none;z-index:1}
 .tn-gantt-name { width:250px; flex-shrink:0; padding:6px 12px; display:flex; align-items:center; gap:6px; font-size:10px; font-weight:500; color:var(--text); background:var(--card); border-right:2px solid var(--border-light); position:sticky; left:0; z-index:4; min-height:34px; cursor:pointer; }
 .tn-gantt-row:hover .tn-gantt-name { background:var(--bg-row-hover, #F8F9FB); }
 .tn-gantt-row.child .tn-gantt-name { background:var(--bg-surface); padding-left:22px; font-size:9px; }
@@ -427,6 +428,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-gantt-bar.tn-prio-p1 { opacity:0.9; }
 .tn-gantt-bar.tn-prio-p2 { opacity:0.85; }
 .tn-gantt-bar.tn-prio-p3 { opacity:0.8; }
+.tn-gantt-bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:3px 0 0 3px;background:rgba(255,255,255,0.3);pointer-events:none;z-index:0}
 .tn-gantt-today-line { position:absolute; top:0; bottom:0; width:2px; background:var(--accent); opacity:0.6; z-index:10; pointer-events:none; }
 .tn-gantt-empty { padding:40px; text-align:center; font-size:11px; color:var(--text-muted); }
 
@@ -1846,6 +1848,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
         <select id="tnWeekFilter" onchange="renderTraineeTasks()"><option value="all">全部周次</option><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option></select>
         <select id="tnPersonFilter" onchange="renderTraineeTasks()"><option value="all">全部执行者</option></select>
         <select id="tnParentFilter" onchange="renderTraineeTasks()"><option value="all">全部层级</option><option value="parent">仅父任务</option><option value="child">仅子任务</option><option value="independent">仅独立任务</option></select>
+        <select id="tnPriorityFilter" onchange="renderTraineeTasks()"><option value="all">全部优先级</option><option value="P0">P0·紧急</option><option value="P1">P1·重要</option><option value="P2">P2·普通</option></select>
         <span style="margin-left:auto;font-size:10px;color:var(--text-dim)" id="tnTaskCount"></span>
         <button class="btn btn-primary btn-sm" onclick="openWeeklyTaskModal()" style="font-size:9px;padding:6px 14px;border-radius:8px;margin-left:8px">+ 新增任务</button>
       </div>
@@ -10605,6 +10608,7 @@ function renderTraineeTasks(){
   var weekFilter = document.getElementById('tnWeekFilter').value;
   var personFilter = document.getElementById('tnPersonFilter').value;
   var parentFilter = document.getElementById('tnParentFilter') ? document.getElementById('tnParentFilter').value : 'all';
+  var priorityFilter = document.getElementById('tnPriorityFilter') ? document.getElementById('tnPriorityFilter').value : 'all';
   var weekIdx = weekFilter !== 'all' ? parseInt(weekFilter.slice(1)) - 1 : -1;
   
   // Apply quick filter
@@ -10634,6 +10638,7 @@ function renderTraineeTasks(){
       var tParentId = (td && td.parentId) ? td.parentId : '';
       if(parentFilter==='child' && !tParentId) return;
       if(parentFilter==='independent' && (tParentId || tChildren.length)) return;
+      if(priorityFilter!=='all'){ var tp=(td&&td.priority)?td.priority:t.priority; if(tp!==priorityFilter) return; }
       t._source = 'plan';
       filtered.push(t);
     });
@@ -10653,6 +10658,7 @@ function renderTraineeTasks(){
     if(parentFilter==='parent' && !wChildren.length) return;
     if(parentFilter==='child' && !w.parentId) return;
     if(parentFilter==='independent' && (w.parentId || wChildren.length)) return;
+    if(priorityFilter!=='all' && w.priority!==priorityFilter) return;
     w._source = 'weekly';
     filtered.push(w);
   });
@@ -10673,6 +10679,7 @@ function renderTraineeTasks(){
     if(parentFilter==='parent' && !rChildren.length) return;
     if(parentFilter==='child' && !r.parentId) return;
     if(parentFilter==='independent' && (r.parentId || rChildren.length)) return;
+    if(priorityFilter!=='all' && r.priority!==priorityFilter) return;
     r._source = 'ref';
     filtered.push(r);
   });
@@ -11048,7 +11055,8 @@ function renderTraineeGantt(filtered, curWkIdx){
       for(var c=0;c<weekCount;c++){
         html += '<div class="tn-gw-cell'+(c===curWkIdx?' current':'')+'"></div>';
       }
-      html += renderGanttBar(wks, st, sysColor, weekCount, prio);
+      html += renderGanttBar(wks, st, sysColor, weekCount, prio, curWkIdx);
+      html += '<div class="tn-gantt-today-line" style="left:'+(curWkIdx/weekCount*100)+'%"></div>';
       html += '</div>';
       html += '</div>';
     });
@@ -11130,7 +11138,7 @@ function buildGanttOrderedTasks(tasks, childIds){
   return ordered;
 }
 
-function renderGanttBar(wks, st, sysColor, weekCount, prio){
+function renderGanttBar(wks, st, sysColor, weekCount, prio, curWkIdx){
   if(!wks) return '';
   var segments = [], inSeg=false, segStart=-1;
   for(var i=0;i<weekCount;i++){
@@ -11160,7 +11168,12 @@ function renderGanttBar(wks, st, sysColor, weekCount, prio){
   segments.forEach(function(seg){
     var leftPct = (seg[0]/weekCount)*100;
     var widthPct = ((seg[1]-seg[0]+1)/weekCount)*100;
+    // Progress fill: weeks passed / total weeks in this segment
+    var segDoneWeeks = 0, segTotal = seg[1]-seg[0]+1;
+    for(var wi = seg[0]; wi <= seg[1]; wi++){ if(wi <= (curWkIdx||0)) segDoneWeeks++; }
+    var fillPct = segTotal > 0 ? (segDoneWeeks/segTotal)*100 : 0;
     html += '<div class="tn-gantt-bar '+st+' '+prioCls+'" style="left:'+leftPct+'%;width:'+widthPct+'%;background:'+barColor+'" title="W'+(seg[0]+1)+'-W'+(seg[1]+1)+' | '+prio+' | '+label+'">';
+    if(fillPct > 0) html += '<div class="tn-gantt-bar-fill" style="width:'+fillPct+'%"></div>';
     html += '<span class="tn-gantt-bar-label">'+label+'</span>';
     html += '</div>';
   });
