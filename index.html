@@ -520,6 +520,26 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .perm-tab { padding:8px 18px; border:none; background:none; font-size:11px; cursor:pointer; color:var(--text2); border-bottom:2px solid transparent; margin-bottom:-2px; transition:all .2s; font-family:inherit; }
 .perm-tab:hover { color:var(--text); }
 .perm-tab.active { color:var(--accent); border-bottom-color:var(--accent); font-weight:500; }
+.perm-module-header { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg-surface); border-bottom:1px solid var(--border-subtle); cursor:pointer; user-select:none; border-radius:8px 8px 0 0; }
+.perm-module-header:hover { background:var(--bg-surface-hover); }
+.perm-module-header .perm-expand-arrow { font-size:9px; color:var(--text-muted); transition:transform .2s; flex-shrink:0; }
+.perm-module-header.expanded .perm-expand-arrow { transform:rotate(90deg); }
+.perm-subtab-body { display:none; }
+.perm-module-header.expanded + .perm-subtab-body { display:block; }
+.perm-subtab-row { padding:7px 14px 7px 28px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border-subtle); font-size:10px; background:var(--bg-base); }
+.perm-subtab-row:last-child { border-bottom:none; }
+.perm-subtab-label { color:var(--text-dim); flex-shrink:0; width:80px; font-size:10px; }
+.perm-subtab-select { padding:3px 6px; font-size:9px; border:1px solid var(--border-light); border-radius:4px; background:var(--card); cursor:pointer; font-family:inherit; width:100%; max-width:100px; }
+.perm-subtab-state-tag { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:10px; font-size:9px; white-space:nowrap; }
+.perm-subtab-state-tag.hidden { background:#FDEDEF; color:#992F48; }
+.perm-subtab-state-tag.visible { background:#EAF0EE; color:#5A7868; }
+.perm-subtab-state-tag.inherit { background:var(--bg-surface); color:var(--text-muted); }
+.perm-user-subtabs { display:none; }
+.perm-user-row.expanded + .perm-user-subtabs { display:table-row; }
+.perm-user-row { cursor:pointer; }
+.perm-user-row:hover { background:var(--bg-surface-hover); }
+.perm-user-subtabs td { padding:6px 12px; background:var(--bg-base); }
+.perm-user-subtab-grid { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .kr-form-item { background:var(--bg-base); border-radius:var(--radius-sm); padding:12px; margin-bottom:10px; position:relative; }
 .add-kr-btn { font-size:11px; color:var(--accent); cursor:pointer; border:none; background:none; margin-top:4px; }
@@ -2546,11 +2566,16 @@ const fileStore = (()=>{
 const MODULES = ['org','okr','kpi','report','meeting'];
 const MOD_LABELS = {org:'组织管理',okr:'OKR目标',kpi:'KPI指标',report:'报表提交',meeting:'例会管理'};
 const PERM_MODULES = ['okr','kpi','report','meeting']; // modules requiring explicit permission grants
-function loadPerms(){try{var p=JSON.parse(localStorage.okr_permissions);if(!p||typeof p!=='object')p={};PERM_MODULES.forEach(function(m){if(!p[m])p[m]={view:[],edit:[]};if(!p[m].view)p[m].view=[];if(!p[m].edit)p[m].edit=[];});return p;}catch(e){var p2={};PERM_MODULES.forEach(function(m){p2[m]={view:[],edit:[]};});return p2;}}
+const SUBTABS = {org:['tree','edit','func','attend'],okr:['cards','gantt','tree'],kpi:['indicators','traineeMgmt'],report:['monthly','yearly'],vision:['strategy','trainee','backend']};
+const SUBTAB_LABELS = {org_tree:'树状架构图',org_edit:'员工花名册',org_func:'职能分工',org_attend:'在岗状态',okr_cards:'总览',okr_gantt:'甘特图',okr_tree:'树形图',kpi_indicators:'KPI 指标',kpi_traineeMgmt:'管培生管理',report_monthly:'月度报表',report_yearly:'年度报表',vision_strategy:'战略总览',vision_trainee:'管培生计划',vision_backend:'大后台系统'};
+function loadPerms(){try{var p=JSON.parse(localStorage.okr_permissions);if(!p||typeof p!=='object')p={};PERM_MODULES.forEach(function(m){if(!p[m])p[m]={view:[],edit:[]};if(!p[m].view)p[m].view=[];if(!p[m].edit)p[m].edit=[];});if(!p.subtabs||typeof p.subtabs!=='object')p.subtabs={};Object.keys(SUBTABS).forEach(function(mod){SUBTABS[mod].forEach(function(st){var key=mod+'_'+st;if(!p.subtabs[key])p.subtabs[key]={hidden:[],visible:[]};if(!p.subtabs[key].hidden)p.subtabs[key].hidden=[];if(!p.subtabs[key].visible)p.subtabs[key].visible=[];});});return p;}catch(e){var p2={};PERM_MODULES.forEach(function(m){p2[m]={view:[],edit:[]};});p2.subtabs={};Object.keys(SUBTABS).forEach(function(mod){SUBTABS[mod].forEach(function(st){p2.subtabs[mod+'_'+st]={hidden:[],visible:[]};});});return p2;}}
 function savePerms(p){try{localStorage.okr_permissions=JSON.stringify(p);}catch(e){}}
 function isGlobalAdmin(user){var u=users[user];return u&&u.role==='admin';}
 function canEditModule(user,mod){if(!user||!mod)return false;if(isGlobalAdmin(user))return true;if(mod==='org')return false;var p=loadPerms();return p[mod]&&p[mod].edit&&p[mod].edit.includes(user);}
 function canViewModule(user,mod){if(!user||!mod)return false;if(canEditModule(user,mod))return true;if(mod==='org')return !!user;var p=loadPerms();return p[mod]&&p[mod].view&&p[mod].view.includes(user);}
+function canViewSubTab(user,mod,st){if(!user||!mod||!st)return false;if(isGlobalAdmin(user))return true;var key=mod+'_'+st;var p=loadPerms();var stp=p.subtabs&&p.subtabs[key];if(stp&&stp.visible&&stp.visible.includes(user))return true;if(stp&&stp.hidden&&stp.hidden.includes(user))return false;if(mod==='org'||mod==='vision')return !!user;return canViewModule(user,mod);}
+function setSubTabPerm(user,mod,st,state){var p=loadPerms();var key=mod+'_'+st;if(!p.subtabs)p.subtabs={};if(!p.subtabs[key])p.subtabs[key]={hidden:[],visible:[]};p.subtabs[key].hidden=p.subtabs[key].hidden.filter(function(x){return x!==user;});
+p.subtabs[key].visible=p.subtabs[key].visible.filter(function(x){return x!==user;});if(state==='visible')p.subtabs[key].visible.push(user);else if(state==='hidden')p.subtabs[key].hidden.push(user);savePerms(p);}
 function getRankOrder(uid){var u=users[uid];if(!u)return 0;try{var emps=JSON.parse(localStorage.okr_employees)||[];var emp=emps.find(function(e){return e.name===u.name;});if(emp&&emp.rank){var m={VII:7,VI:6,V:5,IV:4,III:3,II:2,I:1};return m[emp.rank]||0;}}catch(e){}return 0;}
 function getUsername(u){if(!u)return null;if(typeof u==='string')return u;for(var k in users){if(users[k]===u)return k;}return null;}
 function getRoleLabel(u){if(!u)return'普通用户';var un=getUsername(u);if(un&&isGlobalAdmin(un))return'全站管理员';var p=loadPerms();var hasAny=false;PERM_MODULES.forEach(function(m){if((p[m].edit||[]).includes(un)||(p[m].view||[]).includes(un))hasAny=true;});return hasAny?'授权用户':'普通用户';}
@@ -2777,7 +2802,7 @@ function buildUserPermView(perm){
   var allUsers=Object.keys(users).filter(function(k){return users[k].role!=='admin';});
   allUsers.sort(function(a,b){return getRankOrder(b)-getRankOrder(a)||(users[a].name||a).localeCompare(users[b].name||b,'zh');});
   if(!allUsers.length) return '<div style="text-align:center;padding:30px;color:var(--text2)">暂无普通用户</div>';
-  var h='<div style="font-size:9px;color:var(--text2);margin-bottom:8px">组织管理：所有人默认可查看（无需配置）</div>';
+  var h='<div style="font-size:9px;color:var(--text2);margin-bottom:8px">组织管理：所有人默认可查看 · 点击用户行展开子标签权限</div>';
   h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:var(--bg-base)">';
   h+='<th style="padding:10px 12px;text-align:left;font-weight:500;white-space:nowrap;border-bottom:1px solid var(--border-subtle)">用户</th>';
   PERM_MODULES.forEach(function(m){
@@ -2786,17 +2811,31 @@ function buildUserPermView(perm){
   h+='</tr></thead><tbody>';
   allUsers.forEach(function(uid){
     var u=users[uid];
-    h+='<tr style="border-bottom:1px solid var(--border-subtle)">';
-    h+='<td style="padding:8px 12px;white-space:nowrap"><span style="font-weight:500">'+esc(u.name)+'</span><span style="color:var(--text2);font-size:9px;margin-left:4px">@'+esc(uid)+'</span></td>';
+    h+='<tr class="perm-user-row" onclick="var arrow=this.querySelector(\'.perm-expand-arrow\');if(arrow){arrow.style.transform=this.classList.contains(\'expanded\')?\'rotate(0deg)\':\'rotate(90deg)\';}" style="border-bottom:1px solid var(--border-subtle)">';
+    h+='<td style="padding:8px 12px;white-space:nowrap"><span class="perm-expand-arrow" style="font-size:9px;margin-right:5px;color:var(--text-muted);display:inline-block;transition:transform .2s">▶</span><span style="font-weight:500">'+esc(u.name)+'</span><span style="color:var(--text2);font-size:9px;margin-left:4px">@'+esc(uid)+'</span></td>';
     PERM_MODULES.forEach(function(m){
       var level=perm[m].edit.includes(uid)?'edit':perm[m].view.includes(uid)?'view':'none';
-      h+='<td style="padding:6px 4px;text-align:center"><select onchange="setUserPerm(\''+esc(uid)+'\',\''+m+'\',this.value)" style="width:100%;padding:4px 6px;font-size:10px;border:1px solid var(--border-light);border-radius:4px;background:var(--card);cursor:pointer">';
+      h+='<td style="padding:6px 4px;text-align:center" onclick="event.stopPropagation()"><select onchange="setUserPerm(\''+esc(uid)+'\',\''+m+'\',this.value)" style="width:100%;padding:4px 6px;font-size:10px;border:1px solid var(--border-light);border-radius:4px;background:var(--card);cursor:pointer">';
       h+='<option value="none"'+(level==='none'?' selected':'')+'>无</option>';
       h+='<option value="view"'+(level==='view'?' selected':'')+'>查看</option>';
       h+='<option value="edit"'+(level==='edit'?' selected':'')+'>编辑</option>';
       h+='</select></td>';
     });
     h+='</tr>';
+    h+='<tr class="perm-user-subtabs"><td colspan="'+(PERM_MODULES.length+1)+'"><div class="perm-user-subtab-grid">';
+    Object.keys(SUBTABS).forEach(function(mod){
+      h+='<span style="font-size:8px;color:var(--text-muted);margin-right:2px;white-space:nowrap">'+MOD_LABELS[mod]+':</span>';
+      SUBTABS[mod].forEach(function(st){
+        var key=mod+'_'+st;
+        var stp=perm.subtabs&&perm.subtabs[key];
+        var state='inherit';
+        if(stp&&stp.hidden&&stp.hidden.includes(uid))state='hidden';
+        else if(stp&&stp.visible&&stp.visible.includes(uid))state='visible';
+        var cls='perm-subtab-state-tag '+state;
+        h+='<span class="'+cls+'">'+SUBTAB_LABELS[key]+' <select onchange="event.stopPropagation();setSubTabPerm(\''+esc(uid)+'\',\''+mod+'\',\''+st+'\',this.value);var tag=this.parentElement;tag.className=\'perm-subtab-state-tag \'+this.value" style="font-size:7px;padding:0 2px;border:none;background:transparent;cursor:pointer;color:inherit"><option value="inherit"'+(state==='inherit'?' selected':'')+'>继承</option><option value="visible"'+(state==='visible'?' selected':'')+'>可见</option><option value="hidden"'+(state==='hidden'?' selected':'')+'>不可见</option></select></span>';
+      });
+    });
+    h+='</div></td></tr>';
   });
   h+='</tbody></table></div>';
   h+='<div style="margin-top:10px"><button class="btn btn-sm btn-primary" onclick="openAdminSettings()">刷新视图</button></div>';
@@ -2811,14 +2850,42 @@ function setUserPerm(uid,mod,level){
   savePerms(p);
 }
 function buildModulePermView(perm){
-  var h='<div style="font-size:9px;color:var(--text2);margin-bottom:10px">组织管理：所有人默认可查看（无需配置）</div>';
+  var h='<div style="font-size:9px;color:var(--text2);margin-bottom:10px">组织管理：所有人默认可查看 · 点击模块标题展开子标签设置</div>';
   PERM_MODULES.forEach(function(m){
     var edits=(perm[m]&&perm[m].edit)||[];
     var views=(perm[m]&&perm[m].view)||[];
     h+='<div style="border:1px solid var(--border-subtle);border-radius:8px;margin-bottom:10px;overflow:hidden">';
-    h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-base);border-bottom:1px solid var(--border-subtle)">';
+    h+='<div class="perm-module-header" onclick="this.classList.toggle(\'expanded\')">';
     h+='<span style="font-weight:500;font-size:12px">'+MOD_LABELS[m]+'</span>';
-    h+='<span style="font-size:9px;color:var(--text2)">编辑 '+edits.length+'人 · 查看 '+views.length+'人</span></div>';
+    h+='<span style="display:flex;align-items:center;gap:8px"><span style="font-size:9px;color:var(--text2)">编辑 '+edits.length+'人 · 查看 '+views.length+'人</span><span class="perm-expand-arrow">▶</span></span></div>';
+    h+='<div class="perm-subtab-body">';
+    if(SUBTABS[m]){
+      SUBTABS[m].forEach(function(st){
+        var key=m+'_'+st;
+        var stp=perm.subtabs&&perm.subtabs[key];
+        h+='<div class="perm-subtab-row"><span class="perm-subtab-label">'+SUBTAB_LABELS[key]+'</span><div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;align-items:center">';
+        var hasCfg=false;
+        if(stp){
+          var allUsers=Object.keys(users);
+          allUsers.forEach(function(uid){
+            if(stp.hidden&&stp.hidden.includes(uid)){
+              hasCfg=true;
+              var uname=users[uid]?users[uid].name:uid;
+              h+='<span class="perm-subtab-state-tag hidden" title="'+esc(uname)+'">'+esc(uname)+' · 不可见<span onclick="event.stopPropagation();setSubTabPerm(\''+esc(uid)+'\',\''+m+'\',\''+st+'\',\'inherit\');openAdminSettings()" style="cursor:pointer;margin-left:3px;font-weight:700">&times;</span></span>';
+            }
+            if(stp.visible&&stp.visible.includes(uid)){
+              hasCfg=true;
+              var uname2=users[uid]?users[uid].name:uid;
+              h+='<span class="perm-subtab-state-tag visible" title="'+esc(uname2)+'">'+esc(uname2)+' · 可见<span onclick="event.stopPropagation();setSubTabPerm(\''+esc(uid)+'\',\''+m+'\',\''+st+'\',\'inherit\');openAdminSettings()" style="cursor:pointer;margin-left:3px;font-weight:700">&times;</span></span>';
+            }
+          });
+        }
+        if(!hasCfg) h+='<span style="font-size:9px;color:var(--text-muted)">全部继承模块权限</span>';
+        h+='<button onclick="event.stopPropagation();showSubTabAdd(\''+m+'\',\''+st+'\')" style="border:1px dashed var(--border);background:none;border-radius:10px;padding:1px 8px;font-size:8px;color:var(--text-muted);cursor:pointer">+</button>';
+        h+='</div></div>';
+      });
+    }
+    h+='</div>';
     h+='<div style="padding:8px 14px;border-bottom:1px solid var(--border-subtle)"><div style="display:flex;align-items:flex-start;gap:10px">';
     h+='<span style="font-size:10px;font-weight:500;color:var(--text);min-width:36px;padding-top:4px">编辑</span>';
     h+='<div style="flex:1;min-width:0"><div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-height:26px" id="permTag_'+m+'_edit">';
@@ -2861,6 +2928,8 @@ function applyPreset(type){
       });
     });
   }
+  // Clear all sub-tab overrides
+  if(p.subtabs){Object.keys(p.subtabs).forEach(function(k){p.subtabs[k].hidden=[];p.subtabs[k].visible=[];});}
   savePerms(p);
   openAdminSettings();
 }
@@ -2898,6 +2967,17 @@ function doCopyPerms(){
       else if(fromView) p[m].view.push(uid);
     });
   });
+  // Copy sub-tab permissions
+  if(p.subtabs){
+    Object.keys(p.subtabs).forEach(function(key){
+      targetUids.forEach(function(uid){
+        p.subtabs[key].hidden=p.subtabs[key].hidden.filter(function(x){return x!==uid;});
+        p.subtabs[key].visible=p.subtabs[key].visible.filter(function(x){return x!==uid;});
+        if(p.subtabs[key].hidden.includes(fromUid)) p.subtabs[key].hidden.push(uid);
+        if(p.subtabs[key].visible.includes(fromUid)) p.subtabs[key].visible.push(uid);
+      });
+    });
+  }
   savePerms(p);
   openAdminSettings();
 }
@@ -2912,6 +2992,38 @@ function toggleAddPanel(mod,type){
   // Close other panels
   document.querySelectorAll('[id^="addPanel_"]').forEach(function(el){el.style.display='none';});
   showAddPerm(mod,type,panel);
+}
+function showSubTabAdd(mod,st){
+  var p=loadPerms();
+  var key=mod+'_'+st;
+  var allUsers=Object.keys(users).filter(function(k){return users[k].role!=='admin';});
+  allUsers.sort(function(a,b){return (users[a].name||a).localeCompare(users[b].name||b,'zh');});
+  var html='<div style="padding:8px;background:var(--bg-surface);border-radius:6px;margin-top:4px">';
+  html+='<div style="font-size:9px;color:var(--text-muted);margin-bottom:6px">设置 '+SUBTAB_LABELS[key]+' 可见性</div>';
+  allUsers.forEach(function(uid){
+    var stp=p.subtabs&&p.subtabs[key];
+    var state='inherit';
+    if(stp&&stp.hidden&&stp.hidden.includes(uid))state='hidden';
+    else if(stp&&stp.visible&&stp.visible.includes(uid))state='visible';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 0;font-size:10px"><span>'+esc(users[uid].name)+'</span><select onchange="setSubTabPerm(\''+esc(uid)+'\',\''+mod+'\',\''+st+'\',this.value);openAdminSettings()" class="perm-subtab-select"><option value="inherit"'+(state==='inherit'?' selected':'')+'>继承模块</option><option value="visible"'+(state==='visible'?' selected':'')+'>可见</option><option value="hidden"'+(state==='hidden'?' selected':'')+'>不可见</option></select></div>';
+  });
+  html+='<button onclick="openAdminSettings()" style="margin-top:6px;font-size:9px;border:none;background:var(--card);cursor:pointer;padding:3px 10px;border-radius:4px">关闭</button></div>';
+  // Find the sub-tab row and insert after it
+  var panel=document.getElementById('stAddPanel_'+key);
+  if(!panel){
+    var rows=document.querySelectorAll('.perm-subtab-row');
+    for(var i=0;i<rows.length;i++){
+      if(rows[i].textContent.indexOf(SUBTAB_LABELS[key])!==-1){
+        var div=document.createElement('div');div.id='stAddPanel_'+key;div.innerHTML=html;
+        rows[i].parentNode.insertBefore(div,rows[i].nextSibling);
+        return;
+      }
+    }
+    // Fallback: reload
+    openAdminSettings();
+    return;
+  }
+  panel.innerHTML=html;panel.style.display='block';
 }
 function showAddPerm(mod,type,panel){
   var p=loadPerms();
@@ -3203,6 +3315,11 @@ let reports = loadReports();
 let rptView = 'monthly';
 
 function switchRptView(view){
+  if(!canViewSubTab(currentUser,'report',view)){
+    var alt=SUBTABS.report.find(function(st){return canViewSubTab(currentUser,'report',st);});
+    if(alt&&alt!==view){switchRptView(alt);return;}
+    return;
+  }
   rptView = view;
   document.querySelectorAll('#rptViewToggle button').forEach((b,i)=>b.classList.toggle('active',i===['monthly','yearly'].indexOf(view)));
   const el=document.getElementById('rptList');
@@ -3787,6 +3904,34 @@ function hidePermBlock(tabId){
     if(orig!==null){c.style.display=orig;c.removeAttribute('data-perm-display');}
   });
 }
+function renderSubTabButtons(mod){
+  var toggles={okr:'okrViewToggle',kpi:'kpiViewToggle',report:'rptViewToggle'};
+  var toggleId=toggles[mod];
+  if(toggleId){
+    var container=document.getElementById(toggleId);
+    if(!container)return;
+    var btns=container.querySelectorAll('button');
+    SUBTABS[mod].forEach(function(st,i){
+      if(btns[i])btns[i].style.display=canViewSubTab(currentUser,mod,st)?'':'none';
+    });
+  }
+  if(mod==='org'){
+    var orgBtns=document.querySelectorAll('#tabORG .oc-sub-tabs button');
+    SUBTABS.org.forEach(function(st,i){
+      if(orgBtns[i])orgBtns[i].style.display=canViewSubTab(currentUser,'org',st)?'':'none';
+    });
+  }
+  if(mod==='vision'){
+    var visBtns=document.querySelectorAll('#tabVision .oc-sub-tabs button');
+    // Vision sub-tabs: strategy (index 0), backend (index 1), trainee (dynamic)
+    var dynBtn=document.getElementById('visionTraineeTabBtn');
+    var visSts=SUBTABS.vision;
+    visBtns.forEach(function(b,i){
+      if(i<visSts.length&&b.id!=='visionTraineeTabBtn')b.style.display=canViewSubTab(currentUser,'vision',visSts[i])?'':'none';
+    });
+    if(dynBtn)dynBtn.style.display=canViewSubTab(currentUser,'vision','trainee')?'':'none';
+  }
+}
 function switchTab(tab) {
   curTab = tab;
   safeSessionSet('okr_last_tab', tab);
@@ -3804,29 +3949,30 @@ function switchTab(tab) {
   function setNewBtn(show){const id=btnIds[tab];if(id)document.getElementById(id).style.display=show?'':'none';}
   setNewBtn(!(tab==='workspace'||(tab==='org'&&!isAdmin)));
   if (tab==='workspace') { renderWorkspace(); }
-  else if (tab==='vision') { renderVision(); }
+  else if (tab==='vision') { renderVision(); renderSubTabButtons('vision'); }
   else if (tab==='okr') {
     if(!currentUser){pendingTab=tab;showPermBlock('tabOKR','暂无权限访问OKR目标','请先登录后查看');setNewBtn(false);return;}
     hidePermBlock('tabOKR');
     if(!canViewModule(currentUser,'okr')){showPermBlock('tabOKR','暂无权限访问OKR目标','请联系管理员开通OKR查看权限');setNewBtn(false);return;}
-    restoreOkrFilters(); renderOKR();
+    restoreOkrFilters(); renderOKR(); renderSubTabButtons('okr');
   }
   else if (tab==='kpi') {
     hidePermBlock('tabKPI');
     if(!currentUser){ showPermBlock('tabKPI','请先登录','登录后查看KPI指标和管培生管理'); setNewBtn(false); return; }
     if(!canViewModule(currentUser,'kpi')){document.getElementById('kpiIndicatorsPage').innerHTML='<div class="empty"><p>暂无权限访问KPI指标看板</p><p style="font-size:9px">请联系管理员开通KPI查看权限</p></div>';document.getElementById('kpiIndicatorsPage').className='page active';document.getElementById('kpiFilterRow').style.display='none';document.getElementById('kpiFilterChips').style.display='none';setNewBtn(false);return;}
-    switchKpiView(kpiView);
+    switchKpiView(kpiView); renderSubTabButtons('kpi');
   }
   else if (tab==='report') {
     if(!currentUser){pendingTab=tab;showPermBlock('tabRPT','暂无权限访问报表提交','请先登录后查看');setNewBtn(false);return;}
     hidePermBlock('tabRPT');
     if(!canViewModule(currentUser,'report')){showPermBlock('tabRPT','暂无权限访问报表提交','请联系管理员开通报表查看权限');setNewBtn(false);return;}
-    restoreRptFilters(); renderReports();
+    restoreRptFilters(); renderReports(); renderSubTabButtons('report');
   }
   else if (tab==='org') {
     hidePermBlock('tabORG');
     if((orgSubView==='func'||orgSubView==='attend')&&!currentUser){switchOrgSubView('tree',document.querySelector('.oc-sub-tab'));return;}
     if(orgSubView==='tree')renderOrgChart(); else if(orgSubView==='func')renderOrgFuncView(); else if(orgSubView==='attend')renderAttendView(); else renderEmployeeTable();
+    renderSubTabButtons('org');
   }
   else {
     if(!currentUser){pendingTab=tab;showPermBlock('tabMET','暂无权限访问例会管理','请先登录后查看');setNewBtn(false);return;}
@@ -3856,6 +4002,15 @@ function switchKpiView(view) {
     document.getElementById('sidebarBtn').style.display='none';
     return;
   }
+  if(!canViewSubTab(currentUser,'kpi',view)){
+    document.getElementById('kpiIndicatorsPage').innerHTML='<div class="empty"><p>暂无权限访问此页面</p><p style="font-size:9px">请联系管理员开通子标签查看权限</p></div>';
+    document.getElementById('kpiIndicatorsPage').className='page active';
+    document.getElementById('kpiTraineePage').className='page';
+    document.getElementById('kpiFilterRow').style.display='none';
+    document.getElementById('kpiFilterChips').style.display='none';
+    document.getElementById('sidebarBtn').style.display='none';
+    return;
+  }
   kpiView = view;
   document.getElementById('kpiIndicatorsPage').className = 'page' + (view==='indicators'?' active':'');
   document.getElementById('kpiTraineePage').className = 'page' + (view==='traineeMgmt'?' active':'');
@@ -3869,6 +4024,11 @@ function switchKpiView(view) {
 }
 
 function switchOkrView(view) {
+  if(!canViewSubTab(currentUser,'okr',view)){
+    var alt=SUBTABS.okr.find(function(st){return canViewSubTab(currentUser,'okr',st);});
+    if(alt&&alt!==view){switchOkrView(alt);return;}
+    return;
+  }
   okrView = view;
   document.getElementById('okrCardsPage').className = 'page' + (view==='cards'?' active':'');
   document.getElementById('okrGanttPage').className = 'page' + (view==='gantt'?' active':'');
@@ -5949,6 +6109,11 @@ let funcSubView = 'backend'; // 'backend' | 'bu'
 
 function switchOrgSubView(view, tab) {
   if ((view==='func'||view==='attend')&&!currentUser){pendingTab='org';showPermBlock('tabORG','暂无权限访问此页面','请先登录后查看');document.getElementById('sidebarBtn').style.display='none';return;}
+  if(!canViewSubTab(currentUser,'org',view)){
+    var alt=SUBTABS.org.find(function(st){return canViewSubTab(currentUser,'org',st);});
+    if(alt&&alt!==view){switchOrgSubView(alt);return;}
+    showPermBlock('tabORG','暂无权限访问此页面','请联系管理员开通子标签查看权限');return;
+  }
   orgSubView = view;
   document.querySelectorAll('.oc-sub-tab').forEach(t => t.classList.remove('active'));
   if (tab) tab.classList.add('active');
@@ -7389,6 +7554,11 @@ document.addEventListener('click',function(e){
 let visionSubView = 'strategy';
 function switchVisionSubView(view, tab) {
   if(view === 'trainee' && !(currentUser && isGlobalAdmin(currentUser))) return;
+  if(!canViewSubTab(currentUser,'vision',view)){
+    var alt=SUBTABS.vision.find(function(st){return canViewSubTab(currentUser,'vision',st);});
+    if(alt&&alt!==view){switchVisionSubView(alt);return;}
+    return;
+  }
   visionSubView = view;
   document.querySelectorAll('#tabVision .oc-sub-tab').forEach(t => t.classList.remove('active'));
   if (tab) tab.classList.add('active');
