@@ -3025,7 +3025,7 @@ function refreshPermUI(){
   var cards=document.querySelectorAll('.perm-st-card.open');
   for(var i=0;i<cards.length;i++){openIds.push(cards[i].id);}
   var el=document.getElementById('permContent');
-  if(el)refreshPermUI();
+  if(el)el.innerHTML=renderPermUI();
   // Restore open card states
   for(var j=0;j<openIds.length;j++){
     var card=document.getElementById(openIds[j]);
