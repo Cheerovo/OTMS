@@ -2889,7 +2889,7 @@ function renderPermUI(){
   var perm=loadPerms();
   var allMods=Object.keys(SUBTABS);
   if(!PERM_SELMOD||allMods.indexOf(PERM_SELMOD)<0)PERM_SELMOD=allMods[0];
-  var h='';
+  var h='<div id="permContent">';
   // Admin info
   var gaNames=[];
   for(var k in users){if(users[k].role==='admin')gaNames.push(users[k].name);}
@@ -3015,6 +3015,7 @@ function renderPermUI(){
   h+='<button class="btn btn-xs btn-outline" onclick="copyPermsFrom()">复制角色...</button>';
   h+='</div>';
   h+='</div></div>';
+  h+='</div>'; // close permContent
   return h;
 }
 
