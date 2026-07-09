@@ -9110,7 +9110,7 @@ var EVAL_TRAINEES = [
 ];
 
 var EVAL_DIMS = [
-  {id:'taskCompletion',name:'任务完成度',weight:20,max:20,desc:'本周任务全部按时完成，交付质量高'},
+  {id:'taskCompletion',name:'任务完成度',weight:30,max:30,desc:'本周任务全部按时完成，交付质量高'},
   {id:'workQuality',name:'工作质量',weight:25,max:25,desc:'提交工作前请核对细节'},
   {id:'collaboration',name:'协作贡献',weight:20,max:20,desc:'积极协助团队成员解决问题'},
   {id:'responseSpeed',name:'响应速度',weight:15,max:15,desc:'对需求变更响应迅速'},
@@ -9832,11 +9832,13 @@ function calcTaskCompletionForTrainee(traineeName, weekId){
   var weekRate = weekTotal > 0 ? Math.round(weekDone/weekTotal*100) : 0;
   var allRate = allTotal > 0 ? Math.round(allDone/allTotal*100) : 0;
   var suggestedScore = weekTotal > 0 ? Math.round(weekRate/100 * EVAL_DIMS[0].max * 10) / 10 : 0;
+  var autoScore20 = weekTotal > 0 ? Math.round(weekRate/100 * 20 * 10) / 10 : 0;
   return {
     total: weekTotal, done: weekDone, rate: weekRate,
     weekTotal: weekTotal, weekDone: weekDone, weekRate: weekRate,
     allTotal: allTotal, allDone: allDone, allRate: allRate,
-    suggestedScore: suggestedScore
+    suggestedScore: suggestedScore,
+    autoScore20: autoScore20
   };
 }
 
@@ -11166,10 +11168,10 @@ function openTraineeDetail(name){
   var comp = calcTaskCompletionForTrainee(name, curWkId);
   var s = getEvalScore(name, curWkId);
   var ts = calcTotalScore(s);
-  var autoScore = comp.suggestedScore;
+  var autoScore20 = comp.autoScore20;
   var manualScore = ts !== null ? ts.toFixed(1) : '--';
   html += '<div class="tn-detail-section"><h4>本周评估（'+curWkId+'）</h4><div style="display:flex;gap:12px">';
-  html += '<div class="tn-dash-card" style="flex:1"><div style="font-size:8px;color:var(--text-muted);margin-bottom:4px">任务完成 <span style="color:#2E7D32;font-weight:600">自动</span></div><div style="font-size:20px;font-weight:700;color:#8BA89C">'+autoScore.toFixed(1)+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/20</span></div><div class="dash-mini-bar" style="margin-top:6px"><div class="dash-mini-fill" style="width:'+comp.weekRate+'%;background:#8BA89C"></div></div><div style="font-size:8px;color:var(--text-muted);margin-top:4px">本周 '+comp.weekDone+'/'+comp.weekTotal+' 项 · '+comp.weekRate+'%</div><div style="font-size:7px;color:var(--text-muted);margin-top:2px">累计 '+comp.allDone+'/'+comp.allTotal+' 项 · '+comp.allRate+'%</div></div>';
+  html += '<div class="tn-dash-card" style="flex:1"><div style="font-size:8px;color:var(--text-muted);margin-bottom:4px">任务达成率 <span style="color:#2E7D32;font-weight:600">自动</span></div><div style="font-size:20px;font-weight:700;color:#8BA89C">'+autoScore20.toFixed(1)+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/20</span></div><div class="dash-mini-bar" style="margin-top:6px"><div class="dash-mini-fill" style="width:'+comp.weekRate+'%;background:#8BA89C"></div></div><div style="font-size:8px;color:var(--text-muted);margin-top:4px">本周 '+comp.weekDone+'/'+comp.weekTotal+' 项 · '+comp.weekRate+'%</div><div style="font-size:7px;color:var(--text-muted);margin-top:2px">累计 '+comp.allDone+'/'+comp.allTotal+' 项 · '+comp.allRate+'%</div></div>';
   html += '<div class="tn-dash-card" style="flex:1"><div style="font-size:8px;color:var(--text-muted);margin-bottom:4px">综合评估 <span style="color:#9A7D3E;font-weight:600">手动</span></div><div style="font-size:20px;font-weight:700;color:'+(ts!==null?(ts>=80?'#8BA89C':ts>=60?'#D4A76A':'#C94F66'):'var(--text-dim)')+'">'+manualScore+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/100</span></div><div class="dash-mini-bar" style="margin-top:6px"><div class="dash-mini-fill" style="width:'+(ts!==null?Math.round(ts):0)+'%;background:'+(ts!==null?(ts>=80?'#8BA89C':ts>=60?'#D4A76A':'#C94F66'):'var(--text-dim)')+'"></div></div><div style="font-size:8px;color:var(--text-muted);margin-top:4px">5维评估</div></div>';
   html += '</div></div>';
   
@@ -11271,7 +11273,7 @@ function renderDashboard(){
     var manualScore = ts !== null ? ts.toFixed(1) : '--';
     var manualPct = ts !== null ? Math.round(ts) : 0;
     var comp = calcTaskCompletionForTrainee(tr.name, curWkId);
-    var autoScore = comp.suggestedScore;
+    var autoScore20 = comp.autoScore20;
     var autoPct = comp.rate;
     var scoreColor = ts !== null ? (ts >= 80 ? '#8BA89C' : ts >= 60 ? '#D4A76A' : '#C94F66') : 'var(--text-dim)';
     var avColor = avatarColors[i] || '#7B8FC0';
@@ -11280,7 +11282,7 @@ function renderDashboard(){
       '<div class="dash-lbl">'+tr.name+'</div>'+
       '<div class="dash-metric-divider"></div>'+
       '<div class="dash-metric">'+
-        '<div class="dash-metric-hd"><span class="dash-metric-label">任务完成 <span style="color:#2E7D32;font-weight:600">自动</span></span><span class="dash-metric-score" style="color:#8BA89C">'+autoScore.toFixed(1)+'<span class="dash-metric-max">/20</span></span></div>'+
+        '<div class="dash-metric-hd"><span class="dash-metric-label">任务达成率 <span style="color:#2E7D32;font-weight:600">自动</span></span><span class="dash-metric-score" style="color:#8BA89C">'+autoScore20.toFixed(1)+'<span class="dash-metric-max">/20</span></span></div>'+
         '<div class="dash-mini-bar"><div class="dash-mini-fill" style="width:'+autoPct+'%;background:#8BA89C"></div></div>'+
         '<div style="font-size:7px;color:var(--text-muted);margin-top:3px;display:flex;justify-content:space-between"><span>本周 '+comp.weekDone+'/'+comp.weekTotal+' 项</span><span>累计 '+comp.allDone+'/'+comp.allTotal+' 项</span></div>'+
       '</div>'+
