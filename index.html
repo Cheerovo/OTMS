@@ -2880,7 +2880,7 @@ function openAdminSettings(){
   var perm=loadPerms();
   var gaNames=[];
   for(var k in users){if(users[k].role==='admin')gaNames.push(users[k].name);}
-  var viewMode=getPref('permViewMode','roles');
+  var viewMode=getPref('permViewMode','module');
   var html='<div class="modal-header"><h2>权限设置</h2><button class="btn-icon" onclick="closeModal()">✕</button></div>';
   html+='<div class="modal-body" style="max-height:70vh;overflow-y:auto;padding:16px 24px">';
   html+='<div style="font-size:9px;color:var(--text2);margin-bottom:10px">全站管理员：<b style="color:var(--text)">'+(gaNames.length?gaNames.join('、'):'无')+'</b>（拥有全部权限，不参与角色系统）</div>';
@@ -2893,6 +2893,7 @@ function openAdminSettings(){
   html+='</div>';
   // Tabs
   html+='<div style="display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid var(--border-subtle)">';
+  html+='<button onclick="switchPermView(\'module\')" id="permTabModule" class="perm-tab'+(viewMode==='module'?' active':'')+'">模块权限</button>';
   html+='<button onclick="switchPermView(\'roles\')" id="permTabRoles" class="perm-tab'+(viewMode==='roles'?' active':'')+'">角色模板</button>';
   html+='<button onclick="switchPermView(\'users\')" id="permTabUsers" class="perm-tab'+(viewMode==='users'?' active':'')+'">用户分配</button>';
   html+='<button onclick="switchPermView(\'exceptions\')" id="permTabExceptions" class="perm-tab'+(viewMode==='exceptions'?' active':'')+'">例外管理</button>';
@@ -2900,7 +2901,8 @@ function openAdminSettings(){
   html+='<div id="permContent">';
   if(viewMode==='roles') html+=buildRoleTemplateView(perm);
   else if(viewMode==='users') html+=buildUserAssignmentView(perm);
-  else html+=buildExceptionView(perm);
+  else if(viewMode==='exceptions') html+=buildExceptionView(perm);
+  else html+=buildModuleSubTabView(perm);
   html+='</div>';
   html+='</div>';
   document.getElementById('modal').innerHTML=html;
@@ -2915,10 +2917,12 @@ function switchPermView(mode){
   var el=document.getElementById('permContent');
   if(mode==='roles') el.innerHTML=buildRoleTemplateView(perm);
   else if(mode==='users') el.innerHTML=buildUserAssignmentView(perm);
-  else el.innerHTML=buildExceptionView(perm);
+  else if(mode==='exceptions') el.innerHTML=buildExceptionView(perm);
+  else el.innerHTML=buildModuleSubTabView(perm);
   document.getElementById('permTabRoles').className='perm-tab'+(mode==='roles'?' active':'');
   document.getElementById('permTabUsers').className='perm-tab'+(mode==='users'?' active':'');
   document.getElementById('permTabExceptions').className='perm-tab'+(mode==='exceptions'?' active':'');
+  document.getElementById('permTabModule').className='perm-tab'+(mode==='module'?' active':'');
 }
 
 // ===== Tab 1: 角色模板 =====
@@ -3247,6 +3251,111 @@ function renderExcDetail(uid){
   });
   h+='</div>';
   document.getElementById('excDetail').innerHTML=h;
+}
+
+// ===== Tab 4: 模块权限（模块→子标签→选人） =====
+var MODPERM_SELMOD=null; // currently selected module
+
+function buildModuleSubTabView(perm){
+  var allMods=Object.keys(SUBTABS);
+  if(!MODPERM_SELMOD||allMods.indexOf(MODPERM_SELMOD)<0)MODPERM_SELMOD=allMods[0];
+  var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">';
+  h+='<span style="font-size:10px;color:var(--text2)">选择模块：</span>';
+  h+='<select onchange="MODPERM_SELMOD=this.value;switchPermView(\'module\')" style="padding:6px 10px;border:1px solid var(--border-light);border-radius:6px;font-size:11px;min-width:140px">';
+  allMods.forEach(function(m){
+    h+='<option value="'+m+'"'+(m===MODPERM_SELMOD?' selected':'')+'>'+MOD_LABELS[m]+'</option>';
+  });
+  h+='</select>';
+  h+='<span style="font-size:8px;color:var(--text-muted)">选择模块后设置各子标签的可见范围</span>';
+  h+='</div>';
+  // Get sub-tabs for selected module
+  var sts=SUBTABS[MODPERM_SELMOD]||[];
+  if(!sts.length) return h+'<div style="text-align:center;padding:30px;color:var(--text2)">该模块暂无子标签</div>';
+  sts.forEach(function(st){
+    var key=MODPERM_SELMOD+'_'+st;
+    var label=SUBTAB_LABELS[key]||key;
+    // Calculate current state
+    var allNonAdmin=Object.keys(users).filter(function(k){return users[k].role!=='admin';});
+    var visibleUsers=[],hiddenUsers=[];
+    allNonAdmin.forEach(function(uid){
+      if(canViewSubTab(uid,MODPERM_SELMOD,st))visibleUsers.push(uid);
+      else hiddenUsers.push(uid);
+    });
+    var allVisible=hiddenUsers.length===0;
+    var allHidden=visibleUsers.length===0;
+    var statusColor=allVisible?'color:#16a34a':allHidden?'color:#dc2626':'color:#d97706';
+    var statusText=allVisible?'全员可见':allHidden?'全员不可见':'部分可见（'+visibleUsers.length+'/'+allNonAdmin.length+'人）';
+    // Get individual exceptions
+    var excUsers=[];
+    var exc=perm.exceptions||{};
+    for(var uid2 in exc){
+      if(exc[uid2]&&exc[uid2].subtabs&&exc[uid2].subtabs[key]!==undefined){
+        excUsers.push({uid:uid2,val:exc[uid2].subtabs[key]});
+      }
+    }
+    h+='<div style="border:1px solid var(--border-subtle);border-radius:8px;margin-bottom:10px;overflow:hidden">';
+    // Header
+    h+='<div style="padding:10px 14px;background:var(--bg-surface);display:flex;align-items:center;justify-content:space-between">';
+    h+='<span style="font-weight:500;font-size:12px">'+esc(label)+'</span>';
+    h+='<span style="font-size:9px;'+statusColor+'">'+statusText+'</span></div>';
+    // 全员 controls
+    h+='<div style="padding:10px 14px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+    h+='<span style="font-size:10px;font-weight:500">全员设置：</span>';
+    h+='<button class="btn btn-xs btn-primary" onclick="setAllRolesSubTab(\''+key+'\',\'visible\')">全员可见</button>';
+    h+='<button class="btn btn-xs btn-outline" onclick="setAllRolesSubTab(\''+key+'\',\'hidden\')">全员不可见</button>';
+    h+='<button class="btn btn-xs btn-outline" onclick="setAllRolesSubTab(\''+key+'\',\'\')">由角色决定</button>';
+    h+='<span style="font-size:8px;color:var(--text-muted)">（修改所有角色模板中的此子标签设置）</span>';
+    h+='</div>';
+    // Exception list
+    h+='<div style="padding:10px 14px">';
+    h+='<div style="font-size:10px;font-weight:500;margin-bottom:6px">例外用户（覆盖角色）：</div>';
+    if(excUsers.length){
+      excUsers.forEach(function(eu){
+        var uname=users[eu.uid]?users[eu.uid].name:eu.uid;
+        h+='<div style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-size:9px;margin:0 4px 4px 0;'+(eu.val==='visible'?'background:#dcfce7;color:#166534':'background:#fef2f2;color:#991b1b')+'">';
+        h+=esc(uname)+' · '+(eu.val==='visible'?'强制可见':'强制隐藏');
+        h+='<span onclick="removeException(\''+esc(eu.uid)+'\',\''+key+'\');switchPermView(\'module\')" style="cursor:pointer;font-weight:700;margin-left:2px">&times;</span>';
+        h+='</div>';
+      });
+    }else{
+      h+='<span style="font-size:9px;color:var(--text-muted)">无例外用户</span>';
+    }
+    h+='<button class="btn btn-xs" style="border:1px dashed var(--border);background:none;border-radius:12px;padding:2px 10px;font-size:9px;color:var(--text2);cursor:pointer;margin-left:6px" onclick="addSubTabException(\''+key+'\')">+ 添加例外</button>';
+    h+='<div id="excAddPanel_'+key+'" style="margin-top:6px"></div>';
+    h+='</div></div>';
+  });
+  return h;
+}
+
+function setAllRolesSubTab(key,value){
+  var p=loadPerms();
+  var roles=p.roles||{};
+  Object.keys(roles).forEach(function(rn){
+    if(!roles[rn].subtabs)roles[rn].subtabs={};
+    if(value) roles[rn].subtabs[key]=value;
+    else delete roles[rn].subtabs[key];
+  });
+  savePerms(p);
+  switchPermView('module');
+}
+
+function addSubTabException(key){
+  var p=loadPerms();
+  var panel=document.getElementById('excAddPanel_'+key);
+  if(!panel)return;
+  var allUsers=Object.keys(users).filter(function(k){return users[k].role!=='admin';});
+  allUsers.sort(function(a,b){return (users[a].name||a).localeCompare(users[b].name||b,'zh');});
+  var h='<div style="background:var(--bg-surface);border-radius:6px;padding:8px;margin-top:4px">';
+  h+='<div style="font-size:9px;color:var(--text-muted);margin-bottom:6px">为 <b>'+esc(SUBTAB_LABELS[key]||key)+'</b> 添加例外用户</div>';
+  allUsers.forEach(function(uid){
+    var stVal='inherit';
+    if(p.exceptions&&p.exceptions[uid]&&p.exceptions[uid].subtabs&&p.exceptions[uid].subtabs[key]!==undefined){
+      stVal=p.exceptions[uid].subtabs[key];
+    }
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 0;font-size:10px"><span>'+esc(users[uid].name)+'</span><select onchange="if(this.value){setException(\''+esc(uid)+'\',\''+key+'\',this.value);}else{removeException(\''+esc(uid)+'\',\''+key+'\');}addSubTabException(\''+key+'\')" style="font-size:9px;padding:2px 4px;border:1px solid var(--border-light);border-radius:3px"><option value="">由角色决定</option><option value="visible"'+(stVal==='visible'?' selected':'')+'>强制可见</option><option value="hidden"'+(stVal==='hidden'?' selected':'')+'>强制隐藏</option></select></div>';
+  });
+  h+='<button onclick="switchPermView(\'module\')" style="margin-top:6px;font-size:9px;border:none;background:var(--card);cursor:pointer;padding:3px 10px;border-radius:4px">关闭</button></div>';
+  panel.innerHTML=h;
 }
 
 // ===== Presets & Utilities =====
