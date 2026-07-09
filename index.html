@@ -2757,7 +2757,7 @@ function getUserEffectivePerms(uid){var p=loadPerms();var role=getUserRole(uid);
 const ADMINS = ['杜宪','Jenny'];
 function defaultUsers(){return{
   '杜宪':{pw:'32508000',role:'admin',name:'杜宪',modules:['org','okr','kpi','report','meeting']},
-  'Jenny':{pw:'32508000',role:'admin',name:'张毅',modules:['org','okr','kpi','report','meeting']},
+  'Jenny':{pw:'32508000',role:'admin',name:'Jenny',modules:['org','okr','kpi','report','meeting']},
   '汪顺':{pw:'123123',role:'user',name:'汪顺'},
   '王倩':{pw:'123123',role:'user',name:'王倩'},
   '邵吴慧':{pw:'123123',role:'user',name:'邵吴慧'},
@@ -9645,16 +9645,16 @@ var evalCurrentView = 'weekly';
 var evalCurrentWeek = 0;
 var evalSelectedTrainee = null;
 var evalData = null;
-var MENTOR_LIST = ['Jenny','Bella','王倩','Shaun','王妤扬','杜宪','张毅','邵吴慧'];
+var MENTOR_LIST = ['Jenny','王倩','黄一萧','王妤扬','杜宪','邵吴慧'];
 
 var EVAL_TRAINEES = [
   {id:'chendshuangjie',name:'陈双杰',role:'DS小队长',level:'第二层',supervisor:'Jenny',location:'香港(6.7到港)',color:'#7B8FC0',avatarBg:'#7B8FC0'},
   {id:'chenjin',name:'陈锦',role:'账务管培生',level:'第二层',supervisor:'王倩',location:'上海',color:'#D4A76A',avatarBg:'#D4A76A'},
-  {id:'zhaoliuwen',name:'赵柳文',role:'法务管培生',level:'第二层',supervisor:'Bella',location:'香港(6.7到港)',color:'#8BA89C',avatarBg:'#8BA89C'},
-  {id:'anziyue',name:'安子玥',role:'法务管培生',level:'第二层',supervisor:'Bella',location:'上海',color:'#A09DB5',avatarBg:'#A09DB5'},
-  {id:'huangyanting',name:'黄燕婷',role:'HR管培生',level:'第二层',supervisor:'Shaun',location:'上海→香港',color:'#D4A76A',avatarBg:'#D4A76A'},
-  {id:'renmengchao',name:'任梦超',role:'CS管培生',level:'第三层',supervisor:'Bella',location:'北美在线',color:'var(--accent)',avatarBg:'#C94F66'},
-  {id:'chenyuan',name:'陈圆',role:'CS管培生',level:'第三层',supervisor:'Bella',location:'香港(6.1到港)',color:'#8BA89C',avatarBg:'#8BA89C'}
+  {id:'zhaoliuwen',name:'赵柳文',role:'法务管培生',level:'第二层',supervisor:'王妤扬',location:'香港(6.7到港)',color:'#8BA89C',avatarBg:'#8BA89C'},
+  {id:'anziyue',name:'安子玥',role:'法务管培生',level:'第二层',supervisor:'王妤扬',location:'上海',color:'#A09DB5',avatarBg:'#A09DB5'},
+  {id:'huangyanting',name:'黄燕婷',role:'HR管培生',level:'第二层',supervisor:'黄一萧',location:'上海→香港',color:'#D4A76A',avatarBg:'#D4A76A'},
+  {id:'renmengchao',name:'任梦超',role:'CS管培生',level:'第三层',supervisor:'王妤扬',location:'北美在线',color:'var(--accent)',avatarBg:'#C94F66'},
+  {id:'chenyuan',name:'陈圆',role:'CS管培生',level:'第三层',supervisor:'王妤扬',location:'香港(6.1到港)',color:'#8BA89C',avatarBg:'#8BA89C'}
 ];
 
 var EVAL_DIMS = [
