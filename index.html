@@ -423,10 +423,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-gantt-bar.active { opacity:0.75; }
 .tn-gantt-bar.done { opacity:0.9; }
 .tn-gantt-bar-label { font-size:9px; font-weight:600; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3); white-space:nowrap; pointer-events:none; padding:0 4px; }
-.tn-gantt-bar.done { background:#7BA89C !important; opacity:0.85; }
-.tn-gantt-bar.tn-prio-p1 { background:#C94F66 !important; opacity:0.9; }
-.tn-gantt-bar.tn-prio-p2 { background:#D4A76A !important; opacity:0.85; }
-.tn-gantt-bar.tn-prio-p3 { background:#7B8FC0 !important; opacity:0.8; }
+.tn-gantt-bar.done { opacity:0.9; }
+.tn-gantt-bar.tn-prio-p1 { opacity:0.9; }
+.tn-gantt-bar.tn-prio-p2 { opacity:0.85; }
+.tn-gantt-bar.tn-prio-p3 { opacity:0.8; }
 .tn-gantt-today-line { position:absolute; top:0; bottom:0; width:2px; background:var(--accent); opacity:0.6; z-index:10; pointer-events:none; }
 .tn-gantt-empty { padding:40px; text-align:center; font-size:11px; color:var(--text-muted); }
 
@@ -11139,22 +11139,28 @@ function renderGanttBar(wks, st, sysColor, weekCount, prio){
   }
   if(inSeg) segments.push([segStart,weekCount-1]);
   if(!segments.length) return '';
-  // Calculate days remaining for tooltip
+  // Calculate days remaining
   var startDate = new Date(2026,5,1);
   var now = new Date();
   var lastWeekIdx = segments[segments.length-1][1];
   var endDate = new Date(startDate.getTime() + (lastWeekIdx+1)*7*24*60*60*1000);
   var remaining = Math.ceil((endDate.getTime() - now.getTime()) / (1000*60*60*24));
-  var remainingText = (remaining<0?'已超期'+Math.abs(remaining)+'天':'还剩'+remaining+'天');
-  // Priority-based color and label
+  // Label: remaining days
+  var label = '';
+  if(st==='done'){ label='已完成'; }
+  else if(remaining<0){ label='超'+Math.abs(remaining)+'天'; }
+  else if(remaining===0){ label='今天截止'; }
+  else { label='剩'+remaining+'天'; }
+  // Color by priority
   prio = prio||'P2';
   var prioCls = 'tn-prio-'+prio.toLowerCase();
-  var label = st==='done'?'✓':prio;
+  var prioColors = {p1:'#C94F66', p2:'#D4A76A', p3:'#7B8FC0'};
+  var barColor = st==='done'?'#7BA89C':(prioColors[prio.toLowerCase()]||sysColor);
   var html = '';
   segments.forEach(function(seg){
     var leftPct = (seg[0]/weekCount)*100;
     var widthPct = ((seg[1]-seg[0]+1)/weekCount)*100;
-    html += '<div class="tn-gantt-bar '+st+' '+prioCls+'" style="left:'+leftPct+'%;width:'+widthPct+'%;background:'+sysColor+'" title="W'+(seg[0]+1)+'-W'+(seg[1]+1)+' | '+remainingText+' | '+prio+'">';
+    html += '<div class="tn-gantt-bar '+st+' '+prioCls+'" style="left:'+leftPct+'%;width:'+widthPct+'%;background:'+barColor+'" title="W'+(seg[0]+1)+'-W'+(seg[1]+1)+' | '+prio+' | '+label+'">';
     html += '<span class="tn-gantt-bar-label">'+label+'</span>';
     html += '</div>';
   });
