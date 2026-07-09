@@ -2699,8 +2699,6 @@ function removeException(uid,key){var p=loadPerms();if(p.exceptions&&p.exception
 function setModuleException(uid,mod,value){var p=loadPerms();if(!p.exceptions)p.exceptions={};if(!p.exceptions[uid])p.exceptions[uid]={modules:{},subtabs:{}};p.exceptions[uid].modules[mod]=value;savePerms(p);}
 function getUserEffectivePerms(uid){var p=loadPerms();var role=getUserRole(uid);var rp=role&&p.roles[role]?p.roles[role]:{modules:{},subtabs:{}};var ep=p.exceptions&&p.exceptions[uid]?p.exceptions[uid]:{modules:{},subtabs:{}};var result={modules:{},subtabs:{},role:role||'无'};PERM_MODULES.forEach(function(m){result.modules[m]=ep.modules&&ep.modules[m]!==undefined?ep.modules[m]:(rp.modules[m]||'none');});Object.keys(SUBTABS).forEach(function(mod){SUBTABS[mod].forEach(function(st){var key=mod+'_'+st;result.subtabs[key]=ep.subtabs&&ep.subtabs[key]!==undefined?ep.subtabs[key]:(rp.subtabs&&rp.subtabs[key])||'inherit';});});return result;}
 const ADMINS = ['杜宪','Jenny'];
-function canAccessAdminSettings(u){if(!u)return false;var un=getUsername(u);return un&&isGlobalAdmin(un);}
-const ADMINS = ['杜宪','Jenny'];
 function defaultUsers(){return{
   '杜宪':{pw:'32508000',role:'admin',name:'杜宪',modules:['org','okr','kpi','report','meeting']},
   'Jenny':{pw:'32508000',role:'admin',name:'张毅',modules:['org','okr','kpi','report','meeting']},
