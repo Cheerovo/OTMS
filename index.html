@@ -11261,7 +11261,6 @@ function buildGanttOrderedTasks(tasks, childIds){
   return ordered;
 }
 
-function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function renderGanttBar(wks, st, sysColor, weekCount, prio, curWkIdx, taskName, person, srcTag){
   if(!wks) return '';
   var segments = [], inSeg=false, segStart=-1;
