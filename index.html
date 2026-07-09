@@ -9784,6 +9784,18 @@ function calcExtraTotal(extras){
   return extras.reduce(function(s,e){ return s + (parseInt(e.score)||0); }, 0);
 }
 
+// Shared: get current week index (0-based) and week ID from system date
+function getCurrentWeekIdx(){
+  var now = new Date();
+  var startDate = new Date(2026,5,1);
+  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
+  if(diffDays < 0) diffDays = 0;
+  return Math.min(Math.floor(diffDays / 7), 13);
+}
+function getCurrentWeekId(){
+  return 'W' + (getCurrentWeekIdx() + 1);
+}
+
 function initEvalSystem(){
   loadEvalData();
   var cu = currentUser || '王妤扬';
@@ -9792,11 +9804,7 @@ function initEvalSystem(){
   // Show mentor assign button for admins only
   var mentorBtn = document.getElementById('evalMentorBtn');
   if(mentorBtn) mentorBtn.style.display = isGlobalAdmin(currentUser) ? '' : 'none';
-  var now = new Date();
-  var startDate = new Date(2026,5,1);
-  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
-  if(diffDays < 0) diffDays = 0;
-  evalCurrentWeek = Math.min(Math.floor(diffDays / 7), 13);
+  evalCurrentWeek = getCurrentWeekIdx();
   initSampleData();
   switchEvalView('weekly');
 }
@@ -10075,8 +10083,6 @@ function updateDimScore(traineeId, dimId, value, weekId){
   var labelEl = document.querySelector('#evalScorePanelContainer .big-label');
   if(totalEl) totalEl.textContent = total !== null ? total : '—';
   if(labelEl) labelEl.textContent = '通用 '+(total !== null ? total : '—')+' / 100';
-  renderEvalTraineeList();
-  renderEvalWeekTabs();
 }
 
 function updateDimComment(traineeId, dimId, value, weekId){
@@ -10106,16 +10112,15 @@ function updateExtraTask(traineeId, weekId, index, field, value){
   if(!extras[index]) return;
   extras[index][field] = value;
   setEvalExtras(traineeId, weekId, extras);
-  renderEvalTraineeList();
-  renderEvalWeekTabs();
 }
 
 function saveCurrentEval(traineeId, weekId){
+  // Refresh trainee list and week tabs (dimension data auto-saved on edit)
   renderEvalTraineeList();
   renderEvalWeekTabs();
   renderEvalScorePanel(traineeId);
   var saveBtn = document.querySelector('.eval-btn-save');
-  if(saveBtn){ saveBtn.textContent = '已保存'; setTimeout(function(){ saveBtn.textContent = '保存评分'; }, 1500); }
+  if(saveBtn){ saveBtn.textContent = '已刷新'; setTimeout(function(){ saveBtn.textContent = '保存评分'; }, 1500); }
 }
 
 function restorePrevWeekData(traineeId, prevWeekId, weekId){
@@ -12282,11 +12287,7 @@ function openTraineeDetail(name){
   html += '</div><button class="tn-detail-close" onclick="this.closest(\'.tn-detail-overlay\').remove()">×</button></div>';
   
   // Task stats - use all task sources
-  var now = new Date();
-  var startDate = new Date(2026,5,1);
-  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
-  if(diffDays < 0) diffDays = 0;
-  var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
+  var curWkIdx = getCurrentWeekIdx();
   var curWkId = 'W' + (curWkIdx + 1);
   var comp = calcTaskCompletionForTrainee(name, curWkId);
   var s = getEvalScore(name, curWkId);
@@ -12407,13 +12408,9 @@ function toggleScoringRules(e){
 
 function renderDashboard(){
   loadEvalData();
-  var now = new Date();
-  var startDate = new Date(2026,5,1);
-  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
-  if(diffDays < 0) diffDays = 0;
-  var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
+  var curWkIdx = getCurrentWeekIdx();
   var curWkId = 'W' + (curWkIdx + 1);
-  
+
   // 360 Eval summary
   render360Eval(curWkId);
   
@@ -12666,11 +12663,7 @@ function drawTrendChart(){
 function renderRanking(){
   loadEvalData();
   var wkFilter = document.getElementById('tnRankWeek').value;
-  var now = new Date();
-  var startDate = new Date(2026,5,1);
-  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
-  if(diffDays < 0) diffDays = 0;
-  var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
+  var curWkIdx = getCurrentWeekIdx();
   var wkId = wkFilter === 'latest' ? 'W'+(curWkIdx+1) : wkFilter;
   var wkFilterIdx = wkFilter === 'latest' ? curWkIdx : parseInt(wkFilter.slice(1)) - 1;
 
