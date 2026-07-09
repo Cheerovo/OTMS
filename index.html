@@ -2292,8 +2292,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 
   <div class="oc-sub-tabs" style="margin-bottom:20px">
     <button class="oc-sub-tab active" onclick="switchVisionSubView('strategy',this)">战略总览</button>
-    <button class="oc-sub-tab" id="visionTraineeTabBtn" onclick="switchVisionSubView('trainee',this)" style="display:none">管培生计划</button>
-    <button class="oc-sub-tab" onclick="switchVisionSubView('backend',this)">大后台系统</button>
+    <button class="oc-sub-tab" id="visionBackendTabBtn" onclick="switchVisionSubView('backend',this)">大后台系统</button>
   </div>
 
             <div id="visionStrategyView">
@@ -7400,10 +7399,24 @@ function switchVisionSubView(view, tab) {
 }
 function renderVision(){
   var isAdmin = currentUser && isGlobalAdmin(currentUser);
-  var traineeBtn = document.getElementById('visionTraineeTabBtn');
-  if(traineeBtn) traineeBtn.style.display = isAdmin ? '' : 'none';
-  if(!isAdmin && visionSubView === 'trainee'){
-    switchVisionSubView('strategy');
+  var existingBtn = document.getElementById('visionTraineeTabBtn');
+  if(isAdmin){
+    if(!existingBtn){
+      var backendBtn = document.getElementById('visionBackendTabBtn');
+      var btn = document.createElement('button');
+      btn.className = 'oc-sub-tab';
+      btn.id = 'visionTraineeTabBtn';
+      btn.onclick = function(){ switchVisionSubView('trainee', btn); };
+      btn.textContent = '管培生计划';
+      if(backendBtn && backendBtn.parentNode){
+        backendBtn.parentNode.insertBefore(btn, backendBtn);
+      }
+    }
+  } else {
+    if(existingBtn) existingBtn.remove();
+    if(visionSubView === 'trainee'){
+      switchVisionSubView('strategy');
+    }
   }
 }
 function renderTraineeView() {
