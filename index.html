@@ -2581,9 +2581,9 @@ const fileStore = (()=>{
 <script>
 // ===== User & Auth =====
 const MODULES = ['org','okr','kpi','report','meeting'];
-const MOD_LABELS = {org:'组织管理',okr:'OKR目标',kpi:'KPI指标',report:'报表提交',meeting:'例会管理'};
+const MOD_LABELS = {vision:'愿景与战略',org:'组织管理',okr:'OKR目标',kpi:'KPI指标',report:'报表提交',meeting:'例会管理'};
 const PERM_MODULES = ['okr','kpi','report','meeting']; // modules requiring explicit permission grants
-const SUBTABS = {org:['tree','edit','func','attend'],okr:['cards','gantt','tree'],kpi:['indicators','traineeMgmt'],report:['monthly','yearly'],vision:['strategy','trainee','backend']};
+const SUBTABS = {vision:['strategy','trainee','backend'],org:['tree','edit','func','attend'],okr:['cards','gantt','tree'],kpi:['indicators','traineeMgmt'],report:['monthly','yearly']};
 const SUBTAB_LABELS = {org_tree:'树状架构图',org_edit:'员工花名册',org_func:'职能分工',org_attend:'在岗状态',okr_cards:'总览',okr_gantt:'甘特图',okr_tree:'树形图',kpi_indicators:'KPI 指标',kpi_traineeMgmt:'管培生管理',report_monthly:'月度报表',report_yearly:'年度报表',vision_strategy:'战略总览',vision_trainee:'管培生计划',vision_backend:'大后台系统'};
 function defaultRoles(){
   return {
