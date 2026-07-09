@@ -1536,9 +1536,24 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-detail-section h4 { font-size:10px; font-weight:600; color:var(--text); margin-bottom:8px; }
 
 /* Performance dashboard */
-.tn-dash-section { margin-bottom:20px; }
+.tn-dash-section { margin-bottom:20px; position:relative; }
 .tn-dash-section-title { font-size:12px; font-weight:600; color:var(--text); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
 .tn-dash-section-title::before { content:''; display:inline-block; width:3px; height:14px; border-radius:2px; background:var(--accent); }
+/* Scoring rules trigger & popover */
+.scoring-rule-trigger { display:inline-flex; align-items:center; gap:2px; font-size:9px; font-weight:400; color:var(--accent); cursor:pointer; text-decoration:underline dotted var(--accent); text-underline-offset:3px; margin-left:4px; user-select:none; }
+.scoring-rule-trigger:hover { color:var(--accent-hover, #4F6BA0); }
+.scoring-rule-trigger svg { flex-shrink:0; }
+.scoring-rules-popover { position:absolute; background:rgba(20,20,32,0.96); color:#e0e0e0; border-radius:10px; padding:14px 16px; font-size:9px; line-height:1.6; z-index:100; max-width:290px; box-shadow:0 4px 20px rgba(0,0,0,0.35); }
+.sr-popover-arrow { position:absolute; top:-6px; left:20px; width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-bottom:7px solid rgba(20,20,32,0.96); }
+.sr-popover-hd { font-size:11px; font-weight:600; color:#fff; margin-bottom:10px; }
+.sr-rule-item { margin-bottom:8px; }
+.sr-rule-label { font-size:10px; margin-bottom:3px; }
+.sr-rule-label em { font-size:8px; color:#999; font-style:normal; }
+.sr-rule-label b { color:#fff; }
+.sr-dot { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:4px; vertical-align:middle; }
+.sr-rule-detail { color:#aaa; font-size:8px; padding-left:10px; }
+.sr-hl { color:#fff; background:rgba(255,255,255,0.12); padding:0 3px; border-radius:2px; }
+.sr-divider { border-top:1px solid rgba(255,255,255,0.1); margin:8px 0; }
 .tn-dash-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
 .tn-dash-card { background:var(--card); border-radius:12px; padding:16px 14px; text-align:center; box-shadow:var(--shadow-xs); cursor:pointer; transition:all .15s; border:1px solid transparent; }
 .tn-dash-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.08); border-color:var(--accent-wash); }
@@ -2153,8 +2168,29 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
       </div>
       <!-- Section: Trainee Score Cards -->
       <div class="tn-dash-section">
-        <div class="tn-dash-section-title">管培生绩效总览</div>
+        <div class="tn-dash-section-title">管培生绩效总览 <span class="scoring-rule-trigger" onclick="event.stopPropagation();toggleScoringRules(event)">计分规则<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span></div>
         <div class="tn-dash-grid" id="tnDashGrid"></div>
+      </div>
+      <!-- Scoring Rules Popover -->
+      <div class="scoring-rules-popover" id="scoringRulesPopover" style="display:none" onclick="event.stopPropagation()">
+        <div class="sr-popover-arrow"></div>
+        <div class="sr-popover-hd">计分规则说明</div>
+        <div class="sr-rule-item">
+          <div class="sr-rule-label"><span class="sr-dot" style="background:#8BA89C"></span>任务达成率 <b>/20</b> <em>自动计算</em></div>
+          <div class="sr-rule-detail">仅统计<span class="sr-hl">R（负责人）</span>角色本周排期的任务<br>优先级权重：<span class="sr-hl">P0×1.5</span> <span class="sr-hl">P1×1.0</span> <span class="sr-hl">P2×0.5</span><br>仅 <span class="sr-hl">已完成</span> 计分，进行中/未开始不计<br>得分 = 加权完成数 ÷ 加权总数 × 20</div>
+        </div>
+        <div class="sr-divider"></div>
+        <div class="sr-rule-item">
+          <div class="sr-rule-label"><span class="sr-dot" style="background:#9A7D3E"></span>本周评分 <b>/100</b> <em>手动打分</em></div>
+          <div class="sr-rule-detail">5维度：任务完成度（30）+ 工作质量（25）+ 协作贡献（20）+ 响应速度（15）+ 主动创新（10）<br>仅该周<span class="sr-hl">带教老师</span>或<span class="sr-hl">管理员</span>可编辑</div>
+        </div>
+        <div class="sr-divider"></div>
+        <div class="sr-rule-item">
+          <div class="sr-rule-label"><span class="sr-dot" style="background:#8B6BAE"></span>累计总分 <em>自动汇总</em></div>
+          <div class="sr-rule-detail">已评分各周<span class="sr-hl">本周评分之和</span><br>满分 = 已评周数 × 100（14周全评 = 1400）</div>
+        </div>
+      </div>
+      <!-- Section: Charts -->
       </div>
       <!-- Section: Charts -->
       <div class="tn-dash-charts">
@@ -12343,6 +12379,32 @@ function saveModalFeedback(){
 }
 
 // ===== PERFORMANCE DASHBOARD =====
+function toggleScoringRules(e){
+  var pop = document.getElementById('scoringRulesPopover');
+  if(!pop) return;
+  if(pop.style.display === 'none' || !pop.style.display){
+    var trigger = e.currentTarget;
+    var rect = trigger.getBoundingClientRect();
+    var container = trigger.closest('.tn-dash-section') || trigger.closest('#tnDashboardView');
+    if(container){
+      var cr = container.getBoundingClientRect();
+      pop.style.top = (rect.bottom - cr.top + 8) + 'px';
+      pop.style.left = (rect.left - cr.left) + 'px';
+    }
+    pop.style.display = 'block';
+    setTimeout(function(){
+      document.addEventListener('click', function hidePop(e2){
+        if(!pop.contains(e2.target) && !trigger.contains(e2.target)){
+          pop.style.display = 'none';
+          document.removeEventListener('click', hidePop);
+        }
+      });
+    }, 10);
+  } else {
+    pop.style.display = 'none';
+  }
+}
+
 function renderDashboard(){
   loadEvalData();
   var now = new Date();
