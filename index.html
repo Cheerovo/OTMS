@@ -3081,7 +3081,7 @@ function addSubTabExc(key){
     var cur='';
     if(p.exceptions&&p.exceptions[uid]&&p.exceptions[uid].subtabs&&p.exceptions[uid].subtabs[key]!==undefined)cur=p.exceptions[uid].subtabs[key];
     h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0;font-size:10px"><span>'+esc(users[uid].name)+'</span>';
-    h+='<select onchange="var v=this.value;if(v){setException(\''+esc(uid)+'\',\''+key+'\',v);}else{removeException(\''+esc(uid)+'\',\''+key+'\');}addSubTabExc(\''+key+'\')" style="font-size:9px;padding:1px 3px;border:1px solid var(--border-light);border-radius:3px">';
+    h+='<select onchange="var v=this.value;if(v){setException(\''+esc(uid)+'\',\''+key+'\',v);}else{removeException(\''+esc(uid)+'\',\''+key+'\');}refreshPermUI()" style="font-size:9px;padding:1px 3px;border:1px solid var(--border-light);border-radius:3px">';
     h+='<option value="">—</option>';
     h+='<option value="visible"'+(cur==='visible'?' selected':'')+'>可见</option>';
     h+='<option value="hidden"'+(cur==='hidden'?' selected':'')+'>隐藏</option>';
