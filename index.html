@@ -2587,10 +2587,10 @@ const SUBTABS = {vision:['strategy','trainee','backend'],org:['tree','edit','fun
 const SUBTAB_LABELS = {org_tree:'树状架构图',org_edit:'员工花名册',org_func:'职能分工',org_attend:'在岗状态',okr_cards:'总览',okr_gantt:'甘特图',okr_tree:'树形图',kpi_indicators:'KPI 指标',kpi_traineeMgmt:'管培生管理',report_monthly:'月度报表',report_yearly:'年度报表',vision_strategy:'战略总览',vision_trainee:'管培生计划',vision_backend:'大后台系统'};
 function defaultRoles(){
   return {
-    '部门主管':{modules:{okr:'edit',kpi:'edit',report:'edit',meeting:'view'},subtabs:{}},
-    '标准员工':{modules:{okr:'view',kpi:'view',report:'view',meeting:'none'},subtabs:{}},
-    '管培生':{modules:{okr:'view',kpi:'view',report:'none',meeting:'none'},subtabs:{kpi_traineeMgmt:'visible'}},
-    '仅组织架构':{modules:{okr:'none',kpi:'none',report:'none',meeting:'none'},subtabs:{}}
+    '部门主管':{modules:{okr:'edit',kpi:'edit',report:'edit',meeting:'view'},subtabs:{vision_trainee:'hidden'}},
+    '标准员工':{modules:{okr:'view',kpi:'view',report:'view',meeting:'none'},subtabs:{vision_trainee:'hidden'}},
+    '管培生':{modules:{okr:'view',kpi:'view',report:'none',meeting:'none'},subtabs:{kpi_traineeMgmt:'visible',vision_trainee:'hidden'}},
+    '仅组织架构':{modules:{okr:'none',kpi:'none',report:'none',meeting:'none'},subtabs:{vision_trainee:'hidden'}}
   };
 }
 function ensureDefaultRoles(p){
@@ -7692,7 +7692,6 @@ document.addEventListener('click',function(e){
 // ===== My Workspace =====
 let visionSubView = 'strategy';
 function switchVisionSubView(view, tab) {
-  if(view === 'trainee' && !(currentUser && isGlobalAdmin(currentUser))) return;
   if(!canViewSubTab(currentUser,'vision',view)){
     var alt=SUBTABS.vision.find(function(st){return canViewSubTab(currentUser,'vision',st);});
     if(alt&&alt!==view){switchVisionSubView(alt);return;}
@@ -7708,9 +7707,9 @@ function switchVisionSubView(view, tab) {
   if (view === 'backend') renderBackendView();
 }
 function renderVision(){
-  var isAdmin = currentUser && isGlobalAdmin(currentUser);
+  var canSee = currentUser && canViewSubTab(currentUser,'vision','trainee');
   var existingBtn = document.getElementById('visionTraineeTabBtn');
-  if(isAdmin){
+  if(canSee){
     if(!existingBtn){
       var backendBtn = document.getElementById('visionBackendTabBtn');
       var btn = document.createElement('button');
