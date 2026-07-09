@@ -10413,51 +10413,70 @@ function taskOverlapsWeek(task, weekIdx){
 // Cross-reference all task sources to calculate completion for a trainee in a given week
 function calcTaskCompletionForTrainee(traineeName, weekId){
   var weekIdx = parseInt(weekId.slice(1)) - 1;
-  var weekTotal = 0, weekDone = 0;
-  var allTotal = 0, allDone = 0;
+  var weightedDone = 0, weightedTotal = 0;
+  var weekTotal = 0, weekDone = 0;  // simple count for display
+  var allTotal = 0, allDone = 0;    // simple count for display
 
-  // 1. Plan tasks (TN_TASKS)
+  function prioWeight(p){
+    if(p==='P0') return 1.5;
+    if(p==='P1') return 1.0;
+    return 0.5; // P2 or unknown
+  }
+
+  // 1. Plan tasks — only R (responsible), not A or I
   TN_TASKS.forEach(function(t){
-    if(t.R!==traineeName && t.A!==traineeName && (t.I||'').indexOf(traineeName)===-1) return;
+    if(t.R !== traineeName) return;
     var td = getTnTask(t.id);
-    var isDone = (td && td.status)==='done' || (!td && t.status==='done');
+    var prio = (td && td.priority) ? td.priority : (t.priority || 'P2');
+    var isDone = (td && td.status === 'done') || (!td && t.status === 'done');
+    var pw = prioWeight(prio);
     allTotal++;
     if(isDone) allDone++;
     if(t.weeks && t.weeks[weekIdx]){
       weekTotal++;
-      if(isDone) weekDone++;
+      weightedTotal += pw;
+      if(isDone){ weekDone++; weightedDone += pw; }
     }
   });
 
-  // 2. Weekly tasks (wtasks)
+  // 2. Weekly tasks — person = doer
   if(tnData && tnData.wtasks){
     tnData.wtasks.forEach(function(w){
-      if(w.person!==traineeName) return;
+      if(w.person !== traineeName) return;
+      var prio = w.priority || 'P1';
+      var isDone = w.status === 'done';
+      var pw = prioWeight(prio);
       allTotal++;
-      if(w.status==='done') allDone++;
+      if(isDone) allDone++;
       if(w.week === weekId){
         weekTotal++;
-        if(w.status==='done') weekDone++;
+        weightedTotal += pw;
+        if(isDone){ weekDone++; weightedDone += pw; }
       }
     });
   }
 
-  // 3. Reference tasks (refTasks)
+  // 3. Reference tasks — executors = doer
   var refTasks = tnData && tnData.refTasks ? tnData.refTasks : TN_REF_TASKS;
   refTasks.forEach(function(r){
-    if(!r.executors || r.executors.indexOf(traineeName)===-1) return;
+    if(!r.executors || r.executors.indexOf(traineeName) === -1) return;
+    var prio = r.priority || 'P2';
+    var isDone = r.refStatus === 'done';
+    var pw = prioWeight(prio);
     allTotal++;
-    if(r.refStatus==='done') allDone++;
+    if(isDone) allDone++;
     if(r.weeks && r.weeks[weekIdx]){
       weekTotal++;
-      if(r.refStatus==='done') weekDone++;
+      weightedTotal += pw;
+      if(isDone){ weekDone++; weightedDone += pw; }
     }
   });
 
   var weekRate = weekTotal > 0 ? Math.round(weekDone/weekTotal*100) : 0;
   var allRate = allTotal > 0 ? Math.round(allDone/allTotal*100) : 0;
-  var suggestedScore = weekTotal > 0 ? Math.round(weekRate/100 * EVAL_DIMS[0].max * 10) / 10 : 0;
-  var autoScore20 = weekTotal > 0 ? Math.round(weekRate/100 * 20 * 10) / 10 : 0;
+  // Weighted scoring: only count done tasks with priority weight
+  var suggestedScore = weightedTotal > 0 ? Math.round(weightedDone / weightedTotal * EVAL_DIMS[0].max * 10) / 10 : 0;
+  var autoScore20 = weightedTotal > 0 ? Math.round(weightedDone / weightedTotal * 20 * 10) / 10 : 0;
   return {
     total: weekTotal, done: weekDone, rate: weekRate,
     weekTotal: weekTotal, weekDone: weekDone, weekRate: weekRate,
