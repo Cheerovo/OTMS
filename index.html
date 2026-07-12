@@ -7818,7 +7818,7 @@ function initApp(){
   switchTab(homeTab);
   updateBellBadge();
 }
-initApp();
+try { initApp(); } catch(e) { console.error('initApp 失败:', e.message); }
 
 // ===== Global Search =====
 function globalSearch(q){
@@ -10785,11 +10785,11 @@ function renderTraineeTasks(){
   filtered.forEach(function(t){ groups[t.sys].push(t); });
 
   // Always render both panes
-  renderTraineeCards(filtered, sysOrder, curWkIdx);
+  renderTraineeCards(filtered, sysOrder, curWkIdx, groups);
   renderTraineeGantt(filtered, curWkIdx);
 }
 
-function renderTraineeCards(filtered, sysOrder, curWkIdx){
+function renderTraineeCards(filtered, sysOrder, curWkIdx, groups){
   var html = '';
   sysOrder.forEach(function(sys){
     var tasks = groups[sys];
