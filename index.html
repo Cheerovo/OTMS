@@ -11568,7 +11568,7 @@ function populateWeekSelect(selId, includeAll){
   if(!sel) return;
   var html = '';
   if(includeAll) html += '<option value="all">全部周次</option>';
-  if(typeof EVAL_WEEKS !== 'undefined'){
+  if(typeof EVAL_WEEKS !== 'undefined' && EVAL_WEEKS && typeof EVAL_WEEKS.forEach === 'function'){
     EVAL_WEEKS.forEach(function(w){
       html += '<option value="'+w.id+'">'+w.label+' ('+w.start+'-'+w.end+')</option>';
     });
@@ -11578,10 +11578,12 @@ function populateWeekSelect(selId, includeAll){
   sel.innerHTML = html;
 }
 function openWeeklyTaskModal(){
+  try {
   // Populate week dropdown with date ranges
   populateWeekSelect('wtWeek', false);
   // Set default week from filter
-  var wkFilter = document.getElementById('tnWeekFilter').value;
+  var tnWkEl = document.getElementById('tnWeekFilter');
+  var wkFilter = tnWkEl ? tnWkEl.value : 'all';
   if(wkFilter !== 'all'){
     document.getElementById('wtWeek').value = wkFilter;
   } else {
@@ -11593,11 +11595,15 @@ function openWeeklyTaskModal(){
     document.getElementById('wtWeek').value = 'W' + (curWkIdx + 1);
   }
   // Populate RACI selects with trainee names
-  var tOpts = TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
-  document.getElementById('wtR').innerHTML = '<option value="">选择执行人</option>' + tOpts;
-  document.getElementById('wtA').innerHTML = '<option value="">选择负责人</option>' + tOpts;
-  document.getElementById('wtC').innerHTML = '<option value="">选择知会人</option>' + tOpts;
-  document.getElementById('wtI').innerHTML = '<option value="">选择审核人</option>' + tOpts;
+  var tOpts = (typeof TN_TRAINEES !== 'undefined' ? TN_TRAINEES : []).map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
+  ['wtR','wtA','wtC','wtI'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.innerHTML = '<option value="">选择</option>' + tOpts;
+  });
+  document.getElementById('wtR').getElementsByTagName('option')[0].textContent = '选择执行人';
+  document.getElementById('wtA').getElementsByTagName('option')[0].textContent = '选择负责人';
+  document.getElementById('wtC').getElementsByTagName('option')[0].textContent = '选择知会人';
+  document.getElementById('wtI').getElementsByTagName('option')[0].textContent = '选择审核人';
   document.getElementById('wtName').value = '';
   // Set modal title/hint based on role
   var isAdmin = currentUser && users && users[currentUser] && users[currentUser].role === 'admin';
@@ -11612,6 +11618,7 @@ function openWeeklyTaskModal(){
   document.getElementById('wtSaveBtn').textContent = isAdmin ? '发布任务' : '提交审核';
   document.getElementById('weeklyTaskModal').style.display = 'flex';
   document.getElementById('wtName').focus();
+  } catch(e) { alert('打开失败: '+e.message); console.error(e); }
 }
 
 function closeWeeklyTaskModal(){
