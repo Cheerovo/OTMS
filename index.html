@@ -1402,6 +1402,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-raci-badge.R { background:#E8F0FE; color:#3A6BC5; }
 .tn-raci-badge.A { background:#FDEDEF; color:#992F48; }
 .tn-raci-badge.I { background:#F4F6FB; color:#7B8FC0; }
+.tn-raci-badge.C { background:#FFF8E1; color:#B45309; }
 .tn-trainee-link { font-size:10px; color:var(--text-muted); cursor:pointer; flex-shrink:0; opacity:0; transition:opacity .15s; padding:0 2px; }
 .tn-task-card-new:hover .tn-trainee-link { opacity:1; }
 .tn-trainee-link:hover { color:var(--accent); }
@@ -1942,7 +1943,7 @@ body.tn-resizing * { pointer-events:none; }
       <div class="filter-row" style="margin-bottom:14px" id="tnFilterRow">
         <select id="tnSystemFilter" onchange="renderTraineeTasks()"><option value="all">全部系统</option><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option><option value="itpm">IT项目管理系统</option></select>
         <select id="tnStatusFilter" onchange="renderTraineeTasks()"><option value="all">全部状态</option><option value="pending">待开始</option><option value="active">进行中</option><option value="done">已完成</option></select>
-        <select id="tnWeekFilter" onchange="renderTraineeTasks()"><option value="all">全部周次</option><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option></select>
+        <select id="tnWeekFilter" onchange="renderTraineeTasks()"><option value="all">全部周次</option></select>
         <select id="tnPersonFilter" onchange="renderTraineeTasks()"><option value="all">全部执行者</option></select>
         <select id="tnParentFilter" onchange="renderTraineeTasks()"><option value="all">全部层级</option><option value="parent">仅父任务</option><option value="child">仅子任务</option><option value="independent">仅独立任务</option></select>
         <span style="margin-left:auto;font-size:10px;color:var(--text-dim)" id="tnTaskCount"></span>
@@ -1980,7 +1981,7 @@ body.tn-resizing * { pointer-events:none; }
             </div>
             <div class="tn-report-field" style="flex:1">
               <label>所属周次</label>
-              <select id="wtWeek"><option value="W1">W1</option><option value="W2">W2</option><option value="W3">W3</option><option value="W4">W4</option><option value="W5">W5</option><option value="W6">W6</option><option value="W7">W7</option><option value="W8">W8</option><option value="W9">W9</option><option value="W10">W10</option><option value="W11">W11</option><option value="W12">W12</option><option value="W13">W13</option><option value="W14">W14</option></select>
+              <select id="wtWeek"></select>
             </div>
           </div>
           <div style="display:flex;gap:10px;margin-bottom:10px">
@@ -1993,11 +1994,27 @@ body.tn-resizing * { pointer-events:none; }
               <select id="wtTaskCategory"><option value="deliverable">交付物</option><option value="okr">OKR</option><option value="milestone">里程碑</option><option value="review">评审</option></select>
             </div>
           </div>
-          <div style="display:flex;gap:10px;margin-bottom:16px">
+          <div style="display:flex;gap:10px;margin-bottom:10px">
             <div class="tn-report-field" style="flex:1">
-              <label>负责人</label>
-              <select id="wtPerson"><option value="">选择管培生</option></select>
+              <label>R 执行人</label>
+              <select id="wtR"><option value="">选择执行人</option></select>
             </div>
+            <div class="tn-report-field" style="flex:1">
+              <label>A 负责人</label>
+              <select id="wtA"><option value="">选择负责人</option></select>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:10px">
+            <div class="tn-report-field" style="flex:1">
+              <label>C 知会人</label>
+              <select id="wtC"><option value="">选择知会人</option></select>
+            </div>
+            <div class="tn-report-field" style="flex:1">
+              <label>I 审核人</label>
+              <select id="wtI"><option value="">选择审核人</option></select>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:16px">
             <div class="tn-report-field" style="flex:1">
               <label>优先级</label>
               <select id="wtPriority"><option value="P0">P0 · 紧急</option><option value="P1" selected>P1 · 重要</option><option value="P2">P2 · 普通</option></select>
@@ -2084,7 +2101,15 @@ body.tn-resizing * { pointer-events:none; }
           <div id="umWeeklyFields" style="display:none">
             <div style="display:flex;gap:10px;margin-bottom:10px">
               <div class="tn-report-field" style="flex:1"><label>所属周次</label><select id="umWeek"></select></div>
-              <div class="tn-report-field" style="flex:1"><label>负责人</label><select id="umPerson"></select></div>
+            </div>
+            <div style="font-size:10px;font-weight:600;color:var(--text-dim);margin-bottom:6px">RACI 分配</div>
+            <div style="display:flex;gap:10px;margin-bottom:10px">
+              <div class="tn-report-field" style="flex:1"><label>R 执行人</label><select id="umWR"></select></div>
+              <div class="tn-report-field" style="flex:1"><label>A 负责人</label><select id="umWA"></select></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:10px">
+              <div class="tn-report-field" style="flex:1"><label>C 知会人</label><select id="umWC"></select></div>
+              <div class="tn-report-field" style="flex:1"><label>I 审核人</label><select id="umWI"></select></div>
             </div>
           </div>
           <!-- Reference task fields -->
@@ -10496,9 +10521,15 @@ function initTraineeSystem(){
   // Populate person filter
   var sel = document.getElementById('tnPersonFilter');
   sel.innerHTML = '<option value="all">全部执行者</option>' + TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
+  // Populate week filter with date ranges
+  populateWeekSelect('tnWeekFilter', true);
   // Populate week selectors for report and feedback
   var weekOpts = '';
-  for(var i=0;i<14;i++){ var w='W'+(i+1); var st=TN_WEEK_LABELS[i]?TN_WEEK_LABELS[i]:''; weekOpts += '<option value="'+w+'">'+w+' (06/'+String(i*7+1).padStart(2,'0')+')</option>'; }
+  if(typeof EVAL_WEEKS !== 'undefined'){
+    EVAL_WEEKS.forEach(function(w){ weekOpts += '<option value="'+w.id+'">'+w.label+' ('+w.start+'-'+w.end+')</option>'; });
+  } else {
+    for(var i=0;i<14;i++){ var w='W'+(i+1); weekOpts += '<option value="'+w+'">'+w+'</option>'; }
+  }
   document.getElementById('tnFbWeek').innerHTML = weekOpts;
   document.getElementById('tnRankWeek').innerHTML = '<option value="latest">最新</option>' + weekOpts;
   // Populate trainee selects
@@ -10641,8 +10672,8 @@ function renderTraineeTasks(){
     if(weekIdx >= 0 && w.week !== ('W'+(weekIdx+1))) return;
     if(tnQuickFilter === 'week' && w.week !== ('W'+(curWkIdx+1))) return;
     if(tnQuickFilter === 'active' && w.status !== 'active') return;
-    if(personFilter!=='all' && w.person !== personFilter) return;
-    if(tnQuickFilter === 'mine' && currentUser && w.person !== currentUser) return;
+    if(personFilter!=='all' && w.R !== personFilter && w.A !== personFilter && w.C !== personFilter && w.I !== personFilter && w.person !== personFilter) return;
+    if(tnQuickFilter === 'mine' && currentUser && w.R !== currentUser && w.A !== currentUser && w.C !== currentUser && w.I !== currentUser && w.person !== currentUser) return;
     // Approval filtering
     var apStatus = w.approvalStatus || 'approved';
     if(tnApprovalFilter === 'pending'){ if(apStatus !== 'pending') return; }
@@ -10809,7 +10840,10 @@ function renderTraineeCards(filtered, sysOrder, curWkIdx){
           html += '<div class="tn-child-task-body">';
           html += '<span class="tn-child-task-name" onclick="openUnifiedTaskModal(\''+t._source+'\',\''+t.id+'\')" title="编辑任务">'+t.name+'</span>';
           if(isWeekly){
-            html += '<span class="tn-child-task-meta">'+t.person+'</span>';
+            if(t.R) html += '<span class="tn-raci-badge R">'+t.R+'</span>';
+            if(t.A) html += '<span class="tn-raci-badge A">'+t.A+'</span>';
+            if(t.C) html += '<span class="tn-raci-badge C">'+t.C+'</span>';
+            if(t.I) html += '<span class="tn-raci-badge I">'+t.I+'</span>';
             var apStat = t.approvalStatus || 'approved';
             if(apStat === 'pending') html += '<span class="tn-approval-status pending">待审核</span>';
             else if(apStat === 'rejected') html += '<span class="tn-approval-status rejected">已驳回</span>';
@@ -10858,7 +10892,10 @@ function renderTraineeCards(filtered, sysOrder, curWkIdx){
         html += catBadge;
         html += '<span class="tn-prio-tag '+prio+'">'+prio+'</span>';
         if(isWeekly){
-          html += '<span class="tn-raci-badge R">'+t.person+'</span>';
+          if(t.R) html += '<span class="tn-raci-badge R">'+t.R+'</span>';
+          if(t.A) html += '<span class="tn-raci-badge A">'+t.A+'</span>';
+          if(t.C) html += '<span class="tn-raci-badge C">'+t.C+'</span>';
+          if(t.I) html += '<span class="tn-raci-badge I">'+t.I+'</span>';
           // Approval status badge
           var apStatus = t.approvalStatus || 'approved';
           if(apStatus === 'pending') html += '<span class="tn-approval-status pending">待审核</span>';
@@ -10932,7 +10969,7 @@ function renderTraineeCards(filtered, sysOrder, curWkIdx){
           html += '<span class="tn-task-status-dot '+stCls+'"></span>';
           html += '<div class="tn-child-task-body">';
           html += '<span class="tn-child-task-name" onclick="openUnifiedTaskModal(\''+t._source+'\',\''+t.id+'\')" title="编辑">'+t.name+'</span>';
-          if(isWeekly){ html += '<span class="tn-child-task-meta">'+t.person+'</span>'; }
+          if(isWeekly){ html += (t.R?'<span class="tn-raci-badge R">'+t.R+'</span>':'')+(t.A?'<span class="tn-raci-badge A">'+t.A+'</span>':'')+(t.C?'<span class="tn-raci-badge C">'+t.C+'</span>':'')+(t.I?'<span class="tn-raci-badge I">'+t.I+'</span>':''); }
           else if(isRef){ html += '<span class="tn-child-task-meta">'+(t.executors||[]).join(',')+'</span>'; }
           else { html += '<span class="tn-child-task-meta">'+(td&&td.R?td.R:t.R)+'</span>'; }
           html += '</div>';
@@ -10954,7 +10991,7 @@ function renderTraineeCards(filtered, sysOrder, curWkIdx){
         html += '<div class="tn-task-priority '+prio+'" style="width:4px;height:18px;border-radius:2px;flex-shrink:0"></div>';
         html += '<span class="tn-task-status '+stCls+'"></span>';
         var metaHtml = srcBadge + taskTypeBadge + catBadge;
-        if(isWeekly) metaHtml += ' <b>负责人</b> '+t.person;
+        if(isWeekly) metaHtml += (t.R?' <b>R</b> '+t.R:'')+(t.A?' <b>A</b> '+t.A:'')+(t.C?' <b>C</b> '+t.C:'')+(t.I?' <b>I</b> '+t.I:'');
         else if(isRef) metaHtml += ' <b>执行人</b> '+(t.executors||[]).join(',')+' · <b>审批</b> '+(t.approver||'');
         else metaHtml += ' <b>R</b> '+(td&&td.R?td.R:t.R)+' · <b>A</b> '+(td&&td.A?td.A:t.A);
         html += '<div class="tn-task-info"><div class="tn-task-name">'+t.name+'</div><div class="tn-task-meta">'+metaHtml+'</div></div>';
@@ -11187,7 +11224,7 @@ function renderTraineeGantt(filtered, curWkIdx){
       } else {
         wks = (td&&td.weeks)?td.weeks:t.weeks;
       }
-      var personLabel = isWeekly?t.person:(isRefT?(t.executors||[]).join(','):((td&&td.R)?td.R:t.R));
+      var personLabel = isWeekly?(t.R||t.person||''):(isRefT?(t.executors||[]).join(','):((td&&td.R)?td.R:t.R));
       var srcTagClass = isWeekly?'weekly':(isRefT?'ref':'plan');
       var srcTagLabel = isWeekly?t.week:(isRefT?'R':'P');
 
@@ -11234,7 +11271,7 @@ function groupTasksForGantt(filtered){
   } else if(tnGanttGroup==='person'){
     filtered.forEach(function(t){
       var persons = [];
-      if(t._source==='weekly'){ persons=[t.person]; }
+      if(t._source==='weekly'){ persons=[t.R||t.person,t.A,t.C,t.I].filter(Boolean); }
       else if(t._source==='ref'){ persons=t.executors||[]; }
       else { var td=getTnTask(t.id); persons=[(td&&td.R)?td.R:t.R]; }
       persons.forEach(function(p){
@@ -11513,7 +11550,7 @@ function renderApprovalPanel(){
     }
     html += '<div class="tn-approval-item">';
     html += '<span class="tn-approval-name" title="'+t.name+'">'+t.name+'</span>';
-    html += '<span class="tn-approval-meta">'+t.person+'</span>';
+    html += '<span class="tn-approval-meta">'+(t.R||t.person||'')+'</span>';
     html += '<span class="tn-approval-meta">'+sysName+'</span>';
     html += '<span class="tn-approval-meta">'+t.week+'</span>';
     if(createdTime) html += '<span class="tn-approval-meta">'+createdTime+'</span>';
@@ -11525,7 +11562,24 @@ function renderApprovalPanel(){
 }
 
 // ===== WEEKLY TASKS =====
+// Helper: populate week dropdowns with date ranges from EVAL_WEEKS
+function populateWeekSelect(selId, includeAll){
+  var sel = document.getElementById(selId);
+  if(!sel) return;
+  var html = '';
+  if(includeAll) html += '<option value="all">全部周次</option>';
+  if(typeof EVAL_WEEKS !== 'undefined'){
+    EVAL_WEEKS.forEach(function(w){
+      html += '<option value="'+w.id+'">'+w.label+' ('+w.start+'-'+w.end+')</option>';
+    });
+  } else {
+    for(var i=1;i<=14;i++){ html += '<option value="W'+i+'">W'+i+'</option>'; }
+  }
+  sel.innerHTML = html;
+}
 function openWeeklyTaskModal(){
+  // Populate week dropdown with date ranges
+  populateWeekSelect('wtWeek', false);
   // Set default week from filter
   var wkFilter = document.getElementById('tnWeekFilter').value;
   if(wkFilter !== 'all'){
@@ -11538,9 +11592,12 @@ function openWeeklyTaskModal(){
     var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
     document.getElementById('wtWeek').value = 'W' + (curWkIdx + 1);
   }
-  // Populate person select
-  var sel = document.getElementById('wtPerson');
-  sel.innerHTML = TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
+  // Populate RACI selects with trainee names
+  var tOpts = TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
+  document.getElementById('wtR').innerHTML = '<option value="">选择执行人</option>' + tOpts;
+  document.getElementById('wtA').innerHTML = '<option value="">选择负责人</option>' + tOpts;
+  document.getElementById('wtC').innerHTML = '<option value="">选择知会人</option>' + tOpts;
+  document.getElementById('wtI').innerHTML = '<option value="">选择审核人</option>' + tOpts;
   document.getElementById('wtName').value = '';
   // Set modal title/hint based on role
   var isAdmin = currentUser && users && users[currentUser] && users[currentUser].role === 'admin';
@@ -11566,10 +11623,14 @@ function saveWeeklyTask(){
   if(!name){ alert('请输入任务名称'); return; }
   var sys = document.getElementById('wtSystem').value;
   var week = document.getElementById('wtWeek').value;
-  var person = document.getElementById('wtPerson').value || currentUser || '';
+  var personR = document.getElementById('wtR').value || '';
+  var personA = document.getElementById('wtA').value || '';
+  var personC = document.getElementById('wtC').value || '';
+  var personI = document.getElementById('wtI').value || '';
   var priority = document.getElementById('wtPriority').value;
   var taskType = document.getElementById('wtTaskType').value;
   var taskCategory = document.getElementById('wtTaskCategory').value;
+  if(!personR && !personA){ alert('请至少指定执行人或负责人'); return; }
   if(!tnData) loadTnData();
   if(!tnData.wtasks) tnData.wtasks = [];
   var isAdmin = currentUser && users && users[currentUser] && users[currentUser].role === 'admin';
@@ -11579,7 +11640,11 @@ function saveWeeklyTask(){
     name: name,
     sys: sys,
     week: week,
-    person: person,
+    person: personR,
+    R: personR,
+    A: personA,
+    C: personC,
+    I: personI,
     priority: priority,
     taskType: taskType,
     taskCategory: taskCategory,
@@ -11708,12 +11773,15 @@ function openUnifiedTaskModal(source, taskId){
   // Populate R/person selects
   var tOpts = TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
   document.getElementById('umR').innerHTML = tOpts;
-  document.getElementById('umPerson').innerHTML = '<option value="">选择管培生</option>' + tOpts;
+  // RACI selects for weekly tasks
+  var tOpts2 = '<option value="">选择</option>' + tOpts;
+  var umWR = document.getElementById('umWR'); if(umWR) umWR.innerHTML = '<option value="">选择执行人</option>' + tOpts;
+  var umWA = document.getElementById('umWA'); if(umWA) umWA.innerHTML = '<option value="">选择负责人</option>' + tOpts;
+  var umWC = document.getElementById('umWC'); if(umWC) umWC.innerHTML = '<option value="">选择知会人</option>' + tOpts;
+  var umWI = document.getElementById('umWI'); if(umWI) umWI.innerHTML = '<option value="">选择审核人</option>' + tOpts;
 
   // Populate week selects
-  var wOpts = '';
-  for(var i=0;i<14;i++){ wOpts += '<option value="W'+(i+1)+'">W'+(i+1)+'</option>'; }
-  document.getElementById('umWeek').innerHTML = wOpts;
+  populateWeekSelect('umWeek', false);
 
   // Week checkboxes for plan tasks
   var wChecks = '';
@@ -11763,7 +11831,10 @@ function openUnifiedTaskModal(source, taskId){
       document.getElementById('umTaskCategory').value = task.taskCategory || 'deliverable';
       document.getElementById('umStatus').value = task.status;
       document.getElementById('umWeek').value = task.week;
-      document.getElementById('umPerson').value = task.person;
+      document.getElementById('umWR').value = task.R || task.person || '';
+      document.getElementById('umWA').value = task.A || '';
+      document.getElementById('umWC').value = task.C || '';
+      document.getElementById('umWI').value = task.I || '';
       document.getElementById('umDesc').value = task.desc || '';
       document.getElementById('umParentId').innerHTML = buildParentOptions(unifiedEditTaskId, task.parentId || '');
       document.getElementById('umClearParent').style.display = task.parentId ? '' : 'none';
@@ -11848,7 +11919,11 @@ function saveUnifiedTask(){
         tnData.wtasks[i].taskCategory = document.getElementById('umTaskCategory').value;
         tnData.wtasks[i].status = status;
         tnData.wtasks[i].week = document.getElementById('umWeek').value;
-        tnData.wtasks[i].person = document.getElementById('umPerson').value;
+        tnData.wtasks[i].R = document.getElementById('umWR').value;
+        tnData.wtasks[i].A = document.getElementById('umWA').value;
+        tnData.wtasks[i].C = document.getElementById('umWC').value;
+        tnData.wtasks[i].I = document.getElementById('umWI').value;
+        tnData.wtasks[i].person = tnData.wtasks[i].R;
         tnData.wtasks[i].desc = document.getElementById('umDesc').value.trim();
         tnData.wtasks[i].parentId = document.getElementById('umParentId').value;
         break;
