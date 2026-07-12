@@ -1689,6 +1689,42 @@ body.tn-resizing * { pointer-events:none; }
 .mt-assignment-add-btn:hover { background:var(--accent); color:#fff; }
 .mt-assignment-empty { font-size:10px; color:var(--text-muted); padding:6px 0; text-align:center; }
 
+/* ---- Trainee Overview Dashboard ---- */
+.tn-ov-stats { display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+.tn-ov-stat-item { flex:1; min-width:100px; min-height:60px; background:var(--bg-surface); border-radius:10px; padding:14px 16px; text-align:center; border:1px solid var(--border-light); }
+.tn-ov-stat-num { font-size:22px; font-weight:700; line-height:1.2; }
+.tn-ov-stat-label { font-size:9px; color:var(--text-muted); margin-top:4px; }
+
+.tn-ov-link-panels { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+@media(max-width:1000px){ .tn-ov-link-panels { grid-template-columns:1fr; } }
+.tn-ov-panel { background:var(--bg-surface); border-radius:10px; overflow:hidden; border:1px solid var(--border-light); }
+.tn-ov-panel-hd { padding:10px 14px; font-size:11px; font-weight:600; color:#fff; display:flex; align-items:center; }
+.tn-ov-panel-bd { padding:8px 0; max-height:420px; overflow-y:auto; }
+.tn-ov-mod-row { display:flex; align-items:center; gap:6px; padding:6px 14px; transition:background .1s; }
+.tn-ov-mod-row:hover { background:var(--bg-surface-hover); }
+.tn-ov-mod-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.tn-ov-mod-arrow { font-size:8px; color:var(--text-dim); flex-shrink:0; transition:transform .2s; width:10px; text-align:center; }
+.tn-ov-mod-name { font-size:10.5px; color:var(--text); flex:1; min-width:0; line-height:1.4; }
+.tn-ov-mod-desc { font-size:8.5px; color:var(--text-muted); flex-shrink:0; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tn-ov-mod-badge { font-size:8px; padding:2px 8px; border-radius:10px; font-weight:500; flex-shrink:0; }
+.tn-ov-prog-done { background:#EAF0EE; color:#5A7868; }
+.tn-ov-prog-active { background:#FBF6EC; color:#D4A76A; }
+.tn-ov-prog-pend { background:var(--bg-surface); color:var(--text-dim); border:1px solid var(--border-light); }
+.tn-ov-mod-subs { border-left:1px dashed var(--border-light); margin-left:19px; }
+.tn-ov-mod-sub { padding:4px 14px 4px 10px; }
+
+.tn-ov-sys-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+@media(max-width:900px){ .tn-ov-sys-cards { grid-template-columns:repeat(2,1fr); } }
+.tn-ov-sys-card { background:var(--bg-surface); border-radius:10px; padding:14px 16px; cursor:pointer; transition:box-shadow .15s; border:1px solid var(--border-light); }
+.tn-ov-sys-card:hover { box-shadow:var(--shadow-sm); }
+.tn-ov-sc-name { font-size:12px; font-weight:600; color:var(--text); margin-bottom:8px; }
+.tn-ov-sc-stats { display:flex; flex-wrap:wrap; gap:6px 10px; font-size:9px; align-items:center; }
+
+.tn-ov-status-strip { display:flex; gap:12px; background:var(--bg-surface); border-radius:10px; padding:14px 16px; border:1px solid var(--border-light); flex-wrap:wrap; }
+.tn-ov-ss-item { flex:1; min-width:80px; text-align:center; }
+.tn-ov-ss-val { font-size:18px; font-weight:700; color:var(--text); line-height:1.2; }
+.tn-ov-ss-label { font-size:9px; color:var(--text-muted); margin-top:2px; }
+
 </style>
 </head>
 <body>
@@ -1753,6 +1789,7 @@ body.tn-resizing * { pointer-events:none; }
     <button data-tab="org" onclick="switchTab('org')" title="管理部门、团队和人员架构"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="2.5"/><path d="M3 20v-1.5c0-2 2.5-4 6-4s6 2 6 4V20"/><circle cx="18" cy="7" r="2"/><path d="M14 19v-1c0-1.5 2-3 4.5-3s4.5 1.5 4.5 3v1"/></svg></span><span>组织管理</span></button>
     <button data-tab="okr" onclick="switchTab('okr')" title="制定季度目标与关键结果，跟踪执行进度"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span><span>OKR 目标管理</span></button>
     <button data-tab="kpi" onclick="switchTab('kpi')" title="追踪收入、效率、质量等量化指标"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="13" width="4" height="8" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg></span><span>KPI 指标管理</span></button>
+    <button data-tab="trainee" onclick="switchTab('trainee')" title="管培生任务看板、反馈、打分与绩效"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/></svg></span><span>管培生管理</span></button>
 
     <button data-tab="report" onclick="switchTab('report')" title="月度/年度财务报表的提交与汇总"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span><span>报表提交</span></button>
     <button data-tab="meeting" onclick="switchTab('meeting')" title="记录例会纪要、决议事项和临时任务"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><span>例会管理</span></button>
@@ -1853,10 +1890,6 @@ body.tn-resizing * { pointer-events:none; }
         <option value="2026-01">2026年1月</option>
       </select>
     </div>
-    <div class="view-toggle" id="kpiViewToggle">
-      <button class="active" onclick="switchKpiView('indicators')">KPI 指标</button>
-      <button onclick="switchKpiView('traineeMgmt')">管培生管理</button>
-    </div>
   </div>
   <div class="filter-chips" id="kpiFilterChips"></div>
 
@@ -1865,14 +1898,30 @@ body.tn-resizing * { pointer-events:none; }
     <div class="kpi-list" id="kpiList"></div>
   </div>
 
-  <!-- Trainee Management sub-page -->
-  <div class="page" id="kpiTraineePage">
+</div>
+</div>
+
+<!-- ==================== TRAINEE TAB ==================== -->
+<div class="tab-content" id="tabTrainee">
+<div class="main">
+  <div class="page-hd"><span class="ph-dot c3"></span><div class="ph-title">管培生管理</div><div class="ph-sub c3">Trainee Management</div><button class="ph-act" onclick="openWeeklyTaskModal()">+ 新增任务</button></div>
+
+  <!-- Trainee Management page -->
+  <div class="page active" id="kpiTraineePage">
     <div class="trainee-summary" id="traineeSummary"></div>
     <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;background:var(--bg-surface);border-radius:10px;padding:3px;width:fit-content">
+      <button class="tn-sub-tab" onclick="switchTraineeView('overview')">总览</button>
       <button class="tn-sub-tab active" onclick="switchTraineeView('tasks')">任务看板</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('reports')">每周反馈</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('evaluation')">管培生打分</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('dashboard')">管培生绩效</button>
+    </div>
+    <!-- Trainee Overview Dashboard -->
+    <div class="tn-view" id="tnOverviewView" style="display:none">
+      <div class="tn-ov-stats" id="tnOvStatsBar"></div>
+      <div class="tn-ov-link-panels" id="tnOvLinkPanels"></div>
+      <div class="tn-ov-sys-cards" id="tnOvSysCards"></div>
+      <div class="tn-ov-status-strip" id="tnOvStatusStrip"></div>
     </div>
     <div class="tn-view" id="tnTaskView">
       <div class="tn-view-toggle-bar">
@@ -2233,6 +2282,8 @@ body.tn-resizing * { pointer-events:none; }
         <button class="eval-sub-tab" onclick="switchEvalView('history')">历史评估</button>
       </div>
       <div class="eval-header-actions" style="margin-left:auto">
+        <button onclick="openMentorAssignModal()" id="evalMentorBtn" style="display:none">带教分配</button>
+        <button onclick="switchTraineeView('dashboard')" style="background:var(--accent);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:9px;cursor:pointer;font-family:inherit">绩效总览</button>
         <button onclick="exportEvalData()">导出</button>
         <button onclick="importEvalData()">导入</button>
       </div>
@@ -2271,6 +2322,24 @@ body.tn-resizing * { pointer-events:none; }
       </div>
       <input class="eval-search" type="text" id="evalHistorySearch" placeholder="搜索管培生姓名或直属上级..." oninput="renderEvalHistory()">
       <div class="eval-history-table-wrap" id="evalHistoryTable"></div>
+    </div>
+
+    <!-- Mentor assignment modal -->
+    <div class="tn-detail-overlay" id="mentorAssignModal" style="display:none" onclick="if(event.target===this)closeMentorAssignModal()">
+      <div class="tn-detail-modal" style="width:90vw;max-width:1100px;max-height:85vh;overflow:auto" onclick="event.stopPropagation()">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <h4 style="margin:0;font-size:14px">带教老师分配</h4>
+          <span style="font-size:9px;color:var(--text-dim)">按管培生 × 周次设置评估负责人</span>
+          <button style="margin-left:auto;border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-dim)" onclick="closeMentorAssignModal()">✕</button>
+        </div>
+        <div style="margin-bottom:12px;font-size:9px;color:var(--text-dim)">空白表示使用默认带教老师，选择后将覆盖默认值。</div>
+        <div style="overflow-x:auto" id="mentorMatrix"></div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-outline btn-sm" onclick="resetMentorAssign()" style="flex:1">重置为默认</button>
+          <button class="btn btn-outline btn-sm" onclick="closeMentorAssignModal()" style="flex:1">取消</button>
+          <button class="btn btn-primary btn-sm" onclick="saveMentorAssign()" style="flex:1">保存分配</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2634,20 +2703,60 @@ const fileStore = (()=>{
 </script>
 
 <script>
+var TN_DASHBOARD_DATA = {"treeData":[{"name":"用印档案公司管理系统","stats":{"total":19,"done":10,"prog":3,"pend":6,"pct":53},"parents":[{"name":"用印审批流程前端页面开发","taskIds":[1,86,89],"stats":{"total":3,"done":1,"prog":0,"pend":2,"pct":33}},{"name":"用印系统功能开发与测试","taskIds":[2,18,21,95,123,125],"stats":{"total":6,"done":4,"prog":0,"pend":2,"pct":67}},{"name":"用印档案文档与数据整理","taskIds":[3,4,14,15,17,33,69,90],"stats":{"total":8,"done":5,"prog":2,"pend":1,"pct":62}},{"name":"用印数据校验与导入","taskIds":[91,92],"stats":{"total":2,"done":0,"prog":1,"pend":1,"pct":0}}]},{"name":"人事事务自动化系统","stats":{"total":22,"done":14,"prog":4,"pend":4,"pct":64},"parents":[{"name":"人事流程与模板梳理","taskIds":[5,6,19,20,30,56,68,82],"stats":{"total":8,"done":6,"prog":1,"pend":1,"pct":75}},{"name":"员工档案与考勤数据管理","taskIds":[7,16,57,83],"stats":{"total":4,"done":3,"prog":1,"pend":0,"pct":75}},{"name":"人事系统功能开发与测试","taskIds":[31,32,47,48,49,84,87,88,117,119],"stats":{"total":10,"done":5,"prog":2,"pend":3,"pct":50}}]},{"name":"项目管理系统","stats":{"total":17,"done":12,"prog":5,"pend":0,"pct":71},"parents":[{"name":"项目管理前端看板","taskIds":[8,22],"stats":{"total":2,"done":2,"prog":0,"pend":0,"pct":100}},{"name":"项目管理系统搭建与迭代","taskIds":[9,10,11,12,13,26,27,28,29,41,42,43,44,45,46],"stats":{"total":15,"done":10,"prog":5,"pend":0,"pct":67}}]},{"name":"财务账务自动化系统","stats":{"total":54,"done":32,"prog":18,"pend":4,"pct":59},"parents":[{"name":"收付款流程梳理与需求分析","taskIds":[23,24,25,35,36,39,40,55,60,64],"stats":{"total":10,"done":10,"prog":0,"pend":0,"pct":100}},{"name":"收款模块前端开发与交付","taskIds":[34,37,50,59,70,107],"stats":{"total":6,"done":4,"prog":2,"pend":0,"pct":67}},{"name":"付款模块前端开发与交付","taskIds":[38,51,52,53,54,61,62,63,72,73,74,106,111],"stats":{"total":13,"done":8,"prog":4,"pend":1,"pct":62}},{"name":"收款模块系统开发与迭代","taskIds":[65,66],"stats":{"total":2,"done":2,"prog":0,"pend":0,"pct":100}},{"name":"付款模块系统开发与迭代","taskIds":[67,75,76,78,100,101,108],"stats":{"total":7,"done":4,"prog":2,"pend":1,"pct":57}},{"name":"物业模块前端开发与交付","taskIds":[71,97,112],"stats":{"total":3,"done":1,"prog":1,"pend":1,"pct":33}},{"name":"财务报表模块开发","taskIds":[77,79,80,81,98,99,102,103,104,105,109,110,116],"stats":{"total":13,"done":3,"prog":9,"pend":1,"pct":23}}]}],"modules":[{"link":"向前链路","mod":"公寓 | 物业 | 商办","progress":"待开始","subs":[{"mod":"长租公寓（分散式/集中式）","desc":"租金收入"},{"mod":"物业管理（住宅/写字楼）","desc":"物业费+停车费"},{"mod":"商业办公（商铺/写字楼）","desc":"租金+水电+管理费"}]},{"link":"向前链路","mod":"渠道开发","progress":"待开始","subs":[{"mod":"线上渠道（58/贝壳/抖音）","desc":"线索录入"},{"mod":"线下渠道（中介/老带新）","desc":"佣金管理"},{"mod":"企业渠道（HR/行政对接）","desc":"批量获客"},{"mod":"渠道效果分析","desc":"转化率/成本"}]},{"link":"向前链路","mod":"带看管理","progress":"待开始","subs":[{"mod":"预约看房","desc":"在线预约"},{"mod":"带看记录","desc":"经纪人跟进"},{"mod":"意向登记","desc":"客户需求"},{"mod":"转化率分析","desc":"漏斗统计"}]},{"link":"向前链路","mod":"合同与账单","progress":"进行中","subs":[{"mod":"应收租金（月/季/年）","desc":"合同金额"},{"mod":"应收水电费（分摊/固定）","desc":"公用事业"},{"mod":"实收租金（到账核对）","desc":"银行流水"},{"mod":"押金管理（收/退/转）","desc":"保证金"},{"mod":"逾期催收（自动提醒）","desc":"预警机制"},{"mod":"接口对接WBES/人才开发系统","desc":"数据自动导入"},{"mod":"月度服务费结算/薪酬表导入","desc":"实收/实付/劳务费"},{"mod":"残疾人基金差额处理","desc":"合规计算"}]},{"link":"向前链路","mod":"合同核心事项","progress":"待开始","subs":[{"mod":"租金金额与支付周期","desc":"月付/季付/年付"},{"mod":"租期与起止日期","desc":"1年/2年/3年"},{"mod":"押金条款","desc":"1押/2押"},{"mod":"递增条款","desc":"年递增5%"},{"mod":"违约责任","desc":"提前退租"},{"mod":"免租期与优惠","desc":"装修免租"}]},{"link":"向前链路","mod":"收款管理","progress":"进行中","subs":[{"mod":"业务账单生成（合同驱动）","desc":"自动出账"},{"mod":"租金收款核销","desc":"银行流水匹配"},{"mod":"水电费收款","desc":"分摊计算"},{"mod":"押金收款/退款","desc":"保证金台账"},{"mod":"逾期催收管理","desc":"自动提醒"}]},{"link":"向前链路","mod":"付款和费用报销","progress":"进行中","subs":[{"mod":"付款申请（对公/对私）","desc":"审批流"},{"mod":"费用报销（差旅/办公）","desc":"票据OCR"},{"mod":"供应商付款","desc":"物业/维修"},{"mod":"工资薪酬发放","desc":"Payroll"},{"mod":"银行接口对接","desc":"HKMS银行流水"},{"mod":"20类费用报销（市内交通/差旅等）","desc":"员工提交"},{"mod":"强制关联预算编号/立项编号","desc":"前置校验"},{"mod":"直接支付申请流程","desc":"对公/对私"}]},{"link":"中间链路","mod":"合同标准版本","progress":"进行中","subs":[{"mod":"长租公寓合同模板","desc":"标准条款"},{"mod":"物业托管合同模板","desc":"服务协议"},{"mod":"商办租赁合同模板","desc":"商务条款"},{"mod":"增值服务合同模板","desc":"保洁/维修"},{"mod":"审批通过后电子签章/物理用印授权","desc":"执行枢纽"},{"mod":"联动网银/ERP接口执行现金流转","desc":"劳务费/税金"}]},{"link":"中间链路","mod":"合同审核流程","progress":"进行中","subs":[{"mod":"经纪人提交","desc":"发起"},{"mod":"店长/区域经理审核","desc":"业务审核"},{"mod":"法务合规审核","desc":"Bella团队"},{"mod":"财务风险评估","desc":"Angela/Moses"},{"mod":"最终审批（Jenny）","desc":"超权限"},{"mod":"账务部发票自动化审核/防重","desc":"20类报销限额"},{"mod":"法务部线上审核法律风险","desc":"合同文本/可用印"},{"mod":"财务部复核可用额度上限","desc":"额度管控"}]},{"link":"中间链路","mod":"用印申请","progress":"进行中","subs":[{"mod":"线上用印申请","desc":"审批流"},{"mod":"印章类型选择","desc":"公章/合同章/财务章"},{"mod":"用印记录留痕","desc":"可追溯"},{"mod":"电子签章集成","desc":"法大大/e签宝"},{"mod":"用印分类（付款/收款/业务调整/财务）","desc":"输入项"},{"mod":"付款合同自动触发现金流控制","desc":"前置匹配立项书"},{"mod":"级联审批（BU负责人→财务→集团执行/总裁）","desc":"审批链"}]},{"link":"中间链路","mod":"账务部分类标注","progress":"进行中","subs":[{"mod":"公司管理报表一级备注","desc":"业态/BU维度"},{"mod":"公司管理报表二级备注","desc":"项目/楼盘维度"},{"mod":"收支明细报表","desc":"按合同/按房源"},{"mod":"账龄分析报表","desc":"应收逾期"}]},{"link":"中间链路","mod":"财务部会计科目","progress":"进行中","subs":[{"mod":"一级科目（资产/负债/损益）","desc":"会计准则"},{"mod":"二级科目（应收/应付/费用）","desc":"业务分类"},{"mod":"三级科目（租金/水电/维修）","desc":"明细科目"},{"mod":"自动凭证生成","desc":"业务→凭证"}]},{"link":"向右链路","mod":"自动化财务报表","progress":"进行中","subs":[{"mod":"P&L内部管理报表","desc":"收入-成本-利润"},{"mod":"资产负债表","desc":"资产=负债+权益"},{"mod":"损益表","desc":"收入-费用=净利"},{"mod":"现金流量表","desc":"经营/投资/筹资"},{"mod":"BU维度利润分析","desc":"按业务单元"},{"mod":"P&L损益管理看板（按城市维度）","desc":"天津/深圳/香港/美国"},{"mod":"二级费用科目拆解","desc":"办公租金/增值税/园区改造"},{"mod":"资产负债科目自动变动","desc":"应收/应付税金/固定资产"}]},{"link":"向右链路","mod":"档案管理","progress":"待开始","subs":[{"mod":"合同扫描归档","desc":"OCR识别"},{"mod":"电子档案库","desc":"分类存储"},{"mod":"到期预警提醒","desc":"30/60/90天"},{"mod":"续签/退签处理","desc":"流程化"},{"mod":"历史版本追溯","desc":"变更记录"},{"mod":"发票登票原件自动与记账凭证挂接","desc":"流程闭环"},{"mod":"盖印文件业务活动扫描记存","desc":"档案保管人执行"},{"mod":"生成系统备案编号永久留存","desc":""}]}],"stats":{"total":112,"done":68,"prog":30,"pend":14,"pct":61},"weeks":[{"num":1,"start":"6.1","end":"6.5"},{"num":2,"start":"6.8","end":"6.12"},{"num":3,"start":"6.15","end":"6.19"},{"num":4,"start":"6.22","end":"6.26"},{"num":5,"start":"6.29","end":"7.3"},{"num":6,"start":"7.6","end":"7.10"},{"num":7,"start":"7.13","end":"7.17"},{"num":8,"start":"7.20","end":"7.24"},{"num":9,"start":"7.27","end":"7.31"},{"num":10,"start":"8.3","end":"8.7"},{"num":11,"start":"8.10","end":"8.14"},{"num":12,"start":"8.17","end":"8.21"},{"num":13,"start":"8.24","end":"8.28"},{"num":14,"start":"8.31","end":"9.4"}],"currentWeek":7,"atRiskCount":44,"totalModules":97};
+var evalData = null;
+
+var MENTOR_LIST = ['Jenny','王倩','黄一萧','王妤扬','杜宪','邵吴慧'];
+
+var EVAL_TRAINEES = [
+  {id:'chendshuangjie',name:'陈双杰',role:'DS小队长',level:'第二层',supervisor:'Jenny',location:'香港(6.7到港)',color:'#7B8FC0',avatarBg:'#7B8FC0'},
+  {id:'chenjin',name:'陈锦',role:'账务管培生',level:'第二层',supervisor:'王倩',location:'上海',color:'#D4A76A',avatarBg:'#D4A76A'},
+  {id:'zhaoliuwen',name:'赵柳文',role:'法务管培生',level:'第二层',supervisor:'Bella',location:'香港(6.7到港)',color:'#8BA89C',avatarBg:'#8BA89C'},
+  {id:'anziyue',name:'安子玥',role:'法务管培生',level:'第二层',supervisor:'Bella',location:'上海',color:'#A09DB5',avatarBg:'#A09DB5'},
+  {id:'huangyanting',name:'黄燕婷',role:'HR管培生',level:'第二层',supervisor:'Shaun',location:'上海→香港',color:'#D4A76A',avatarBg:'#D4A76A'},
+  {id:'renmengchao',name:'任梦超',role:'CS管培生',level:'第三层',supervisor:'Bella',location:'北美在线',color:'var(--accent)',avatarBg:'#C94F66'},
+  {id:'chenyuan',name:'陈圆',role:'CS管培生',level:'第三层',supervisor:'Bella',location:'香港(6.1到港)',color:'#8BA89C',avatarBg:'#8BA89C'}
+];
+
+var EVAL_DIMS = [
+  {id:'taskCompletion',name:'任务完成度',weight:30,max:30,desc:'本周任务全部按时完成，交付质量高'},
+  {id:'workQuality',name:'工作质量',weight:25,max:25,desc:'提交工作前请核对细节'},
+  {id:'collaboration',name:'协作贡献',weight:20,max:20,desc:'积极协助团队成员解决问题'},
+  {id:'responseSpeed',name:'响应速度',weight:15,max:15,desc:'对需求变更响应迅速'},
+  {id:'innovation',name:'主动创新',weight:10,max:10,desc:'提出了流程优化建议'}
+];
+
+var EVAL_WEEKS = [
+  {id:'W1',label:'W1',start:'06/01',end:'06/05',month:'6月'},
+  {id:'W2',label:'W2',start:'06/08',end:'06/12',month:'6月'},
+  {id:'W3',label:'W3',start:'06/15',end:'06/19',month:'6月'},
+  {id:'W4',label:'W4',start:'06/22',end:'06/26',month:'6月'},
+  {id:'W5',label:'W5',start:'06/29',end:'07/03',month:'6-7月'},
+  {id:'W6',label:'W6',start:'07/06',end:'07/10',month:'7月'},
+  {id:'W7',label:'W7',start:'07/13',end:'07/17',month:'7月'},
+  {id:'W8',label:'W8',start:'07/20',end:'07/24',month:'7月'},
+  {id:'W9',label:'W9',start:'07/27',end:'07/31',month:'7月'},
+  {id:'W10',label:'W10',start:'08/03',end:'08/07',month:'8月'},
+  {id:'W11',label:'W11',start:'08/10',end:'08/14',month:'8月'},
+  {id:'W12',label:'W12',start:'08/17',end:'08/21',month:'8月'},
+  {id:'W13',label:'W13',start:'08/24',end:'08/28',month:'8月'},
+  {id:'W14',label:'W14',start:'08/31',end:'09/04',month:'8-9月'}
+];
+var TN_EVAL_SEED = {"scores":{"陈双杰|W1":{"taskCompletion":29,"taskCompletionComment":"本周任务全部按时完成，交付质量高","workQuality":24,"workQualityComment":"提交工作前请核对细节","collaboration":20,"collaborationComment":"积极协助团队成员解决问题","responseSpeed":15,"responseSpeedComment":"对需求变更响应迅速","innovation":10,"innovationComment":"提出了流程优化建议"},"陈双杰|W2":{"taskCompletion":28,"taskCompletionComment":"列表内任务基本可以按时完成，对于会议管理系统请注意及时更新","workQuality":23.5,"workQualityComment":"注意考虑不同权限的问题","collaboration":18,"responseSpeed":14,"innovation":8},"陈双杰|W3":{"taskCompletion":26,"taskCompletionComment":"请注意任务完成的深度和精细度","workQuality":21,"workQualityComment":"请注意任务完成的深度和精细度","collaboration":19,"responseSpeed":14,"innovation":8},"陈双杰|W4":{"taskCompletion":27,"taskCompletionComment":"本周新增超级管理员角色、文件上传功能、合同台账于应收账单自动生成功能","workQuality":22.5,"collaboration":19,"responseSpeed":14,"innovation":9},"陈锦|W1":{"taskCompletion":21,"taskCompletionComment":"需要账务主管协同打分；第一周账务财务梳理任务完成度70%，希望后面严格跟上每周的工作进度","workQuality":17.5,"workQualityComment":"暂未见到明确的工作产出","collaboration":17.5,"collaborationComment":"工作任务中包含（1）接手账务专员工作；（2）旁听悦塘会议；（3）参与账务培训","responseSpeed":13,"innovation":7,"innovationComment":"暂未见到明确的工作产出"},"陈锦|W2":{"taskCompletion":21,"taskCompletionComment":"第二周根据Jenny会议安排（1）生成了付款系统看板，但未生成系统可看的版本；（2）按时提交第一版任务安排，但是在任务变更时未及时通知到Bella；（3）未生成本周任务单中的修订版的付款流程图，后6月15日补交","workQuality":17.5,"workQualityComment":"（1）付款流程图请参照原有版本的展现方式；（2）周报提交质量有待提高","collaboration":17,"collaborationComment":"希望尽快对接账务财务部门，尽快了解付款流程","responseSpeed":13,"innovation":8,"innovationComment":"尝试搭建付款流程看板"},"陈锦|W3":{"taskCompletion":29,"taskCompletionComment":"本周任务进度已跟上，表扬","workQuality":23,"workQualityComment":"工作任务完成质量较好，任务细节考虑进去了","collaboration":19,"responseSpeed":14,"innovation":8},"陈锦|W4":{"taskCompletion":27,"taskCompletionComment":"核心功能进行了新增与优化，包括申请流程增强、审批管理优化、报表与台账升级，按照统一模板进行改造，增加了PL表的预算功能","workQuality":23,"collaboration":19,"responseSpeed":14,"innovation":9},"赵柳文|W1":{"taskCompletion":29,"taskCompletionComment":"完成度良好，完成时需更多的考虑细节","workQuality":24,"workQualityComment":"需在提交前核对工作底稿与AI生成的内容\n","collaboration":20,"responseSpeed":15,"innovation":10},"赵柳文|W2":{"taskCompletion":26,"taskCompletionComment":"希望尽快梳理完成历史邮件","workQuality":24,"collaboration":18,"collaborationComment":"能够为团队其他成员提供协助","responseSpeed":14,"innovation":10,"innovationComment":" 面对困难能够积极想出不同的办法解决问题"},"赵柳文|W3":{"taskCompletion":28,"taskCompletionComment":"邮件梳理任务重，希望加快速度","workQuality":23,"workQualityComment":"梳理过程中遇到很多困难，但每次都能看到想办法解决，能看到梳理质量越来越高","collaboration":19,"responseSpeed":14,"innovation":9},"赵柳文|W4":{"taskCompletion":26,"workQuality":23,"workQualityComment":"本周进行了新一轮的尝试，虽未最终梳理完成，但是能看到工作结果在不断推进，梳理成果逐渐清晰。","collaboration":19,"responseSpeed":14,"innovation":10,"innovationComment":"本周进行了新一轮的尝试，考虑到工作的复杂性，能看到柳文在不断的尝试新的方法，发现问题并解决问题"},"安子玥|W1":{"taskCompletion":29,"taskCompletionComment":"完成度良好，需更多的站在企业的角度思考问题\n","workQuality":24,"workQualityComment":"需更多的站在企业的角度思考问题\n","collaboration":20,"responseSpeed":15,"innovation":10},"安子玥|W2":{"taskCompletion":28,"taskCompletionComment":"在请假一天的情况下仍然可以按进度完成任务，并承担了经营管理会议纪要的任务","workQuality":23,"collaboration":18,"collaborationComment":"能够主动与各BU协作获取标准合同模板，并与部门内部同事良好的进行分工协作","responseSpeed":14,"innovation":8,"innovationComment":"工作内容提交上请注意数据库的链接"},"安子玥|W3":{"taskCompletion":28,"taskCompletionComment":"人事档案梳理进度不错","workQuality":22.5,"workQualityComment":"梳理工作不错，但仍需理解最初的任务核心：希望知道哪个负责人任内，缺失了什么文件。","collaboration":19,"responseSpeed":14,"innovation":9,"innovationComment":"能够尝试自己搭建了新的会议系统"},"安子玥|W4":{"taskCompletion":27,"taskCompletionComment":"仍需对整个人事工作的框架、审批逻辑和历史审批有更加深刻的理解","workQuality":22.5,"workQualityComment":"仍需对整个人事工作的框架、审批逻辑和历史审批有更加深刻的理解","collaboration":19,"responseSpeed":14,"innovation":9},"黄燕婷|W1":{"taskCompletion":21,"taskCompletionComment":"5月中旬开始布置人事相关任务，希望尽快赶上进度","workQuality":20,"workQualityComment":"需关注速度和框架性、条理性\n","collaboration":19,"collaborationComment":"希望克服困难尽快赶上进度","responseSpeed":15,"innovation":6,"innovationComment":"希望勇敢尝试AI工具，多创新、动手"},"黄燕婷|W2":{"taskCompletion":29,"taskCompletionComment":"本周努力赶上各种进度，加班时间很长，在规定时间完成了任务","workQuality":22,"workQualityComment":"产出物质量良好，希望更多的关注自己系统的联通，并且更多的抓住系统设计的核心要点","collaboration":18,"collaborationComment":"加班加点处理日常事务，并完成人事档案的电子化，为其他同事的工作奠定了基础","responseSpeed":14,"innovation":9,"innovationComment":"努力尝试各种工具完成任务"},"黄燕婷|W3":{"taskCompletion":28.5,"taskCompletionComment":"在兼顾日常工作的情况下，能够跟上进度完成系统任务","workQuality":23.5,"collaboration":19,"collaborationComment":"客服困难完成自己的前端工作，为其他同事的工作奠定基础","responseSpeed":14,"innovation":8},"黄燕婷|W4":{"taskCompletion":27,"taskCompletionComment":"仍需对整个人事工作的框架、审批逻辑有更加深刻的理解","workQuality":22.5,"workQualityComment":"能够对产品说明书进行进一步的梳理更新和进一步的展开，并补充了员工服务板块","collaboration":19,"responseSpeed":14,"innovation":9},"任梦超|W1":{"taskCompletion":29,"taskCompletionComment":"任务完成良好，因为服务器问题本周项目管理V1.0上线晚于预定时间，希望之后严格按照上线时间表","workQuality":24.5,"workQualityComment":"之后可更多考虑管理习惯和用户习惯进行设计。","collaboration":20,"responseSpeed":15,"innovation":10},"任梦超|W2":{"taskCompletion":27,"taskCompletionComment":"完成大部分项目管理系统V1.1版本的改进","workQuality":23,"workQualityComment":"请注意系统的用户友好程度思考","collaboration":19,"responseSpeed":14,"responseSpeedComment":"\n0\n\n","innovation":9},"任梦超|W3":{"taskCompletion":28.5,"taskCompletionComment":"V1.1十六项修改任务已完成14.5项","workQuality":23.5,"collaboration":19,"responseSpeed":14,"innovation":9},"任梦超|W4":{"taskCompletion":27,"taskCompletionComment":"完成了项目管理系统V1.1版本的修订","workQuality":23.5,"workQualityComment":"希望能进一步提升系统的用户友好性","collaboration":19,"responseSpeed":14,"innovation":9},"陈圆|W1":{"taskCompletion":29,"taskCompletionComment":"V1.0上线速度快，V1.1暂未上线","workQuality":24.5,"workQualityComment":"基于V1.0打分","collaboration":20,"responseSpeed":15,"innovation":10},"陈圆|W2":{"taskCompletion":29,"taskCompletionComment":"完成用印管理系统几乎所有的修改意见","workQuality":24,"workQualityComment":"请注意AI提取功能的可用性","collaboration":19,"responseSpeed":14,"innovation":9},"陈圆|W3":{"taskCompletion":28.5,"taskCompletionComment":"给出的任务都可以如期完成","workQuality":23.5,"workQualityComment":"系统功能实现良好","collaboration":19,"responseSpeed":14,"innovation":9},"陈圆|W4":{"taskCompletion":27,"taskCompletionComment":"按时完成了用印系统的修改，并开启了人事系统的初步搭建","workQuality":23.5,"workQualityComment":"用印管理系统和人事管理系统的功能展现质量都不错","collaboration":19,"responseSpeed":14,"innovation":9}},"extras":{"陈双杰|W1":[{"name":"邮件自动化备份与抓取","score":"10","desc":"完成了邮件备份脚本开发"}],"陈双杰|W2":[{"name":"HKMS2.0流程图","score":"8.5","desc":"与小慧共同合作完成"},{"name":"合并会议纪要系统","score":"7","desc":"与安子玥共同合并，需更多考虑不同权限的问题"}],"陈双杰|W3":[{"name":"第一版收款系统交付","score":"8","desc":"注意业务细节的实现"},{"name":"","score":"0","desc":""}],"陈双杰|W4":[{"name":"","score":"0","desc":""}],"陈双杰|W5":[{"name":"","score":"0","desc":""}],"陈双杰|W6":[{"name":"","score":"0","desc":""}],"陈双杰|W7":[{"name":"","score":"0","desc":""}],"陈双杰|W8":[{"name":"","score":"0","desc":""}],"陈双杰|W9":[{"name":"","score":"0","desc":""}],"陈双杰|W10":[{"name":"","score":"0","desc":""}],"陈双杰|W11":[{"name":"","score":"0","desc":""}],"陈双杰|W12":[{"name":"","score":"0","desc":""}],"陈双杰|W13":[{"name":"","score":"0","desc":""}],"陈双杰|W14":[{"name":"","score":"0","desc":""}],"陈锦|W1":[{"name":"","score":"0","desc":""}],"陈锦|W2":[{"name":"","score":"0","desc":""}],"陈锦|W3":[{"name":"付款系统设计","score":"9","desc":"系统设计良好，任务细节考虑周到"}],"陈锦|W4":[{"name":"","score":"0","desc":""}],"陈锦|W5":[{"name":"","score":"0","desc":""}],"陈锦|W6":[{"name":"","score":"0","desc":""}],"陈锦|W7":[{"name":"","score":"0","desc":""}],"陈锦|W8":[{"name":"","score":"0","desc":""}],"陈锦|W9":[{"name":"","score":"0","desc":""}],"陈锦|W10":[{"name":"","score":"0","desc":""}],"陈锦|W11":[{"name":"","score":"0","desc":""}],"陈锦|W12":[{"name":"","score":"0","desc":""}],"陈锦|W13":[{"name":"","score":"0","desc":""}],"陈锦|W14":[{"name":"","score":"0","desc":""}],"赵柳文|W1":[{"name":"自动化编码","score":"9","desc":"编码效率有提升"},{"name":"印章保管人情况更新","score":"8","desc":"部分信息待确认"},{"name":"印章换刻","score":"9.5","desc":"换刻流程执行顺利,工作中需更灵活考虑如何完成事情+减轻小额付款的审批负担"}],"赵柳文|W2":[{"name":"历史邮件系统的自动抓取","score":"8.5","desc":""},{"name":"完成合同分类字段提取","score":"8","desc":"请注意实操中文件的进一步梳理，如【授权书】等情况"}],"赵柳文|W3":[{"name":"","score":"0","desc":""}],"赵柳文|W4":[{"name":"","score":"0","desc":""}],"赵柳文|W5":[{"name":"","score":"0","desc":""}],"赵柳文|W6":[{"name":"","score":"0","desc":""}],"赵柳文|W7":[{"name":"","score":"0","desc":""}],"赵柳文|W8":[{"name":"","score":"0","desc":""}],"赵柳文|W9":[{"name":"","score":"0","desc":""}],"赵柳文|W10":[{"name":"","score":"0","desc":""}],"赵柳文|W11":[{"name":"","score":"0","desc":""}],"赵柳文|W12":[{"name":"","score":"0","desc":""}],"赵柳文|W13":[{"name":"","score":"0","desc":""}],"赵柳文|W14":[{"name":"","score":"0","desc":""}],"安子玥|W1":[{"name":"合规用工版本梳理","score":"9","desc":"梳理工作进展良好"},{"name":"开弈投资合同框架梳理","score":"10","desc":"合同框架整理完成"}],"安子玥|W2":[{"name":"各BU标准合同版本收集梳理","score":"8.5","desc":"https://dvg5zvhhlq29xt2xz.page.qq.com/"}],"安子玥|W3":[{"name":"历史人事档案梳理汇总","score":"8.5","desc":""},{"name":"新的经营管理会议系统","score":"8.5","desc":""},{"name":"","score":"0","desc":""}],"安子玥|W4":[{"name":"","score":"0","desc":""}],"安子玥|W5":[{"name":"","score":"0","desc":""}],"安子玥|W6":[{"name":"","score":"0","desc":""}],"安子玥|W7":[{"name":"","score":"0","desc":""}],"安子玥|W8":[{"name":"","score":"0","desc":""}],"安子玥|W9":[{"name":"","score":"0","desc":""}],"安子玥|W10":[{"name":"","score":"0","desc":""}],"安子玥|W11":[{"name":"","score":"0","desc":""}],"安子玥|W12":[{"name":"","score":"0","desc":""}],"安子玥|W13":[{"name":"","score":"0","desc":""}],"安子玥|W14":[{"name":"","score":"0","desc":""}],"黄燕婷|W1":[{"name":"人事档案电子化","score":"6","desc":"电子化进度稍慢"},{"name":"人事流程梳理","score":"6","desc":"流程梳理进行，需关注速度和框架性、条理性"}],"黄燕婷|W2":[{"name":"人事工作梳理看板","score":"8.5","desc":"https://imwaiting-tina.github.io/hro-hr/weekly-report-260612.html"},{"name":"自行搭建人事系统","score":"8","desc":"https://imwaiting-tina.github.io/hro-system/recruitment/resume"},{"name":"","score":"0","desc":""}],"黄燕婷|W3":[{"name":"人事系统需求说明书V1.0","score":"9","desc":""}],"黄燕婷|W4":[{"name":"","score":"0","desc":""}],"黄燕婷|W5":[{"name":"","score":"0","desc":""}],"黄燕婷|W6":[{"name":"","score":"0","desc":""}],"黄燕婷|W7":[{"name":"","score":"0","desc":""}],"黄燕婷|W8":[{"name":"","score":"0","desc":""}],"黄燕婷|W9":[{"name":"","score":"0","desc":""}],"黄燕婷|W10":[{"name":"","score":"0","desc":""}],"黄燕婷|W11":[{"name":"","score":"0","desc":""}],"黄燕婷|W12":[{"name":"","score":"0","desc":""}],"黄燕婷|W13":[{"name":"","score":"0","desc":""}],"黄燕婷|W14":[{"name":"","score":"0","desc":""}],"任梦超|W1":[{"name":"项目管理V1.0","score":"9","desc":"项目管理工作表现优秀，因为服务器问题本周项目管理V1.0上线晚于预定时间，希望之后严格按照上线时间表"}],"任梦超|W2":[{"name":"项目管理系统V1.1","score":"8.5","desc":""}],"任梦超|W3":[{"name":"项目管理系统V1.1","score":"9","desc":""}],"任梦超|W4":[{"name":"","score":"0","desc":""}],"任梦超|W5":[{"name":"","score":"0","desc":""}],"任梦超|W6":[{"name":"","score":"0","desc":""}],"任梦超|W7":[{"name":"","score":"0","desc":""}],"任梦超|W8":[{"name":"","score":"0","desc":""}],"任梦超|W9":[{"name":"","score":"0","desc":""}],"任梦超|W10":[{"name":"","score":"0","desc":""}],"任梦超|W11":[{"name":"","score":"0","desc":""}],"任梦超|W12":[{"name":"","score":"0","desc":""}],"任梦超|W13":[{"name":"","score":"0","desc":""}],"任梦超|W14":[{"name":"","score":"0","desc":""}],"陈圆|W1":[{"name":"用印管理V1.0","score":"10","desc":"用印管理工作表现突出，在没有需求说明书的情况下承担技术和项目经理双重角色完成V1.0\n"}],"陈圆|W2":[{"name":"用印管理系统V1.0上线","score":"9","desc":"请注意AI提取功能的可用性"}],"陈圆|W3":[{"name":"用印管理系统V1.1","score":"9","desc":""}],"陈圆|W4":[{"name":"","score":"0","desc":""}],"陈圆|W5":[{"name":"","score":"0","desc":""}],"陈圆|W6":[{"name":"","score":"0","desc":""}],"陈圆|W7":[{"name":"","score":"0","desc":""}],"陈圆|W8":[{"name":"","score":"0","desc":""}],"陈圆|W9":[{"name":"","score":"0","desc":""}],"陈圆|W10":[{"name":"","score":"0","desc":""}],"陈圆|W11":[{"name":"","score":"0","desc":""}],"陈圆|W12":[{"name":"","score":"0","desc":""}],"陈圆|W13":[{"name":"","score":"0","desc":""}],"陈圆|W14":[{"name":"","score":"0","desc":""}]},"mentors":{}};
 // ===== User & Auth =====
-const MODULES = ['org','okr','kpi','report','meeting'];
-const MOD_LABELS = {vision:'愿景与战略',org:'组织管理',okr:'OKR目标',kpi:'KPI指标',report:'报表提交',meeting:'例会管理'};
-const PERM_MODULES = ['okr','kpi','report','meeting']; // modules requiring explicit permission grants
-const SUBTABS = {vision:['strategy','trainee','backend'],org:['tree','edit','func','attend'],okr:['cards','gantt','tree'],kpi:['indicators','traineeMgmt'],report:['monthly','yearly']};
-const SUBTAB_LABELS = {org_tree:'树状架构图',org_edit:'员工花名册',org_func:'职能分工',org_attend:'在岗状态',okr_cards:'总览',okr_gantt:'甘特图',okr_tree:'树形图',kpi_indicators:'KPI 指标',kpi_traineeMgmt:'管培生管理',report_monthly:'月度报表',report_yearly:'年度报表',vision_strategy:'战略总览',vision_trainee:'管培生计划',vision_backend:'大后台系统'};
+const MODULES = ['org','okr','kpi','report','meeting','trainee'];
+const MOD_LABELS = {vision:'愿景与战略',org:'组织管理',okr:'OKR目标',kpi:'KPI指标',report:'报表提交',meeting:'例会管理',trainee:'管培生管理'};
+const PERM_MODULES = ['okr','kpi','report','meeting','trainee']; // modules requiring explicit permission grants
+const SUBTABS = {vision:['strategy','trainee','backend'],org:['tree','edit','func','attend'],okr:['cards','gantt','tree'],kpi:['indicators'],report:['monthly','yearly']};
+const SUBTAB_LABELS = {org_tree:'树状架构图',org_edit:'员工花名册',org_func:'职能分工',org_attend:'在岗状态',okr_cards:'总览',okr_gantt:'甘特图',okr_tree:'树形图',kpi_indicators:'KPI 指标',report_monthly:'月度报表',report_yearly:'年度报表',vision_strategy:'战略总览',vision_trainee:'管培生计划',vision_backend:'大后台系统'};
 var PERM_SELMOD = 'vision';
 const escAttr=s=>String(s).replace(/[^a-zA-Z0-9\u4e00-\u9fff_-]/g,'_');
 function defaultRoles(){
   return {
-    '部门主管':{modules:{okr:'edit',kpi:'edit',report:'edit',meeting:'view'},subtabs:{vision_trainee:'hidden'}},
-    '标准员工':{modules:{okr:'view',kpi:'view',report:'view',meeting:'none'},subtabs:{vision_trainee:'hidden'}},
-    '管培生':{modules:{okr:'view',kpi:'view',report:'none',meeting:'none'},subtabs:{kpi_traineeMgmt:'visible',vision_trainee:'hidden'}},
-    '仅组织架构':{modules:{okr:'none',kpi:'none',report:'none',meeting:'none'},subtabs:{vision_trainee:'hidden'}}
+    '部门主管':{modules:{okr:'edit',kpi:'edit',report:'edit',meeting:'view',trainee:'edit'},subtabs:{vision_trainee:'hidden'}},
+    '标准员工':{modules:{okr:'view',kpi:'view',report:'view',meeting:'none',trainee:'none'},subtabs:{vision_trainee:'hidden'}},
+    '管培生':{modules:{okr:'view',kpi:'view',report:'none',meeting:'none',trainee:'view'},subtabs:{vision_trainee:'hidden'}},
+    '仅组织架构':{modules:{okr:'none',kpi:'none',report:'none',meeting:'none',trainee:'none'},subtabs:{vision_trainee:'hidden'}}
   };
 }
 function ensureDefaultRoles(p){
@@ -2670,6 +2779,29 @@ function loadPerms(){
     if(!p.userRoles||typeof p.userRoles!=='object')p.userRoles={};
     if(!p.exceptions||typeof p.exceptions!=='object')p.exceptions={};
     ensureDefaultRoles(p);
+    // Migrate old kpi_traineeMgmt subtab → trainee module
+    Object.keys(p.exceptions||{}).forEach(function(uid){
+      var ex=p.exceptions[uid];
+      if(ex.subtabs&&ex.subtabs.kpi_traineeMgmt!==undefined){
+        if(!ex.modules)ex.modules={};
+        if(ex.modules.trainee===undefined){
+          ex.modules.trainee=ex.subtabs.kpi_traineeMgmt==='visible'?'view':'none';
+        }
+        delete ex.subtabs.kpi_traineeMgmt;
+      }
+      if(ex.subtabs&&!Object.keys(ex.subtabs).length)delete ex.subtabs;
+    });
+    // Also migrate role defaults
+    Object.keys(p.roles||{}).forEach(function(rn){
+      var r=p.roles[rn];
+      if(r.subtabs&&r.subtabs.kpi_traineeMgmt!==undefined){
+        if(!r.modules)r.modules={};
+        if(r.modules.trainee===undefined){
+          r.modules.trainee=r.subtabs.kpi_traineeMgmt==='visible'?'view':'none';
+        }
+        delete r.subtabs.kpi_traineeMgmt;
+      }
+    });
     return p;
   }catch(e){
     var p2={roles:{},userRoles:{},exceptions:{}};
@@ -4150,7 +4282,7 @@ function restoreSelect(id,val){const el=document.getElementById(id);if(el&&val)e
 
 // ===== Tab Switching =====
 let curTab = 'workspace';
-let kpiView = 'indicators';
+
 let pendingTab = null;
 function showPermBlock(tabId,title,subtitle){
   var main=document.querySelector('#'+tabId+' .main');
@@ -4179,6 +4311,7 @@ function switchTab(tab) {
   pendingTab = null;
   document.getElementById('tabOKR').className = 'tab-content' + (tab==='okr'?' active':'');
   document.getElementById('tabKPI').className = 'tab-content' + (tab==='kpi'?' active':'');
+  document.getElementById('tabTrainee').className = 'tab-content' + (tab==='trainee'?' active':'');
   document.getElementById('tabRPT').className = 'tab-content' + (tab==='report'?' active':'');
   document.getElementById('tabMET').className = 'tab-content' + (tab==='meeting'?' active':'');
   document.getElementById('tabORG').className = 'tab-content' + (tab==='org'?' active':'');
@@ -4199,9 +4332,18 @@ function switchTab(tab) {
   }
   else if (tab==='kpi') {
     hidePermBlock('tabKPI');
-    if(!currentUser){ showPermBlock('tabKPI','请先登录','登录后查看KPI指标和管培生管理'); setNewBtn(false); return; }
+    if(!currentUser){ showPermBlock('tabKPI','请先登录','登录后查看KPI指标'); setNewBtn(false); return; }
     if(!canViewModule(currentUser,'kpi')){document.getElementById('kpiIndicatorsPage').innerHTML='<div class="empty"><p>暂无权限访问KPI指标看板</p><p style="font-size:9px">请联系管理员开通KPI查看权限</p></div>';document.getElementById('kpiIndicatorsPage').className='page active';document.getElementById('kpiFilterRow').style.display='none';document.getElementById('kpiFilterChips').style.display='none';setNewBtn(false);return;}
-    switchKpiView(kpiView);
+    document.getElementById('kpiIndicatorsPage').className='page active';
+    document.getElementById('kpiFilterRow').style.display='';
+    document.getElementById('kpiFilterChips').style.display='';
+    restoreKpiFilters(); renderKPI();
+  }
+  else if (tab==='trainee') {
+    hidePermBlock('tabTrainee');
+    if(!currentUser){ showPermBlock('tabTrainee','请先登录','登录后查看管培生管理'); setNewBtn(false); return; }
+    if(!canViewModule(currentUser,'trainee')){showPermBlock('tabTrainee','暂无权限访问管培生管理','请联系管理员开通管培生查看权限');setNewBtn(false);return;}
+    initTraineeSystem();
   }
   else if (tab==='report') {
     if(!currentUser){pendingTab=tab;showPermBlock('tabRPT','暂无权限访问报表提交','请先登录后查看');setNewBtn(false);return;}
@@ -4221,38 +4363,8 @@ function switchTab(tab) {
     restoreMeetingFilters(); renderMeetings();
   }
 }
-function handleNew() { if(curTab==='workspace'||curTab==='vision')return; if(curTab==='org'&&!canEditModule(currentUser,'org')){alert('仅管理员可管理员工花名册');return;} curTab==='okr'?openOkrModal():curTab==='kpi'?openKpiModal():curTab==='report'?openReportModal():curTab==='org'?openEmployeeModal():openMeetingModal(); }
+function handleNew() { if(curTab==='workspace'||curTab==='vision')return; if(curTab==='org'&&!canEditModule(currentUser,'org')){alert('仅管理员可管理员工花名册');return;} curTab==='okr'?openOkrModal():curTab==='kpi'?openKpiModal():curTab==='report'?openReportModal():curTab==='org'?openEmployeeModal():curTab==='trainee'?openWeeklyTaskModal():openMeetingModal(); }
 
-function switchKpiView(view) {
-  if(!currentUser){
-    document.getElementById('kpiIndicatorsPage').innerHTML='<div class="empty"><p>请先登录</p></div>';
-    document.getElementById('kpiIndicatorsPage').className='page active';
-    document.getElementById('kpiTraineePage').className='page';
-    document.getElementById('kpiFilterRow').style.display='none';
-    document.getElementById('kpiFilterChips').style.display='none';
-    document.getElementById('sidebarBtn').style.display='none';
-    return;
-  }
-  if(!canViewModule(currentUser,'kpi')){
-    document.getElementById('kpiIndicatorsPage').innerHTML='<div class="empty"><p>暂无权限访问KPI指标看板</p><p style="font-size:9px">请联系管理员开通KPI查看权限</p></div>';
-    document.getElementById('kpiIndicatorsPage').className='page active';
-    document.getElementById('kpiTraineePage').className='page';
-    document.getElementById('kpiFilterRow').style.display='none';
-    document.getElementById('kpiFilterChips').style.display='none';
-    document.getElementById('sidebarBtn').style.display='none';
-    return;
-  }
-  kpiView = view;
-  document.getElementById('kpiIndicatorsPage').className = 'page' + (view==='indicators'?' active':'');
-  document.getElementById('kpiTraineePage').className = 'page' + (view==='traineeMgmt'?' active':'');
-  document.getElementById('kpiFilterRow').style.display = view==='indicators' ? '' : 'none';
-  document.getElementById('kpiFilterChips').style.display = view==='indicators' ? '' : 'none';
-  document.querySelectorAll('#kpiViewToggle button').forEach(function(b,i){
-    b.classList.toggle('active', (i===0 && view==='indicators') || (i===1 && view==='traineeMgmt'));
-  });
-  if(view==='indicators'){ restoreKpiFilters(); renderKPI(); }
-  else if(view==='traineeMgmt'){ initTraineeSystem(); }
-}
 
 function switchOkrView(view) {
   okrView = view;
@@ -9479,42 +9591,6 @@ function renderWorkspace(){
 var evalCurrentView = 'weekly';
 var evalCurrentWeek = 0;
 var evalSelectedTrainee = null;
-var evalData = null;
-
-var EVAL_TRAINEES = [
-  {id:'chendshuangjie',name:'陈双杰',role:'DS小队长',level:'第二层',supervisor:'Jenny',location:'香港(6.7到港)',color:'#7B8FC0',avatarBg:'#7B8FC0'},
-  {id:'chenjin',name:'陈锦',role:'账务管培生',level:'第二层',supervisor:'王倩',location:'上海',color:'#D4A76A',avatarBg:'#D4A76A'},
-  {id:'zhaoliuwen',name:'赵柳文',role:'法务管培生',level:'第二层',supervisor:'Bella',location:'香港(6.7到港)',color:'#8BA89C',avatarBg:'#8BA89C'},
-  {id:'anziyue',name:'安子玥',role:'法务管培生',level:'第二层',supervisor:'Bella',location:'上海',color:'#A09DB5',avatarBg:'#A09DB5'},
-  {id:'huangyanting',name:'黄燕婷',role:'HR管培生',level:'第二层',supervisor:'Shaun',location:'上海→香港',color:'#D4A76A',avatarBg:'#D4A76A'},
-  {id:'renmengchao',name:'任梦超',role:'CS管培生',level:'第三层',supervisor:'Bella',location:'北美在线',color:'var(--accent)',avatarBg:'#C94F66'},
-  {id:'chenyuan',name:'陈圆',role:'CS管培生',level:'第三层',supervisor:'Bella',location:'香港(6.1到港)',color:'#8BA89C',avatarBg:'#8BA89C'}
-];
-
-var EVAL_DIMS = [
-  {id:'taskCompletion',name:'任务完成度',weight:30,max:30,desc:'本周任务全部按时完成，交付质量高'},
-  {id:'workQuality',name:'工作质量',weight:25,max:25,desc:'提交工作前请核对细节'},
-  {id:'collaboration',name:'协作贡献',weight:20,max:20,desc:'积极协助团队成员解决问题'},
-  {id:'responseSpeed',name:'响应速度',weight:15,max:15,desc:'对需求变更响应迅速'},
-  {id:'innovation',name:'主动创新',weight:10,max:10,desc:'提出了流程优化建议'}
-];
-
-var EVAL_WEEKS = [
-  {id:'W1',label:'W1',start:'06/01',end:'06/05',month:'6月'},
-  {id:'W2',label:'W2',start:'06/08',end:'06/12',month:'6月'},
-  {id:'W3',label:'W3',start:'06/15',end:'06/19',month:'6月'},
-  {id:'W4',label:'W4',start:'06/22',end:'06/26',month:'6月'},
-  {id:'W5',label:'W5',start:'06/29',end:'07/03',month:'6-7月'},
-  {id:'W6',label:'W6',start:'07/06',end:'07/10',month:'7月'},
-  {id:'W7',label:'W7',start:'07/13',end:'07/17',month:'7月'},
-  {id:'W8',label:'W8',start:'07/20',end:'07/24',month:'7月'},
-  {id:'W9',label:'W9',start:'07/27',end:'07/31',month:'7月'},
-  {id:'W10',label:'W10',start:'08/03',end:'08/07',month:'8月'},
-  {id:'W11',label:'W11',start:'08/10',end:'08/14',month:'8月'},
-  {id:'W12',label:'W12',start:'08/17',end:'08/21',month:'8月'},
-  {id:'W13',label:'W13',start:'08/24',end:'08/28',month:'8月'},
-  {id:'W14',label:'W14',start:'08/31',end:'09/04',month:'8-9月'}
-];
 
 function getEvalStorageKey(){ return 'otms_trainee_eval_v1'; }
 
@@ -9570,11 +9646,70 @@ function calcExtraTotal(extras){
   return extras.reduce(function(s,e){ return s + (parseInt(e.score)||0); }, 0);
 }
 
+function openMentorAssignModal(){
+  if(!evalData) loadEvalData();
+  var html = '<table style="width:100%;border-collapse:collapse;font-size:10px">';
+  html += '<thead><tr><th style="position:sticky;left:0;background:var(--bg-surface);z-index:2;text-align:left;padding:8px;min-width:80px;border-bottom:1px solid var(--border-light)">管培生</th>';
+  for(var w=0;w<EVAL_WEEKS.length;w++){
+    html += '<th style="padding:6px 4px;text-align:center;border-bottom:1px solid var(--border-light);font-size:8px;min-width:60px">'+EVAL_WEEKS[w].label+'<br><span style="font-weight:400;color:var(--text-dim)">'+EVAL_WEEKS[w].start+'</span></th>';
+  }
+  html += '</tr></thead><tbody>';
+  EVAL_TRAINEES.forEach(function(t){
+    html += '<tr><td style="position:sticky;left:0;background:var(--card);z-index:1;padding:8px;border-bottom:1px solid var(--border-light);font-weight:500;white-space:nowrap">'+t.name+'<br><span style="font-size:8px;color:var(--text-dim);font-weight:400">默认:'+t.supervisor+'</span></td>';
+    for(var w=0;w<EVAL_WEEKS.length;w++){
+      var key = t.name+'|'+EVAL_WEEKS[w].id;
+      var curVal = (evalData.mentors&&evalData.mentors[key])||'';
+      html += '<td style="padding:4px;border-bottom:1px solid var(--border-light);text-align:center">';
+      html += '<select id="mtr_'+t.id+'_'+EVAL_WEEKS[w].id+'" style="width:100%;padding:4px;border:1px solid var(--border-light);border-radius:4px;font-size:9px;font-family:inherit;background:var(--bg-surface);color:var(--text);outline:none;cursor:pointer">';
+      html += '<option value="">'+t.supervisor+'</option>';
+      MENTOR_LIST.forEach(function(m){
+        html += '<option value="'+m+'"'+(curVal===m?' selected':'')+'>'+m+'</option>';
+      });
+      html += '</select></td>';
+    }
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('mentorMatrix').innerHTML = html;
+  document.getElementById('mentorAssignModal').style.display = '';
+}
+function closeMentorAssignModal(){
+  document.getElementById('mentorAssignModal').style.display = 'none';
+}
+function saveMentorAssign(){
+  if(!evalData) loadEvalData();
+  if(!evalData.mentors) evalData.mentors = {};
+  EVAL_TRAINEES.forEach(function(t){
+    for(var w=0;w<EVAL_WEEKS.length;w++){
+      var sel = document.getElementById('mtr_'+t.id+'_'+EVAL_WEEKS[w].id);
+      if(!sel) continue;
+      var key = t.name+'|'+EVAL_WEEKS[w].id;
+      if(sel.value){
+        evalData.mentors[key] = sel.value;
+      } else {
+        delete evalData.mentors[key];
+      }
+    }
+  });
+  saveEvalData();
+  closeMentorAssignModal();
+  renderEvalTraineeList();
+  if(evalSelectedTrainee) renderEvalScorePanel(evalSelectedTrainee);
+}
+function resetMentorAssign(){
+  if(!evalData) loadEvalData();
+  evalData.mentors = {};
+  saveEvalData();
+  openMentorAssignModal();
+}
+
 function initEvalSystem(){
   loadEvalData();
   var cu = currentUser || '王妤扬';
   document.getElementById('evalAvatar').textContent = (cu||'评').charAt(0);
   document.getElementById('evalName').textContent = cu || '评分人';
+  var mentorBtn = document.getElementById('evalMentorBtn');
+  if(mentorBtn) mentorBtn.style.display = isGlobalAdmin(currentUser) ? '' : 'none';
   var now = new Date();
   var startDate = new Date(2026,5,1);
   var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
@@ -9585,37 +9720,23 @@ function initEvalSystem(){
 }
 
 function initSampleData(){
-  var hasData = false;
-  for(var i=0;i<EVAL_TRAINEES.length;i++){
-    var s = getEvalScore(EVAL_TRAINEES[i].name, 'W1');
-    if(s){ hasData = true; break; }
+  if(typeof TN_EVAL_SEED === 'undefined') return;
+  // Always load from embedded seed data (imported from JSON)
+  if(TN_EVAL_SEED.scores){
+    if(!evalData) loadEvalData();
+    if(!evalData.scores) evalData.scores = {};
+    Object.keys(TN_EVAL_SEED.scores).forEach(function(k){
+      if(!evalData.scores[k]) evalData.scores[k] = TN_EVAL_SEED.scores[k];
+    });
   }
-  if(hasData) return;
-  var w1Scores = {
-    '陈双杰': {taskCompletion:29,workQuality:24,collaboration:20,responseSpeed:15,innovation:10},
-    '陈锦':   {taskCompletion:22,workQuality:19,collaboration:17,responseSpeed:11,innovation:7},
-    '赵柳文': {taskCompletion:29,workQuality:25,collaboration:19,responseSpeed:15,innovation:10},
-    '安子玥': {taskCompletion:29,workQuality:25,collaboration:19,responseSpeed:15,innovation:10},
-    '黄燕婷': {taskCompletion:24,workQuality:20,collaboration:18,responseSpeed:12,innovation:7},
-    '任梦超': {taskCompletion:30,workQuality:25,collaboration:20,responseSpeed:14,innovation:9.5},
-    '陈圆':   {taskCompletion:30,workQuality:25,collaboration:20,responseSpeed:14,innovation:9.5}
-  };
-  var w1Extras = {
-    '陈双杰': [{name:'数据看板搭建',score:'10',desc:'完成管培生数据看板V1.0'}],
-    '任梦超': [{name:'架构设计文档',score:'9',desc:'完成三链路架构设计文档'}],
-    '陈圆':   [{name:'前端页面框架',score:'10',desc:'完成合同档案系统前端框架搭建'}]
-  };
-  Object.keys(w1Scores).forEach(function(tid){
-    setEvalScore(tid, 'W1', w1Scores[tid]);
-    if(w1Extras[tid]) setEvalExtras(tid, 'W1', w1Extras[tid]);
-  });
-  var w2Scores = {
-    '陈双杰': {taskCompletion:27,workQuality:23,collaboration:19,responseSpeed:13,innovation:9.5},
-    '陈锦':   {taskCompletion:23,workQuality:19,collaboration:17,responseSpeed:11,innovation:6.5}
-  };
-  Object.keys(w2Scores).forEach(function(tid){
-    setEvalScore(tid, 'W2', w2Scores[tid]);
-  });
+  if(TN_EVAL_SEED.extras){
+    if(!evalData) loadEvalData();
+    if(!evalData.extras) evalData.extras = {};
+    Object.keys(TN_EVAL_SEED.extras).forEach(function(k){
+      if(!evalData.extras[k]) evalData.extras[k] = TN_EVAL_SEED.extras[k];
+    });
+  }
+  saveEvalData();
 }
 
 function switchEvalView(view){
@@ -9689,6 +9810,7 @@ function selectEvalTrainee(traineeId){
 }
 
 function renderEvalScorePanel(traineeId){
+  try {
   var t = null;
   for(var i=0;i<EVAL_TRAINEES.length;i++){ if(EVAL_TRAINEES[i].name===traineeId){ t=EVAL_TRAINEES[i]; break; } }
   if(!t) return;
@@ -9769,6 +9891,7 @@ function renderEvalScorePanel(traineeId){
         prevDataBtn + saveBtn +
       '</div>'+
     '</div>';
+  } catch(e) { container.innerHTML = '<div style=\"padding:12px;color:#C94F66;background:var(--bg-surface);border-radius:8px;text-align:center;font-size:11px\">评分面板报错: '+esc(e.message)+'</div>'; }
 }
 
 // Auto-score task completion from task board data
@@ -10016,7 +10139,7 @@ function exportEvalCSV(){
 var tnCurrentView = 'tasks';
 var tnData = null;
 
-// 39 RACI tasks
+
 var TN_TASKS = [];
 
 // 59 Reference tasks from external task management system
@@ -10130,7 +10253,7 @@ function calcTaskCompletionForTrainee(traineeName, weekId){
   var allTotal = 0, allDone = 0;
 
   // 1. Plan tasks (TN_TASKS)
-  TN_TASKS.forEach(function(t){
+  if(typeof TN_TASKS !== 'undefined' && TN_TASKS) TN_TASKS.forEach(function(t){
     if(t.R!==traineeName && t.A!==traineeName && (t.I||'').indexOf(traineeName)===-1) return;
     var td = getTnTask(t.id);
     var isDone = (td && td.status)==='done' || (!td && t.status==='done');
@@ -10157,7 +10280,7 @@ function calcTaskCompletionForTrainee(traineeName, weekId){
 
   // 3. Reference tasks (refTasks)
   var refTasks = tnData && tnData.refTasks ? tnData.refTasks : TN_REF_TASKS;
-  refTasks.forEach(function(r){
+  if(refTasks) refTasks.forEach(function(r){
     if(!r.executors || r.executors.indexOf(traineeName)===-1) return;
     allTotal++;
     if(r.refStatus==='done') allDone++;
@@ -10395,15 +10518,17 @@ function initTraineeSystem(){
 
 function switchTraineeView(view){
   tnCurrentView = view;
+  document.getElementById('tnOverviewView').style.display = view==='overview'?'':'none';
   document.getElementById('tnTaskView').style.display = view==='tasks'?'':'none';
   document.getElementById('tnReportView').style.display = view==='reports'?'':'none';
   document.getElementById('tnDashboardView').style.display = view==='dashboard'?'':'none';
   document.getElementById('tnEvalView').style.display = view==='evaluation'?'':'none';
   document.querySelectorAll('.tn-sub-tab').forEach(function(b,i){
-    var views = ['tasks','reports','evaluation','dashboard'];
+    var views = ['overview','tasks','reports','evaluation','dashboard'];
     b.classList.toggle('active', views[i]===view);
   });
-  if(view==='tasks'){ renderTraineeSummary(); renderApprovalPanel(); renderTraineeTasks(); document.getElementById('tnGanttDims').style.display = 'flex'; initTnSplitPane(); }
+  if(view==='overview'){ try { renderTraineeSummary(); } catch(e) { document.getElementById('traineeSummary').innerHTML = '<div style=\"padding:12px;color:#C94F66;background:var(--bg-surface);border-radius:8px;text-align:center;font-size:11px\">Summary报错: '+esc(e.message)+'</div>'; } try { renderTraineeOverview(); } catch(e) { document.getElementById('tnOvStatsBar').innerHTML = '<div style=\"padding:20px;color:#C94F66;background:var(--bg-surface);border-radius:10px;text-align:center\">Overview报错: '+esc(e.message)+'</div>'; } }
+  else if(view==='tasks'){ renderTraineeSummary(); renderApprovalPanel(); renderTraineeTasks(); document.getElementById('tnGanttDims').style.display = 'flex'; initTnSplitPane(); }
   else if(view==='reports'){ renderTraineeSummary(); initTnAttendees(); clearTnMeetingForm(); renderTnMeetingList(); switchReportSection('meeting'); }
   else if(view==='dashboard'){ renderTraineeSummary(); renderDashboard(); }
   else if(view==='evaluation'){ initEvalSystem(); }
@@ -10430,7 +10555,7 @@ function renderTraineeSummary(){
   }
   // Also count reference tasks
   var refTasks = tnData && tnData.refTasks ? tnData.refTasks : TN_REF_TASKS;
-  refTasks.forEach(function(r){
+  if(refTasks) refTasks.forEach(function(r){
     total++;
     var st = r.refStatus || 'pending';
     if(st==='done') done++;
@@ -10451,11 +10576,13 @@ function renderTraineeSummary(){
   var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
   var curWkId = 'W' + (curWkIdx + 1);
   var totalScore = 0, traineeCount = 0;
-  EVAL_TRAINEES.forEach(function(tr){
-    var s = getEvalScore(tr.name, curWkId);
-    var ts = calcTotalScore(s);
-    if(ts !== null){ totalScore += ts; traineeCount++; }
-  });
+  if(typeof EVAL_TRAINEES !== 'undefined' && EVAL_TRAINEES){
+    EVAL_TRAINEES.forEach(function(tr){
+      var s = getEvalScore(tr.name, curWkId);
+      var ts = calcTotalScore(s);
+      if(ts !== null){ totalScore += ts; traineeCount++; }
+    });
+  }
   var avgScore = traineeCount > 0 ? (totalScore / traineeCount).toFixed(1) : '--';
   document.getElementById('traineeSummary').innerHTML =
     '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#7B8FC0">'+total+'</div><div class="tn-sc-lbl">全部任务</div></div>'+
@@ -11965,6 +12092,122 @@ function renderDashboard(){
   }, 100);
   
   document.getElementById('tnRankWeekLabel').textContent = curWkId + ' 排名';
+}
+
+// ===== TRAINEE OVERVIEW DASHBOARD (HKMS2.0 data, OTMS style) =====
+function renderTraineeOverview(){
+  try {
+  var D = window.TN_DASHBOARD_DATA || (typeof TN_DASHBOARD_DATA !== 'undefined' ? TN_DASHBOARD_DATA : null);
+  if(!D){ document.getElementById('tnOvStatsBar').innerHTML = '<div style=\"padding:20px;color:var(--text-muted)\">数据未加载 (typeof='+(typeof TN_DASHBOARD_DATA)+')</div>'; return; }
+  var s = D.stats;
+
+  // --- Stats Bar ---
+  var statsHtml = '';
+  var items = [
+    {v:s.total, l:'总任务', c:'var(--accent)'},
+    {v:s.done, l:'已完成', c:'var(--success)'},
+    {v:s.prog, l:'进行中', c:'#D4A76A'},
+    {v:s.pend, l:'待开始', c:'#C94F66'},
+    {v:s.pct+'%', l:'完成率', c:'var(--accent)'},
+    {v:D.atRiskCount, l:'W9截止前未完成', c:'#C94F66'},
+    {v:'W'+D.currentWeek, l:'当前周', c:'var(--text-muted)'}
+  ];
+  items.forEach(function(it){
+    statsHtml += '<div class="tn-ov-stat-item"><div class="tn-ov-stat-num" style="color:'+it.c+'">'+it.v+'</div><div class="tn-ov-stat-label">'+it.l+'</div></div>';
+  });
+  document.getElementById('tnOvStatsBar').innerHTML = statsHtml;
+
+  // --- System Cards ---
+  var cardsHtml = '';
+  D.treeData.forEach(function(sys){
+    var st = sys.stats;
+    var color = st.pct >= 80 ? 'var(--success)' : (st.pct >= 40 ? '#D4A76A' : '#C94F66');
+    cardsHtml += '<div class="tn-ov-sys-card" style="border-left:3px solid '+color+'">'+
+      '<div class="tn-ov-sc-name">'+esc(sys.name)+'</div>'+
+      '<div class="tn-ov-sc-stats">'+
+        '<span><b>'+st.total+'</b> 任务</span>'+
+        '<span style="color:var(--success)">已完成 '+st.done+'</span>'+
+        '<span style="color:#D4A76A">进行中 '+st.prog+'</span>'+
+        '<span style="color:#C94F66">待开始 '+st.pend+'</span>'+
+        '<span style="margin-left:auto;font-weight:700;color:'+color+'">'+st.pct+'%</span>'+
+      '</div>'+
+      '<div style="margin-top:6px;font-size:10px;color:var(--text-muted)">'+sys.parents.length+' 个父任务组</div>'+
+    '</div>';
+  });
+  document.getElementById('tnOvSysCards').innerHTML = cardsHtml;
+
+  // --- Link Panels ---
+  var links = [
+    {key:'向前链路', name:'向前链路', color:'#5B7DB5'},
+    {key:'中间链路', name:'中间链路', color:'#D4A76A'},
+    {key:'向右链路', name:'向右链路', color:'#5A7868'}
+  ];
+  var panelsHtml = '';
+  links.forEach(function(l){
+    var groups = D.modules.filter(function(g){ return g.link === l.key; });
+    var itemCount = 0;
+    groups.forEach(function(g){ itemCount += 1 + g.subs.length; });
+
+    panelsHtml += '<div class="tn-ov-panel">'+
+      '<div class="tn-ov-panel-hd" style="background:'+l.color+'">'+l.name+'<span style="font-weight:400;opacity:.8;margin-left:8px;font-size:10px">'+groups.length+'模块组 · '+itemCount+'项</span></div>'+
+      '<div class="tn-ov-panel-bd">';
+    groups.forEach(function(g){
+      var prog = g.progress || '待开始';
+      var progCls = prog==='已完成'?'tn-ov-prog-done':(prog==='进行中'?'tn-ov-prog-active':'tn-ov-prog-pend');
+      var hasSubs = g.subs && g.subs.length > 0;
+      panelsHtml += '<div class="tn-ov-mod-row tn-ov-mod-parent" data-expand="1" style="cursor:pointer">'+
+        '<span class="tn-ov-mod-dot" style="background:'+l.color+'"></span>'+
+        (hasSubs ? '<span class="tn-ov-mod-arrow">&#9660;</span>' : '')+
+        '<span class="tn-ov-mod-name">'+esc(g.mod)+'</span>'+
+        '<span class="tn-ov-mod-badge '+progCls+'">'+prog+'</span>'+
+      '</div>';
+      if(hasSubs){
+        panelsHtml += '<div class="tn-ov-mod-subs">';
+        g.subs.forEach(function(sb){
+          panelsHtml += '<div class="tn-ov-mod-row tn-ov-mod-sub">'+
+            '<span class="tn-ov-mod-dot" style="background:'+l.color+';opacity:.35"></span>'+
+            '<span class="tn-ov-mod-name" style="padding-left:16px;font-size:10px">'+esc(sb.mod)+'</span>'+
+            '<span class="tn-ov-mod-desc">'+esc(sb.desc||'')+'</span>'+
+          '</div>';
+        });
+        panelsHtml += '</div>';
+      }
+    });
+    panelsHtml += '</div></div>';
+  });
+  document.getElementById('tnOvLinkPanels').innerHTML = panelsHtml;
+
+  // bind expand/collapse on parent module rows
+  setTimeout(function(){
+    var parents = document.querySelectorAll('#tnOvLinkPanels .tn-ov-mod-parent[data-expand]');
+    parents.forEach(function(el){
+      el.addEventListener('click', function(){
+        var subs = this.nextElementSibling;
+        if(subs && subs.classList.contains('tn-ov-mod-subs')){
+          var hidden = subs.style.display === 'none';
+          subs.style.display = hidden ? '' : 'none';
+          var arrow = this.querySelector('.tn-ov-mod-arrow');
+          if(arrow){ arrow.style.transform = hidden ? '' : 'rotate(-90deg)'; }
+        }
+      });
+    });
+  }, 50);
+
+  // --- Status Strip ---
+  var weekInfo = D.weeks[D.currentWeek-1];
+  var now = new Date();
+  var w9Start = new Date(2026,6,27); // July 27
+  var riskDays = Math.max(0, Math.ceil((w9Start - now) / (1000*60*60*24)));
+  var stripHtml = '';
+  stripHtml += '<div class="tn-ov-ss-item"><div class="tn-ov-ss-val">'+s.total+'</div><div class="tn-ov-ss-label">总任务</div></div>';
+  stripHtml += '<div class="tn-ov-ss-item"><div class="tn-ov-ss-val" style="color:var(--success)">'+s.pct+'%</div><div class="tn-ov-ss-label">整体完成率</div></div>';
+  stripHtml += '<div class="tn-ov-ss-item"><div class="tn-ov-ss-val">W'+D.currentWeek+'</div><div class="tn-ov-ss-label">当前周 ('+weekInfo.start+'-'+weekInfo.end+')</div></div>';
+  stripHtml += '<div class="tn-ov-ss-item"><div class="tn-ov-ss-val" style="color:#D4A76A">'+riskDays+' 天</div><div class="tn-ov-ss-label">距 W9(7.27) 截止</div></div>';
+  stripHtml += '<div class="tn-ov-ss-item"><div class="tn-ov-ss-val" style="color:#C94F66">'+D.atRiskCount+'</div><div class="tn-ov-ss-label">截止前未完成</div></div>';
+  document.getElementById('tnOvStatusStrip').innerHTML = stripHtml;
+  } catch(e) {
+    document.getElementById('tnOvStatsBar').innerHTML = '<div style=\"padding:20px;color:#C94F66;background:var(--bg-surface);border-radius:10px;text-align:center\">渲染错误: '+esc(e.message)+'</div>';
+  }
 }
 
 function render360Eval(wkId){
