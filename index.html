@@ -210,7 +210,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .checkin-warning { font-size:10px; color:var(--danger-text); }
 
 /* Layout */
-.main { max-width:1160px; margin:0 auto; padding:28px 36px 40px; }
+.main { max-width:1400px; margin:0 auto; padding:28px 36px 40px; }
 
 /* Stats */
 .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
@@ -735,9 +735,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
   .gantt-name { width:160px; } .gantt-name-col { width:160px; }
   .tn-gantt-name { width:160px; } .tn-gw-label-col { width:160px; } .tn-gantt-inner { min-width:720px; }
   .tn-split-container { flex-direction:column; height:auto; }
-  #tnCardPane { width:100% !important; max-height:none; min-width:0; }
-  #tnGanttPane { display:none; }
-  .tn-divider { display:none; }
+  #tnCardPane { width:100% !important; max-height:50vh; min-width:0; }
+  #tnGanttPane { min-width:0; max-height:50vh; }
+  .tn-divider { width:100%; height:6px; cursor:row-resize; }
+  .tn-divider::after { width:32px; height:2px; }
   .login-box { width:90%; padding:28px 20px; }
 }
 
@@ -1499,9 +1500,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 
 /* ===== 分栏布局：卡片 + 甘特图 ===== */
 .tn-split-container { display:flex; height:calc(100vh - 190px); min-height:450px; gap:0; overflow:hidden; }
-#tnCardPane { width:100%; min-width:0; overflow-y:auto; overflow-x:hidden; }
-#tnGanttPane { display:none; }
-.tn-divider { display:none; }
+#tnCardPane { width:35%; min-width:260px; overflow-y:auto; overflow-x:hidden; }
+#tnGanttPane { flex:1; min-width:400px; overflow:auto; background:var(--card); border-radius:8px; }
+.tn-divider { width:6px; cursor:col-resize; background:var(--border-light); flex-shrink:0; transition:background .15s; position:relative; }
+.tn-divider:hover, .tn-divider.dragging { background:var(--accent-light); }
+.tn-divider::after { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:2px; height:32px; border-radius:1px; background:var(--text-muted); opacity:0.4; }
 body.tn-resizing { cursor:col-resize !important; user-select:none; }
 body.tn-resizing * { pointer-events:none; }
 
