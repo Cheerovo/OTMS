@@ -1979,10 +1979,16 @@ body.tn-resizing * { pointer-events:none; }
               <label>所属系统</label>
               <select id="wtSystem"><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option></select>
             </div>
+          <div style="display:flex;gap:10px;margin-bottom:10px">
             <div class="tn-report-field" style="flex:1">
-              <label>所属周次</label>
-              <select id="wtWeek"></select>
+              <label>起始周次</label>
+              <select id="wtWeekStart" onchange="var v=document.getElementById('wtWeekStart').value;var e=document.getElementById('wtWeekEnd');if(v&&e&&parseInt(v.slice(1))>parseInt(e.value.slice(1)))e.value=v;"></select>
             </div>
+            <div class="tn-report-field" style="flex:1">
+              <label>结束周次</label>
+              <select id="wtWeekEnd"></select>
+            </div>
+          </div>
           </div>
           <div style="display:flex;gap:10px;margin-bottom:10px">
             <div class="tn-report-field" style="flex:1">
@@ -2100,7 +2106,8 @@ body.tn-resizing * { pointer-events:none; }
           <!-- Weekly task fields -->
           <div id="umWeeklyFields" style="display:none">
             <div style="display:flex;gap:10px;margin-bottom:10px">
-              <div class="tn-report-field" style="flex:1"><label>所属周次</label><select id="umWeek"></select></div>
+              <div class="tn-report-field" style="flex:1"><label>起始周次</label><select id="umWeekStart"></select></div>
+              <div class="tn-report-field" style="flex:1"><label>结束周次</label><select id="umWeekEnd"></select></div>
             </div>
             <div style="font-size:10px;font-weight:600;color:var(--text-dim);margin-bottom:6px">RACI 分配</div>
             <div style="display:flex;gap:10px;margin-bottom:10px">
@@ -10669,8 +10676,8 @@ function renderTraineeTasks(){
   wtasks.forEach(function(w){
     if(sysFilter!=='all' && w.sys!==sysFilter) return;
     if(statusFilter!=='all' && w.status!==statusFilter) return;
-    if(weekIdx >= 0 && w.week !== ('W'+(weekIdx+1))) return;
-    if(tnQuickFilter === 'week' && w.week !== ('W'+(curWkIdx+1))) return;
+    if(weekIdx >= 0){ var ws=w.weekStart||w.week||''; var we=w.weekEnd||w.week||ws; var wsi=parseInt(ws.slice(1)); var wei=parseInt(we.slice(1)); if(weekIdx+1<wsi||weekIdx+1>wei) return; }
+    if(tnQuickFilter === 'week'){ var ws2=w.weekStart||w.week||''; var we2=w.weekEnd||w.week||ws2; var wsi2=parseInt(ws2.slice(1)); var wei2=parseInt(we2.slice(1)); if(curWkIdx+1<wsi2||curWkIdx+1>wei2) return; }
     if(tnQuickFilter === 'active' && w.status !== 'active') return;
     if(personFilter!=='all' && w.R !== personFilter && w.A !== personFilter && w.C !== personFilter && w.I !== personFilter && w.person !== personFilter) return;
     if(tnQuickFilter === 'mine' && currentUser && w.R !== currentUser && w.A !== currentUser && w.C !== currentUser && w.I !== currentUser && w.person !== currentUser) return;
@@ -10809,7 +10816,7 @@ function renderTraineeCards(filtered, sysOrder, curWkIdx){
 
       // Source badge
       var srcBadge;
-      if(isWeekly) srcBadge = '<span class="tn-src-badge weekly">'+t.week+'</span>';
+      if(isWeekly) { var wLabel = t.weekStart || t.week || ''; if(t.weekEnd && t.weekEnd !== wLabel) wLabel += '-' + t.weekEnd; srcBadge = '<span class="tn-src-badge weekly">'+wLabel+'</span>'; }
       else if(isRef){ var rwWeeks=[]; var rw=t.weeks||[]; for(var rwi=0;rwi<rw.length;rwi++){ if(rw[rwi]) rwWeeks.push('W'+(rwi+1)); } srcBadge = rwWeeks.length ? '<span class="tn-src-badge weekly">'+rwWeeks.join(',')+'</span>' : ''; }
       else { var planWeeks=[]; for(var pwi=0;pwi<wks.length;pwi++){ if(wks[pwi]) planWeeks.push('W'+(pwi+1)); } srcBadge = planWeeks.length ? '<span class="tn-src-badge weekly">'+planWeeks.join(',')+'</span>' : '<span class="tn-src-badge plan">计划</span>'; }
       // Task type badge (普通任务/会议任务)
@@ -11217,8 +11224,9 @@ function renderTraineeGantt(filtered, curWkIdx){
       var sysColor = getGanttSysColor(t.sys);
       var wks;
       if(isWeekly){
-        wks = []; var wkIdx = parseInt((t.week||'W1').slice(1))-1;
-        for(var wi=0;wi<weekCount;wi++) wks[wi]=(wi===wkIdx?1:0);
+        wks = []; var ws = t.weekStart || t.week || 'W1'; var we = t.weekEnd || t.week || ws;
+        var wsi = parseInt(ws.slice(1))-1; var wei = parseInt(we.slice(1))-1;
+        for(var wi=0;wi<weekCount;wi++) wks[wi]=(wi>=wsi && wi<=wei?1:0);
       } else if(isRefT){
         wks = t.weeks||[];
       } else {
@@ -11226,7 +11234,7 @@ function renderTraineeGantt(filtered, curWkIdx){
       }
       var personLabel = isWeekly?(t.R||t.person||''):(isRefT?(t.executors||[]).join(','):((td&&td.R)?td.R:t.R));
       var srcTagClass = isWeekly?'weekly':(isRefT?'ref':'plan');
-      var srcTagLabel = isWeekly?t.week:(isRefT?'R':'P');
+      var srcTagLabel = isWeekly?(t.weekStart||t.week||''):(isRefT?'R':'P');
 
       html += '<div class="tn-gantt-row'+(isChild?' child':'')+'" data-task-id="'+t.id+'" onclick="highlightTask(\''+t.id+'\')">';
       html += '<div class="tn-gantt-name" onclick="event.stopPropagation();openUnifiedTaskModal(\''+t._source+'\',\''+t.id+'\')" title="'+esc(t.name)+'">';
@@ -11552,7 +11560,8 @@ function renderApprovalPanel(){
     html += '<span class="tn-approval-name" title="'+t.name+'">'+t.name+'</span>';
     html += '<span class="tn-approval-meta">'+(t.R||t.person||'')+'</span>';
     html += '<span class="tn-approval-meta">'+sysName+'</span>';
-    html += '<span class="tn-approval-meta">'+t.week+'</span>';
+    var wkl2 = t.weekStart || t.week || ''; if(t.weekEnd && t.weekEnd !== wkl2) wkl2 += '-' + t.weekEnd;
+    html += '<span class="tn-approval-meta">'+wkl2+'</span>';
     if(createdTime) html += '<span class="tn-approval-meta">'+createdTime+'</span>';
     html += '<button class="tn-approval-btn approve" onclick="event.stopPropagation();approveTask(\''+t.id+'\')">通过</button>';
     html += '<button class="tn-approval-btn reject" onclick="event.stopPropagation();rejectTask(\''+t.id+'\')">驳回</button>';
@@ -11579,31 +11588,26 @@ function populateWeekSelect(selId, includeAll){
 }
 function openWeeklyTaskModal(){
   try {
-  // Populate week dropdown with date ranges
-  populateWeekSelect('wtWeek', false);
-  // Set default week from filter
+  // Populate week dropdowns with date ranges
+  populateWeekSelect('wtWeekStart', false);
+  populateWeekSelect('wtWeekEnd', false);
+  // Set default weeks
   var tnWkEl = document.getElementById('tnWeekFilter');
   var wkFilter = tnWkEl ? tnWkEl.value : 'all';
-  if(wkFilter !== 'all'){
-    document.getElementById('wtWeek').value = wkFilter;
-  } else {
-    var now = new Date();
-    var startDate = new Date(2026,5,1);
-    var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
-    if(diffDays < 0) diffDays = 0;
-    var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
-    document.getElementById('wtWeek').value = 'W' + (curWkIdx + 1);
-  }
+  var now = new Date();
+  var startDate = new Date(2026,5,1);
+  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
+  if(diffDays < 0) diffDays = 0;
+  var curWk = 'W' + Math.min(Math.floor(diffDays / 7) + 1, 14);
+  var defStart = wkFilter !== 'all' ? wkFilter : curWk;
+  document.getElementById('wtWeekStart').value = defStart;
+  document.getElementById('wtWeekEnd').value = defStart;
   // Populate RACI selects with trainee names
-  var tOpts = (typeof TN_TRAINEES !== 'undefined' ? TN_TRAINEES : []).map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
-  ['wtR','wtA','wtC','wtI'].forEach(function(id){
-    var el = document.getElementById(id);
-    if(el) el.innerHTML = '<option value="">选择</option>' + tOpts;
-  });
-  document.getElementById('wtR').getElementsByTagName('option')[0].textContent = '选择执行人';
-  document.getElementById('wtA').getElementsByTagName('option')[0].textContent = '选择负责人';
-  document.getElementById('wtC').getElementsByTagName('option')[0].textContent = '选择知会人';
-  document.getElementById('wtI').getElementsByTagName('option')[0].textContent = '选择审核人';
+  var tOpts = TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
+  document.getElementById('wtR').innerHTML = '<option value="">选择执行人</option>' + tOpts;
+  document.getElementById('wtA').innerHTML = '<option value="">选择负责人</option>' + tOpts;
+  document.getElementById('wtC').innerHTML = '<option value="">选择知会人</option>' + tOpts;
+  document.getElementById('wtI').innerHTML = '<option value="">选择审核人</option>' + tOpts;
   document.getElementById('wtName').value = '';
   // Set modal title/hint based on role
   var isAdmin = currentUser && users && users[currentUser] && users[currentUser].role === 'admin';
@@ -11629,7 +11633,11 @@ function saveWeeklyTask(){
   var name = document.getElementById('wtName').value.trim();
   if(!name){ alert('请输入任务名称'); return; }
   var sys = document.getElementById('wtSystem').value;
-  var week = document.getElementById('wtWeek').value;
+  var weekStart = document.getElementById('wtWeekStart').value;
+  var weekEnd = document.getElementById('wtWeekEnd').value;
+  // Ensure end >= start
+  var si = parseInt(weekStart.slice(1)), ei = parseInt(weekEnd.slice(1));
+  if(si > ei){ var tmp = weekStart; weekStart = weekEnd; weekEnd = tmp; }
   var personR = document.getElementById('wtR').value || '';
   var personA = document.getElementById('wtA').value || '';
   var personC = document.getElementById('wtC').value || '';
@@ -11646,7 +11654,9 @@ function saveWeeklyTask(){
     id: 'w'+Date.now(),
     name: name,
     sys: sys,
-    week: week,
+    week: weekStart,
+    weekStart: weekStart,
+    weekEnd: weekEnd,
     person: personR,
     R: personR,
     A: personA,
@@ -11788,7 +11798,8 @@ function openUnifiedTaskModal(source, taskId){
   var umWI = document.getElementById('umWI'); if(umWI) umWI.innerHTML = '<option value="">选择审核人</option>' + tOpts;
 
   // Populate week selects
-  populateWeekSelect('umWeek', false);
+  populateWeekSelect('umWeekStart', false);
+  populateWeekSelect('umWeekEnd', false);
 
   // Week checkboxes for plan tasks
   var wChecks = '';
@@ -11837,7 +11848,8 @@ function openUnifiedTaskModal(source, taskId){
       document.getElementById('umTaskType').value = task.taskType || 'normal';
       document.getElementById('umTaskCategory').value = task.taskCategory || 'deliverable';
       document.getElementById('umStatus').value = task.status;
-      document.getElementById('umWeek').value = task.week;
+      document.getElementById('umWeekStart').value = task.weekStart || task.week || '';
+      document.getElementById('umWeekEnd').value = task.weekEnd || task.week || '';
       document.getElementById('umWR').value = task.R || task.person || '';
       document.getElementById('umWA').value = task.A || '';
       document.getElementById('umWC').value = task.C || '';
@@ -11846,7 +11858,8 @@ function openUnifiedTaskModal(source, taskId){
       document.getElementById('umParentId').innerHTML = buildParentOptions(unifiedEditTaskId, task.parentId || '');
       document.getElementById('umClearParent').style.display = task.parentId ? '' : 'none';
       document.getElementById('umWeeklyFields').style.display = '';
-      document.getElementById('unifiedModalSourceTag').textContent = '每周任务 · '+task.week;
+      var wTag = task.weekStart || task.week || ''; if(task.weekEnd && task.weekEnd !== wTag) wTag += '-' + task.weekEnd;
+      document.getElementById('unifiedModalSourceTag').textContent = '每周任务 · '+wTag;
     }
   } else if(source === 'ref'){
     var refTasks = tnData && tnData.refTasks ? tnData.refTasks : TN_REF_TASKS;
@@ -11925,7 +11938,9 @@ function saveUnifiedTask(){
         tnData.wtasks[i].taskType = document.getElementById('umTaskType').value;
         tnData.wtasks[i].taskCategory = document.getElementById('umTaskCategory').value;
         tnData.wtasks[i].status = status;
-        tnData.wtasks[i].week = document.getElementById('umWeek').value;
+        tnData.wtasks[i].week = document.getElementById('umWeekStart').value;
+        tnData.wtasks[i].weekStart = document.getElementById('umWeekStart').value;
+        tnData.wtasks[i].weekEnd = document.getElementById('umWeekEnd').value;
         tnData.wtasks[i].R = document.getElementById('umWR').value;
         tnData.wtasks[i].A = document.getElementById('umWA').value;
         tnData.wtasks[i].C = document.getElementById('umWC').value;
