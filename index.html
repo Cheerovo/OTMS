@@ -10188,74 +10188,7 @@ var tnCurrentView = 'tasks';
 var tnData = null;
 
 
-// 59 Reference tasks from external task management system
-var TN_REF_TASKS = [
-  // 钱 - 财务账务自动化系统 (30条)
-  {id:'r1',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'有关票点点自动开票的汇报ppt制作',taskType:'normal',taskCategory:'deliverable',executors:['陈双杰'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,0,0,0,1,1,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r2',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款系统第四版交付物',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,0,0,0,0,1,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r3',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'HKMS收款模块第三版交付',taskType:'normal',taskCategory:'milestone',executors:['陈双杰'],approver:'Jenny',refStatus:'pending',priority:'P0',weeks:[0,0,0,0,1,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r4',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款系统细节功能完善',taskType:'normal',taskCategory:'okr',executors:['陈锦'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,0,0,0,1,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r5',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款模块第三版交付（7月1日）',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,0,0,0,1,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r6',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'离职全流程梳理',taskType:'normal',taskCategory:'deliverable',executors:['黄燕婷'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r7',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'考勤管理板块梳理',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r8',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'各类财务账务表格设计',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r9',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款从申请到完成的状态流转图',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r10',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'银行流水与账单样本',taskType:'normal',taskCategory:'deliverable',executors:['陈双杰'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r11',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'梳理全部费用类型',taskType:'normal',taskCategory:'deliverable',executors:['陈双杰'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r12',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'收款业务流程梳理',taskType:'normal',taskCategory:'deliverable',executors:['陈双杰'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r13',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'可运行的前端项目骨架+《前端项目结构文档》',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,0,0,1,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r14',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款模块数据库表设计',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r15',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款流程梳理+收集报表+提交《科目字典与报表清单》',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r16',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'付款流程梳理+报表清单+科目字典',taskType:'normal',taskCategory:'deliverable',executors:['陈锦'],approver:'Jenny',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r17',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'项目计划表',taskType:'normal',taskCategory:'deliverable',executors:['陈双杰'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r18',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'需要【标准财务报表模板】',taskType:'normal',taskCategory:'deliverable',executors:['蔡心宇'],approver:'Bella',refStatus:'active',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r19',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'个人分工任务提交',taskType:'normal',taskCategory:'okr',executors:['陈锦', '陈双杰'],approver:'Jenny',refStatus:'pending',priority:'P0',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:3},
-  {id:'r20',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'两个会议系统的合并',taskType:'normal',taskCategory:'okr',executors:['安子玥', '陈双杰'],approver:'Bella',refStatus:'active',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r21',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'六月凭证必传验证任务',taskType:'normal',taskCategory:'okr',executors:['王倩'],approver:'Jenny',refStatus:'pending',priority:'P0',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r22',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'六月财务凭证上传验证任务',taskType:'normal',taskCategory:'okr',executors:['王倩'],approver:'Jenny',refStatus:'pending',priority:'P0',weeks:[0,1,1,1,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r23',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'流程搭建',taskType:'normal',taskCategory:'okr',executors:['陈双杰', '邵吴慧'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r24',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'全面上线与回测',taskType:'normal',taskCategory:'okr',executors:['芦智蔚', '安子玥', '陈圆', '黄燕婷', '陈锦', '陈双杰', '黄欢欢', '浏览器范围测试用户', '王倩', '蔡心宇', '任梦超', '邵吴慧', '赵柳文'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,0,0,0,0,0,0,1,0,0,0,0,0,0],attachments:0},
-  {id:'r25',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'P&L自动生成测试',taskType:'normal',taskCategory:'okr',executors:['陈锦', '陈双杰'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,0,0,0,0,1,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r26',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'HKMS接口开发V1.0',taskType:'normal',taskCategory:'okr',executors:['任梦超', '陈圆', '黄欢欢', '陈锦'],approver:'Jenny',refStatus:'active',priority:'P1',weeks:[0,0,0,1,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r27',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'P&L报表模板设计与数据整理',taskType:'normal',taskCategory:'okr',executors:['陈锦', '陈双杰'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,0,0,1,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r28',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'HKMS银行接口需求确认与开发',taskType:'normal',taskCategory:'okr',executors:['陈锦', '任梦超', '陈圆'],approver:'Jenny',refStatus:'active',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r29',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'投资系/人才系数据字典建设',taskType:'normal',taskCategory:'okr',executors:['陈锦', '陈双杰'],approver:'Jenny',refStatus:'active',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r30',sys:'cwzw',sysName:'财务账务自动化系统',sysColor:'#5A7868',sysBg:'#F2F6F4',name:'陈锦/陈双杰入职与财务岗位带教启动',taskType:'normal',taskCategory:'okr',executors:['陈锦', '陈双杰'],approver:'Jenny',refStatus:'active',priority:'P1',weeks:[1,0,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  // 事 - 用印档案公司管理系统 (19条)
-  {id:'r31',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'最新版密码（黄燕婷用户名从cattoin改成tina）',taskType:'normal',taskCategory:'okr',executors:['Bella'],approver:'Bella',refStatus:'pending',priority:'P2',weeks:[0,0,0,1,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r32',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'密码（仅需阅知）',taskType:'normal',taskCategory:'okr',executors:['Bella', '任梦超'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,0,0,1,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r33',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'开弈集团公司名录+印章管理表格信息补全',taskType:'normal',taskCategory:'okr',executors:['Bella', '蔡心宇', '芦智蔚', '赵柳文'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:4},
-  {id:'r34',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印管理系统V1.0上线测试使用',taskType:'normal',taskCategory:'milestone',executors:['陈圆'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r35',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'标准合同版本的确定+系统字段表',taskType:'normal',taskCategory:'deliverable',executors:['安子玥'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r36',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'历史用印档案第二阶段梳理',taskType:'normal',taskCategory:'okr',executors:['赵柳文'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r37',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'商办标准合同版本及商办合同字段表',taskType:'normal',taskCategory:'deliverable',executors:['邵吴慧', '赵柳文'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r38',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'完整用户名密码（新增9个用印相关）',taskType:'normal',taskCategory:'okr',executors:['陈圆'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r39',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'6.11测试',taskType:'normal',taskCategory:'okr',executors:['陈圆'],approver:'Bella',refStatus:'pending',priority:'P2',weeks:[0,1,1,1,1,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r40',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印系统V1.0的修改反馈',taskType:'normal',taskCategory:'okr',executors:['邵吴慧', '赵柳文'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r41',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'各BU标准合同模板的汇总',taskType:'normal',taskCategory:'okr',executors:['赵柳文', '安子玥'],approver:'Bella',refStatus:'active',priority:'P1',weeks:[0,1,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r42',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'商办合同中段系统字段表',taskType:'normal',taskCategory:'okr',executors:['邵吴慧'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r43',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'HKMS2.0业务流程图',taskType:'normal',taskCategory:'okr',executors:['邵吴慧', '陈双杰'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,1,1,0,0,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r44',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'Bella用印邮件的智能化备份',taskType:'normal',taskCategory:'okr',executors:['陈双杰'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r45',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'涉及员工管理的用印资料合并进法务档案表',taskType:'normal',taskCategory:'okr',executors:['安子玥', '赵柳文'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r46',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'历史用印情况的智能化梳理第一阶段成果汇报',taskType:'normal',taskCategory:'okr',executors:['赵柳文'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r47',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'用印自动编号规则确认',taskType:'normal',taskCategory:'okr',executors:['赵柳文'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r48',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'1234',taskType:'normal',taskCategory:'okr',executors:['安子玥'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r49',sys:'yyda',sysName:'用印档案公司管理系统',sysColor:'#7B8FC0',sysBg:'#F4F6FB',name:'六月跨部门项目推进周会',taskType:'meeting',taskCategory:'review',executors:['王倩', '黄燕婷', '陈锦'],approver:'Jenny',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  // 人 - 人事事务自动化系统 (8条)
-  {id:'r50',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工保险梳理',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r51',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'人事各板块工作现状梳理',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'active',priority:'P0',weeks:[0,1,1,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r52',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'人事用印档案系统字段表',taskType:'normal',taskCategory:'okr',executors:['安子玥'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r53',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工人事档案有关用印、审核部分的档案电子化',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r54',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工保险梳理报告',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r55',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'招聘流程梳理+流程图+小黄系统功能实现',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:2},
-  {id:'r56',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'人事系统框架搭建',taskType:'normal',taskCategory:'okr',executors:['黄燕婷'],approver:'Bella',refStatus:'done',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:0},
-  {id:'r57',sys:'rssw',sysName:'人事事务自动化系统',sysColor:'#9A7D3E',sysBg:'#FDF8F2',name:'员工劳动关系框架梳理及相关文件版本梳理',taskType:'normal',taskCategory:'okr',executors:['安子玥'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,0,0,0,0,0,0,0,0,0,0,0,0],attachments:6},
-  // IT - 项目管理 (2条)
-  {id:'r58',sys:'itpm',sysName:'IT项目管理系统',sysColor:'#8B6BAE',sysBg:'#F6F2FB',name:'项目管理系统V1.2修改',taskType:'normal',taskCategory:'okr',executors:['任梦超'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,0,1,0,0,0,0,0,0,0,0,0,0,0],attachments:1},
-  {id:'r59',sys:'itpm',sysName:'IT项目管理系统',sysColor:'#8B6BAE',sysBg:'#F6F2FB',name:'项目管理系统修改V26-611',taskType:'normal',taskCategory:'okr',executors:['任梦超'],approver:'Bella',refStatus:'pending',priority:'P1',weeks:[0,1,1,0,0,0,0,0,0,0,0,0,0,0],attachments:1}
-];
-
-
+var TN_REF_TASKS = [];
 // Date range + week overlap helper for reference tasks
 function getWeekDateRange(weekIdx){
   // weekIdx is 0-indexed (0=W1 starting 06/01)
@@ -10348,6 +10281,12 @@ function loadTnData(){
         localStorage.setItem('otms_trainee_cleared_v3', '1');
         saveTnData();
         return;
+      }
+      // ONE-TIME: clear old reference tasks (59 items)
+      if(!localStorage.getItem('otms_trainee_cleared_ref')){
+        tnData.refTasks = [];
+        localStorage.setItem('otms_trainee_cleared_ref', '1');
+        saveTnData();
       }
       // Migration: add missing fields for backward compat
       if(!tnData.wtasks) tnData.wtasks = [];
