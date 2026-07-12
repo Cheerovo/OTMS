@@ -1382,8 +1382,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-panel-arrow { font-size:10px; color:var(--text-dim); transition:transform .2s; }
 .tn-system-panel.collapsed .tn-panel-arrow { transform:rotate(-90deg); }
 
-/* Upgraded task card */
-.tn-task-card-new { display:flex; align-items:center; gap:10px; padding:10px 16px; border-bottom:1px solid var(--border-light); transition:background .12s; cursor:pointer; }
+/* Upgraded task card — synced with Gantt row height */
+.tn-task-card-new { display:flex; align-items:center; gap:10px; padding:5px 12px; border-bottom:1px solid var(--border-light); transition:background .12s; cursor:pointer; min-height:34px; }
 .tn-task-card-new:hover { background:var(--bg-surface-hover); }
 .tn-task-card-new:last-child { border-bottom:none; }
 .tn-task-card-new.expanded { background:var(--bg-surface); }
@@ -1478,7 +1478,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 /* ---- Task description, parent/child hierarchy ---- */
 .tn-desc-preview { font-size:8px; color:var(--text-muted); margin-top:3px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; max-width:320px; }
 .tn-desc-indicator { display:inline-block; width:4px; height:4px; border-radius:50%; background:var(--accent); opacity:.5; margin-right:3px; vertical-align:middle; }
-.tn-child-task-row { display:flex; align-items:center; gap:6px; padding:4px 12px 4px 24px; border-bottom:1px solid var(--border-light); font-size:10px; background:var(--bg-surface); }
+.tn-child-task-row { display:flex; align-items:center; gap:6px; padding:3px 12px 3px 24px; border-bottom:1px solid var(--border-light); font-size:10px; background:var(--bg-surface); min-height:34px; }
 .tn-child-task-row:last-child { border-bottom:none; }
 .tn-child-connector { width:8px; height:8px; border-left:2px solid var(--accent); border-bottom:2px solid var(--accent); margin-right:2px; flex-shrink:0; }
 .tn-child-task-body { flex:1; display:flex; align-items:center; gap:6px; min-width:0; overflow:hidden; }
@@ -1932,12 +1932,6 @@ body.tn-resizing * { pointer-events:none; }
           <button class="tn-chip" onclick="tnQuickFilter='active';updateQuickFilters();renderTraineeTasks()">进行中</button>
           <button class="tn-chip" onclick="tnQuickFilter='week';updateQuickFilters();renderTraineeTasks()">本周任务</button>
           <button class="tn-chip" id="tnApprovalFilterChip" style="display:none" onclick="tnApprovalFilter=tnApprovalFilter==='pending'?'all':'pending';updateQuickFilters();renderTraineeTasks()">待审核</button>
-        </div>
-        <div id="tnGanttDims" style="display:flex;gap:4px;align-items:center;margin-left:auto">
-          <span style="font-size:8px;color:var(--text-muted);flex-shrink:0;margin-right:2px">分组:</span>
-          <button class="tn-chip active" onclick="tnGanttGroup='system';updateGanttDims();renderTraineeTasks()">按系统</button>
-          <button class="tn-chip" onclick="tnGanttGroup='person';updateGanttDims();renderTraineeTasks()">按人员</button>
-          <button class="tn-chip" onclick="tnGanttGroup='status';updateGanttDims();renderTraineeTasks()">按状态</button>
         </div>
       </div>
       <div class="filter-row" style="margin-bottom:14px" id="tnFilterRow">
@@ -10627,17 +10621,10 @@ function switchTraineeView(view){
     b.classList.toggle('active', views[i]===view);
   });
   if(view==='overview'){ try { renderTraineeSummary(); } catch(e) { document.getElementById('traineeSummary').innerHTML = '<div style=\"padding:12px;color:#C94F66;background:var(--bg-surface);border-radius:8px;text-align:center;font-size:11px\">Summary报错: '+esc(e.message)+'</div>'; } try { renderTraineeOverview(); } catch(e) { document.getElementById('tnOvStatsBar').innerHTML = '<div style=\"padding:20px;color:#C94F66;background:var(--bg-surface);border-radius:10px;text-align:center\">Overview报错: '+esc(e.message)+'</div>'; } }
-  else if(view==='tasks'){ renderTraineeSummary(); renderApprovalPanel(); renderTraineeTasks(); document.getElementById('tnGanttDims').style.display = 'flex'; initTnSplitPane(); }
+  else if(view==='tasks'){ renderTraineeSummary(); renderApprovalPanel(); renderTraineeTasks(); initTnSplitPane(); }
   else if(view==='reports'){ renderTraineeSummary(); initTnAttendees(); clearTnMeetingForm(); renderTnMeetingList(); switchReportSection('meeting'); }
   else if(view==='dashboard'){ renderTraineeSummary(); renderDashboard(); }
   else if(view==='evaluation'){ initEvalSystem(); }
-}
-
-function updateGanttDims(){
-  document.querySelectorAll('#tnGanttDims .tn-chip').forEach(function(c,i){
-    var vals = ['system','person','status'];
-    c.classList.toggle('active', vals[i]===tnGanttGroup);
-  });
 }
 
 // ===== TASK BOARD =====
@@ -11181,6 +11168,21 @@ function initTnSplitPane(){
     };
   };
 
+  // Sync vertical scroll between card pane and Gantt pane
+  var scrollSyncing = false;
+  cardPane.addEventListener('scroll', function(){
+    if(scrollSyncing) return;
+    scrollSyncing = true;
+    ganttPane.scrollTop = cardPane.scrollTop;
+    requestAnimationFrame(function(){ scrollSyncing = false; });
+  }, {passive: true});
+  ganttPane.addEventListener('scroll', function(){
+    if(scrollSyncing) return;
+    scrollSyncing = true;
+    cardPane.scrollTop = ganttPane.scrollTop;
+    requestAnimationFrame(function(){ scrollSyncing = false; });
+  }, {passive: true});
+
   // Responsive: on resize, switch between split and stacked
   window.addEventListener('resize', function(){
     if(window.innerWidth <= 768){
@@ -11222,6 +11224,9 @@ function highlightTask(taskId){
   if(cardPane){
     var cardEl = cardPane.querySelector('[data-task-id="'+tnHighlightedTaskId+'"]');
     if(cardEl){
+      // Auto-expand collapsed system panel
+      var panel = cardEl.closest('.tn-system-panel');
+      if(panel && panel.classList.contains('collapsed')) panel.classList.remove('collapsed');
       cardEl.classList.add('highlighted');
       cardEl.scrollIntoView({behavior:'smooth',block:'nearest'});
     }
@@ -11230,6 +11235,9 @@ function highlightTask(taskId){
   if(ganttPane){
     var ganttEl = ganttPane.querySelector('[data-task-id="'+tnHighlightedTaskId+'"]');
     if(ganttEl){
+      // Auto-expand collapsed Gantt group
+      var group = ganttEl.closest('.tn-gantt-group');
+      if(group && group.classList.contains('collapsed')) group.classList.remove('collapsed');
       ganttEl.classList.add('highlighted');
       ganttEl.scrollIntoView({behavior:'smooth',block:'nearest'});
     }
