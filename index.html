@@ -389,7 +389,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-gantt-inner { min-width:960px; }
 .tn-gantt-weeks { display:flex; border-bottom:1px solid var(--border-light); background:var(--bg-surface); position:sticky; top:0; z-index:5; }
 .tn-gantt-weeks .tn-gw-label-col { width:250px; flex-shrink:0; padding:8px 12px; font-size:9px; font-weight:600; color:var(--text-dim); display:flex; align-items:center; background:var(--bg-surface); border-right:2px solid var(--border-light); position:sticky; left:0; z-index:6; }
-.tn-gantt-weeks .tn-gw-wk { flex:1; min-width:44px; text-align:center; font-size:8px; padding:8px 0; color:var(--text-dim); border-right:1px solid var(--border-subtle); font-weight:500; }
+.tn-gantt-weeks .tn-gw-wk { flex:1; min-width:44px; text-align:center; font-size:8px; padding:8px 0; color:var(--text-dim); border-right:1px solid var(--border-subtle); font-weight:500; cursor:help; }
 .tn-gantt-weeks .tn-gw-wk.current { background:var(--accent-wash); color:var(--accent); font-weight:700; }
 .tn-gantt-group-hd { display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--bg-surface); font-size:10px; font-weight:600; color:var(--text); border-bottom:1px solid var(--border-light); cursor:pointer; user-select:none; position:sticky; left:0; z-index:3; }
 .tn-gantt-group-hd:hover { background:var(--bg-surface-hover); }
@@ -425,6 +425,77 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-gantt-bar.done { opacity:0.9; }
 .tn-gantt-today-line { position:absolute; top:0; bottom:0; width:2px; background:var(--accent); opacity:0.6; z-index:10; pointer-events:none; }
 .tn-gantt-empty { padding:40px; text-align:center; font-size:11px; color:var(--text-muted); }
+/* Month header row */
+.tn-gantt-months { display:flex; border-bottom:1px solid var(--border-light); background:var(--bg-surface); position:sticky; top:0; z-index:5; }
+.tn-gantt-months .tn-gw-label-col { width:250px; flex-shrink:0; padding:6px 12px; font-size:9px; font-weight:600; color:var(--text-dim); display:flex; align-items:center; background:var(--bg-surface); border-right:2px solid var(--border-light); position:sticky; left:0; z-index:6; }
+.tn-gantt-months .tn-gw-month { flex:1; min-width:44px; text-align:center; font-size:9px; padding:6px 0; color:var(--text-dim); font-weight:600; border-right:1px solid var(--border-light); }
+/* Weekend column shading */
+.tn-gantt-weeks .tn-gw-wk.weekend { background:rgba(0,0,0,0.04); }
+.tn-gantt-timeline .tn-gw-cell.weekend { background:rgba(0,0,0,0.03); }
+/* Status statistics bar */
+.tn-gantt-stats { display:flex; align-items:center; gap:16px; padding:8px 14px; background:var(--bg-surface); border-bottom:1px solid var(--border-light); font-size:10px; color:var(--text-dim); flex-wrap:wrap; }
+.tn-gantt-stats .stat-item { display:flex; align-items:center; gap:4px; }
+.tn-gantt-stats .stat-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.tn-gantt-stats .stat-dot.active { background:#D4A76A; }
+.tn-gantt-stats .stat-dot.pending { background:#8D8883; }
+.tn-gantt-stats .stat-dot.done { background:#8BA89C; }
+.tn-gantt-stats .stat-count { font-weight:700; color:var(--text); }
+/* Quick filter chips */
+.tn-gantt-filters { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+.tn-gantt-filters .filter-label { font-size:9px; color:var(--text-dim); flex-shrink:0; }
+.tn-gantt-filter-chip { padding:3px 10px; border-radius:12px; font-size:9px; cursor:pointer; border:1px solid var(--border-light); background:var(--card); color:var(--text-dim); transition:all .15s; user-select:none; white-space:nowrap; }
+.tn-gantt-filter-chip:hover { border-color:var(--accent); color:var(--accent); }
+.tn-gantt-filter-chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.tn-gantt-filter-chip .chip-dot { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:3px; vertical-align:middle; }
+/* Week focus mode */
+.tn-gantt-row.week-dimmed { opacity:0.18; transition:opacity .2s; }
+.tn-gantt-row.week-dimmed:hover { opacity:0.55; }
+.tn-gantt-row.week-dimmed .tn-gantt-bar { pointer-events:none; }
+/* Overdue risk markers */
+.tn-gantt-bar.overdue { box-shadow:inset 0 0 0 2px #E0556A; animation: overduePulse 2s ease-in-out infinite; }
+@keyframes overduePulse { 0%,100% { box-shadow:inset 0 0 0 2px #E0556A; } 50% { box-shadow:inset 0 0 0 2px rgba(224,85,106,0.35); } }
+.tn-gantt-name .overdue-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#E0556A; flex-shrink:0; margin-left:2px; animation: overduePulse 2s ease-in-out infinite; }
+/* Focus toggle chip */
+.tn-gantt-filter-chip.focus-on { background:#E0556A; color:#fff; border-color:#E0556A; }
+.tn-gantt-filter-chip.focus-on:hover { background:#C94F66; border-color:#C94F66; color:#fff; }
+/* Group header status stats */
+.tn-group-stats { display:inline-flex; align-items:center; gap:3px; margin-left:6px; }
+.gstat-item { font-size:8px; font-weight:600; min-width:16px; height:16px; line-height:16px; text-align:center; border-radius:8px; padding:0 5px; }
+.gstat-active { background:#FBF6EC; color:#C48A4A; }
+.gstat-pending { background:#EEEEEE; color:#6E6E6E; }
+.gstat-done { background:#EAF0EE; color:#6B9A8A; }
+/* ---- Optimisation 7: Print styles ---- */
+@media print {
+  /* Hide non-Gantt UI */
+  .sidebar, .topbar, .tn-gantt-filters, .tn-gantt-stats, #tnGanttGroupBy,
+  .report-section-tabs, .tn-task-card-new, .tn-approval-panel,
+  .tn-dash-grid, .tn-dash-charts, .tn-rank-table, .tn-eval360,
+  .tn-report-layout, #tnReportView, #tnTaskView, header, nav, footer,
+  button, select, input, textarea { display:none !important; }
+  /* Show only Gantt chart */
+  #tnGanttView { display:block !important; position:static; overflow:visible; }
+  #tnGanttChart { box-shadow:none !important; border-radius:0 !important; overflow:visible !important; }
+  /* Remove sticky positioning (breaks in print) */
+  .tn-gantt-weeks, .tn-gantt-weeks .tn-gw-label-col,
+  .tn-gantt-months, .tn-gantt-months .tn-gw-label-col,
+  .tn-gantt-group-hd, .tn-gantt-name { position:static !important; }
+  /* Remove scroll containment */
+  .tn-gantt-scroll { overflow-x:visible !important; overflow-y:visible !important; }
+  .tn-gantt-inner { min-width:0 !important; }
+  /* Expand all collapsed groups */
+  .tn-gantt-group.collapsed .tn-gantt-rows { display:block !important; }
+  /* Simplify colors for print */
+  .tn-gantt-bar { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+  .tn-gantt-today-line { opacity:1 !important; }
+  /* Remove shadows and rounded corners */
+  .tn-gantt-wrap { border-radius:0 !important; box-shadow:none !important; break-inside:avoid; }
+  /* Page setup */
+  @page { size:landscape; margin:12mm; }
+  body { background:#fff; font-size:9px; }
+  .tn-gantt-row { min-height:28px; }
+  .tn-gantt-name { font-size:10px; }
+  .tn-gantt-weeks .tn-gw-wk { font-size:7px; }
+}
 
 /* Timeline */
 .tl-section { margin-top:14px; }
@@ -1510,11 +1581,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-task-card-new.is-parent { cursor:pointer; }
 .tn-task-card-new.is-child.hidden-by-parent { display:none; }
 
-/* ===== 分栏布局：卡片 + 甘特图 ===== */
-.tn-split-container { display:flex; height:calc(100vh - 190px); min-height:450px; gap:0; overflow:hidden; }
-#tnCardPane { flex:1; min-width:0; overflow-y:auto; overflow-x:hidden; }
-#tnGanttPane { display:none; }
-.tn-divider { display:none; }
+/* ===== 任务卡片列表布局 ===== */
+.tn-split-container { display:block; }
+#tnCardPane { width:100%; overflow-y:auto; overflow-x:hidden; }
+#tnGanttPane { display:none !important; }
+.tn-divider { display:none !important; }
 body.tn-resizing { cursor:col-resize !important; user-select:none; }
 body.tn-resizing * { pointer-events:none; }
 
@@ -1925,6 +1996,7 @@ body.tn-resizing * { pointer-events:none; }
     <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;background:var(--bg-surface);border-radius:10px;padding:3px;width:fit-content">
       <button class="tn-sub-tab" onclick="switchTraineeView('overview')">总览</button>
       <button class="tn-sub-tab active" onclick="switchTraineeView('tasks')">任务看板</button>
+      <button class="tn-sub-tab" onclick="switchTraineeView('gantt')">甘特图</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('reports')">每周反馈</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('evaluation')">管培生打分</button>
       <button class="tn-sub-tab" onclick="switchTraineeView('dashboard')">管培生绩效</button>
@@ -2138,6 +2210,35 @@ body.tn-resizing * { pointer-events:none; }
           </div>
         </div>
       </div>
+    </div>
+    <!-- Gantt chart view -->
+    <div class="tn-view" id="tnGanttView" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:13px;font-weight:600;color:var(--text)">甘特图</span>
+          <span style="font-size:10px;color:var(--text-dim)" id="tnGanttTaskCount"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:9px;color:var(--text-dim)">分组：</span>
+          <select id="tnGanttGroupBy" onchange="renderTraineeGanttView()" style="font-size:10px;padding:4px 8px;border:1px solid var(--border-light);border-radius:6px;background:var(--card);color:var(--text);font-family:inherit">
+            <option value="system">按系统</option>
+            <option value="person">按人员</option>
+            <option value="status">按状态</option>
+          </select>
+        </div>
+      </div>
+      <!-- Quick filter chips -->
+      <div class="tn-gantt-filters" id="tnGanttFilters">
+        <span class="filter-label">筛选：</span>
+        <span class="tn-gantt-filter-chip active" data-filter="all" onclick="applyGanttFilter('all',this)">全部</span>
+        <span class="tn-gantt-filter-chip" data-filter="yyda" onclick="applyGanttFilter('yyda',this)"><span class="chip-dot" style="background:#5D8AA8"></span>用印档案</span>
+        <span class="tn-gantt-filter-chip" data-filter="rssw" onclick="applyGanttFilter('rssw',this)"><span class="chip-dot" style="background:#E0956A"></span>人事事务</span>
+        <span class="tn-gantt-filter-chip" data-filter="cwzw" onclick="applyGanttFilter('cwzw',this)"><span class="chip-dot" style="background:#6AAA8A"></span>财务账务</span>
+        <span class="tn-gantt-filter-chip" data-filter="itpm" onclick="applyGanttFilter('itpm',this)"><span class="chip-dot" style="background:#8B7AAA"></span>IT项目</span>
+        <span style="color:var(--border-light);margin:0 4px">|</span>
+        <span class="tn-gantt-filter-chip" id="tnFocusChip" onclick="toggleGanttFocus()">本周聚焦</span>
+      </div>
+      <div id="tnGanttChart" style="background:var(--card);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-sm)"></div>
     </div>
     <div class="tn-view" id="tnReportView" style="display:none">
       <!-- Internal section tabs -->
@@ -10624,20 +10725,35 @@ function initTraineeSystem(){
 }
 
 function switchTraineeView(view){
+  console.log('[switchTraineeView] switching to:', view);
   tnCurrentView = view;
   document.getElementById('tnOverviewView').style.display = view==='overview'?'':'none';
   document.getElementById('tnTaskView').style.display = view==='tasks'?'':'none';
   document.getElementById('tnReportView').style.display = view==='reports'?'':'none';
   document.getElementById('tnDashboardView').style.display = view==='dashboard'?'':'none';
   document.getElementById('tnEvalView').style.display = view==='evaluation'?'':'none';
+  var gv = document.getElementById('tnGanttView');
+  gv.style.display = view==='gantt'?'':'none';
+  console.log('[switchTraineeView] tnGanttView.style.display set to:', gv.style.display, 'computed:', window.getComputedStyle(gv).display);
+  // Trace ancestor visibility chain
+  var p = gv; var chain = [];
+  while(p && p !== document.body){
+    p = p.parentElement;
+    if(p){
+      var cs = window.getComputedStyle(p);
+      chain.push((p.id||p.className||p.tagName) + ' display:' + cs.display);
+    }
+  }
+  console.log('[switchTraineeView] ancestor chain:', chain.join(' > '));
   document.querySelectorAll('.tn-sub-tab').forEach(function(b,i){
-    var views = ['overview','tasks','reports','evaluation','dashboard'];
+    var views = ['overview','tasks','gantt','reports','evaluation','dashboard'];
     b.classList.toggle('active', views[i]===view);
   });
   if(view==='overview'){ try { renderTraineeSummary(); } catch(e) { document.getElementById('traineeSummary').innerHTML = '<div style=\"padding:12px;color:#C94F66;background:var(--bg-surface);border-radius:8px;text-align:center;font-size:11px\">Summary报错: '+esc(e.message)+'</div>'; } try { renderTraineeOverview(); } catch(e) { document.getElementById('tnOvStatsBar').innerHTML = '<div style=\"padding:20px;color:#C94F66;background:var(--bg-surface);border-radius:10px;text-align:center\">Overview报错: '+esc(e.message)+'</div>'; } }
-  else if(view==='tasks'){ renderTraineeSummary(); renderApprovalPanel(); renderTraineeTasks(); initTnSplitPane(); }
+  else if(view==='tasks'){ renderTraineeSummary(); renderApprovalPanel(); renderTraineeTasks(); }
   else if(view==='reports'){ renderTraineeSummary(); initTnAttendees(); clearTnMeetingForm(); renderTnMeetingList(); switchReportSection('meeting'); }
   else if(view==='dashboard'){ renderTraineeSummary(); renderDashboard(); }
+  else if(view==='gantt'){ try { renderTraineeSummary(); } catch(e) { console.error('renderTraineeSummary error:', e); } try { renderTraineeGanttView(); } catch(e) { console.error('renderTraineeGanttView error:', e.message, e.stack); document.getElementById('tnGanttChart').innerHTML = '<div style="padding:40px;text-align:center;color:#C94F66;font-size:12px">甘特图渲染失败: '+esc(e.message)+'</div>'; } }
   else if(view==='evaluation'){ initEvalSystem(); }
 }
 
@@ -11270,6 +11386,312 @@ function highlightTask(taskId){
 }
 
 // ===== TRAINEE GANTT CHART =====
+function renderTraineeGanttView(){
+  try {
+  // Read group by setting
+  var gbEl = document.getElementById('tnGanttGroupBy');
+  if(!gbEl){ console.error('[Gantt] tnGanttGroupBy element not found'); }
+  var groupBy = gbEl ? gbEl.value : 'system';
+  tnGanttGroup = groupBy;
+
+  // Always build from TN_REF_TASKS as the canonical 123-task source
+  var allTasks = [];
+  if(typeof TN_REF_TASKS !== 'undefined'){
+    TN_REF_TASKS.forEach(function(r){
+      var clone = JSON.parse(JSON.stringify(r));
+      clone._source = 'ref';
+      if(tnData && tnData.refTasks){
+        for(var i = 0; i < tnData.refTasks.length; i++){
+          if(tnData.refTasks[i].id === r.id){
+            clone.refStatus = tnData.refTasks[i].refStatus || r.refStatus;
+            break;
+          }
+        }
+      }
+      allTasks.push(clone);
+    });
+  }
+  if(tnData && tnData.wtasks){
+    tnData.wtasks.forEach(function(w){
+      w._source = 'weekly';
+      allTasks.push(w);
+    });
+  }
+
+  // Apply system filter
+  var activeFilter = tnGanttFilter || 'all';
+  var filtered = activeFilter === 'all' ? allTasks.slice() : allTasks.filter(function(t){ return t.sys === activeFilter; });
+
+  // Update task count
+  document.getElementById('tnGanttTaskCount').textContent = filtered.length + ' 项任务';
+
+  // Week labels — always use 14-week range for ref tasks
+  var weekLabels = TN_ALL_WEEKS;
+  var weekCount = weekLabels.length;
+
+  // Calculate current week index
+  var now = new Date();
+  var startDate = new Date(2026, 5, 1);
+  var diffDays = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+  if(diffDays < 0) diffDays = 0;
+  var curWkIdx = Math.min(Math.floor(diffDays / 7), weekCount - 1);
+
+  // ---- Optimisation 2: Build month header spans from EVAL_WEEKS ----
+  var monthSpans = [];
+  if(typeof EVAL_WEEKS !== 'undefined' && EVAL_WEEKS.length >= weekCount){
+    var curMonth = EVAL_WEEKS[0].month || '';
+    var spanStart = 0;
+    for(var w = 1; w < weekCount; w++){
+      var m = EVAL_WEEKS[w].month || '';
+      if(m !== curMonth){
+        monthSpans.push({month:curMonth, start:spanStart, count:w - spanStart});
+        curMonth = m;
+        spanStart = w;
+      }
+    }
+    monthSpans.push({month:curMonth, start:spanStart, count:weekCount - spanStart});
+  }
+
+  // ---- Optimisation 5: Compute weekend columns ----
+  var weekendCols = {};
+  if(typeof EVAL_WEEKS !== 'undefined'){
+    for(var ww = 0; ww < weekCount && ww < EVAL_WEEKS.length; ww++){
+      var ew = EVAL_WEEKS[ww];
+      var parts = (ew.start || '').split('/');
+      if(parts.length === 2){
+        var mth = parseInt(parts[0]) - 1;
+        var dy = parseInt(parts[1]);
+        var wkStart = new Date(2026, mth, dy);
+        // Check each day of the 5-day work week for weekend
+        var hasWeekend = false;
+        for(var d = 0; d < 5; d++){
+          var cd = new Date(wkStart);
+          cd.setDate(cd.getDate() + d);
+          var dow = cd.getDay();
+          if(dow === 0 || dow === 6){ hasWeekend = true; break; }
+        }
+        if(hasWeekend) weekendCols[ww] = true;
+      }
+    }
+  }
+
+  // Group tasks
+  var groups = groupTasksForGantt(filtered);
+  var groupKeys = Object.keys(groups);
+
+  var chart = document.getElementById('tnGanttChart');
+  if(!chart){ console.error('[Gantt] tnGanttChart element not found!'); return; }
+  if(!groupKeys.length){
+    chart.innerHTML = '<div style="padding:60px;text-align:center;color:var(--text-muted);font-size:13px">暂无任务数据，请先添加任务</div>';
+    return;
+  }
+
+  // ---- Optimisation 4: Compute status statistics ----
+  var statCounts = {active:0, pending:0, done:0};
+  var overdueCount = 0;
+  allTasks.forEach(function(t){
+    var st = getTaskStatus(t);
+    if(st === 'active') statCounts.active++;
+    else if(st === 'done') statCounts.done++;
+    else {
+      statCounts.pending++;
+      // Check overdue: pending + planned start week passed
+      var wks = t.weeks || [];
+      for(var ow = 0; ow < weekCount; ow++){
+        if(wks[ow]){ if(ow < curWkIdx) overdueCount++; break; }
+      }
+    }
+  });
+  var stLabels = {active:'进行中', pending:'待开始', done:'已完成'};
+
+  // Status label helper for tooltips
+  function statusLabel(st){ return stLabels[st] || st || '待开始'; }
+
+  // ---- Optimisation 3: Date range helper for tooltips ----
+  function getWeekDateRange(segStart, segEnd){
+    if(typeof EVAL_WEEKS === 'undefined') return 'W'+(segStart+1)+'-W'+(segEnd+1);
+    var s = EVAL_WEEKS[segStart];
+    var e = EVAL_WEEKS[segEnd];
+    if(s && e) return (s.start||'') + ' - ' + (e.end||'');
+    return 'W'+(segStart+1)+'-W'+(segEnd+1);
+  }
+
+  var statsHtml = '<div class="tn-gantt-stats">';
+  statsHtml += '<span style="font-weight:600;color:var(--text)">任务统计</span>';
+  ['active','pending','done'].forEach(function(stKey){
+    statsHtml += '<span class="stat-item"><span class="stat-dot '+stKey+'"></span>'+stLabels[stKey]+'：<span class="stat-count">'+statCounts[stKey]+'</span></span>';
+  });
+  if(overdueCount > 0){
+    statsHtml += '<span class="stat-item" style="color:#E0556A"><span class="stat-dot" style="background:#E0556A"></span>逾期风险：<span class="stat-count" style="color:#E0556A">'+overdueCount+'</span></span>';
+  }
+  statsHtml += '<span style="margin-left:auto;font-size:9px">当前第'+(curWkIdx+1)+'周</span>';
+  statsHtml += '</div>';
+
+  var html = statsHtml;
+  groupKeys.forEach(function(groupKey){
+    var group = groups[groupKey];
+    var tasks = group.tasks;
+    if(!tasks.length) return;
+    var groupId = 'tngv_' + groupKey.replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g, '_');
+
+    html += '<div class="tn-gantt-wrap">';
+    html += '<div class="tn-gantt-group" id="' + groupId + '">';
+    html += '<div class="tn-gantt-group-hd" onclick="var g=document.getElementById(\'' + groupId + '\');g.classList.toggle(\'collapsed\')">';
+    html += '<span class="grp-dot" style="background:' + group.color + '"></span>';
+    html += '<span>' + group.label + '</span>';
+    // Optimisation 6: per-group status counts
+    var gStats = {active:0, pending:0, done:0};
+    tasks.forEach(function(gt){ var gs = getTaskStatus(gt); if(gs==='active') gStats.active++; else if(gs==='done') gStats.done++; else gStats.pending++; });
+    html += '<span class="tn-group-stats">';
+    if(gStats.active) html += '<span class="gstat-item gstat-active">' + gStats.active + '</span>';
+    if(gStats.pending) html += '<span class="gstat-item gstat-pending">' + gStats.pending + '</span>';
+    if(gStats.done) html += '<span class="gstat-item gstat-done">' + gStats.done + '</span>';
+    html += '</span>';
+    html += '<span class="grp-count">' + tasks.length + ' 项</span>';
+    html += '</div>';
+    html += '<div class="tn-gantt-rows">';
+    html += '<div class="tn-gantt-scroll"><div class="tn-gantt-inner">';
+
+    // ---- Optimisation 2: Month header row ----
+    html += '<div class="tn-gantt-months">';
+    html += '<div class="tn-gw-label-col"></div>';
+    monthSpans.forEach(function(ms){
+      html += '<div class="tn-gw-month" style="flex:'+ms.count+'">'+esc(ms.month)+'</div>';
+    });
+    html += '</div>';
+
+    // Week header
+    html += '<div class="tn-gantt-weeks">';
+    html += '<div class="tn-gw-label-col">任务名称</div>';
+    for(var w = 0; w < weekCount; w++){
+      var isCurWk = (w === curWkIdx);
+      var wkClass = 'tn-gw-wk' + (isCurWk ? ' current' : '') + (weekendCols[w] ? ' weekend' : '');
+      // Optimisation 4: hover tooltip with date range
+      var wkTip = weekLabels[w];
+      if(typeof EVAL_WEEKS !== 'undefined' && EVAL_WEEKS[w]){
+        wkTip += ': ' + EVAL_WEEKS[w].start + ' - ' + EVAL_WEEKS[w].end;
+      }
+      html += '<div class="' + wkClass + '" title="' + esc(wkTip) + '">' + weekLabels[w] + '</div>';
+    }
+    html += '</div>';
+
+    // Task rows
+    var childIds = getGanttChildIds(tasks);
+    var ordered = buildGanttOrderedTasks(tasks, childIds);
+    ordered.forEach(function(t){
+      var isChild = !!childIds[t.id];
+      var isWeekly = t._source === 'weekly';
+      var isRefT = t._source === 'ref';
+      var st = getTaskStatus(t);
+      var prio = t.priority || 'P2';
+      var sysColor = getGanttSysColor(t.sys);
+      var wks;
+      if(isWeekly){
+        wks = [];
+        var ws = t.weekStart || t.week || 'W1';
+        var we = t.weekEnd || t.week || ws;
+        var wsi = parseInt(ws.slice(1)) - 1;
+        var wei = parseInt(we.slice(1)) - 1;
+        for(var wi = 0; wi < weekCount; wi++) wks[wi] = (wi >= wsi && wi <= wei ? 1 : 0);
+      } else {
+        wks = t.weeks || [];
+      }
+      var personLabel = isWeekly ? (t.R || t.person || '') : (isRefT ? (t.executors || []).join(',') : (t.R || ''));
+      var srcTagClass = isWeekly ? 'weekly' : (isRefT ? 'ref' : 'plan');
+      var srcTagLabel = isWeekly ? (t.weekStart || t.week || '') : (isRefT ? 'R' : 'P');
+
+      // ---- Feature 1: Week focus mode ----
+      var inCurWeek = !!(wks && wks[curWkIdx]);
+      var rowDimmed = (tnGanttFocusWeek && !inCurWeek) ? ' week-dimmed' : '';
+
+      // ---- Feature 2: Overdue detection ----
+      var isOverdue = false;
+      if(st === 'pending' && wks){
+        for(var ow = 0; ow < weekCount; ow++){
+          if(wks[ow]){ isOverdue = (ow < curWkIdx); break; }
+        }
+      }
+      var overdueClass = isOverdue ? ' overdue' : '';
+
+      html += '<div class="tn-gantt-row' + (isChild ? ' child' : '') + rowDimmed + '" data-task-id="' + t.id + '" onclick="highlightTask(\'' + t.id + '\')">';
+      html += '<div class="tn-gantt-name" onclick="event.stopPropagation();openUnifiedTaskModal(\'' + t._source + '\',\'' + t.id + '\')" title="' + esc(t.name) + (isOverdue ? ' [逾期风险]' : '') + '">';
+      html += '<span class="task-prio-dot ' + prio + '"></span>';
+      if(isChild){
+        html += '<span style="width:8px;height:8px;border-left:2px solid var(--accent);border-bottom:2px solid var(--accent);margin-right:2px;flex-shrink:0"></span>';
+      }
+      html += '<span class="task-name-text">' + esc(t.name) + '</span>';
+      if(isOverdue) html += '<span class="overdue-dot" title="逾期风险：计划已开始但状态仍为待开始"></span>';
+      html += '<span class="task-src-tag ' + srcTagClass + '">' + srcTagLabel + '</span>';
+      html += '<span class="task-meta">' + esc(personLabel) + '</span>';
+      html += '</div>';
+      html += '<div class="tn-gantt-timeline">';
+      // Cell grid + weekend shading
+      for(var c = 0; c < weekCount; c++){
+        var cellClass = 'tn-gw-cell' + (c === curWkIdx ? ' current' : '') + (weekendCols[c] ? ' weekend' : '');
+        html += '<div class="' + cellClass + '"></div>';
+      }
+      // ---- Optimisation 3: Enhanced tooltips & Optimisation 1: Today line ----
+      html += renderGanttBar(wks, st, sysColor, weekCount, t.name, statusLabel(st), isOverdue);
+      // ---- Optimisation 1: Today marker line ----
+      html += '<div class="tn-gantt-today-line" style="left:' + ((curWkIdx + 0.5) / weekCount * 100) + '%"></div>';
+      html += '</div>';
+      html += '</div>';
+    });
+
+    html += '</div></div>'; // .tn-gantt-inner, .tn-gantt-scroll
+    html += '</div>'; // .tn-gantt-rows
+    html += '</div>'; // .tn-gantt-group
+    html += '</div>'; // .tn-gantt-wrap
+  });
+
+  chart.innerHTML = html;
+  // Force visibility
+  var ganttView = document.getElementById('tnGanttView');
+  if(ganttView){
+    ganttView.style.display = 'block';
+    ganttView.style.minHeight = '400px';
+  }
+  chart.style.display = 'block';
+  chart.style.minHeight = '300px';
+  } catch(e) {
+    console.error('[Gantt] FATAL ERROR:', e.message, e.stack);
+    var chart = document.getElementById('tnGanttChart');
+    if(chart) chart.innerHTML = '<div style="padding:40px;text-align:center;color:#C94F66;font-size:12px">甘特图渲染失败: '+esc(e.message)+'<br><span style="font-size:9px">请打开浏览器控制台查看详细错误</span></div>';
+  }
+}
+
+// Helper: extract task status from any task source
+function getTaskStatus(t){
+  if(t._source === 'weekly') return t.status || 'pending';
+  if(t._source === 'ref') return t.refStatus || 'pending';
+  var td = getTnTask(t.id);
+  return (td && td.status) ? td.status : (t.status || 'pending');
+}
+
+// ---- Optimisation 6: System filter chips ----
+var tnGanttFilter = 'all';
+function applyGanttFilter(sys, el){
+  tnGanttFilter = sys;
+  var chips = document.querySelectorAll('#tnGanttFilters .tn-gantt-filter-chip');
+  for(var i = 0; i < chips.length; i++){ chips[i].classList.remove('active'); }
+  if(el) el.classList.add('active');
+  // Restore focus chip if it was active
+  if(tnGanttFocusWeek){ var fc = document.getElementById('tnFocusChip'); if(fc) fc.classList.add('focus-on'); }
+  renderTraineeGanttView();
+}
+
+// ---- Feature 1: Week focus toggle ----
+var tnGanttFocusWeek = false;
+function toggleGanttFocus(){
+  tnGanttFocusWeek = !tnGanttFocusWeek;
+  var fc = document.getElementById('tnFocusChip');
+  if(fc){
+    if(tnGanttFocusWeek){ fc.classList.add('focus-on'); }
+    else { fc.classList.remove('focus-on'); }
+  }
+  renderTraineeGanttView();
+}
+
 function renderTraineeGantt(filtered, curWkIdx){
   var board = document.getElementById('tnGanttPane');
   var hasRef = false;
@@ -11439,7 +11861,7 @@ function buildGanttOrderedTasks(tasks, childIds){
   return ordered;
 }
 
-function renderGanttBar(wks, st, sysColor, weekCount){
+function renderGanttBar(wks, st, sysColor, weekCount, taskName, statusText, isOverdue){
   if(!wks) return '';
   var segments = [], inSeg=false, segStart=-1;
   for(var i=0;i<weekCount;i++){
@@ -11452,7 +11874,19 @@ function renderGanttBar(wks, st, sysColor, weekCount){
   segments.forEach(function(seg){
     var leftPct = (seg[0]/weekCount)*100;
     var widthPct = ((seg[1]-seg[0]+1)/weekCount)*100;
-    html += '<div class="tn-gantt-bar '+st+'" style="left:'+leftPct+'%;width:'+widthPct+'%;background:'+sysColor+'" title="W'+(seg[0]+1)+'-W'+(seg[1]+1)+'"></div>';
+    var dateRange = '';
+    if(typeof EVAL_WEEKS !== 'undefined' && EVAL_WEEKS[seg[0]] && EVAL_WEEKS[seg[1]]){
+      dateRange = EVAL_WEEKS[seg[0]].start + ' - ' + EVAL_WEEKS[seg[1]].end;
+    } else {
+      dateRange = 'W'+(seg[0]+1)+' - W'+(seg[1]+1);
+    }
+    var tip = '';
+    if(taskName) tip += taskName + '&#10;';
+    if(statusText) tip += '状态: ' + statusText + '&#10;';
+    if(isOverdue) tip += '⚠ 逾期风险&#10;';
+    tip += '周期: ' + dateRange;
+    var extraClass = (isOverdue ? ' overdue' : '');
+    html += '<div class="tn-gantt-bar '+st+extraClass+'" style="left:'+leftPct+'%;width:'+widthPct+'%;background:'+sysColor+'" title="'+tip+'"></div>';
   });
   return html;
 }
