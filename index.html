@@ -1347,6 +1347,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .eval-btn-save:hover { background:var(--accent-dim); }
 .eval-btn-restore { background:var(--bg-surface); color:var(--text-dim); border:1px solid var(--border-light); }
 .eval-btn-restore:hover { background:var(--bg-surface-hover); }
+.eval-rank-btn { padding:5px 12px; border:1px dashed var(--accent); border-radius:6px; font-size:9px; cursor:pointer; font-family:inherit; background:var(--accent-wash); color:var(--accent-dim); transition:var(--transition); white-space:nowrap; font-weight:500; }
+.eval-rank-btn:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
+.eval-rank-btn.submitted { border-style:solid; border-color:var(--success); background:var(--success-bg); color:var(--success-text); }
+.eval-rank-btn.submitted:hover { background:var(--success); color:#fff; border-color:var(--success); }
 
 /* Calendar view */
 .eval-cal-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px; }
@@ -1567,15 +1571,15 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-child-count { font-size:7px; padding:1px 5px; border-radius:4px; background:var(--bg-surface); color:var(--text-dim); flex-shrink:0; white-space:nowrap; }
 .tn-child-count.has-children { background:var(--accent-wash); color:var(--accent); font-weight:600; cursor:pointer; }
 .tn-child-count.has-children:hover { background:var(--accent); color:#fff; }
-.tn-child-badge { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:3px; background:var(--accent-wash); color:var(--accent); font-size:8px; font-weight:700; flex-shrink:0; }
+.tn-child-badge { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:10px; background:var(--accent-wash); color:var(--accent); font-size:9px; font-weight:500; flex-shrink:0; }
 .tn-task-card-new.is-child { padding:3px 10px; min-height:30px; font-size:11px; gap:8px; }
 .tn-task-card-new.is-child .tn-task-title { font-size:12px; }
 .tn-task-card-new.is-child:hover { background:var(--bg-surface-hover); }
 .tn-task-card-new.is-child.highlighted { background:var(--accent-wash) !important; box-shadow:inset 3px 0 0 var(--accent); }
 .tn-task-card-new.is-child:hover .tn-child-task-del { opacity:1; }
 .tn-task-card-new.is-child:hover .tn-task-edit-btn { opacity:1; }
-.tn-task-card-new.is-parent { background:#f5f6f8; }
-.tn-parent-arrow { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; color:var(--text-dim); flex-shrink:0; transition:transform .2s; }
+.tn-task-card-new.is-parent { background:var(--bg-surface); }
+.tn-parent-arrow { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; color:var(--text-muted); flex-shrink:0; }
 .tn-parent-arrow svg { transition:transform .2s; }
 .tn-task-card-new.is-parent.collapsed .tn-parent-arrow svg { transform:rotate(-90deg); }
 .tn-task-card-new.is-parent { cursor:pointer; }
@@ -1774,40 +1778,54 @@ body.tn-resizing * { pointer-events:none; }
 .mt-assignment-empty { font-size:10px; color:var(--text-muted); padding:6px 0; text-align:center; }
 
 /* ---- Trainee Overview Dashboard ---- */
-.tn-ov-stats { display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
-.tn-ov-stat-item { flex:1; min-width:100px; min-height:60px; background:var(--bg-surface); border-radius:10px; padding:14px 16px; text-align:center; border:1px solid var(--border-light); }
-.tn-ov-stat-num { font-size:22px; font-weight:700; line-height:1.2; }
-.tn-ov-stat-label { font-size:9px; color:var(--text-muted); margin-top:4px; }
-
-.tn-ov-link-panels { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+/* Hero stat cards */
+.tn-ov-hero { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+.tn-ov-hero-card { flex:1; min-width:120px; text-align:center; padding:18px 14px; background:var(--card); border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+.tn-ov-hero-val { font-size:20px; font-weight:700; line-height:1.2; }
+.tn-ov-hero-lbl { font-size:8px; color:var(--text-muted); margin-top:4px; text-transform:uppercase; letter-spacing:.5px; }
+.tn-ov-hero-sub { font-size:8px; color:var(--text-dim); margin-top:2px; }
+/* System progress section */
+.tn-ov-sys-section { margin-bottom:20px; }
+.tn-ov-sys-title { font-size:12px; font-weight:600; color:var(--text); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.tn-ov-sys-title::after { content:''; flex:1; height:1px; background:var(--border-light); }
+.tn-ov-sys-row { display:flex; align-items:center; gap:14px; padding:12px 16px; background:var(--card); border-radius:10px; margin-bottom:8px; border:1px solid var(--border-light); transition:box-shadow .15s; }
+.tn-ov-sys-row:hover { box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+.tn-ov-sys-dot { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+.tn-ov-sys-name { width:180px; flex-shrink:0; font-size:12px; font-weight:600; color:var(--text); }
+.tn-ov-sys-bar-wrap { flex:1; min-width:100px; height:8px; background:var(--bg-surface); border-radius:4px; overflow:hidden; }
+.tn-ov-sys-bar-fill { height:100%; border-radius:4px; transition:width .6s cubic-bezier(.4,0,.2,1); }
+.tn-ov-sys-nums { display:flex; gap:8px; font-size:9px; color:var(--text-dim); flex-shrink:0; white-space:nowrap; }
+.tn-ov-sys-pct { font-size:15px; font-weight:700; flex-shrink:0; width:40px; text-align:right; }
+/* System card grid (4-column) */
+.tn-ov-sys-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+@media(max-width:900px){ .tn-ov-sys-grid { grid-template-columns:repeat(2,1fr); } }
+.tn-ov-sys-card-new { background:var(--card); border-radius:10px; padding:12px 14px 10px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.04); transition:box-shadow .15s; }
+.tn-ov-sys-card-new:hover { box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+.tn-ov-sc-top { display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:8px; }
+.tn-ov-sc-dot { width:7px; height:7px; border-radius:2px; flex-shrink:0; }
+.tn-ov-sc-name { font-size:10px; font-weight:600; color:var(--text); }
+.tn-ov-sc-pct { font-size:22px; font-weight:700; margin-bottom:4px; line-height:1; }
+.tn-ov-sc-nums { display:flex; justify-content:center; gap:6px; font-size:8px; color:var(--text-dim); margin-top:4px; flex-wrap:wrap; }
+.tn-ov-sys-card-new .tn-ov-sys-bar-wrap { max-width:160px; margin:0 auto; }
+/* Link panels */
+.tn-ov-link-panels { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; align-items:start; }
 @media(max-width:1000px){ .tn-ov-link-panels { grid-template-columns:1fr; } }
-.tn-ov-panel { background:var(--bg-surface); border-radius:10px; overflow:hidden; border:1px solid var(--border-light); }
-.tn-ov-panel-hd { padding:10px 14px; font-size:11px; font-weight:600; color:#fff; display:flex; align-items:center; }
-.tn-ov-panel-bd { padding:8px 0; max-height:420px; overflow-y:auto; }
-.tn-ov-mod-row { display:flex; align-items:center; gap:6px; padding:6px 14px; transition:background .1s; }
+.tn-ov-panel { background:var(--card); border-radius:var(--radius-sm); overflow:hidden; box-shadow:var(--shadow-sm); }
+.tn-ov-panel-hd { padding:10px 16px; font-size:11px; font-weight:600; color:var(--text); display:flex; align-items:center; gap:7px; letter-spacing:.3px; background:var(--bg-surface); }
+.tn-ov-panel-hd .pnl-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.tn-ov-panel-bd { padding:6px 0; }
+.tn-ov-mod-row { display:flex; align-items:center; gap:6px; padding:7px 16px; transition:background .12s; cursor:pointer; }
 .tn-ov-mod-row:hover { background:var(--bg-surface-hover); }
-.tn-ov-mod-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-.tn-ov-mod-arrow { font-size:8px; color:var(--text-dim); flex-shrink:0; transition:transform .2s; width:10px; text-align:center; }
-.tn-ov-mod-name { font-size:10.5px; color:var(--text); flex:1; min-width:0; line-height:1.4; }
-.tn-ov-mod-desc { font-size:8.5px; color:var(--text-muted); flex-shrink:0; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.tn-ov-mod-badge { font-size:8px; padding:2px 8px; border-radius:10px; font-weight:500; flex-shrink:0; }
-.tn-ov-prog-done { background:#EAF0EE; color:#6AAA8A; }
-.tn-ov-prog-active { background:#FBF6EC; color:#D4A76A; }
-.tn-ov-prog-pend { background:var(--bg-surface); color:var(--text-dim); border:1px solid var(--border-light); }
-.tn-ov-mod-subs { border-left:1px dashed var(--border-light); margin-left:19px; }
-.tn-ov-mod-sub { padding:4px 14px 4px 10px; }
-
-.tn-ov-sys-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
-@media(max-width:900px){ .tn-ov-sys-cards { grid-template-columns:repeat(2,1fr); } }
-.tn-ov-sys-card { background:var(--bg-surface); border-radius:10px; padding:14px 16px; cursor:pointer; transition:box-shadow .15s; border:1px solid var(--border-light); }
-.tn-ov-sys-card:hover { box-shadow:var(--shadow-sm); }
-.tn-ov-sc-name { font-size:12px; font-weight:600; color:var(--text); margin-bottom:8px; }
-.tn-ov-sc-stats { display:flex; flex-wrap:wrap; gap:6px 10px; font-size:9px; align-items:center; }
-
-.tn-ov-status-strip { display:flex; gap:12px; background:var(--bg-surface); border-radius:10px; padding:14px 16px; border:1px solid var(--border-light); flex-wrap:wrap; }
-.tn-ov-ss-item { flex:1; min-width:80px; text-align:center; }
-.tn-ov-ss-val { font-size:18px; font-weight:700; color:var(--text); line-height:1.2; }
-.tn-ov-ss-label { font-size:9px; color:var(--text-muted); margin-top:2px; }
+.tn-ov-mod-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.tn-ov-mod-arrow { font-size:7px; color:var(--text-dim); flex-shrink:0; transition:transform .25s; width:12px; text-align:center; }
+.tn-ov-mod-name { font-size:10.5px; color:var(--text); flex:1; min-width:0; line-height:1.45; font-weight:500; }
+.tn-ov-mod-desc { font-size:8px; color:var(--text-muted); flex-shrink:0; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tn-ov-mod-badge { font-size:7.5px; padding:2px 8px; border-radius:10px; font-weight:600; flex-shrink:0; letter-spacing:.2px; }
+.tn-ov-prog-done { background:#E6F0EC; color:#5C9A82; }
+.tn-ov-prog-active { background:var(--accent-wash); color:var(--accent-dim); }
+.tn-ov-prog-pend { background:#F4F6FB; color:#5D8AA8; }
+.tn-ov-mod-subs { border-left:2px solid var(--border-light); margin-left:21px; overflow:hidden; transition:max-height .3s; }
+.tn-ov-mod-sub { padding:5px 16px 5px 12px; background:var(--bg-surface); }
 
 </style>
 </head>
@@ -1992,7 +2010,7 @@ body.tn-resizing * { pointer-events:none; }
 
   <!-- Trainee Management page -->
   <div class="page active" id="kpiTraineePage">
-    <div class="trainee-summary" id="traineeSummary"></div>
+    <div class="trainee-summary" id="traineeSummary" style="display:none"></div>
     <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;background:var(--bg-surface);border-radius:10px;padding:3px;width:fit-content">
       <button class="tn-sub-tab" onclick="switchTraineeView('overview')">总览</button>
       <button class="tn-sub-tab active" onclick="switchTraineeView('tasks')">任务看板</button>
@@ -2003,10 +2021,9 @@ body.tn-resizing * { pointer-events:none; }
     </div>
     <!-- Trainee Overview Dashboard -->
     <div class="tn-view" id="tnOverviewView" style="display:none">
-      <div class="tn-ov-stats" id="tnOvStatsBar"></div>
+      <div id="tnOvHero"></div>
+      <div id="tnOvSysBars"></div>
       <div class="tn-ov-link-panels" id="tnOvLinkPanels"></div>
-      <div class="tn-ov-sys-cards" id="tnOvSysCards"></div>
-      <div class="tn-ov-status-strip" id="tnOvStatusStrip"></div>
     </div>
     <div class="tn-view" id="tnTaskView">
       <div class="tn-view-toggle-bar">
@@ -2090,12 +2107,12 @@ body.tn-resizing * { pointer-events:none; }
           </div>
           <div style="display:flex;gap:10px;margin-bottom:10px">
             <div class="tn-report-field" style="flex:1">
-              <label>C 知会人</label>
-              <select id="wtC"><option value="">选择知会人</option></select>
+              <label>C 咨询人</label>
+              <select id="wtC"><option value="">选择咨询人</option></select>
             </div>
             <div class="tn-report-field" style="flex:1">
-              <label>I 审核人</label>
-              <select id="wtI"><option value="">选择审核人</option></select>
+              <label>I 知会人</label>
+              <select id="wtI"><option value="">选择知会人</option></select>
             </div>
           </div>
           <div style="display:flex;gap:10px;margin-bottom:16px">
@@ -2193,8 +2210,8 @@ body.tn-resizing * { pointer-events:none; }
               <div class="tn-report-field" style="flex:1"><label>A 负责人</label><select id="umWA"></select></div>
             </div>
             <div style="display:flex;gap:10px;margin-bottom:10px">
-              <div class="tn-report-field" style="flex:1"><label>C 知会人</label><select id="umWC"></select></div>
-              <div class="tn-report-field" style="flex:1"><label>I 审核人</label><select id="umWI"></select></div>
+              <div class="tn-report-field" style="flex:1"><label>C 咨询人</label><select id="umWC"></select></div>
+              <div class="tn-report-field" style="flex:1"><label>I 知会人</label><select id="umWI"></select></div>
             </div>
           </div>
           <!-- Reference task fields -->
@@ -2373,7 +2390,7 @@ body.tn-resizing * { pointer-events:none; }
       <!-- Section: Charts -->
       <div class="tn-dash-charts">
         <div class="tn-chart-box">
-          <div class="tn-chart-box-hd"><span class="tn-chart-dot" style="background:var(--accent)"></span>五维能力雷达图</div>
+          <div class="tn-chart-box-hd"><span class="tn-chart-dot" style="background:var(--accent)"></span><span id="tnRadarChartTitle">能力雷达图</span></div>
           <canvas id="tnRadarChart"></canvas>
         </div>
         <div class="tn-chart-box">
@@ -2422,6 +2439,7 @@ body.tn-resizing * { pointer-events:none; }
       </div>
       <div class="eval-header-actions" style="margin-left:auto">
         <button onclick="openMentorAssignModal()" id="evalMentorBtn" style="display:none">带教分配</button>
+        <button id="evalRankingBtn" onclick="openRankingModal()" style="display:none;background:var(--accent);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:9px;cursor:pointer;font-family:inherit;margin-right:4px">排名打分</button>
         <button onclick="switchTraineeView('dashboard')" style="background:var(--accent);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:9px;cursor:pointer;font-family:inherit">绩效总览</button>
         <button onclick="exportEvalData()">导出</button>
         <button onclick="importEvalData()">导入</button>
@@ -2478,6 +2496,26 @@ body.tn-resizing * { pointer-events:none; }
           <button class="btn btn-outline btn-sm" onclick="closeMentorAssignModal()" style="flex:1">取消</button>
           <button class="btn btn-primary btn-sm" onclick="saveMentorAssign()" style="flex:1">保存分配</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Ranking modal -->
+    <div class="tn-detail-overlay" id="rankingModal" style="display:none" onclick="if(event.target===this)closeRankingModal()">
+      <div class="tn-detail-modal" style="width:90vw;max-width:920px;max-height:85vh;overflow:auto" onclick="event.stopPropagation()">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <h4 style="margin:0;font-size:14px" id="rankingModalTitle">排名打分</h4>
+          <span style="font-size:9px;color:var(--text-dim)" id="rankingModalSub"></span>
+          <button style="margin-left:auto;border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-dim)" onclick="closeRankingModal()">✕</button>
+        </div>
+        <div id="rankingModalInstructions" style="margin-bottom:12px;padding:10px 14px;background:var(--accent-wash);border-radius:8px;font-size:9px;color:var(--accent-dim);line-height:1.6">
+          <strong>操作说明：</strong><span id="rankingInstructions"></span>
+        </div>
+        <div id="rankingModalBody" style="overflow-x:auto"></div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-outline btn-sm" onclick="closeRankingModal()" style="flex:1">取消</button>
+          <button class="btn btn-primary btn-sm" id="rankingSubmitBtn" onclick="submitRankings()" style="flex:1;padding:10px">确认提交排名</button>
+        </div>
+        <div style="font-size:8px;color:var(--text-muted);margin-top:8px;text-align:center">提交后每位管培生的排名分数将由系统自动计算：去最高最低 → 取平均排名 → 查表转换为分数</div>
       </div>
     </div>
   </div>
@@ -2865,6 +2903,30 @@ var EVAL_DIMS = [
   {id:'innovation',name:'主动创新',weight:10,max:10,desc:'提出了流程优化建议'}
 ];
 
+// V2 dimensions (W5+, 120-point system): auto(60) + mentorRank(50) + peerRank(10)
+var EVAL_DIMS_V2 = [
+  {id:'taskCompletion',name:'任务完成度',max:40,auto:true,desc:'本周任务全部按时完成，交付质量高'},
+  {id:'workQuality',   name:'工作质量',  max:20,auto:true,desc:'提交工作前请核对细节'},
+  {id:'execution',     name:'执行力',    max:15,type:'mentorRank',desc:'任务响应速度、按时交付、跟进到底'},
+  {id:'quality',       name:'工作质量',  max:15,type:'mentorRank',desc:'交付物质量、出错率、是否需返工'},
+  {id:'communication', name:'沟通表达',  max:8, type:'mentorRank',desc:'汇报清晰度、主动同步进度'},
+  {id:'growth',        name:'成长进步',  max:7, type:'mentorRank',desc:'相比上周的进步幅度、学习速度'},
+  {id:'responsibility',name:'责任心',    max:5, type:'mentorRank',desc:'主动承担、不推诿、对自己任务负责'},
+  {id:'collaboration', name:'协作贡献',  max:10,type:'peerRank',  desc:'主动协助他人、响应求助速度'}
+];
+
+// Rank → score: max points for each dimension tier
+var RANK_SCORE_MAP = {
+  15:[15,12,9,6,4,2,0],
+  10:[10,8,6,4,2,1,0],
+  8:[8,6,4,3,1,0,0],
+  7:[7,5,3,2,1,0,0],
+  5:[5,4,2,1,0,0,0]
+};
+
+// Cutoff: W5 (index 4) and later use V2 (currently disabled — all weeks use V1 100-point system)
+var EVAL_V2_CUTOFF_WEEK = 14; // W5 = index 4; set to 14 to keep V1 for all weeks
+
 var EVAL_WEEKS = [
   {id:'W1',label:'W1',start:'06/01',end:'06/05',month:'6月'},
   {id:'W2',label:'W2',start:'06/08',end:'06/12',month:'6月'},
@@ -3076,7 +3138,7 @@ function getRoleLabel(u){if(!u)return'未分配';var un=getUsername(u);if(un&&is
 function canAccessAdminSettings(u){if(!u)return false;var un=getUsername(u);return un&&isGlobalAdmin(un);}
 const ADMINS = ['杜宪','Jenny'];
 function defaultUsers(){return{
-  '杜宪':{pw:'32508000',role:'admin',name:'杜宪',modules:['org','okr','kpi','report','meeting']},
+  '杜宪':{pw:'112233',role:'admin',name:'杜宪',modules:['org','okr','kpi','report','meeting']},
   'Jenny':{pw:'32508000',role:'admin',name:'张毅',modules:['org','okr','kpi','report','meeting']},
   '汪顺':{pw:'123123',role:'user',name:'汪顺'},
   '王倩':{pw:'123123',role:'user',name:'王倩'},
@@ -9754,9 +9816,9 @@ function getEvalStorageKey(){ return 'otms_trainee_eval_v1'; }
 function loadEvalData(){
   try{
     var raw = localStorage.getItem(getEvalStorageKey());
-    if(raw){ evalData = JSON.parse(raw); return; }
+    if(raw){ evalData = JSON.parse(raw); if(!evalData.mentors) evalData.mentors={}; if(!evalData.rankings) evalData.rankings={}; return; }
   }catch(e){}
-  evalData = {scores:{}, extras:{}};
+  evalData = {scores:{}, extras:{}, mentors:{}, rankings:{}};
 }
 
 function saveEvalData(){
@@ -9789,11 +9851,101 @@ function setEvalExtras(traineeId, weekId, extras){
   saveEvalData();
 }
 
-function calcTotalScore(scores){
+function getActiveDims(weekId){
+  var weekIdx = parseInt(weekId.slice(1)) - 1;
+  return weekIdx >= EVAL_V2_CUTOFF_WEEK ? EVAL_DIMS_V2 : EVAL_DIMS;
+}
+
+function getEvalMaxScore(weekId){
+  var dims = getActiveDims(weekId);
+  var max = 0;
+  dims.forEach(function(d){ max += d.max; });
+  return max;
+}
+
+function calcTotalScore(scores, weekId){
   if(!scores) return null;
+  var dims = weekId ? getActiveDims(weekId) : EVAL_DIMS;
   var total = 0;
-  EVAL_DIMS.forEach(function(d){
+  dims.forEach(function(d){
     total += (scores[d.id] || 0);
+  });
+  return Math.round(total * 10) / 10;
+}
+
+function getRankScore(maxPoints, rank){
+  var map = RANK_SCORE_MAP[maxPoints];
+  if(!map) return 0;
+  var idx = Math.max(0, Math.min(rank - 1, map.length - 1));
+  return map[idx];
+}
+
+function calcTraineeRankScores(traineeName, weekId){
+  // Returns { scores: {dimId: score}, details: {...} } for ranking dimensions
+  if(!evalData || !evalData.rankings || !evalData.rankings[weekId]) return {scores:{}, details:{}};
+  var wk = evalData.rankings[weekId];
+  var result = {scores:{}, details:{}};
+  var self = this;
+
+  // Mentor ranking dimensions
+  var mentorDims = EVAL_DIMS_V2.filter(function(d){ return d.type==='mentorRank'; });
+  mentorDims.forEach(function(d){
+    var allRanks = [];
+    if(wk.mentorRankings){
+      Object.keys(wk.mentorRankings).forEach(function(mentor){
+        var ranks = wk.mentorRankings[mentor];
+        if(ranks && ranks[traineeName] && ranks[traineeName][d.id]){
+          allRanks.push(ranks[traineeName][d.id]);
+        }
+      });
+    }
+    if(allRanks.length === 0) return;
+    // Remove highest and lowest if 3+ mentors
+    if(allRanks.length >= 3){
+      allRanks.sort(function(a,b){ return a-b; });
+      allRanks = allRanks.slice(1, -1);
+    }
+    var avgRank = allRanks.reduce(function(s,r){ return s+r; }, 0) / allRanks.length;
+    result.scores[d.id] = getRankScore(d.max, Math.round(avgRank));
+    result.details[d.id] = {avgRank: Math.round(avgRank*10)/10, rawRanks: allRanks, score: result.scores[d.id]};
+  });
+
+  // Peer ranking dimension
+  var peerDims = EVAL_DIMS_V2.filter(function(d){ return d.type==='peerRank'; });
+  peerDims.forEach(function(d){
+    var allRanks = [];
+    if(wk.peerRankings){
+      Object.keys(wk.peerRankings).forEach(function(peer){
+        var ranks = wk.peerRankings[peer];
+        if(ranks && ranks[traineeName]){
+          allRanks.push(ranks[traineeName]);
+        }
+      });
+    }
+    if(allRanks.length === 0) return;
+    if(allRanks.length >= 3){
+      allRanks.sort(function(a,b){ return a-b; });
+      allRanks = allRanks.slice(1, -1);
+    }
+    var avgRank = allRanks.reduce(function(s,r){ return s+r; }, 0) / allRanks.length;
+    result.scores[d.id] = getRankScore(d.max, Math.round(avgRank));
+    result.details[d.id] = {avgRank: Math.round(avgRank*10)/10, rawRanks: allRanks, score: result.scores[d.id]};
+  });
+
+  return result;
+}
+
+function calcTraineeTotalScoreV2(traineeName, weekId){
+  // Combines auto scores (from evalData.scores) + ranking scores
+  var s = getEvalScore(traineeName, weekId) || {};
+  var rankResult = calcTraineeRankScores(traineeName, weekId);
+  var total = 0;
+  EVAL_DIMS_V2.forEach(function(d){
+    if(d.auto){
+      total += (s[d.id] || 0);
+    } else if(d.type==='mentorRank' || d.type==='peerRank'){
+      total += (rankResult.scores[d.id] || 0);
+    }
   });
   return Math.round(total * 10) / 10;
 }
@@ -9801,6 +9953,188 @@ function calcTotalScore(scores){
 function calcExtraTotal(extras){
   if(!extras || !extras.length) return 0;
   return extras.reduce(function(s,e){ return s + (parseInt(e.score)||0); }, 0);
+}
+
+// ===== RANKING MODAL =====
+var rankingModalMode = ''; // 'mentor' or 'peer'
+var rankingModalWeekId = '';
+
+function getCurrentUserDisplayName(){
+  return (currentUser && users[currentUser]) ? users[currentUser].name : '';
+}
+
+function isUserMentor(){
+  var name = getCurrentUserDisplayName();
+  for(var i=0;i<MENTOR_LIST.length;i++){ if(MENTOR_LIST[i]===name) return true; }
+  for(var i=0;i<EVAL_TRAINEES.length;i++){ if(EVAL_TRAINEES[i].supervisor===name) return true; }
+  return false;
+}
+
+function isUserTrainee(){
+  var name = getCurrentUserDisplayName();
+  for(var i=0;i<EVAL_TRAINEES.length;i++){ if(EVAL_TRAINEES[i].name===name) return true; }
+  return false;
+}
+
+function openRankingModal(){
+  if(!evalData) loadEvalData();
+  var weekId = EVAL_WEEKS[evalCurrentWeek].id;
+  var weekIdx = parseInt(weekId.slice(1)) - 1;
+  if(weekIdx < EVAL_V2_CUTOFF_WEEK){ alert('W5 起（6月29日后）才启用排名打分，当前周使用旧评估体系。'); return; }
+  rankingModalWeekId = weekId;
+  var userName = getCurrentUserDisplayName();
+  var isAdmin = isGlobalAdmin(currentUser);
+  var isMentor = isUserMentor();
+  var isTrainee = isUserTrainee();
+
+  document.getElementById('rankingModalSub').innerHTML = EVAL_WEEKS[evalCurrentWeek].label + ' (' + EVAL_WEEKS[evalCurrentWeek].start + ' - ' + EVAL_WEEKS[evalCurrentWeek].end + ') · <strong>提交人：'+userName+'</strong>';
+
+  if(isAdmin || isMentor){
+    rankingModalMode = 'mentor';
+    document.getElementById('rankingModalTitle').textContent = '带教排名打分';
+    document.getElementById('rankingInstructions').textContent = '请为每一位管培生在 5 个维度上分别排名（1=最佳，7=最末），同一维度下排名不能重复。每个维度独立排名，系统会综合所有带教老师的排名去最高最低后取平均。';
+    renderMentorRankingForm(weekId, userName);
+  } else if(isTrainee){
+    rankingModalMode = 'peer';
+    document.getElementById('rankingModalTitle').textContent = '协作互评排名';
+    document.getElementById('rankingInstructions').textContent = '请给其他 6 位管培生的协作贡献程度排名（1=协作最佳，6=协作最少），排名不能重复。';
+    renderPeerRankingForm(weekId, userName);
+  } else {
+    alert('您没有排名打分权限。');
+    return;
+  }
+  document.getElementById('rankingModal').style.display = '';
+}
+
+function closeRankingModal(){
+  document.getElementById('rankingModal').style.display = 'none';
+}
+
+function updateRankingBtn(){
+  var btn = document.getElementById('evalRankingBtn');
+  if(!btn) return;
+  var show = evalCurrentWeek >= EVAL_V2_CUTOFF_WEEK && (isGlobalAdmin(currentUser) || isUserMentor() || isUserTrainee());
+  btn.style.display = show ? '' : 'none';
+}
+
+function renderMentorRankingForm(weekId, mentorName){
+  // Show all 7 trainees with 5 dimension ranking dropdowns
+  var mentorDims = EVAL_DIMS_V2.filter(function(d){ return d.type==='mentorRank'; });
+  var existing = null;
+  if(evalData.rankings && evalData.rankings[weekId] && evalData.rankings[weekId].mentorRankings){
+    existing = evalData.rankings[weekId].mentorRankings[mentorName] || null;
+  }
+  var statusNote = existing ? '<span style="color:var(--success-text);font-size:9px;font-weight:400">（已有提交记录，可修改）</span>' : '<span style="color:var(--warning-text);font-size:9px;font-weight:400">（暂未提交）</span>';
+  var html = '<div style="font-size:10px;color:var(--accent-dim);margin-bottom:8px">你的姓名：<strong>'+mentorName+'</strong> '+statusNote+'</div>';
+  html += '<table style="width:100%;border-collapse:collapse;font-size:10px">';
+  html += '<thead><tr><th style="position:sticky;left:0;background:var(--bg-surface);z-index:2;text-align:left;padding:8px;min-width:70px;border-bottom:2px solid var(--border)">管培生</th>';
+  mentorDims.forEach(function(d){
+    html += '<th style="padding:6px 4px;text-align:center;border-bottom:2px solid var(--border);font-size:9px;min-width:72px">'+d.name+'<br><span style="font-weight:400;color:var(--text-dim)">'+d.max+'分</span></th>';
+  });
+  html += '</tr></thead><tbody>';
+  EVAL_TRAINEES.forEach(function(t){
+    html += '<tr><td style="position:sticky;left:0;background:var(--card);z-index:1;padding:8px;border-bottom:1px solid var(--border-light);font-weight:500;white-space:nowrap;font-size:11px">'+t.name+'</td>';
+    mentorDims.forEach(function(d){
+      var curVal = (existing && existing[t.name] && existing[t.name][d.id]) ? existing[t.name][d.id] : '';
+      html += '<td style="padding:4px;border-bottom:1px solid var(--border-light);text-align:center"><select class="rank-sel" data-trainee="'+t.name+'" data-dim="'+d.id+'" style="width:100%;padding:4px;border:1px solid var(--border-light);border-radius:4px;font-size:9px;font-family:inherit;background:var(--bg-surface);color:var(--text);outline:none;cursor:pointer">';
+      html += '<option value="">—</option>';
+      for(var r=1;r<=EVAL_TRAINEES.length;r++){
+        html += '<option value="'+r+'"'+(curVal==r?' selected':'')+'>第'+r+'名</option>';
+      }
+      html += '</select></td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  html += '<div style="font-size:8px;color:var(--text-muted);margin-top:8px">每个维度下 1-7 名必须各不相同，提交时会校验。你可以随时重新提交修改排名。</div>';
+  document.getElementById('rankingModalBody').innerHTML = html;
+}
+
+function renderPeerRankingForm(weekId, traineeName){
+  // Show 6 other trainees with 1 collaboration ranking dropdown
+  var others = [];
+  for(var i=0;i<EVAL_TRAINEES.length;i++){
+    if(EVAL_TRAINEES[i].name !== traineeName) others.push(EVAL_TRAINEES[i]);
+  }
+  var existing = null;
+  if(evalData.rankings && evalData.rankings[weekId] && evalData.rankings[weekId].peerRankings){
+    existing = evalData.rankings[weekId].peerRankings[traineeName] || null;
+  }
+  var html = '<table style="width:100%;border-collapse:collapse;font-size:10px">';
+  html += '<thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border-light)">管培生</th><th style="text-align:center;padding:8px;border-bottom:1px solid var(--border-light);width:200px">协作贡献排名 <span style="font-weight:400;color:var(--text-dim)">(1=最佳)</span></th></tr></thead><tbody>';
+  others.forEach(function(t){
+    var curVal = (existing && existing[t.name]) ? existing[t.name] : '';
+    html += '<tr><td style="padding:10px;border-bottom:1px solid var(--border-light);font-weight:500;font-size:11px">'+t.name+'</td>';
+    html += '<td style="padding:4px;border-bottom:1px solid var(--border-light);text-align:center"><select class="rank-sel" data-trainee="'+t.name+'" style="width:100%;padding:6px;border:1px solid var(--border-light);border-radius:4px;font-size:10px;font-family:inherit;background:var(--bg-surface);color:var(--text);outline:none;cursor:pointer">';
+    html += '<option value="">—</option>';
+    for(var r=1;r<=others.length;r++){
+      html += '<option value="'+r+'"'+(curVal==r?' selected':'')+'>第'+r+'名</option>';
+    }
+    html += '</select></td></tr>';
+  });
+  html += '</tbody></table>';
+  html += '<div style="font-size:8px;color:var(--text-muted);margin-top:8px">请给其他 6 位管培生排名，名次不能重复。</div>';
+  document.getElementById('rankingModalBody').innerHTML = html;
+}
+
+function submitRankings(){
+  var weekId = rankingModalWeekId;
+  if(!evalData) loadEvalData();
+  if(!evalData.rankings) evalData.rankings = {};
+  if(!evalData.rankings[weekId]) evalData.rankings[weekId] = {mentorRankings:{}, peerRankings:{}};
+
+  var rankerName = getCurrentUserDisplayName();
+  var allSelects = document.querySelectorAll('#rankingModalBody select.rank-sel');
+
+  if(rankingModalMode === 'mentor'){
+    // Validate: each dimension column must have all unique ranks 1-7
+    var dims = EVAL_DIMS_V2.filter(function(d){ return d.type==='mentorRank'; });
+    var errors = [];
+    dims.forEach(function(d){
+      var vals = [];
+      var seen = {};
+      allSelects.forEach(function(sel){
+        if(sel.dataset.dim === d.id){
+          var v = sel.value;
+          vals.push({trainee:sel.dataset.trainee, val:v});
+          if(v && seen[v]) errors.push(d.name+' 排名 '+v+' 重复');
+          if(v) seen[v] = true;
+        }
+      });
+    });
+    if(errors.length > 0){ alert('校验失败：\n'+errors.join('\n')); return; }
+
+    // Save
+    var entry = {};
+    allSelects.forEach(function(sel){
+      if(!sel.value) return;
+      if(!entry[sel.dataset.trainee]) entry[sel.dataset.trainee] = {};
+      entry[sel.dataset.trainee][sel.dataset.dim] = parseInt(sel.value);
+    });
+    evalData.rankings[weekId].mentorRankings[rankerName] = entry;
+  } else {
+    // Peer ranking
+    var vals = [];
+    var seen = {};
+    allSelects.forEach(function(sel){
+      var v = sel.value;
+      vals.push({trainee:sel.dataset.trainee, val:v});
+      if(v && seen[v]){ alert('排名重复：第'+v+'名出现多次，请检查。'); return; }
+      if(v) seen[v] = true;
+    });
+    var entry = {};
+    allSelects.forEach(function(sel){
+      if(!sel.value) return;
+      entry[sel.dataset.trainee] = parseInt(sel.value);
+    });
+    evalData.rankings[weekId].peerRankings[rankerName] = entry;
+  }
+
+  saveEvalData();
+  closeRankingModal();
+  // Refresh score panel if a trainee is selected
+  if(evalSelectedTrainee) renderEvalScorePanel(evalSelectedTrainee);
+  renderEvalTraineeList();
 }
 
 function openMentorAssignModal(){
@@ -9872,6 +10206,12 @@ function initEvalSystem(){
   var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
   if(diffDays < 0) diffDays = 0;
   evalCurrentWeek = Math.min(Math.floor(diffDays / 7), 13);
+  // Show ranking button for W5+
+  var rankingBtn = document.getElementById('evalRankingBtn');
+  if(rankingBtn){
+    var showRanking = evalCurrentWeek >= EVAL_V2_CUTOFF_WEEK && (isGlobalAdmin(currentUser) || isUserMentor() || isUserTrainee());
+    rankingBtn.style.display = showRanking ? '' : 'none';
+  }
   initSampleData();
   switchEvalView('weekly');
 }
@@ -9919,7 +10259,7 @@ function renderEvalWeekTabs(){
     for(var j=0;j<EVAL_TRAINEES.length;j++){
       if(getEvalScore(EVAL_TRAINEES[j].name, w.id)){ hasData = true; break; }
     }
-    html += '<button class="eval-week-tab'+(i===evalCurrentWeek?' active':'')+(hasData?' has-data':'')+'" onclick="evalCurrentWeek='+i+';renderEvalWeekTabs();renderEvalTraineeList();evalSelectedTrainee=null;document.getElementById(\'evalScorePanelContainer\').innerHTML=\'<div class=eval-empty>选择左侧管培生查看评分详情</div>\';">'+w.label+'<span style="font-size:7px;display:block">'+w.start+'</span>'+(hasData?'<span class=wk-dot></span>':'')+'</button>';
+    html += '<button class="eval-week-tab'+(i===evalCurrentWeek?' active':'')+(hasData?' has-data':'')+'" onclick="evalCurrentWeek='+i+';renderEvalWeekTabs();renderEvalTraineeList();evalSelectedTrainee=null;document.getElementById(\'evalScorePanelContainer\').innerHTML=\'<div class=eval-empty>选择左侧管培生查看评分详情</div>\';updateRankingBtn();">'+w.label+'<span style="font-size:7px;display:block">'+w.start+'</span>'+(hasData?'<span class=wk-dot></span>':'')+'</button>';
   }
   el.innerHTML = html;
 }
@@ -9933,24 +10273,25 @@ function renderEvalTraineeList(){
     var t = EVAL_TRAINEES[i];
     if(search && t.name.indexOf(search)===-1 && t.supervisor.toLowerCase().indexOf(search)===-1 && t.role.indexOf(search)===-1) continue;
     var s = getEvalScore(t.name, weekId);
-    var total = calcTotalScore(s);
+    var total = calcTotalScore(s, weekId);
     var extras = getEvalExtras(t.name, weekId);
     var extraTotal = calcExtraTotal(extras);
     var prevWeekIdx = evalCurrentWeek - 1;
     var change = null;
     if(prevWeekIdx >= 0){
       var prevScore = getEvalScore(t.name, EVAL_WEEKS[prevWeekIdx].id);
-      var prevTotal = calcTotalScore(prevScore);
+      var prevTotal = calcTotalScore(prevScore, EVAL_WEEKS[prevWeekIdx].id);
       if(prevTotal !== null && total !== null){
         change = Math.round((total - prevTotal) * 10) / 10;
       }
     }
     var initials = t.name.charAt(0);
+    var displayMentor = (evalData.mentors && evalData.mentors[t.name + '|' + weekId]) || t.supervisor;
     html += '<div class="eval-trainee-card'+(evalSelectedTrainee===t.name?' selected':'')+'" onclick="selectEvalTrainee(\''+t.name+'\')">'+
       '<div class="eval-trainee-avatar" style="background:'+t.avatarBg+'">'+initials+'</div>'+
       '<div class="eval-trainee-info">'+
         '<div class="eval-trainee-name">'+t.name+'</div>'+
-        '<div class="eval-trainee-meta">'+t.supervisor+'</div>'+
+        '<div class="eval-trainee-meta">'+displayMentor+'</div>'+
       '</div>'+
       '<div class="eval-trainee-score">'+
         (total !== null ? ('<div class="score-num">'+total+'</div>'+(change !== null && change !== 0 ? '<div class="score-change '+(change>0?'up':'down')+'">'+(change>0?'+':'')+change+'</div>' : '')+(extraTotal > 0 ? '<div style="font-size:8px;color:var(--accent);margin-top:2px">+'+extraTotal+'</div>' : '')) : '<div class="score-num" style="color:var(--text-muted);font-size:13px">—</div>')+
@@ -9971,18 +10312,31 @@ function renderEvalScorePanel(traineeId){
   var t = null;
   for(var i=0;i<EVAL_TRAINEES.length;i++){ if(EVAL_TRAINEES[i].name===traineeId){ t=EVAL_TRAINEES[i]; break; } }
   if(!t) return;
-  // Permission: only supervisor (by display name) or admin can edit scores
-  var currentUserName = currentUser && users[currentUser] ? users[currentUser].name : '';
-  var canEdit = isGlobalAdmin(currentUser) || (currentUserName === t.supervisor);
-  var dis = canEdit ? '' : ' disabled';
-  var readonly = canEdit ? '' : ' readonly';
   var weekId = EVAL_WEEKS[evalCurrentWeek].id;
+  var weekIdx = parseInt(weekId.slice(1)) - 1;
+  var isV2 = weekIdx >= EVAL_V2_CUTOFF_WEEK;
+  var weekMentor = (evalData.mentors && evalData.mentors[t.name + '|' + weekId]) || t.supervisor;
+  var currentUserName = currentUser && users[currentUser] ? users[currentUser].name : '';
+  var canEdit = isGlobalAdmin(currentUser) || (currentUserName === weekMentor);
   var weekLabel = EVAL_WEEKS[evalCurrentWeek].label + ' (' + EVAL_WEEKS[evalCurrentWeek].start + ' - ' + EVAL_WEEKS[evalCurrentWeek].end + ')';
+  var container = document.getElementById('evalScorePanelContainer');
+
+  if(isV2){
+    // ===== V2 System (120 pts) =====
+    renderScorePanelV2(t, weekId, weekLabel, canEdit, container);
+  } else {
+    // ===== V1 System (100 pts, original) =====
+    renderScorePanelV1(t, weekId, weekLabel, canEdit, container);
+  }
+  } catch(e) { var c2 = document.getElementById('evalScorePanelContainer'); if(c2) c2.innerHTML = '<div style=\"padding:12px;color:#C94F66;background:var(--bg-surface);border-radius:8px;text-align:center;font-size:11px\">评分面板报错: '+esc(e.message)+'</div>'; }
+}
+
+function renderScorePanelV1(t, weekId, weekLabel, canEdit, container){
+  var dis = canEdit ? '' : ' disabled';
   var s = getEvalScore(t.name, weekId) || {};
   var extras = getEvalExtras(t.name, weekId) || [];
   var total = calcTotalScore(s);
   var extraTotal = calcExtraTotal(extras);
-  var container = document.getElementById('evalScorePanelContainer');
 
   var dimsHtml = '';
   for(var i=0;i<EVAL_DIMS.length;i++){
@@ -10025,10 +10379,9 @@ function renderEvalScorePanel(traineeId){
     var prevWeekId = EVAL_WEEKS[prevWeekIdx].id;
     prevDataBtn = '<button class="eval-btn-restore" onclick="restorePrevWeekData(\''+t.name+'\',\''+prevWeekId+'\',\''+weekId+'\')">恢复'+EVAL_WEEKS[prevWeekIdx].label+'数据</button>';
   }
-
   var saveBtn = canEdit ? '<button class="eval-btn-save" onclick="saveCurrentEval(\''+t.name+'\',\''+weekId+'\')">保存评分</button>' : '';
-
   var readonlyBanner = !canEdit ? '<div style="text-align:center;padding:6px;background:#FDF6EC;border-radius:8px;margin-bottom:12px;font-size:9px;color:#E0956A">仅限直属上级（'+t.supervisor+'）或管理员编辑评分</div>' : '';
+
   container.innerHTML =
     '<div class="eval-score-panel">'+
       '<div class="eval-score-panel-hd">'+
@@ -10048,7 +10401,179 @@ function renderEvalScorePanel(traineeId){
         prevDataBtn + saveBtn +
       '</div>'+
     '</div>';
-  } catch(e) { container.innerHTML = '<div style=\"padding:12px;color:#C94F66;background:var(--bg-surface);border-radius:8px;text-align:center;font-size:11px\">评分面板报错: '+esc(e.message)+'</div>'; }
+}
+
+function renderScorePanelV2(t, weekId, weekLabel, canEdit, container){
+  var dis = canEdit ? '' : ' disabled';
+  var s = getEvalScore(t.name, weekId) || {};
+  var rankResult = calcTraineeRankScores(t.name, weekId);
+  var total = calcTraineeTotalScoreV2(t.name, weekId);
+  var maxScore = getEvalMaxScore(weekId);
+
+  // Auto-score the two auto dimensions
+  var taskComp = autoScoreTaskCompletionV2(t.name, weekId);
+  var workQual = autoScoreWorkQualityV2(t.name, weekId);
+
+  // Build dims HTML grouped by type
+  var autoHtml = '', mentorHtml = '', peerHtml = '';
+
+  EVAL_DIMS_V2.forEach(function(d){
+    var val = 0, isAuto = d.auto, isRank = (d.type==='mentorRank' || d.type==='peerRank');
+    var dimLabel = '';
+    if(d.auto){
+      val = (s[d.id] || 0);
+      if(d.id==='taskCompletion') val = taskComp.score;
+      if(d.id==='workQuality') val = workQual.score;
+      dimLabel = '<span style="font-size:7px;color:var(--success-text);background:var(--success-bg);padding:1px 5px;border-radius:3px;margin-left:4px">自动</span>';
+    } else if(isRank){
+      val = (rankResult.scores[d.id] || 0);
+      var det = rankResult.details[d.id];
+      if(det && det.avgRank) dimLabel = '<span style="font-size:7px;color:var(--text-muted);margin-left:4px">均排 '+det.avgRank+'</span>';
+      else dimLabel = '<span style="font-size:7px;color:var(--text-muted);margin-left:4px">暂无排名</span>';
+    }
+    var row = '<div class="eval-dim-item">'+
+      '<div class="eval-dim-label"><div class="dim-name">'+d.name+dimLabel+'</div><div class="dim-weight">满分 '+d.max+'</div></div>'+
+      '<div class="eval-dim-score-input"><input type="number" value="'+val+'" min="0" max="'+d.max+'" step="0.5" id="evalDim_'+d.id+'"'+(d.auto?dis:' disabled')+'></div>'+
+      '<div class="eval-dim-max">/ '+d.max+'</div>'+
+      (d.auto ? '<div class="eval-dim-slider"><input type="range" value="'+val+'" min="0" max="'+d.max+'" step="0.5" oninput="var inp=document.getElementById(\'evalDim_'+d.id+'\');if(inp&&!inp.disabled){inp.value=this.value;}"'+dis+'></div>' : '<div style="flex:1;min-width:60px"></div>')+
+      '<div class="eval-dim-comment" style="width:160px;flex-shrink:0"><input type="text" placeholder="评语..." value="'+esc((s[d.id+'Comment']||d.desc))+'" '+dis+'></div>'+
+    '</div>';
+    if(d.auto) autoHtml += row;
+    else if(d.type==='mentorRank') mentorHtml += row;
+    else peerHtml += row;
+  });
+
+  var mentorCount = 0;
+  if(evalData.rankings && evalData.rankings[weekId] && evalData.rankings[weekId].mentorRankings){
+    mentorCount = Object.keys(evalData.rankings[weekId].mentorRankings).length;
+  }
+  var peerCount = 0;
+  if(evalData.rankings && evalData.rankings[weekId] && evalData.rankings[weekId].peerRankings){
+    peerCount = Object.keys(evalData.rankings[weekId].peerRankings).length;
+  }
+
+  var prevWeekIdx = evalCurrentWeek - 1;
+  var prevDataBtn = '';
+  if(prevWeekIdx >= 0 && canEdit){
+    var prevWeekId = EVAL_WEEKS[prevWeekIdx].id;
+    prevDataBtn = '<button class="eval-btn-restore" onclick="restorePrevWeekData(\''+t.name+'\',\''+prevWeekId+'\',\''+weekId+'\')">恢复'+EVAL_WEEKS[prevWeekIdx].label+'数据</button>';
+  }
+  var saveBtn = canEdit ? '<button class="eval-btn-save" onclick="saveCurrentEvalV2(\''+t.name+'\',\''+weekId+'\')">保存评分</button>' : '';
+
+  var rankingInfo = '<div style="font-size:8px;color:var(--text-muted);margin-top:4px">已提交排名：带教 '+mentorCount+' 人 · 互评 '+peerCount+' 人（去最高最低取平均）</div>';
+
+  var currentUserName = getCurrentUserDisplayName();
+  var isCurrentMentor = isUserMentor();
+  var isCurrentTrainee = isUserTrainee();
+  var isAdmin = isGlobalAdmin(currentUser);
+
+  // Check if current user already submitted rankings
+  var hasMentorSubmitted = false;
+  var hasPeerSubmitted = false;
+  if(evalData.rankings && evalData.rankings[weekId]){
+    if(evalData.rankings[weekId].mentorRankings && evalData.rankings[weekId].mentorRankings[currentUserName]){
+      hasMentorSubmitted = true;
+    }
+    if(evalData.rankings[weekId].peerRankings && evalData.rankings[weekId].peerRankings[currentUserName]){
+      hasPeerSubmitted = true;
+    }
+  }
+
+  var mentorRankBtn = '';
+  var peerRankBtn = '';
+  if(isAdmin || isCurrentMentor){
+    mentorRankBtn = '<button class="eval-rank-btn'+(hasMentorSubmitted?' submitted':'')+'" onclick="openRankingModal()">'+
+      (hasMentorSubmitted ? '已提交排名 · 重新提交' : '提交我的排名')+
+      '</button>';
+  }
+  if(isCurrentTrainee && !isAdmin && !isCurrentMentor){
+    peerRankBtn = '<button class="eval-rank-btn'+(hasPeerSubmitted?' submitted':'')+'" onclick="openRankingModal()">'+
+      (hasPeerSubmitted ? '已提交互评 · 重新提交' : '提交互评排名')+
+      '</button>';
+  }
+
+  container.innerHTML =
+    '<div class="eval-score-panel">'+
+      '<div class="eval-score-panel-hd">'+
+        '<div><div class="name">'+t.name+'</div><div class="meta">'+t.supervisor+' · '+weekLabel+'</div></div>'+
+        '<div style="text-align:right"><div style="font-size:9px;color:var(--text-muted)">综合得分</div><div style="font-size:10px;color:var(--text-muted)">满分 120 分（自动 60 + 排名 60）</div></div>'+
+      '</div>'+
+      '<div class="eval-total-score">'+
+        '<div class="big-num">'+total+'</div>'+
+        '<div class="big-label">综合 '+total+' / 120</div>'+
+        rankingInfo +
+      '</div>'+
+      '<div style="font-size:12px;font-weight:600;color:var(--success-text);margin-bottom:8px">系统自动评分 <span style="font-weight:400;color:var(--text-dim);font-size:9px">满分 60 分</span></div>'+
+      '<div class="eval-dims">'+autoHtml+'</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-top:16px;margin-bottom:8px">'+
+        '<span style="font-size:12px;font-weight:600;color:var(--text)">带教排名评分 <span style="font-weight:400;color:var(--text-dim);font-size:9px">满分 50 分 · '+mentorCount+' 位带教已提交</span></span>'+
+        mentorRankBtn +
+      '</div>'+
+      '<div class="eval-dims">'+mentorHtml+'</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-top:16px;margin-bottom:8px">'+
+        '<span style="font-size:12px;font-weight:600;color:var(--text)">管培生互评排名 <span style="font-weight:400;color:var(--text-dim);font-size:9px">满分 10 分 · '+peerCount+' 人已提交</span></span>'+
+        peerRankBtn +
+      '</div>'+
+      '<div class="eval-dims">'+peerHtml+'</div>'+
+      (canEdit ? '<div class="eval-save-row" style="margin-top:16px">'+prevDataBtn + saveBtn+'</div>' : '')+
+    '</div>';
+}
+
+function autoScoreTaskCompletionV2(traineeName, weekId){
+  var s = getEvalScore(traineeName, weekId) || {};
+  var comp = calcTaskCompletionForTrainee(traineeName, weekId);
+  if(!s._autoTaskCompletionV2 || s.taskCompletion === undefined || s.taskCompletion === null){
+    s.taskCompletion = comp.suggestedScore;
+    s._autoTaskCompletionV2 = true;
+    setEvalScore(traineeName, weekId, s);
+    return {score: comp.suggestedScore, comp: comp};
+  }
+  return {score: s.taskCompletion, comp: comp};
+}
+
+function autoScoreWorkQualityV2(traineeName, weekId){
+  var s = getEvalScore(traineeName, weekId) || {};
+  // Default: 20 pts if no rejections; check for feedback/rejections
+  var score = 20;
+  if(!s._autoWorkQualityV2 || s.workQuality === undefined || s.workQuality === null){
+    // Check feedback for rejections this week
+    if(tnData && tnData.feedback){
+      var rejectCount = 0;
+      tnData.feedback.forEach(function(fb){
+        if(fb.trainee === traineeName && fb.weekId === weekId && fb.type === 'reject') rejectCount++;
+      });
+      if(rejectCount >= 2) score = 10;
+      else if(rejectCount === 1) score = 15;
+    }
+    s.workQuality = score;
+    s._autoWorkQualityV2 = true;
+    setEvalScore(traineeName, weekId, s);
+    return {score: score, rejections: rejectCount||0};
+  }
+  return {score: s.workQuality};
+}
+
+function saveCurrentEvalV2(traineeName, weekId){
+  var s = getEvalScore(traineeName, weekId) || {};
+  var dims = EVAL_DIMS_V2;
+  for(var i=0;i<dims.length;i++){
+    var el = document.getElementById('evalDim_'+dims[i].id);
+    if(el && !el.disabled && dims[i].auto){
+      var val = parseFloat(el.value) || 0;
+      s[dims[i].id] = val;
+      if(dims[i].id==='taskCompletion') s._autoTaskCompletionV2 = false;
+      if(dims[i].id==='workQuality') s._autoWorkQualityV2 = false;
+    }
+    var commentEl = el ? el.parentElement.parentElement.querySelector('.eval-dim-comment input') : null;
+    if(commentEl && !commentEl.disabled){
+      s[dims[i].id+'Comment'] = commentEl.value;
+    }
+  }
+  setEvalScore(traineeName, weekId, s);
+  var saveEl = document.getElementById('evalScorePanelContainer').querySelector('.eval-btn-save');
+  if(saveEl){ var orig = saveEl.textContent; saveEl.textContent = '已保存'; saveEl.style.background = 'var(--success)'; setTimeout(function(){ if(saveEl){ saveEl.textContent = orig; saveEl.style.background = 'var(--accent)'; } }, 1500); }
+  renderEvalTraineeList();
+  renderEvalWeekTabs();
 }
 
 // Auto-score task completion from task board data
@@ -10071,11 +10596,12 @@ function updateDimScore(traineeId, dimId, value, weekId){
   // Clear auto flag when taskCompletion is manually edited
   if(dimId==='taskCompletion') s._autoTaskCompletion = false;
   setEvalScore(traineeId, weekId, s);
-  var total = calcTotalScore(s);
+  var total = calcTotalScore(s, weekId);
   var totalEl = document.querySelector('#evalScorePanelContainer .big-num');
   var labelEl = document.querySelector('#evalScorePanelContainer .big-label');
+  var maxScore = getEvalMaxScore(weekId);
   if(totalEl) totalEl.textContent = total !== null ? total : '—';
-  if(labelEl) labelEl.textContent = '通用 '+(total !== null ? total : '—')+' / 100';
+  if(labelEl) labelEl.textContent = '通用 '+(total !== null ? total : '—')+' / '+maxScore;
   renderEvalTraineeList();
   renderEvalWeekTabs();
 }
@@ -10136,9 +10662,12 @@ function renderEvalCalendar(){
   var totalAvg = 0, totalCount = 0, maxWeekAvg = 0, maxWeekLabel = '';
   for(var w=0;w<EVAL_WEEKS.length;w++){
     var weekScores = [];
+    var wkId = EVAL_WEEKS[w].id;
+    var wkIsV2 = w >= EVAL_V2_CUTOFF_WEEK;
     for(var t=0;t<EVAL_TRAINEES.length;t++){
-      var s = getEvalScore(EVAL_TRAINEES[t].name, EVAL_WEEKS[w].id);
-      var total = calcTotalScore(s);
+      var tName = EVAL_TRAINEES[t].name;
+      var s = getEvalScore(tName, wkId);
+      var total = wkIsV2 ? calcTraineeTotalScoreV2(tName, wkId) : calcTotalScore(s, wkId);
       if(total !== null){ weekScores.push(total); }
     }
     var avg = weekScores.length ? Math.round(weekScores.reduce(function(a,b){return a+b;},0)/weekScores.length*10)/10 : 0;
@@ -10164,12 +10693,14 @@ function renderEvalCalendar(){
       gridHtml += '<div class="eval-cal-month-label">'+currentMonth+'</div>';
     }
     var wk = EVAL_WEEKS[w];
+    var wkIsV2_2 = w >= EVAL_V2_CUTOFF_WEEK;
     var weekScores = [];
     var topTrainee = null;
     var topScore = -1;
     for(var t=0;t<EVAL_TRAINEES.length;t++){
-      var s = getEvalScore(EVAL_TRAINEES[t].name, wk.id);
-      var total = calcTotalScore(s);
+      var tName2 = EVAL_TRAINEES[t].name;
+      var s = getEvalScore(tName2, wk.id);
+      var total = wkIsV2_2 ? calcTraineeTotalScoreV2(tName2, wk.id) : calcTotalScore(s, wk.id);
       if(total !== null){
         weekScores.push(total);
         if(total > topScore){ topScore = total; topTrainee = EVAL_TRAINEES[t]; }
@@ -10207,8 +10738,10 @@ function renderEvalHistory(){
     html += '<tr><td style="font-weight:500;color:var(--text)">'+tr.name+'</td><td style="font-size:8px;color:var(--text-dim)">'+tr.supervisor+'</td>';
     var allScores = [];
     for(var w=0;w<EVAL_WEEKS.length;w++){
-      var s = getEvalScore(tr.name, EVAL_WEEKS[w].id);
-      var total = calcTotalScore(s);
+      var wkIdH = EVAL_WEEKS[w].id;
+      var s = getEvalScore(tr.name, wkIdH);
+      var wkIsV2H = w >= EVAL_V2_CUTOFF_WEEK;
+      var total = wkIsV2H ? calcTraineeTotalScoreV2(tr.name, wkIdH) : calcTotalScore(s, wkIdH);
       if(total !== null){
         allScores.push(total);
         html += '<td style="cursor:pointer" onclick="evalCurrentWeek='+w+';switchEvalView(\'weekly\');renderEvalWeekTabs();renderEvalTraineeList();selectEvalTrainee(\''+tr.name+'\')">'+total+'</td>';
@@ -10275,8 +10808,10 @@ function exportEvalCSV(){
     csv += tr.name + ',' + tr.supervisor;
     var allScores = [];
     for(var w=0;w<EVAL_WEEKS.length;w++){
-      var s = getEvalScore(tr.name, EVAL_WEEKS[w].id);
-      var total = calcTotalScore(s);
+      var csvWkId = EVAL_WEEKS[w].id;
+      var s = getEvalScore(tr.name, csvWkId);
+      var csvIsV2 = w >= EVAL_V2_CUTOFF_WEEK;
+      var total = csvIsV2 ? calcTraineeTotalScoreV2(tr.name, csvWkId) : calcTotalScore(s, csvWkId);
       csv += ',' + (total !== null ? total : '');
       if(total !== null) allScores.push(total);
     }
@@ -10488,7 +11023,8 @@ function calcTaskCompletionForTrainee(traineeName, weekId){
 
   var weekRate = weekTotal > 0 ? Math.round(weekDone/weekTotal*100) : 0;
   var allRate = allTotal > 0 ? Math.round(allDone/allTotal*100) : 0;
-  var suggestedScore = weekTotal > 0 ? Math.round(weekRate/100 * EVAL_DIMS[0].max * 10) / 10 : 0;
+  var taskMax = getActiveDims(weekId)[0].max;
+  var suggestedScore = weekTotal > 0 ? Math.round(weekRate/100 * taskMax * 10) / 10 : 0;
   return {
     total: weekTotal, done: weekDone, rate: weekRate,
     weekTotal: weekTotal, weekDone: weekDone, weekRate: weekRate,
@@ -10749,11 +11285,11 @@ function switchTraineeView(view){
     var views = ['overview','tasks','gantt','reports','evaluation','dashboard'];
     b.classList.toggle('active', views[i]===view);
   });
-  if(view==='overview'){ try { renderTraineeSummary(); } catch(e) { document.getElementById('traineeSummary').innerHTML = '<div style=\"padding:12px;color:#C94F66;background:var(--bg-surface);border-radius:8px;text-align:center;font-size:11px\">Summary报错: '+esc(e.message)+'</div>'; } try { renderTraineeOverview(); } catch(e) { document.getElementById('tnOvStatsBar').innerHTML = '<div style=\"padding:20px;color:#C94F66;background:var(--bg-surface);border-radius:10px;text-align:center\">Overview报错: '+esc(e.message)+'</div>'; } }
-  else if(view==='tasks'){ renderTraineeSummary(); renderApprovalPanel(); renderTraineeTasks(); }
-  else if(view==='reports'){ renderTraineeSummary(); initTnAttendees(); clearTnMeetingForm(); renderTnMeetingList(); switchReportSection('meeting'); }
-  else if(view==='dashboard'){ renderTraineeSummary(); renderDashboard(); }
-  else if(view==='gantt'){ try { renderTraineeSummary(); } catch(e) { console.error('renderTraineeSummary error:', e); } try { renderTraineeGanttView(); } catch(e) { console.error('renderTraineeGanttView error:', e.message, e.stack); document.getElementById('tnGanttChart').innerHTML = '<div style="padding:40px;text-align:center;color:#C94F66;font-size:12px">甘特图渲染失败: '+esc(e.message)+'</div>'; } }
+  if(view==='overview'){ try { renderTraineeOverview(); } catch(e) { document.getElementById('tnOvHero').innerHTML = '<div style=\"padding:20px;color:#C94F66;background:var(--bg-surface);border-radius:10px;text-align:center\">Overview报错: '+esc(e.message)+'</div>'; } }
+  else if(view==='tasks'){ renderApprovalPanel(); renderTraineeTasks(); }
+  else if(view==='reports'){ initTnAttendees(); clearTnMeetingForm(); renderTnMeetingList(); switchReportSection('meeting'); }
+  else if(view==='dashboard'){ renderDashboard(); }
+  else if(view==='gantt'){ try { renderTraineeGanttView(); } catch(e) { console.error('renderTraineeGanttView error:', e.message, e.stack); document.getElementById('tnGanttChart').innerHTML = '<div style="padding:40px;text-align:center;color:#C94F66;font-size:12px">甘特图渲染失败: '+esc(e.message)+'</div>'; } }
   else if(view==='evaluation'){ initEvalSystem(); }
 }
 
@@ -10793,20 +11329,23 @@ function renderTraineeSummary(){
   var curWkId = 'W' + (curWkIdx + 1);
   var totalScore = 0, traineeCount = 0;
   if(typeof EVAL_TRAINEES !== 'undefined' && EVAL_TRAINEES){
+    var sumWkIdx = parseInt(curWkId.slice(1)) - 1;
+    var sumIsV2 = sumWkIdx >= EVAL_V2_CUTOFF_WEEK;
     EVAL_TRAINEES.forEach(function(tr){
       var s = getEvalScore(tr.name, curWkId);
-      var ts = calcTotalScore(s);
+      var ts = sumIsV2 ? calcTraineeTotalScoreV2(tr.name, curWkId) : calcTotalScore(s, curWkId);
       if(ts !== null){ totalScore += ts; traineeCount++; }
     });
   }
   var avgScore = traineeCount > 0 ? (totalScore / traineeCount).toFixed(1) : '--';
+  var sumMaxLabel = sumIsV2 ? '/120' : '/100';
   document.getElementById('traineeSummary').innerHTML =
     '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#5D8AA8">'+total+'</div><div class="tn-sc-lbl">全部任务</div></div>'+
     '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#8BA89C">'+done+'</div><div class="tn-sc-lbl">已完成</div></div>'+
     '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#D4A76A">'+active+'</div><div class="tn-sc-lbl">进行中</div></div>'+
     '<div class="tn-summary-card"><div class="tn-sc-num" style="color:var(--accent)">'+rptCount+'</div><div class="tn-sc-lbl">周报提交</div></div>'+
     '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#A09DB5">'+fbCount+'</div><div class="tn-sc-lbl">反馈记录</div></div>'+
-    '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#C94F66">'+avgScore+'</div><div class="tn-sc-lbl">本周均分</div></div>';
+    '<div class="tn-summary-card"><div class="tn-sc-num" style="color:#C94F66">'+avgScore+'</div><div class="tn-sc-lbl">本周均分'+sumMaxLabel+'</div></div>';
 }
 
 var tnCollapsedParents = {};
@@ -12594,26 +13133,34 @@ function openTraineeDetail(name){
   var curWkId = 'W' + (curWkIdx + 1);
   var comp = calcTaskCompletionForTrainee(name, curWkId);
   var s = getEvalScore(name, curWkId);
-  var ts = calcTotalScore(s);
+  var detailIsV2 = curWkIdx >= EVAL_V2_CUTOFF_WEEK;
+  var ts = detailIsV2 ? calcTraineeTotalScoreV2(name, curWkId) : calcTotalScore(s, curWkId);
+  var maxScore = getEvalMaxScore(curWkId);
+  var autoMaxScore = getActiveDims(curWkId)[0].max; // taskCompletion: 20(V1) or 40(V2)
   var autoScore = comp.suggestedScore;
   var manualScore = ts !== null ? ts.toFixed(1) : '--';
-  html += '<div class="tn-detail-section"><h4>本周评估（'+curWkId+'）</h4><div style="display:flex;gap:12px">';
-  html += '<div class="tn-dash-card" style="flex:1"><div style="font-size:9px;color:var(--text-muted);margin-bottom:4px">任务完成 <span style="color:#2E7D32;font-weight:600">自动</span></div><div style="font-size:20px;font-weight:700;color:#8BA89C">'+autoScore.toFixed(1)+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/30</span></div><div class="dash-mini-bar" style="margin-top:6px"><div class="dash-mini-fill" style="width:'+comp.weekRate+'%;background:#8BA89C"></div></div><div style="font-size:9px;color:var(--text-muted);margin-top:4px">本周 '+comp.weekDone+'/'+comp.weekTotal+' 项 · '+comp.weekRate+'%</div><div style="font-size:7px;color:var(--text-muted);margin-top:2px">累计 '+comp.allDone+'/'+comp.allTotal+' 项 · '+comp.allRate+'%</div></div>';
-  html += '<div class="tn-dash-card" style="flex:1"><div style="font-size:9px;color:var(--text-muted);margin-bottom:4px">综合评估 <span style="color:#E0956A;font-weight:600">手动</span></div><div style="font-size:20px;font-weight:700;color:'+(ts!==null?(ts>=80?'#8BA89C':ts>=60?'#D4A76A':'#C94F66'):'var(--text-dim)')+'">'+manualScore+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/100</span></div><div class="dash-mini-bar" style="margin-top:6px"><div class="dash-mini-fill" style="width:'+(ts!==null?Math.round(ts):0)+'%;background:'+(ts!==null?(ts>=80?'#8BA89C':ts>=60?'#D4A76A':'#C94F66'):'var(--text-dim)')+'"></div></div><div style="font-size:9px;color:var(--text-muted);margin-top:4px">5维评估</div></div>';
+  var scorePct = ts !== null ? Math.round(ts/maxScore*100) : 0;
+  var scoreColor = ts !== null ? (scorePct >= 80 ? '#8BA89C' : scorePct >= 60 ? '#D4A76A' : '#C94F66') : 'var(--text-dim)';
+  html += '<div class="tn-detail-section"><h4>本周评估（'+curWkId+'）'+(detailIsV2?' <span style="font-size:9px;font-weight:400;color:var(--accent);background:var(--accent-wash);padding:2px 6px;border-radius:4px">V2 · 120分制</span>':' <span style="font-size:9px;font-weight:400;color:var(--text-dim);background:var(--bg-surface);padding:2px 6px;border-radius:4px">V1 · 100分制</span>')+'</h4><div style="display:flex;gap:12px">';
+  html += '<div class="tn-dash-card" style="flex:1"><div style="font-size:9px;color:var(--text-muted);margin-bottom:4px">任务完成 <span style="color:#2E7D32;font-weight:600">自动</span></div><div style="font-size:20px;font-weight:700;color:#8BA89C">'+autoScore.toFixed(1)+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/'+autoMaxScore+'</span></div><div class="dash-mini-bar" style="margin-top:6px"><div class="dash-mini-fill" style="width:'+comp.weekRate+'%;background:#8BA89C"></div></div><div style="font-size:9px;color:var(--text-muted);margin-top:4px">本周 '+comp.weekDone+'/'+comp.weekTotal+' 项 · '+comp.weekRate+'%</div><div style="font-size:7px;color:var(--text-muted);margin-top:2px">累计 '+comp.allDone+'/'+comp.allTotal+' 项 · '+comp.allRate+'%</div></div>';
+  html += '<div class="tn-dash-card" style="flex:1"><div style="font-size:9px;color:var(--text-muted);margin-bottom:4px">综合评估 <span style="color:#E0956A;font-weight:600">'+(detailIsV2?'自动+排名':'手动')+'</span></div><div style="font-size:20px;font-weight:700;color:'+scoreColor+'">'+manualScore+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/'+maxScore+'</span></div><div class="dash-mini-bar" style="margin-top:6px"><div class="dash-mini-fill" style="width:'+scorePct+'%;background:'+scoreColor+'"></div></div><div style="font-size:9px;color:var(--text-muted);margin-top:4px">'+(detailIsV2?'8维评估':'5维评估')+'</div></div>';
   html += '</div></div>';
   
   // Eval trend: last 6 weeks
   html += '<div class="tn-detail-section"><h4>评估趋势（近6周）</h4>';
   var scores = [];
   for(var i=Math.max(0,curWkIdx-5); i<=curWkIdx; i++){
-    var wkId = 'W'+(i+1);
-    var s = getEvalScore(name, wkId);
-    var ts = calcTotalScore(s);
-    scores.push({week:wkId, score:ts!==null?ts:'--'});
+    var wkIdT = 'W'+(i+1);
+    var trendIsV2 = i >= EVAL_V2_CUTOFF_WEEK;
+    var sTrend = getEvalScore(name, wkIdT);
+    var tsTrend = trendIsV2 ? calcTraineeTotalScoreV2(name, wkIdT) : calcTotalScore(sTrend, wkIdT);
+    scores.push({week:wkIdT, score:tsTrend!==null?tsTrend:'--'});
   }
   html += '<div style="display:flex;gap:6px">';
-  scores.forEach(function(s){
-    html += '<div style="flex:1;text-align:center;padding:8px 4px;background:var(--bg-surface);border-radius:8px"><div style="font-size:8px;color:var(--text-dim)">'+s.week+'</div><div style="font-size:14px;font-weight:700;color:'+(s.score!=='--'&&s.score>=80?'#8BA89C':s.score!=='--'&&s.score>=60?'#D4A76A':'var(--text-dim)')+'">'+s.score+'</div></div>';
+  scores.forEach(function(sc){
+    var scMax = getEvalMaxScore(sc.week);
+    var scPct = sc.score!=='--' ? sc.score/scMax : 0;
+    html += '<div style="flex:1;text-align:center;padding:8px 4px;background:var(--bg-surface);border-radius:8px"><div style="font-size:8px;color:var(--text-dim)">'+sc.week+'</div><div style="font-size:14px;font-weight:700;color:'+(sc.score!=='--'&&scPct>=0.8?'#8BA89C':sc.score!=='--'&&scPct>=0.6?'#D4A76A':'var(--text-dim)')+'">'+sc.score+'</div></div>';
   });
   html += '</div></div>';
   
@@ -12694,33 +13241,43 @@ function renderDashboard(){
   // Performance cards
   var cardsHtml = '';
   var avatarColors = ['#5D8AA8','#D4A76A','#6AAA8A','#C94F66','#A09DB5','#6C9BD2','#E8A87C'];
+  var perfIsV2 = curWkIdx >= EVAL_V2_CUTOFF_WEEK;
+  var perfMaxScore = getEvalMaxScore(curWkId);
+  var perfAutoMax = getActiveDims(curWkId)[0].max; // taskCompletion max: 20(V1) or 40(V2)
   EVAL_TRAINEES.forEach(function(tr, i){
     var s = getEvalScore(tr.name, curWkId);
-    var ts = calcTotalScore(s);
+    var ts = perfIsV2 ? calcTraineeTotalScoreV2(tr.name, curWkId) : calcTotalScore(s, curWkId);
     var manualScore = ts !== null ? ts.toFixed(1) : '--';
-    var manualPct = ts !== null ? Math.round(ts) : 0;
+    var manualPct = ts !== null ? Math.round(ts/perfMaxScore*100) : 0;
     var comp = calcTaskCompletionForTrainee(tr.name, curWkId);
     var autoScore = comp.suggestedScore;
     var autoPct = comp.rate;
-    var scoreColor = ts !== null ? (ts >= 80 ? '#8BA89C' : ts >= 60 ? '#D4A76A' : '#C94F66') : 'var(--text-dim)';
+    var scoreColor = ts !== null ? (ts/perfMaxScore >= 0.8 ? '#8BA89C' : ts/perfMaxScore >= 0.6 ? '#D4A76A' : '#C94F66') : 'var(--text-dim)';
     var avColor = avatarColors[i] || '#5D8AA8';
     cardsHtml += '<div class="tn-dash-card" onclick="openTraineeDetail(\''+tr.name+'\')">'+
       '<div class="dash-avatar" style="background:'+avColor+'">'+tr.name.charAt(0)+'</div>'+
       '<div class="dash-lbl">'+tr.name+'</div>'+
       '<div class="dash-metric-divider"></div>'+
       '<div class="dash-metric">'+
-        '<div class="dash-metric-hd"><span class="dash-metric-label">任务完成 <span style="color:#2E7D32;font-weight:600">自动</span></span><span class="dash-metric-score" style="color:#8BA89C">'+autoScore.toFixed(1)+'<span class="dash-metric-max">/30</span></span></div>'+
+        '<div class="dash-metric-hd"><span class="dash-metric-label">任务完成 <span style="color:#2E7D32;font-weight:600">自动</span></span><span class="dash-metric-score" style="color:#8BA89C">'+autoScore.toFixed(1)+'<span class="dash-metric-max">/'+perfAutoMax+'</span></span></div>'+
         '<div class="dash-mini-bar"><div class="dash-mini-fill" style="width:'+autoPct+'%;background:#8BA89C"></div></div>'+
         '<div style="font-size:7px;color:var(--text-muted);margin-top:3px;display:flex;justify-content:space-between"><span>本周 '+comp.weekDone+'/'+comp.weekTotal+' 项</span><span>累计 '+comp.allDone+'/'+comp.allTotal+' 项</span></div>'+
       '</div>'+
       '<div class="dash-metric">'+
-        '<div class="dash-metric-hd"><span class="dash-metric-label">综合评估 <span style="color:#E0956A;font-weight:600">手动</span></span><span class="dash-metric-score" style="color:'+scoreColor+'">'+manualScore+'<span class="dash-metric-max">/100</span></span></div>'+
+        '<div class="dash-metric-hd"><span class="dash-metric-label">综合评估 <span style="color:#E0956A;font-weight:600">'+(perfIsV2?'自动+排名':'手动')+'</span></span><span class="dash-metric-score" style="color:'+scoreColor+'">'+manualScore+'<span class="dash-metric-max">/'+perfMaxScore+'</span></span></div>'+
         '<div class="dash-mini-bar"><div class="dash-mini-fill" style="width:'+manualPct+'%;background:'+scoreColor+'"></div></div>'+
       '</div>'+
     '</div>';
   });
   document.getElementById('tnDashGrid').innerHTML = cardsHtml;
-  
+
+  // Update chart titles for scoring system
+  var dimCount = perfIsV2 ? '八维' : '五维';
+  var scoreLabel = perfIsV2 ? 'V2 · 120分制' : 'V1 · 100分制';
+  var radarTitle = document.getElementById('tnRadarChartTitle');
+  if(radarTitle) radarTitle.textContent = dimCount + '能力雷达图';
+  document.getElementById('tnRankWeekLabel').innerHTML = curWkId + ' 排名 <span style="font-size:8px;font-weight:400;color:'+(perfIsV2?'var(--accent)':'var(--text-dim)')+';background:'+(perfIsV2?'var(--accent-wash)':'var(--bg-surface)')+';padding:1px 5px;border-radius:3px;margin-left:4px">'+scoreLabel+'</span>';
+
   // Draw charts
   setTimeout(function(){
     drawRadarChart(curWkId);
@@ -12728,123 +13285,131 @@ function renderDashboard(){
     renderRanking();
     renderTnFeedbackHistory();
   }, 100);
-  
-  document.getElementById('tnRankWeekLabel').textContent = curWkId + ' 排名';
 }
 
 // ===== TRAINEE OVERVIEW DASHBOARD (HKMS2.0 data, OTMS style) =====
 function renderTraineeOverview(){
   try {
-  var D = window.TN_DASHBOARD_DATA || (typeof TN_DASHBOARD_DATA !== 'undefined' ? TN_DASHBOARD_DATA : null);
-  if(!D){ document.getElementById('tnOvStatsBar').innerHTML = '<div style=\"padding:20px;color:var(--text-muted)\">数据未加载 (typeof='+(typeof TN_DASHBOARD_DATA)+')</div>'; return; }
-  var s = D.stats;
-
-  // --- Stats Bar ---
-  var statsHtml = '';
-  var items = [
-    {v:s.total, l:'总任务', c:'var(--accent)'},
-    {v:s.done, l:'已完成', c:'var(--success)'},
-    {v:s.prog, l:'进行中', c:'#D4A76A'},
-    {v:s.pend, l:'待开始', c:'#C94F66'},
-    {v:s.pct+'%', l:'完成率', c:'var(--accent)'},
-    {v:D.atRiskCount, l:'W9截止前未完成', c:'#C94F66'},
-    {v:'W'+D.currentWeek, l:'当前周', c:'var(--text-muted)'}
-  ];
-  items.forEach(function(it){
-    statsHtml += '<div class="tn-ov-stat-item"><div class="tn-ov-stat-num" style="color:'+it.c+'">'+it.v+'</div><div class="tn-ov-stat-label">'+it.l+'</div></div>';
-  });
-  document.getElementById('tnOvStatsBar').innerHTML = statsHtml;
-
-  // --- System Cards ---
-  var cardsHtml = '';
-  D.treeData.forEach(function(sys){
-    var st = sys.stats;
-    var color = st.pct >= 80 ? 'var(--success)' : (st.pct >= 40 ? '#D4A76A' : '#C94F66');
-    cardsHtml += '<div class="tn-ov-sys-card" style="border-left:3px solid '+color+'">'+
-      '<div class="tn-ov-sc-name">'+esc(sys.name)+'</div>'+
-      '<div class="tn-ov-sc-stats">'+
-        '<span><b>'+st.total+'</b> 任务</span>'+
-        '<span style="color:var(--success)">已完成 '+st.done+'</span>'+
-        '<span style="color:#D4A76A">进行中 '+st.prog+'</span>'+
-        '<span style="color:#C94F66">待开始 '+st.pend+'</span>'+
-        '<span style="margin-left:auto;font-weight:700;color:'+color+'">'+st.pct+'%</span>'+
-      '</div>'+
-      '<div style="margin-top:6px;font-size:10px;color:var(--text-muted)">'+sys.parents.length+' 个父任务组</div>'+
-    '</div>';
-  });
-  document.getElementById('tnOvSysCards').innerHTML = cardsHtml;
-
-  // --- Link Panels ---
-  var links = [
-    {key:'向前链路', name:'向前链路', color:'#5B7DB5'},
-    {key:'中间链路', name:'中间链路', color:'#D4A76A'},
-    {key:'向右链路', name:'向右链路', color:'#6AAA8A'}
-  ];
-  var panelsHtml = '';
-  links.forEach(function(l){
-    var groups = D.modules.filter(function(g){ return g.link === l.key; });
-    var itemCount = 0;
-    groups.forEach(function(g){ itemCount += 1 + g.subs.length; });
-
-    panelsHtml += '<div class="tn-ov-panel">'+
-      '<div class="tn-ov-panel-hd" style="background:'+l.color+'">'+l.name+'<span style="font-weight:400;opacity:.8;margin-left:8px;font-size:10px">'+groups.length+'模块组 · '+itemCount+'项</span></div>'+
-      '<div class="tn-ov-panel-bd">';
-    groups.forEach(function(g){
-      var prog = g.progress || '待开始';
-      var progCls = prog==='已完成'?'tn-ov-prog-done':(prog==='进行中'?'tn-ov-prog-active':'tn-ov-prog-pend');
-      var hasSubs = g.subs && g.subs.length > 0;
-      panelsHtml += '<div class="tn-ov-mod-row tn-ov-mod-parent" data-expand="1" style="cursor:pointer">'+
-        '<span class="tn-ov-mod-dot" style="background:'+l.color+'"></span>'+
-        (hasSubs ? '<span class="tn-ov-mod-arrow">&#9660;</span>' : '')+
-        '<span class="tn-ov-mod-name">'+esc(g.mod)+'</span>'+
-        '<span class="tn-ov-mod-badge '+progCls+'">'+prog+'</span>'+
-      '</div>';
-      if(hasSubs){
-        panelsHtml += '<div class="tn-ov-mod-subs">';
-        g.subs.forEach(function(sb){
-          panelsHtml += '<div class="tn-ov-mod-row tn-ov-mod-sub">'+
-            '<span class="tn-ov-mod-dot" style="background:'+l.color+';opacity:.35"></span>'+
-            '<span class="tn-ov-mod-name" style="padding-left:16px;font-size:10px">'+esc(sb.mod)+'</span>'+
-            '<span class="tn-ov-mod-desc">'+esc(sb.desc||'')+'</span>'+
-          '</div>';
-        });
-        panelsHtml += '</div>';
+  // --- Compute real-time stats from TN_REF_TASKS + tnData ---
+  var allTasks = [];
+  if(typeof TN_REF_TASKS !== 'undefined'){
+    TN_REF_TASKS.forEach(function(r){
+      var clone = {sys:r.sys, name:r.name, refStatus:r.refStatus||'pending', weeks:r.weeks||[], priority:r.priority||'P2'};
+      // Override status from tnData if exists
+      if(tnData && tnData.refTasks){
+        for(var i=0;i<tnData.refTasks.length;i++){
+          if(tnData.refTasks[i].id===r.id){ clone.refStatus=tnData.refTasks[i].refStatus||r.refStatus; break; }
+        }
       }
+      allTasks.push(clone);
     });
-    panelsHtml += '</div></div>';
+  }
+  var total=allTasks.length, done=0, active=0, pending=0;
+  var now=new Date(), w9Start=new Date(2026,6,27);
+  var startDate=new Date(2026,5,1);
+  var diffDays=Math.floor((now-startDate)/(1000*60*60*24));
+  if(diffDays<0) diffDays=0;
+  var curWkIdx=Math.min(Math.floor(diffDays/7),13);
+  var overdueCount=0;
+  var sysStats = {yyda:{total:0,done:0,active:0,pending:0}, rssw:{total:0,done:0,active:0,pending:0}, cwzw:{total:0,done:0,active:0,pending:0}, itpm:{total:0,done:0,active:0,pending:0}};
+  allTasks.forEach(function(t){
+    var st=t.refStatus||'pending';
+    if(st==='done') done++;
+    else if(st==='active') active++;
+    else { pending++; var wks=t.weeks||[]; for(var ow=0;ow<wks.length;ow++){ if(wks[ow]){ if(ow<curWkIdx) overdueCount++; break; } } }
+    if(sysStats[t.sys]){ sysStats[t.sys].total++; if(st==='done') sysStats[t.sys].done++; else if(st==='active') sysStats[t.sys].active++; else sysStats[t.sys].pending++; }
   });
-  document.getElementById('tnOvLinkPanels').innerHTML = panelsHtml;
+  var pct=total>0?Math.round(done/total*100):0;
+  var riskDays=Math.max(0,Math.ceil((w9Start-now)/(1000*60*60*24)));
 
-  // bind expand/collapse on parent module rows
-  setTimeout(function(){
-    var parents = document.querySelectorAll('#tnOvLinkPanels .tn-ov-mod-parent[data-expand]');
-    parents.forEach(function(el){
-      el.addEventListener('click', function(){
-        var subs = this.nextElementSibling;
-        if(subs && subs.classList.contains('tn-ov-mod-subs')){
-          var hidden = subs.style.display === 'none';
-          subs.style.display = hidden ? '' : 'none';
-          var arrow = this.querySelector('.tn-ov-mod-arrow');
-          if(arrow){ arrow.style.transform = hidden ? '' : 'rotate(-90deg)'; }
+  // --- Hero Cards ---
+  var heroItems=[
+    {v:total, l:'总任务数', c:'#5D8AA8', sub:''},
+    {v:pct+'%', l:'整体完成率', c:'#8BA89C', sub:done+'/'+total+' 已完成'},
+    {v:active, l:'进行中', c:'#D4A76A', sub:pending+' 待开始'},
+    {v:riskDays, l:'距 W9 截止', c:riskDays<=14?'#C94F66':'var(--text)', sub:'7月27日'},
+    {v:overdueCount, l:'逾期风险', c:overdueCount>0?'#C94F66':'#8BA89C', sub:'需关注'}
+  ];
+  var heroHtml='<div class="tn-ov-hero">';
+  heroItems.forEach(function(it){
+    heroHtml+='<div class="tn-ov-hero-card"><div class="tn-ov-hero-val" style="color:'+it.c+'">'+it.v+'</div><div class="tn-ov-hero-lbl">'+it.l+'</div>'+(it.sub?'<div class="tn-ov-hero-sub">'+it.sub+'</div>':'')+'</div>';
+  });
+  heroHtml+='</div>';
+  document.getElementById('tnOvHero').innerHTML=heroHtml;
+
+  // --- System Cards: 4-column row ---
+  var sysOrder=[
+    {key:'yyda', name:'用印档案', color:'#5D8AA8'},
+    {key:'rssw', name:'人事事务', color:'#E0956A'},
+    {key:'cwzw', name:'财务账务', color:'#6AAA8A'},
+    {key:'itpm', name:'IT项目', color:'#8B7AAA'}
+  ];
+  var sysHtml='<div class="tn-ov-sys-section"><div class="tn-ov-sys-grid">';
+  sysOrder.forEach(function(sy){
+    var st=sysStats[sy.key];
+    var spct=st.total>0?Math.round(st.done/st.total*100):0;
+    var barColor=spct>=70?'var(--success)':(spct>=40?'#D4A76A':'#C94F66');
+    sysHtml+='<div class="tn-ov-sys-card-new">';
+    sysHtml+='<div class="tn-ov-sc-top"><span class="tn-ov-sc-dot" style="background:'+sy.color+'"></span><span class="tn-ov-sc-name">'+sy.name+'</span></div>';
+    sysHtml+='<div class="tn-ov-sc-pct" style="color:'+barColor+'">'+spct+'%</div>';
+    sysHtml+='<div class="tn-ov-sys-bar-wrap"><div class="tn-ov-sys-bar-fill" style="width:'+spct+'%;background:'+barColor+'"></div></div>';
+    sysHtml+='<div class="tn-ov-sc-nums"><span style="color:var(--success)">'+st.done+' 完成</span> <span style="color:#D4A76A">'+st.active+' 进行</span> <span style="color:#C94F66">'+st.pending+' 待定</span> <span style="color:var(--text-dim)">'+st.total+' 总计</span></div>';
+    sysHtml+='</div>';
+  });
+  sysHtml+='</div></div>';
+  document.getElementById('tnOvSysBars').innerHTML=sysHtml;
+
+  // --- Link Panels (from DASHBOARD_DATA) ---
+  var D=window.TN_DASHBOARD_DATA||(typeof TN_DASHBOARD_DATA!=='undefined'?TN_DASHBOARD_DATA:null);
+  if(D){
+    var links=[
+      {key:'向前链路', name:'向前链路', color:'#5D8AA8'},
+      {key:'中间链路', name:'中间链路', color:'#D4A76A'},
+      {key:'向右链路', name:'向右链路', color:'#8BA89C'}
+    ];
+    var panelsHtml='';
+    links.forEach(function(l){
+      var groups=D.modules.filter(function(g){return g.link===l.key;});
+      var itemCount=0;
+      groups.forEach(function(g){itemCount+=1+(g.subs?g.subs.length:0);});
+      panelsHtml+='<div class="tn-ov-panel"><div class="tn-ov-panel-hd"><span class="pnl-dot" style="background:'+l.color+'"></span>'+l.name+'<span style="font-weight:400;color:var(--text-muted);margin-left:auto;font-size:9px">'+groups.length+' 模块 · '+itemCount+' 项</span></div><div class="tn-ov-panel-bd">';
+      groups.forEach(function(g){
+        var prog=g.progress||'待开始';
+        var progCls=prog==='已完成'?'tn-ov-prog-done':(prog==='进行中'?'tn-ov-prog-active':'tn-ov-prog-pend');
+        var hasSubs=g.subs&&g.subs.length>0;
+        panelsHtml+='<div class="tn-ov-mod-row tn-ov-mod-parent" data-expand="1"><span class="tn-ov-mod-dot" style="background:'+l.color+'"></span>'+(hasSubs?'<span class="tn-ov-mod-arrow">\u25BC</span>':'<span class="tn-ov-mod-arrow"></span>')+'<span class="tn-ov-mod-name">'+esc(g.mod)+'</span><span class="tn-ov-mod-badge '+progCls+'">'+prog+'</span></div>';
+        if(hasSubs){
+          panelsHtml+='<div class="tn-ov-mod-subs">';
+          g.subs.forEach(function(sb){
+            panelsHtml+='<div class="tn-ov-mod-row tn-ov-mod-sub"><span class="tn-ov-mod-dot" style="background:'+l.color+';opacity:.3"></span><span class="tn-ov-mod-name" style="font-size:10px;font-weight:400">'+esc(sb.mod)+'</span><span class="tn-ov-mod-desc">'+esc(sb.desc||'')+'</span></div>';
+          });
+          panelsHtml+='</div>';
         }
       });
+      panelsHtml+='</div></div>';
     });
-  }, 50);
-
-  // --- Status Strip ---
-  var weekInfo = D.weeks[D.currentWeek-1];
-  var now = new Date();
-  var w9Start = new Date(2026,6,27); // July 27
-  var riskDays = Math.max(0, Math.ceil((w9Start - now) / (1000*60*60*24)));
-  var stripHtml = '';
-  stripHtml += '<div class="tn-ov-ss-item"><div class="tn-ov-ss-val">'+s.total+'</div><div class="tn-ov-ss-label">总任务</div></div>';
-  stripHtml += '<div class="tn-ov-ss-item"><div class="tn-ov-ss-val" style="color:var(--success)">'+s.pct+'%</div><div class="tn-ov-ss-label">整体完成率</div></div>';
-  stripHtml += '<div class="tn-ov-ss-item"><div class="tn-ov-ss-val">W'+D.currentWeek+'</div><div class="tn-ov-ss-label">当前周 ('+weekInfo.start+'-'+weekInfo.end+')</div></div>';
-  stripHtml += '<div class="tn-ov-ss-item"><div class="tn-ov-ss-val" style="color:#D4A76A">'+riskDays+' 天</div><div class="tn-ov-ss-label">距 W9(7.27) 截止</div></div>';
-  stripHtml += '<div class="tn-ov-ss-item"><div class="tn-ov-ss-val" style="color:#C94F66">'+D.atRiskCount+'</div><div class="tn-ov-ss-label">截止前未完成</div></div>';
-  document.getElementById('tnOvStatusStrip').innerHTML = stripHtml;
-  } catch(e) {
-    document.getElementById('tnOvStatsBar').innerHTML = '<div style=\"padding:20px;color:#C94F66;background:var(--bg-surface);border-radius:10px;text-align:center\">渲染错误: '+esc(e.message)+'</div>';
+    document.getElementById('tnOvLinkPanels').innerHTML=panelsHtml;
+    setTimeout(function(){
+      var parents=document.querySelectorAll('#tnOvLinkPanels .tn-ov-mod-parent[data-expand]');
+      parents.forEach(function(el){
+        if(el._boundOv) return;
+        el._boundOv=true;
+        el.addEventListener('click',function(){
+          var subs=this.nextElementSibling;
+          if(subs&&subs.classList.contains('tn-ov-mod-subs')){
+            var hidden=subs.style.display==='none';
+            subs.style.display=hidden?'':'none';
+            var arrow=this.querySelector('.tn-ov-mod-arrow');
+            if(arrow) arrow.style.transform=hidden?'':'rotate(-90deg)';
+          }
+        });
+      });
+    },50);
+  } else {
+    document.getElementById('tnOvLinkPanels').innerHTML='';
+  }
+  } catch(e){
+    document.getElementById('tnOvHero').innerHTML='<div style="padding:20px;color:#C94F66;background:var(--bg-surface);border-radius:10px;text-align:center">渲染错误: '+esc(e.message)+'</div>';
   }
 }
 
@@ -12854,9 +13419,12 @@ function render360Eval(wkId){
   var totalScore = 0, evalCount = 0;
   var topTrainee = null, topScore = -1;
   var lowTrainee = null, lowScore = 999;
+  var e360WkIdx = parseInt(wkId.slice(1)) - 1;
+  var e360IsV2 = e360WkIdx >= EVAL_V2_CUTOFF_WEEK;
+  var e360Max = getEvalMaxScore(wkId);
   EVAL_TRAINEES.forEach(function(tr){
     var s = getEvalScore(tr.name, wkId);
-    var ts = calcTotalScore(s);
+    var ts = e360IsV2 ? calcTraineeTotalScoreV2(tr.name, wkId) : calcTotalScore(s, wkId);
     if(ts !== null){
       scores.push({name:tr.name,score:ts});
       totalScore += ts; evalCount++;
@@ -12874,9 +13442,10 @@ function render360Eval(wkId){
   var downIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18h6v-6"/></svg>';
   var starIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
 
+  var sysLabel = e360IsV2 ? '<span style="font-size:7px;color:var(--accent);background:var(--accent-wash);padding:1px 4px;border-radius:3px">V2·120分</span>' : '<span style="font-size:7px;color:var(--text-dim);background:var(--bg-surface);padding:1px 4px;border-radius:3px">V1·100分</span>';
   var html = '';
-  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#E8F0FE;color:#3A6BC5">'+checkIcon+'</div><div class="e360-info"><div class="e360-label">已评估</div><div class="e360-weight">'+wkId+' 当前周</div></div><div class="e360-score" style="color:#3A6BC5">'+evalCount+'<span style="font-size:12px;font-weight:400">/'+EVAL_TRAINEES.length+'</span></div></div>';
-  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#EAF0EE;color:#6AAA8A">'+upIcon+'</div><div class="e360-info"><div class="e360-label">本周均分</div><div class="e360-weight">'+evalCount+'人参与</div></div><div class="e360-score" style="color:#6AAA8A">'+avgScore+'</div></div>';
+  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#E8F0FE;color:#3A6BC5">'+checkIcon+'</div><div class="e360-info"><div class="e360-label">已评估 '+sysLabel+'</div><div class="e360-weight">'+wkId+' 当前周</div></div><div class="e360-score" style="color:#3A6BC5">'+evalCount+'<span style="font-size:12px;font-weight:400">/'+EVAL_TRAINEES.length+'</span></div></div>';
+  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#EAF0EE;color:#6AAA8A">'+upIcon+'</div><div class="e360-info"><div class="e360-label">本周均分</div><div class="e360-weight">满分 '+e360Max+' · '+evalCount+'人参与</div></div><div class="e360-score" style="color:#6AAA8A">'+avgScore+'</div></div>';
   html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#FBF6EC;color:#D4A76A">'+starIcon+'</div><div class="e360-info"><div class="e360-label">最高分</div><div class="e360-weight">本周最佳</div></div><div style="color:#D4A76A;font-size:16px;font-weight:700">'+topDisplay+'</div></div>';
   html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#FDEDEF;color:#C94F66">'+downIcon+'</div><div class="e360-info"><div class="e360-label">最低分</div><div class="e360-weight">本周待提升</div></div><div style="color:#C94F66;font-size:16px;font-weight:700">'+lowDisplay+'</div></div>';
   document.getElementById('tnEval360').innerHTML = html;
@@ -12893,11 +13462,13 @@ function drawRadarChart(wkId){
   canvas.style.width = w + 'px';
   canvas.style.height = h + 'px';
   ctx.scale(2, 2);
-  
+
   var cx = w/2, cy = h/2, r = Math.min(w,h)/2 - 30;
-  var dims = EVAL_DIMS;
+  var wkIdx = parseInt(wkId.slice(1)) - 1;
+  var isV2Radar = wkIdx >= EVAL_V2_CUTOFF_WEEK;
+  var dims = getActiveDims(wkId);
   var n = dims.length;
-  
+
   // Grid
   for(var level=1; level<=5; level++){
     ctx.beginPath();
@@ -12912,12 +13483,12 @@ function drawRadarChart(wkId){
     ctx.strokeStyle = level===5?'#ddd':'#eee';
     ctx.lineWidth = 0.5;
     ctx.stroke();
-    // Label
+    // Label — show percentage
     ctx.fillStyle = '#999';
     ctx.font = '8px sans-serif';
-    ctx.fillText(Math.round(level*dims[0].max/5), cx+3, cy-r*level/5+12);
+    ctx.fillText((level*20)+'%', cx+3, cy-r*level/5+12);
   }
-  
+
   // Axes
   for(var i=0;i<n;i++){
     var angle = Math.PI*2/n*i - Math.PI/2;
@@ -12927,7 +13498,7 @@ function drawRadarChart(wkId){
     ctx.strokeStyle = '#ddd';
     ctx.lineWidth = 0.5;
     ctx.stroke();
-    // Labels
+    // Labels — dim name + max
     var lx = cx + (r+15)*Math.cos(angle);
     var ly = cy + (r+15)*Math.sin(angle);
     ctx.fillStyle = '#666';
@@ -12936,18 +13507,40 @@ function drawRadarChart(wkId){
     ctx.textBaseline = 'middle';
     ctx.fillText(dims[i].name, lx, ly);
   }
-  
+
+  // Build score map per trainee
+  var traineeScores = {};
+  var rankResults = {};
+  EVAL_TRAINEES.forEach(function(tr){
+    var s = getEvalScore(tr.name, wkId) || {};
+    if(isV2Radar){
+      rankResults[tr.name] = calcTraineeRankScores(tr.name, wkId);
+    }
+    traineeScores[tr.name] = {};
+    dims.forEach(function(d){
+      if(d.auto || !isV2Radar){
+        traineeScores[tr.name][d.id] = s[d.id] || 0;
+      } else {
+        traineeScores[tr.name][d.id] = (rankResults[tr.name] && rankResults[tr.name].scores[d.id]) || 0;
+      }
+    });
+  });
+
   // Plot each trainee
   var colors = ['#5D8AA8','#C94F66','#8BA89C','#D4A76A','#A09DB5','#6AAA8A','#E0556A'];
   EVAL_TRAINEES.forEach(function(tr, ti){
-    var s = getEvalScore(tr.name, wkId);
-    if(!s) return;
+    var scores = traineeScores[tr.name];
+    if(!scores) return;
+    // Check if any score is non-zero
+    var hasData = dims.some(function(d){ return (scores[d.id]||0) > 0; });
+    if(!hasData) return;
     ctx.beginPath();
     var firstPoint = true;
     for(var i=0;i<n;i++){
       var angle = Math.PI*2/n*i - Math.PI/2;
-      var score = s[dims[i].id] || 0;
+      var score = scores[dims[i].id] || 0;
       var ratio = score / dims[i].max;
+      ratio = Math.min(1, Math.max(0, ratio));
       var x = cx + r*ratio*Math.cos(angle);
       var y = cy + r*ratio*Math.sin(angle);
       if(firstPoint){ ctx.moveTo(x,y); firstPoint = false; }
@@ -12992,9 +13585,11 @@ function drawTrendChart(){
   var pw = w - padL - padR;
   var ph = h - padT - padB;
   
-  // Grid
-  for(var i=0;i<=5;i++){
-    var y = padT + ph*i/5;
+  // Grid — scale to 120 (max across both V1 and V2)
+  var chartMax = 120;
+  var chartSteps = 5;
+  for(var i=0;i<=chartSteps;i++){
+    var y = padT + ph*i/chartSteps;
     ctx.beginPath();
     ctx.moveTo(padL, y);
     ctx.lineTo(w-padR, y);
@@ -13004,27 +13599,29 @@ function drawTrendChart(){
     ctx.fillStyle = '#999';
     ctx.font = '8px sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText(Math.round(100-i*20), padL-4, y+3);
+    ctx.fillText(Math.round(chartMax - i*chartMax/chartSteps), padL-4, y+3);
   }
-  
+
   // X labels
   ctx.textAlign = 'center';
   for(var i=0;i<14;i++){
     var x = padL + pw*i/13;
     ctx.fillText('W'+(i+1), x, h-padB+12);
   }
-  
+
   // Plot
   var colors = ['#5D8AA8','#C94F66','#8BA89C','#D4A76A','#A09DB5','#6AAA8A','#E0556A'];
   EVAL_TRAINEES.forEach(function(tr, ti){
     ctx.beginPath();
     var firstPoint = true;
     for(var i=0;i<14;i++){
-      var s = getEvalScore(tr.name, 'W'+(i+1));
-      var ts = calcTotalScore(s);
+      var tcWkId = 'W'+(i+1);
+      var tcIsV2 = i >= EVAL_V2_CUTOFF_WEEK;
+      var s = getEvalScore(tr.name, tcWkId);
+      var ts = tcIsV2 ? calcTraineeTotalScoreV2(tr.name, tcWkId) : calcTotalScore(s, tcWkId);
       if(ts === null) continue;
       var x = padL + pw*i/13;
-      var y = padT + ph*(1 - ts/100);
+      var y = padT + ph*(1 - ts/chartMax);
       if(firstPoint){ ctx.moveTo(x,y); firstPoint = false; }
       else ctx.lineTo(x,y);
     }
@@ -13054,48 +13651,67 @@ function renderRanking(){
   if(diffDays < 0) diffDays = 0;
   var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
   var wkId = wkFilter === 'latest' ? 'W'+(curWkIdx+1) : wkFilter;
-  
+  var weekIdx = parseInt(wkId.slice(1)) - 1;
+  var isV2 = weekIdx >= EVAL_V2_CUTOFF_WEEK;
+  var dims = getActiveDims(wkId);
+  var maxScore = getEvalMaxScore(wkId);
+
   var rows = [];
   EVAL_TRAINEES.forEach(function(tr){
     var s = getEvalScore(tr.name, wkId);
-    var ts = calcTotalScore(s);
-    if(ts === null) return;
+    var ts;
     var dimScores = {};
-    EVAL_DIMS.forEach(function(d){ dimScores[d.id] = s ? (s[d.id]||0) : 0; });
+
+    if(isV2){
+      ts = calcTraineeTotalScoreV2(tr.name, wkId);
+      var rankResult = calcTraineeRankScores(tr.name, wkId);
+      dims.forEach(function(d){
+        if(d.auto){
+          dimScores[d.id] = s ? (s[d.id]||0) : 0;
+        } else {
+          dimScores[d.id] = rankResult.scores[d.id] || 0;
+        }
+      });
+    } else {
+      ts = calcTotalScore(s, wkId);
+      dims.forEach(function(d){ dimScores[d.id] = s ? (s[d.id]||0) : 0; });
+    }
+
+    if(ts === null) return;
     var comp = calcTaskCompletionForTrainee(tr.name, wkId);
     rows.push({
       name: tr.name, level: tr.level, total: ts,
-      taskCompletion: dimScores.taskCompletion,
-      workQuality: dimScores.workQuality,
-      collaboration: dimScores.collaboration,
-      responseSpeed: dimScores.responseSpeed,
-      innovation: dimScores.innovation,
+      dimScores: dimScores,
       taskRate: comp.rate
     });
   });
-  
+
   rows.sort(function(a,b){ return b.total - a.total; });
-  
-  document.getElementById('tnRankWeekLabel').textContent = wkId + ' 排名';
-  
-  var html = '<thead><tr><th>排名</th><th>管培生</th><th>总分</th><th>任务完成度</th><th>工作质量</th><th>协作贡献</th><th>响应速度</th><th>主动创新</th><th>任务完成率</th></tr></thead><tbody>';
+
+  document.getElementById('tnRankWeekLabel').innerHTML = wkId + ' 排名 <span style="font-size:8px;font-weight:400;color:'+(isV2?'var(--accent)':'var(--text-dim)')+';background:'+(isV2?'var(--accent-wash)':'var(--bg-surface)')+';padding:1px 5px;border-radius:3px;margin-left:4px">'+(isV2?'V2 · 120分制':'V1 · 100分制')+'</span>';
+
+  var html = '<thead><tr><th>排名</th><th>管培生</th><th>总分</th>';
+  dims.forEach(function(d){
+    html += '<th>'+d.name+'</th>';
+  });
+  html += '<th>任务完成率</th></tr></thead><tbody>';
+  var colCount = dims.length + 4;
+
   rows.forEach(function(r, i){
     var medal = i===0?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A76A" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="12" font-weight="700" fill="#D4A76A" stroke="none">1</text></svg>':i===1?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="12" font-weight="700" fill="#9CA3AF" stroke="none">2</text></svg>':i===2?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9946A" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="12" font-weight="700" fill="#C9946A" stroke="none">3</text></svg>':'';
-    var barColor = r.total>=80?'#8BA89C':r.total>=60?'#D4A76A':'#C94F66';
+    var barColor = r.total>=maxScore*0.8?'#8BA89C':r.total>=maxScore*0.6?'#D4A76A':'#C94F66';
     html += '<tr>'+
       '<td><span class="tn-rank-medal">'+medal+'</span> '+(i+1)+'</td>'+
       '<td>'+r.name+'</td>'+
-      '<td style="font-weight:700;color:'+barColor+'">'+r.total.toFixed(1)+'</td>'+
-      '<td>'+r.taskCompletion.toFixed(0)+'/'+EVAL_DIMS[0].max+'</td>'+
-      '<td>'+r.workQuality.toFixed(0)+'/'+EVAL_DIMS[1].max+'</td>'+
-      '<td>'+r.collaboration.toFixed(0)+'/'+EVAL_DIMS[2].max+'</td>'+
-      '<td>'+r.responseSpeed.toFixed(0)+'/'+EVAL_DIMS[3].max+'</td>'+
-      '<td>'+r.innovation.toFixed(0)+'/'+EVAL_DIMS[4].max+'</td>'+
-      '<td><span class="tn-rank-bar" style="width:'+r.taskRate+'px;background:'+barColor+'"></span> '+r.taskRate+'%</td>'+
+      '<td style="font-weight:700;color:'+barColor+'">'+r.total.toFixed(1)+' / '+maxScore+'</td>';
+    dims.forEach(function(d){
+      html += '<td>'+(r.dimScores[d.id]||0).toFixed(0)+'/'+d.max+'</td>';
+    });
+    html += '<td><span class="tn-rank-bar" style="width:'+r.taskRate+'px;background:'+barColor+'"></span> '+r.taskRate+'%</td>'+
     '</tr>';
   });
   html += '</tbody>';
-  document.getElementById('tnRankTable').innerHTML = html || '<tr><td colspan="9" style="padding:20px;color:var(--text-dim)">暂无评分数据</td></tr>';
+  document.getElementById('tnRankTable').innerHTML = html || '<tr><td colspan="'+colCount+'" style="padding:20px;color:var(--text-dim)">暂无评分数据</td></tr>';
 }
 
 // ===== UPDATED FEEDBACK HISTORY (for dashboard) =====
