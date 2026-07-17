@@ -2964,8 +2964,8 @@ var TN_ALL_WEEKS = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W1
 const MODULES = ['org','okr','kpi','report','meeting','trainee'];
 const MOD_LABELS = {vision:'愿景与战略',org:'组织管理',okr:'OKR目标',kpi:'KPI指标',report:'报表提交',meeting:'例会管理',trainee:'管培生管理'};
 const PERM_MODULES = ['okr','kpi','report','meeting','trainee']; // modules requiring explicit permission grants
-const SUBTABS = {vision:['strategy','trainee','backend'],org:['tree','edit','func','attend'],okr:['cards','gantt','tree'],kpi:['indicators'],report:['monthly','yearly']};
-const SUBTAB_LABELS = {org_tree:'树状架构图',org_edit:'员工花名册',org_func:'职能分工',org_attend:'在岗状态',okr_cards:'总览',okr_gantt:'甘特图',okr_tree:'树形图',kpi_indicators:'KPI 指标',report_monthly:'月度报表',report_yearly:'年度报表',vision_strategy:'战略总览',vision_trainee:'管培生计划',vision_backend:'大后台系统'};
+const SUBTABS = {vision:['strategy','trainee','backend'],org:['tree','edit','func','attend'],okr:['cards','gantt','tree'],kpi:['indicators'],report:['monthly','yearly'],meeting:['weekly'],trainee:['overview','tasks','gantt','reports','evaluation','dashboard']};
+const SUBTAB_LABELS = {org_tree:'树状架构图',org_edit:'员工花名册',org_func:'职能分工',org_attend:'在岗状态',okr_cards:'总览',okr_gantt:'甘特图',okr_tree:'树形图',kpi_indicators:'KPI 指标',report_monthly:'月度报表',report_yearly:'年度报表',vision_strategy:'战略总览',vision_trainee:'管培生计划',vision_backend:'大后台系统',meeting_weekly:'周例会',trainee_overview:'总览',trainee_tasks:'任务看板',trainee_gantt:'甘特图',trainee_reports:'每周反馈',trainee_evaluation:'管培生打分',trainee_dashboard:'管培生绩效'};
 var PERM_SELMOD = 'vision';
 const escAttr=s=>String(s).replace(/[^a-zA-Z0-9\u4e00-\u9fff_-]/g,'_');
 function defaultRoles(){
