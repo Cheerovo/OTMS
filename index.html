@@ -1790,7 +1790,7 @@ body.tn-resizing * { pointer-events:none; }
 .tn-dash-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.08); border-color:var(--accent-wash); }
 .tn-dash-card .dash-avatar { width:32px; height:32px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-size:14px; font-weight:700; margin-bottom:6px; }
 .tn-dash-card .dash-lbl { font-size:11px; color:var(--text); font-weight:500; margin-bottom:4px; }
-.tn-dash-card .dash-main-score { font-size:24px; font-weight:700; line-height:1; margin:6px 0; }
+.tn-dash-card .dash-main-score { font-size:20px; font-weight:700; line-height:1; margin:6px 0; }
 .tn-dash-card .dash-main-max { font-size:9px; font-weight:400; color:var(--text-muted); }
 .tn-dash-card .dash-sub-row { display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:8px; color:var(--text-muted); }
 .tn-dash-card .dash-sub-bar { height:3px; background:var(--border-light); border-radius:2px; margin-top:2px; overflow:hidden; }
@@ -14338,7 +14338,7 @@ function renderDashboard(){
     document.getElementById('tnRankWeekLabel').innerHTML = '周均排名';
 
     setTimeout(function(){
-      var latestWkId = 'W'+(curWkIdx+1);
+      var latestWkId = 'W'+curWkIdx; // latest completed week, not current (unscored)
       drawRadarChart(latestWkId);
       drawTrendChart();
       renderRankingAggregate();
