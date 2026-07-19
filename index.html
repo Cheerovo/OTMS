@@ -14281,9 +14281,16 @@ function renderDashboard(){
     render360EvalAggregate();
     // Section titles
     var t360 = document.getElementById('tnDash360Title'); if(t360) t360.textContent = '累计评估概览';
-    // Cumulative max score across all 14 weeks
+    // Cumulative max score across scored weeks only
     var aggMaxScore = 0;
-    for(var wi=0;wi<curWkIdx;wi++){ aggMaxScore += getEvalMaxScore('W'+(wi+1)); }
+    for(var wi=0;wi<curWkIdx;wi++){
+      // Only count weeks that have actual scoring data
+      var wkHasData = false;
+      for(var ti2=0;ti2<EVAL_TRAINEES.length;ti2++){
+        if(getEvalScore(EVAL_TRAINEES[ti2].name, 'W'+(wi+1))){ wkHasData = true; break; }
+      }
+      if(wkHasData) aggMaxScore += getEvalMaxScore('W'+(wi+1));
+    }
 
     // Total task completion per trainee
     var allComp = {};
@@ -14493,7 +14500,13 @@ function renderRankingAggregate(){
 
   var avgMaxScore = Math.round((function(){
     var total = 0;
-    for(var wi=0;wi<evalCurrentWeek;wi++){ total += getEvalMaxScore('W'+(wi+1)); }
+    for(var wi=0;wi<evalCurrentWeek;wi++){
+      var wkHasData2 = false;
+      for(var ti3=0;ti3<EVAL_TRAINEES.length;ti3++){
+        if(getEvalScore(EVAL_TRAINEES[ti3].name, 'W'+(wi+1))){ wkHasData2 = true; break; }
+      }
+      if(wkHasData2) total += getEvalMaxScore('W'+(wi+1));
+    }
     return total / scoredWeeksRank;
   })());
 
