@@ -88,6 +88,7 @@ body { font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","
 .sr-tag.kpi { background:#E8F0EC; color:#6AAA8A; }
 .sr-tag.rpt { background:#F9F2E7; color:#E0956A; }
 .sr-tag.mtg { background:#EEECF2; color:#7B7495; }
+.sr-tag.tn { background:#E8F0EC; color:#5D8AA8; }
 .search-results .sr-item .sr-body { flex:1; min-width:0; }
 .search-results .sr-item .sr-body .sr-text { line-height:1.4; }
 .search-results .sr-item .sr-body .sr-sub { font-size:9px; color:var(--text-muted); }
@@ -4024,6 +4025,8 @@ let nudgeLog=loadNudgeLog();
 function loadOKRs(){try{const ver=localStorage.okr_version;if(ver==='7'){try{var data=JSON.parse(localStorage.okr_data)||defaultOKRs();migrateRaciToArray(data);return data;}catch(e){return defaultOKRs();}}}catch(e){}return defaultOKRs();}
 // ---- ONE-TIME: clear all OKR data ----
 (function(){if(!localStorage.getItem('_okr_cleared_20260720')){['okr_data','okr_version','okr_permissions','okr_prefs'].forEach(function(k){localStorage.removeItem(k);});localStorage.setItem('_okr_cleared_20260720','1');}})();
+// ---- ONE-TIME: clear all operation log history (2026-07-20) ----
+(function(){if(!localStorage.getItem('_oplog_cleared_20260720')){try{var d=JSON.parse(localStorage.okr_data||'[]');d.forEach(function(o){o.checkins=[];o.krs.forEach(function(k){k.log=[];});});localStorage.setItem('okr_data',JSON.stringify(d));}catch(e){}try{var m=JSON.parse(localStorage.meeting_data||'[]');m.forEach(function(mt){mt.minutesLog=[];});localStorage.setItem('meeting_data',JSON.stringify(m));}catch(e){}try{var r=JSON.parse(localStorage.rpt_data||'[]');r.forEach(function(rp){rp.subs={};});localStorage.setItem('rpt_data',JSON.stringify(r));}catch(e){}localStorage.setItem('nudge_log','[]');localStorage.setItem('_oplog_cleared_20260720','1');}})();
 function migrateRaciToArray(data){data.forEach(function(o){if(!o.raci)return;['R','A','C','I'].forEach(function(r){if(typeof o.raci[r]==='string'){o.raci[r]=o.raci[r]?o.raci[r].split(/[,，、\s]+/).filter(Boolean):[];}});});}
 function parseRaciInput(id){var el=document.getElementById(id);if(!el)return[];return el.value.split(/[,，、\s]+/).filter(Boolean);}
 function saveOKRs(d){try{localStorage.okr_data=JSON.stringify(d);localStorage.okr_version='7'}catch(e){alert('存储空间不足，请清理旧数据或导出备份后重试。\n错误：'+e.message);throw e}}
@@ -8210,6 +8213,31 @@ function globalSearch(q){
   meetings.forEach(m=>{
     if((m.title||'').toLowerCase().includes(q)||(m.notes||'').toLowerCase().includes(q)){
       results.push({cat:'例会',tag:'mtg',text:m.title,sub:(m.date||''),action:()=>{switchTab('meeting');}});
+    }
+  });
+
+  // Trainee reference tasks (refTasks)
+  var refTasks = (tnData && tnData.refTasks && tnData.refTasks.length) ? tnData.refTasks : (typeof TN_REF_TASKS !== 'undefined' ? TN_REF_TASKS : []);
+  refTasks.forEach(function(r){
+    var searchText = (r.name||'') + ' ' + (r.sysName||'') + ' ' + (r.module||'') + ' ' + (r.deliverable||'') + ' ' + (r.R||'') + ' ' + (r.A||'') + ' ' + (r.C||'') + ' ' + (r.I||'') + ' ' + ((r.executors||[]).join(' '));
+    if(searchText.toLowerCase().includes(q)){
+      results.push({cat:'管培生·参考任务',tag:'tn',text:r.name,sub:(r.sysName||'') + ' · ' + (r.module||''),action:function(){switchTab('trainee');switchTraineeView('tasks');setTimeout(function(){openTaskDetail('ref',r.id);},300);}});
+    }
+  });
+  // Trainee weekly tasks (wtasks)
+  if(tnData && tnData.wtasks){
+    tnData.wtasks.forEach(function(w){
+      var searchText = (w.name||'') + ' ' + (w.person||'') + ' ' + (w.R||'') + ' ' + (w.sys||'');
+      if(searchText.toLowerCase().includes(q)){
+        results.push({cat:'管培生·周任务',tag:'tn',text:w.name,sub:(w.person||w.R||'') + ' · ' + (w.sys||''),action:function(){switchTab('trainee');switchTraineeView('tasks');setTimeout(function(){openTaskDetail('weekly',w.id);},300);}});
+      }
+    });
+  }
+  // Trainees (管培生)
+  (typeof EVAL_TRAINEES !== 'undefined' ? EVAL_TRAINEES : []).forEach(function(t){
+    var searchText = (t.name||'') + ' ' + (t.role||'') + ' ' + (t.supervisor||'') + ' ' + (t.location||'');
+    if(searchText.toLowerCase().includes(q)){
+      results.push({cat:'管培生',tag:'tn',text:t.name,sub:(t.role||'') + ' · ' + (t.supervisor||''),action:function(){switchTab('trainee');switchTraineeView('evaluation');setTimeout(function(){var el=document.querySelector('.eval-trainee-item[data-name="'+t.name+'"]');if(el)el.click();},300);}});
     }
   });
 
