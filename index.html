@@ -14405,16 +14405,22 @@ function renderDashboard(){
 // Aggregate 360 eval cards (up to current week)
 function render360EvalAggregate(){
   loadEvalData();
+  // Compute current week fresh (don't rely on evalCurrentWeek global which may be stale)
+  var now = new Date();
+  var startDate = new Date(2026,5,1);
+  var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
+  if(diffDays < 0) diffDays = 0;
+  var cwIdx = Math.min(Math.floor(diffDays / 7), 13);
   // Count weeks that actually have scoring data
   var scoredWeeks360 = 0;
-  for(var wi=0;wi<evalCurrentWeek;wi++){
+  for(var wi=0;wi<cwIdx;wi++){
     var hasAny = false;
     for(var ti=0;ti<EVAL_TRAINEES.length;ti++){
       if(getEvalScore(EVAL_TRAINEES[ti].name, 'W'+(wi+1))){ hasAny = true; break; }
     }
     if(hasAny) scoredWeeks360++;
   }
-  if(scoredWeeks360===0) scoredWeeks360 = evalCurrentWeek;
+  if(scoredWeeks360===0) scoredWeeks360 = cwIdx;
   var totalEvalCount = 0;
   var totalScoreSum = 0;
   var overallTop = null, overallTopAvg = -1;
@@ -14422,7 +14428,7 @@ function render360EvalAggregate(){
 
   EVAL_TRAINEES.forEach(function(tr){
     var traineeTotal = 0, wkCount = 0;
-    for(var wi=0;wi<evalCurrentWeek;wi++){
+    for(var wi=0;wi<cwIdx;wi++){
       var wkId = 'W'+(wi+1);
       var s = getEvalScore(tr.name, wkId);
       var isV2w = wi >= EVAL_V2_CUTOFF_WEEK;
@@ -14460,21 +14466,27 @@ function render360EvalAggregate(){
 // Aggregate ranking (by weekly average up to current week)
 function renderRankingAggregate(){
   loadEvalData();
-  var totalWeeks = evalCurrentWeek; // completed weeks
+  // Compute current week fresh (don't rely on evalCurrentWeek global which may be stale)
+  var now2 = new Date();
+  var startDate2 = new Date(2026,5,1);
+  var diffDays2 = Math.floor((now2 - startDate2) / (1000*60*60*24));
+  if(diffDays2 < 0) diffDays2 = 0;
+  var cwIdx2 = Math.min(Math.floor(diffDays2 / 7), 13);
+  var totalWeeks = cwIdx2; // completed weeks
   // Count weeks that actually have scoring data
   var scoredWeeksRank = 0;
-  for(var wi=0;wi<evalCurrentWeek;wi++){
+  for(var wi=0;wi<cwIdx2;wi++){
     var hasAny = false;
     for(var ti=0;ti<EVAL_TRAINEES.length;ti++){
       if(getEvalScore(EVAL_TRAINEES[ti].name, 'W'+(wi+1))){ hasAny = true; break; }
     }
     if(hasAny) scoredWeeksRank++;
   }
-  if(scoredWeeksRank===0) scoredWeeksRank = evalCurrentWeek;
+  if(scoredWeeksRank===0) scoredWeeksRank = cwIdx2;
   var rows = [];
   EVAL_TRAINEES.forEach(function(tr){
     var cumTotal = 0, wkCount = 0;
-    for(var wi=0;wi<evalCurrentWeek;wi++){
+    for(var wi=0;wi<cwIdx2;wi++){
       var wkId = 'W'+(wi+1);
       var s = getEvalScore(tr.name, wkId);
       var isV2w = wi >= EVAL_V2_CUTOFF_WEEK;
@@ -14485,7 +14497,7 @@ function renderRankingAggregate(){
 
     // Task completion across all weeks
     var td = 0, ta = 0;
-    for(var wi=0;wi<evalCurrentWeek;wi++){
+    for(var wi=0;wi<cwIdx2;wi++){
       var comp = calcTaskCompletionForTrainee(tr.name, 'W'+(wi+1));
       td += comp.weekDone; ta += comp.weekTotal;
     }
@@ -14500,7 +14512,7 @@ function renderRankingAggregate(){
 
   var avgMaxScore = Math.round((function(){
     var total = 0;
-    for(var wi=0;wi<evalCurrentWeek;wi++){
+    for(var wi=0;wi<cwIdx2;wi++){
       var wkHasData2 = false;
       for(var ti3=0;ti3<EVAL_TRAINEES.length;ti3++){
         if(getEvalScore(EVAL_TRAINEES[ti3].name, 'W'+(wi+1))){ wkHasData2 = true; break; }
