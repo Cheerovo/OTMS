@@ -14236,13 +14236,23 @@ function renderDashboard(){
   var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
   if(diffDays < 0) diffDays = 0;
   var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
-  var totalWeeks = curWkIdx; // current week not yet scored, count only completed weeks
+  var totalWeeks = curWkIdx; // completed weeks (current week not yet scored)
+  // Count weeks that actually have any scoring data
+  var scoredWeeks = 0;
+  for(var wi=0;wi<curWkIdx;wi++){
+    var hasScore = false;
+    for(var ti=0;ti<EVAL_TRAINEES.length;ti++){
+      if(getEvalScore(EVAL_TRAINEES[ti].name, 'W'+(wi+1))){ hasScore = true; break; }
+    }
+    if(hasScore) scoredWeeks++;
+  }
+  var effectiveWeeks = scoredWeeks > 0 ? scoredWeeks : totalWeeks;
 
   // Populate week selector once; on subsequent calls read user selection
   var sel = document.getElementById('tnDashWeekSel');
   if(sel && !sel._populated){
     sel._populated = true;
-    var selHtml = '<option value="all" selected>汇总（'+totalWeeks+'周周均）</option>';
+    var selHtml = '<option value="all" selected>汇总（已打分'+effectiveWeeks+'周）</option>';
     for(var si=0;si<14;si++) selHtml += '<option value="'+si+'">W'+(si+1)+' ('+EVAL_WEEKS[si].start+'-'+EVAL_WEEKS[si].end+')</option>';
     sel.innerHTML = selHtml;
   }
@@ -14258,7 +14268,7 @@ function renderDashboard(){
   var sysLabelEl = document.getElementById('tnDashWeekSysLabel');
   if(sysLabelEl){
     if(isAggregate){
-      sysLabelEl.innerHTML = '<span style="font-size:8px;background:var(--accent);color:#fff;padding:1px 6px;border-radius:3px">累计 · '+totalWeeks+'周</span>';
+      sysLabelEl.innerHTML = '<span style="font-size:8px;background:var(--accent);color:#fff;padding:1px 6px;border-radius:3px">累计 · '+effectiveWeeks+'周已打分</span>';
     } else {
       sysLabelEl.innerHTML = perfIsV2 ? '<span style="font-size:8px;background:var(--accent);color:#fff;padding:1px 6px;border-radius:3px">V2 · 121分</span>' : '<span style="font-size:8px;background:var(--text-dim);color:#fff;padding:1px 6px;border-radius:3px">V1 · 100分</span>';
     }
@@ -14287,7 +14297,7 @@ function renderDashboard(){
     });
 
     var cardsArr = [];
-    var avgMaxScore = Math.round(aggMaxScore / totalWeeks);
+    var avgMaxScore = Math.round(aggMaxScore / effectiveWeeks);
     EVAL_TRAINEES.forEach(function(tr, i){
       var cumTotal = 0, wkCount = 0;
       for(var wi=0;wi<curWkIdx;wi++){
@@ -14306,7 +14316,7 @@ function renderDashboard(){
           '<div class="dash-avatar" style="background:'+avatarColors[i%7]+'">'+tr.name.charAt(0)+'</div>'+
           '<div class="dash-lbl">'+tr.name+'</div>'+
           '<div class="dash-main-score" style="color:'+scoreColor+'">'+scoreDisplay+'</div>'+
-          '<div class="dash-main-max">周均 / '+avgMaxScore+' 分 · '+wkCount+'/'+totalWeeks+' 周</div>'+
+          '<div class="dash-main-max">周均 / '+avgMaxScore+' 分 · '+wkCount+' 周已打分</div>'+
           '<div class="dash-sub-row"><span>任务完成</span><span>'+comp.done+'/'+comp.total+' 项</span></div>'+
           '<div class="dash-sub-bar"><div class="dash-sub-fill" style="width:'+comp.rate+'%"></div></div>'+
         '</div>',
@@ -14388,7 +14398,16 @@ function renderDashboard(){
 // Aggregate 360 eval cards (up to current week)
 function render360EvalAggregate(){
   loadEvalData();
-  var totalWeeks = evalCurrentWeek; // current week not yet scored
+  // Count weeks that actually have scoring data
+  var scoredWeeks360 = 0;
+  for(var wi=0;wi<evalCurrentWeek;wi++){
+    var hasAny = false;
+    for(var ti=0;ti<EVAL_TRAINEES.length;ti++){
+      if(getEvalScore(EVAL_TRAINEES[ti].name, 'W'+(wi+1))){ hasAny = true; break; }
+    }
+    if(hasAny) scoredWeeks360++;
+  }
+  if(scoredWeeks360===0) scoredWeeks360 = evalCurrentWeek;
   var totalEvalCount = 0;
   var totalScoreSum = 0;
   var overallTop = null, overallTopAvg = -1;
@@ -14424,17 +14443,27 @@ function render360EvalAggregate(){
   var lowDisplay = overallLow ? '<span style="font-size:11px;font-weight:500">'+overallLow+'</span> <span style="font-size:16px;font-weight:700">'+overallLowAvg.toFixed(1)+'</span>' : '--';
 
   var html = '';
-  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#E8F0FE;color:#3A6BC5">'+checkIcon+'</div><div class="e360-info"><div class="e360-label">累计评估</div><div class="e360-weight">'+totalWeeks+'周汇总</div></div><div class="e360-score" style="color:#3A6BC5">'+totalEvalCount+'<span style="font-size:12px;font-weight:400">人次</span></div></div>';
+  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#E8F0FE;color:#3A6BC5">'+checkIcon+'</div><div class="e360-info"><div class="e360-label">累计评估</div><div class="e360-weight">'+scoredWeeks360+'周已打分</div></div><div class="e360-score" style="color:#3A6BC5">'+totalEvalCount+'<span style="font-size:12px;font-weight:400">人次</span></div></div>';
   html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#EAF0EE;color:#6AAA8A">'+upIcon+'</div><div class="e360-info"><div class="e360-label">整体均分</div><div class="e360-weight">'+totalEvalCount+'人次参与</div></div><div class="e360-score" style="color:#6AAA8A">'+avgScore+'</div></div>';
-  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#FBF6EC;color:#D4A76A">'+starIcon+'</div><div class="e360-info"><div class="e360-label">周均最高</div><div class="e360-weight">'+totalWeeks+'周周均分</div></div><div style="color:#D4A76A;font-size:16px;font-weight:700">'+topDisplay+'</div></div>';
-  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#FDEDEF;color:#C94F66">'+downIcon+'</div><div class="e360-info"><div class="e360-label">周均最低</div><div class="e360-weight">'+totalWeeks+'周周均分</div></div><div style="color:#C94F66;font-size:16px;font-weight:700">'+lowDisplay+'</div></div>';
+  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#FBF6EC;color:#D4A76A">'+starIcon+'</div><div class="e360-info"><div class="e360-label">周均最高</div><div class="e360-weight">'+scoredWeeks360+'周周均分</div></div><div style="color:#D4A76A;font-size:16px;font-weight:700">'+topDisplay+'</div></div>';
+  html += '<div class="tn-eval360-card"><div class="e360-icon" style="background:#FDEDEF;color:#C94F66">'+downIcon+'</div><div class="e360-info"><div class="e360-label">周均最低</div><div class="e360-weight">'+scoredWeeks360+'周周均分</div></div><div style="color:#C94F66;font-size:16px;font-weight:700">'+lowDisplay+'</div></div>';
   document.getElementById('tnEval360').innerHTML = html;
 }
 
 // Aggregate ranking (by weekly average up to current week)
 function renderRankingAggregate(){
   loadEvalData();
-  var totalWeeks = evalCurrentWeek; // current week not yet scored
+  var totalWeeks = evalCurrentWeek; // completed weeks
+  // Count weeks that actually have scoring data
+  var scoredWeeksRank = 0;
+  for(var wi=0;wi<evalCurrentWeek;wi++){
+    var hasAny = false;
+    for(var ti=0;ti<EVAL_TRAINEES.length;ti++){
+      if(getEvalScore(EVAL_TRAINEES[ti].name, 'W'+(wi+1))){ hasAny = true; break; }
+    }
+    if(hasAny) scoredWeeksRank++;
+  }
+  if(scoredWeeksRank===0) scoredWeeksRank = evalCurrentWeek;
   var rows = [];
   EVAL_TRAINEES.forEach(function(tr){
     var cumTotal = 0, wkCount = 0;
@@ -14465,10 +14494,10 @@ function renderRankingAggregate(){
   var avgMaxScore = Math.round((function(){
     var total = 0;
     for(var wi=0;wi<evalCurrentWeek;wi++){ total += getEvalMaxScore('W'+(wi+1)); }
-    return total / totalWeeks;
+    return total / scoredWeeksRank;
   })());
 
-  document.getElementById('tnRankWeekLabel').innerHTML = '周均排名 <span style="font-size:8px;font-weight:400;color:var(--accent);background:var(--accent-wash);padding:1px 5px;border-radius:3px;margin-left:4px">'+totalWeeks+'周周均</span>';
+  document.getElementById('tnRankWeekLabel').innerHTML = '周均排名 <span style="font-size:8px;font-weight:400;color:var(--accent);background:var(--accent-wash);padding:1px 5px;border-radius:3px;margin-left:4px">'+scoredWeeksRank+'周已打分</span>';
 
   if(rows.length === 0){
     document.getElementById('tnRankTable').innerHTML = '<tr><td colspan="5" style="padding:24px;text-align:center"><div style="color:var(--text-dim);margin-bottom:8px">暂无评分数据</div><button class="tn-btn tn-btn-sm tn-btn-primary" onclick="switchToTab(\'tnEval\');" style="font-size:10px;padding:5px 16px">去评分 →</button></td></tr>';
