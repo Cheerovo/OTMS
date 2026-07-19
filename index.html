@@ -2587,6 +2587,7 @@ body.tn-resizing * { pointer-events:none; }
         <button onclick="switchTraineeView('dashboard')" style="background:var(--accent);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:9px;cursor:pointer;font-family:inherit">绩效总览</button>
         <button onclick="exportEvalData()">导出</button>
         <button onclick="importEvalData()">导入</button>
+        <button onclick="exportEvalImage()" id="evalExportImgBtn" style="background:var(--accent);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:9px;cursor:pointer;font-family:inherit">导出图片</button>
       </div>
       <div class="eval-period">评估周期 <strong>2026年6月 - 9月</strong> · 共 14 周</div>
     </div>
@@ -11351,6 +11352,62 @@ function exportEvalData(){
   a.download = 'trainee_evaluation_'+new Date().toISOString().slice(0,10)+'.json';
   a.click();
   URL.revokeObjectURL(url);
+}
+
+var _html2canvasLoaded = false;
+function exportEvalImage(){
+  var btn = document.getElementById('evalExportImgBtn');
+  var origText = btn.textContent;
+  btn.textContent = '加载中...';
+  btn.disabled = true;
+
+  function doCapture(){
+    // Capture the weekly eval view (week tabs + trainee list + score panel)
+    var el = document.getElementById('evalWeeklyView');
+    if(!el || el.style.display==='none') el = document.getElementById('evalCalendarView');
+    if(!el || el.style.display==='none') el = document.getElementById('evalHistoryView');
+    if(!el) { btn.textContent = origText; btn.disabled = false; return; }
+
+    html2canvas(el, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      logging: false
+    }).then(function(canvas){
+      canvas.toBlob(function(blob){
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = '管培生打分_' + new Date().toISOString().slice(0,10) + '.png';
+        a.click();
+        URL.revokeObjectURL(url);
+        btn.textContent = origText;
+        btn.disabled = false;
+      }, 'image/png');
+    }).catch(function(e){
+      alert('导出失败: ' + e.message);
+      btn.textContent = origText;
+      btn.disabled = false;
+    });
+  }
+
+  if(_html2canvasLoaded && typeof html2canvas !== 'undefined'){
+    doCapture();
+  } else {
+    var script = document.createElement('script');
+    script.src = 'https://html2canvas.hertzen.com/dist/html2canvas.min.js';
+    script.onload = function(){
+      _html2canvasLoaded = true;
+      btn.textContent = '生成中...';
+      doCapture();
+    };
+    script.onerror = function(){
+      alert('加载截图库失败，请检查网络连接');
+      btn.textContent = origText;
+      btn.disabled = false;
+    };
+    document.head.appendChild(script);
+  }
 }
 
 function importEvalData(){
