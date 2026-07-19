@@ -10319,6 +10319,16 @@ function renderScoreOverview(){
     html += '</tr>';
   }
 
+  // Action row: detail buttons for each trainee
+  html += '<tr style="border-top:2px solid var(--border)">';
+  html += '<td style="text-align:left;font-size:10px;color:var(--text-dim)">操作</td>';
+  html += '<td></td>';
+  EVAL_TRAINEES.forEach(function(t){
+    var hl = (selTrainee && t.name === selTrainee) ? ' class="hl"' : '';
+    html += '<td'+hl+' style="padding:6px 8px"><button onclick="evalOverviewMode=false;selectEvalTrainee(\''+t.name+'\')" style="padding:4px 10px;border:1px solid var(--accent);background:var(--card);color:var(--accent);border-radius:4px;font-size:10px;cursor:pointer;font-family:inherit;white-space:nowrap">详情</button></td>';
+  });
+  html += '</tr>';
+
   html += '</tbody></table></div>';
   var existing = document.getElementById('evalOverviewContent');
   if(existing) existing.remove();
