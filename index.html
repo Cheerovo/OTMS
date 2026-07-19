@@ -14236,7 +14236,7 @@ function renderDashboard(){
   var diffDays = Math.floor((now - startDate) / (1000*60*60*24));
   if(diffDays < 0) diffDays = 0;
   var curWkIdx = Math.min(Math.floor(diffDays / 7), 13);
-  var totalWeeks = curWkIdx + 1; // average only up to current week, not all 14
+  var totalWeeks = curWkIdx; // current week not yet scored, count only completed weeks
 
   // Populate week selector once; on subsequent calls read user selection
   var sel = document.getElementById('tnDashWeekSel');
@@ -14273,13 +14273,13 @@ function renderDashboard(){
     var t360 = document.getElementById('tnDash360Title'); if(t360) t360.textContent = '累计评估概览';
     // Cumulative max score across all 14 weeks
     var aggMaxScore = 0;
-    for(var wi=0;wi<=curWkIdx;wi++){ aggMaxScore += getEvalMaxScore('W'+(wi+1)); }
+    for(var wi=0;wi<curWkIdx;wi++){ aggMaxScore += getEvalMaxScore('W'+(wi+1)); }
 
     // Total task completion per trainee
     var allComp = {};
     EVAL_TRAINEES.forEach(function(tr){
       var td = 0, ta = 0;
-      for(var wi=0;wi<=curWkIdx;wi++){
+      for(var wi=0;wi<curWkIdx;wi++){
         var comp = calcTaskCompletionForTrainee(tr.name, 'W'+(wi+1));
         td += comp.weekDone; ta += comp.weekTotal;
       }
@@ -14290,7 +14290,7 @@ function renderDashboard(){
     var avgMaxScore = Math.round(aggMaxScore / totalWeeks);
     EVAL_TRAINEES.forEach(function(tr, i){
       var cumTotal = 0, wkCount = 0;
-      for(var wi=0;wi<=curWkIdx;wi++){
+      for(var wi=0;wi<curWkIdx;wi++){
         var wkId2 = 'W'+(wi+1);
         var s2 = getEvalScore(tr.name, wkId2);
         var isV2w = wi >= EVAL_V2_CUTOFF_WEEK;
@@ -14388,7 +14388,7 @@ function renderDashboard(){
 // Aggregate 360 eval cards (up to current week)
 function render360EvalAggregate(){
   loadEvalData();
-  var totalWeeks = evalCurrentWeek + 1;
+  var totalWeeks = evalCurrentWeek; // current week not yet scored
   var totalEvalCount = 0;
   var totalScoreSum = 0;
   var overallTop = null, overallTopAvg = -1;
@@ -14396,7 +14396,7 @@ function render360EvalAggregate(){
 
   EVAL_TRAINEES.forEach(function(tr){
     var traineeTotal = 0, wkCount = 0;
-    for(var wi=0;wi<=evalCurrentWeek;wi++){
+    for(var wi=0;wi<evalCurrentWeek;wi++){
       var wkId = 'W'+(wi+1);
       var s = getEvalScore(tr.name, wkId);
       var isV2w = wi >= EVAL_V2_CUTOFF_WEEK;
@@ -14434,11 +14434,11 @@ function render360EvalAggregate(){
 // Aggregate ranking (by weekly average up to current week)
 function renderRankingAggregate(){
   loadEvalData();
-  var totalWeeks = evalCurrentWeek + 1;
+  var totalWeeks = evalCurrentWeek; // current week not yet scored
   var rows = [];
   EVAL_TRAINEES.forEach(function(tr){
     var cumTotal = 0, wkCount = 0;
-    for(var wi=0;wi<=evalCurrentWeek;wi++){
+    for(var wi=0;wi<evalCurrentWeek;wi++){
       var wkId = 'W'+(wi+1);
       var s = getEvalScore(tr.name, wkId);
       var isV2w = wi >= EVAL_V2_CUTOFF_WEEK;
@@ -14449,7 +14449,7 @@ function renderRankingAggregate(){
 
     // Task completion across all weeks
     var td = 0, ta = 0;
-    for(var wi=0;wi<=evalCurrentWeek;wi++){
+    for(var wi=0;wi<evalCurrentWeek;wi++){
       var comp = calcTaskCompletionForTrainee(tr.name, 'W'+(wi+1));
       td += comp.weekDone; ta += comp.weekTotal;
     }
@@ -14464,7 +14464,7 @@ function renderRankingAggregate(){
 
   var avgMaxScore = Math.round((function(){
     var total = 0;
-    for(var wi=0;wi<=evalCurrentWeek;wi++){ total += getEvalMaxScore('W'+(wi+1)); }
+    for(var wi=0;wi<evalCurrentWeek;wi++){ total += getEvalMaxScore('W'+(wi+1)); }
     return total / totalWeeks;
   })());
 
