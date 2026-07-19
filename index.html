@@ -10319,16 +10319,6 @@ function renderScoreOverview(){
     html += '</tr>';
   }
 
-  // Action row: detail buttons for each trainee
-  html += '<tr style="border-top:2px solid var(--border)">';
-  html += '<td style="text-align:left;font-size:10px;color:var(--text-dim)">操作</td>';
-  html += '<td></td>';
-  EVAL_TRAINEES.forEach(function(t){
-    var hl = (selTrainee && t.name === selTrainee) ? ' class="hl"' : '';
-    html += '<td'+hl+' style="padding:6px 8px"><button onclick="evalOverviewMode=false;selectEvalTrainee(\''+t.name+'\')" style="padding:4px 10px;border:1px solid var(--accent);background:var(--card);color:var(--accent);border-radius:4px;font-size:10px;cursor:pointer;font-family:inherit;white-space:nowrap">详情</button></td>';
-  });
-  html += '</tr>';
-
   html += '</tbody></table></div>';
   var existing = document.getElementById('evalOverviewContent');
   if(existing) existing.remove();
@@ -10770,7 +10760,7 @@ function switchEvalView(view){
     var views = ['weekly','calendar','history'];
     b.classList.toggle('active', views[i]===view);
   });
-  if(view==='weekly'){ renderEvalWeekTabs(); renderEvalTraineeList(); }
+  if(view==='weekly'){ renderEvalWeekTabs(); renderEvalTraineeList(); renderEvalScorePanel(); }
   else if(view==='calendar'){ renderEvalCalendar(); }
   else if(view==='history'){ renderEvalHistory(); }
 }
@@ -10786,7 +10776,7 @@ function renderEvalWeekTabs(){
     }
     var cnt = getWeekCompletionCount(w.id);
     var countHtml = cnt.total > 0 ? '<span style="font-size:7px;display:block;color:'+(cnt.complete===cnt.total?'var(--success-text)':cnt.complete+cnt.partial>0?'var(--warning-text)':'var(--text-muted)')+'">'+cnt.complete+'/'+cnt.total+' 完成</span>' : '';
-    html += '<button class="eval-week-tab'+(i===evalCurrentWeek?' active':'')+(hasData?' has-data':'')+'" onclick="evalCurrentWeek='+i+';renderEvalWeekTabs();renderEvalTraineeList();evalSelectedTrainee=null;if(evalOverviewMode){renderScoreOverview();}else{document.getElementById(\'evalScorePanelContainer\').innerHTML=\'<div class=eval-empty>选择左侧管培生查看评分详情</div>\';}updateRankingBtn();">'+w.label+'<span style="font-size:7px;display:block">'+w.start+'</span>'+countHtml+'</button>';
+    html += '<button class="eval-week-tab'+(i===evalCurrentWeek?' active':'')+(hasData?' has-data':'')+'" onclick="evalCurrentWeek='+i+';renderEvalWeekTabs();renderEvalTraineeList();evalSelectedTrainee=null;renderEvalScorePanel();updateRankingBtn();">'+w.label+'<span style="font-size:7px;display:block">'+w.start+'</span>'+countHtml+'</button>';
   }
   el.innerHTML = html;
 }
@@ -10861,7 +10851,11 @@ function renderEvalScorePanel(traineeId){
 
   var t = null;
   for(var i=0;i<EVAL_TRAINEES.length;i++){ if(EVAL_TRAINEES[i].name===traineeId){ t=EVAL_TRAINEES[i]; break; } }
-  if(!t) return;
+  if(!t){
+    // Still show toggle bar so user can enter overview mode without selecting a trainee
+    container.innerHTML = toggleBar + '<div class="eval-empty">选择左侧管培生查看评分详情</div>';
+    return;
+  }
   var weekMentor = (evalData.mentors && evalData.mentors[t.name + '|' + weekId]) || t.supervisor;
   var currentUserName = currentUser && users[currentUser] ? users[currentUser].name : '';
   var canEdit = isGlobalAdmin(currentUser) || (currentUserName === weekMentor);
