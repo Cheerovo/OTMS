@@ -10176,9 +10176,8 @@ function toggleEvalOverview(){
 
 function getScoreCellStyle(v, max){
   if(!v && v !== 0 || !max) return '';
-  var ratio = v / max;
-  if(ratio >= 0.85) return 'background:rgba(106,170,138,0.12);color:var(--success-text);font-weight:500';
-  if(ratio < 0.3 && ratio > 0) return 'background:rgba(201,79,102,0.08);color:var(--danger-text)';
+  if(v >= max) return 'background:rgba(106,170,138,0.12);color:var(--success-text);font-weight:500';
+  if(v === 0) return 'background:rgba(201,79,102,0.08);color:var(--danger-text)';
   return '';
 }
 function renderScoreOverview(){
