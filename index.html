@@ -1401,6 +1401,32 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .eval-extra-task-item .task-desc { font-size:9px; color:var(--text-dim); width:200px; flex-shrink:0; }
 .eval-extra-task-item .task-desc input { width:100%; padding:4px 8px; border:1px solid var(--border-light); border-radius:6px; font-size:9px; color:var(--text-dim); background:var(--card); outline:none; font-family:inherit; }
 
+/* 本周任务列表 */
+.eval-week-tasks { margin-bottom:16px; background:var(--bg-surface); border-radius:10px; overflow:hidden; }
+.eval-week-tasks .ewt-header { display:flex; align-items:center; gap:8px; padding:10px 14px; cursor:pointer; user-select:none; transition:background .12s; }
+.eval-week-tasks .ewt-header:hover { background:var(--bg-surface-hover); }
+.eval-week-tasks .ewt-toggle { font-size:10px; color:var(--text-muted); transition:transform .2s; width:14px; text-align:center; }
+.eval-week-tasks.collapsed .ewt-toggle { transform:rotate(-90deg); }
+.eval-week-tasks.collapsed .ewt-list { display:none; }
+.eval-week-tasks .ewt-header span:nth-child(2) { font-size:11px; font-weight:500; color:var(--text); }
+.eval-week-tasks .ewt-count { font-size:10px; padding:2px 8px; border-radius:10px; margin-left:auto; }
+.eval-week-tasks .ewt-count.all-done { background:var(--success-bg); color:var(--success-text); }
+.eval-week-tasks .ewt-count.partial { background:#FDF2E0; color:#D4A76A; }
+.eval-week-tasks .ewt-count.none { background:var(--bg-surface-alt); color:var(--text-dim); }
+.eval-week-tasks .ewt-list { padding:0 8px 8px; }
+.eval-week-tasks .ewt-item { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px; transition:background .1s; }
+.eval-week-tasks .ewt-item:hover { background:var(--bg-surface-hover); }
+.eval-week-tasks .ewt-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.eval-week-tasks .ewt-dot.done { background:var(--success); }
+.eval-week-tasks .ewt-dot.active { background:var(--accent); }
+.eval-week-tasks .ewt-dot.todo, .ewt-dot.pending { background:var(--text-muted); }
+.eval-week-tasks .ewt-name { flex:1; font-size:10px; color:var(--text); min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eval-week-tasks .ewt-status { font-size:9px; padding:2px 6px; border-radius:4px; flex-shrink:0; }
+.eval-week-tasks .ewt-status.done { color:var(--success-text); background:var(--success-bg); }
+.eval-week-tasks .ewt-status.active { color:var(--accent); background:var(--accent-wash); }
+.eval-week-tasks .ewt-status.todo, .eval-week-tasks .ewt-status.pending { color:var(--text-dim); background:var(--bg); }
+.eval-week-tasks .ewt-source { font-size:8px; color:var(--text-muted); flex-shrink:0; padding:1px 6px; background:var(--bg); border-radius:3px; }
+
 .eval-save-row { display:flex; align-items:center; gap:8px; justify-content:flex-end; }
 .eval-save-row button { padding:8px 20px; border:none; border-radius:8px; font-size:11px; cursor:pointer; font-family:inherit; transition:var(--transition); }
 .eval-btn-save { background:var(--accent); color:#fff; }
@@ -10843,6 +10869,33 @@ function renderEvalScorePanel(traineeId){
   } catch(e) { var c2 = document.getElementById('evalScorePanelContainer'); if(c2) c2.innerHTML = '<div style=\"padding:12px;color:#C94F66;background:var(--bg-surface);border-radius:8px;text-align:center;font-size:11px\">评分面板报错: '+esc(e.message)+'</div>'; }
 }
 
+function buildWeekTaskList(traineeName, weekId){
+  var tasks = getTraineeWeekTasks(traineeName, weekId);
+  if(!tasks.length) return '';
+  var doneCount = tasks.filter(function(t){return t.status==='done';}).length;
+  var statusCls = doneCount===tasks.length ? 'all-done' : doneCount>0 ? 'partial' : 'none';
+  var statusLabels = {done:'已完成', active:'进行中', todo:'待开始', pending:'待开始'};
+  var sourceLabels = {ref:'参考任务', weekly:'周任务', plan:'计划任务'};
+  var itemsHtml = tasks.map(function(task, i){
+    var st = task.status||'todo';
+    var name = task.name.length > 35 ? task.name.substring(0,33)+'..' : task.name;
+    return '<div class="ewt-item">'+
+      '<span class="ewt-dot '+st+'"></span>'+
+      '<span class="ewt-name" title="'+esc(task.name)+'">'+esc(name)+'</span>'+
+      '<span class="ewt-status '+st+'">'+((statusLabels[st]||st))+'</span>'+
+      '<span class="ewt-source">'+(sourceLabels[task.source]||task.source)+'</span>'+
+    '</div>';
+  }).join('');
+  return '<div class="eval-week-tasks">'+
+    '<div class="ewt-header" onclick="this.parentElement.classList.toggle(\'collapsed\')">'+
+      '<span class="ewt-toggle">▾</span>'+
+      '<span>本周任务</span>'+
+      '<span class="ewt-count '+statusCls+'">'+doneCount+'/'+tasks.length+'</span>'+
+    '</div>'+
+    '<div class="ewt-list">'+itemsHtml+'</div>'+
+  '</div>';
+}
+
 function renderScorePanelV1(t, weekId, weekLabel, canEdit, container){
   var dis = canEdit ? '' : ' disabled';
   var s = getEvalScore(t.name, weekId) || {};
@@ -10904,6 +10957,7 @@ function renderScorePanelV1(t, weekId, weekLabel, canEdit, container){
         (canEdit ? '<div class="eval-save-row">'+prevDataBtn + saveBtn + '</div>' : '')+
       '</div>'+
       readonlyBanner +
+      buildWeekTaskList(t.name, weekId) +
       '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px">通用评分 <span style="font-weight:400;color:var(--text-dim);font-size:9px">满分 100 分</span></div>'+
       '<div class="eval-dims">'+dimsHtml+'</div>'+
       extrasHtml +
@@ -10913,6 +10967,15 @@ function renderScorePanelV1(t, weekId, weekLabel, canEdit, container){
 function renderScorePanelV2(t, weekId, weekLabel, canEdit, container){
   var dis = canEdit ? '' : ' disabled';
   var s = getEvalScore(t.name, weekId) || {};
+  // Sanitize: clamp any out-of-range values (e.g. V1→V2 data leakage)
+  var needsSave = false;
+  EVAL_DIMS_V2.forEach(function(d){
+    if(d.auto && s[d.id] !== undefined && s[d.id] > d.max){
+      s[d.id] = Math.min(s[d.id], d.max);
+      needsSave = true;
+    }
+  });
+  if(needsSave) setEvalScore(t.name, weekId, s);
   var peerVoteScore = calcPeerVoteScore(t.name, weekId);
   var baseTotal = 0;
   EVAL_DIMS_V2.forEach(function(d){
@@ -10943,7 +11006,7 @@ function renderScorePanelV2(t, weekId, weekLabel, canEdit, container){
         if(EVAL_DIMS_V2[k].id === grp.dims[0]){ d = EVAL_DIMS_V2[k]; break; }
       }
       if(d){
-        var val = s[d.id] || 0;
+        var val = Math.min(s[d.id] || 0, d.max);
         grpTotal += val;
         var sliderId = 'evalSlider_'+d.id;
         rowsHtml += '<div class="eval-dim-item">'+
@@ -10962,7 +11025,7 @@ function renderScorePanelV2(t, weekId, weekLabel, canEdit, container){
           if(EVAL_DIMS_V2[k2].id === grp.dims[j]){ sd = EVAL_DIMS_V2[k2]; break; }
         }
         if(!sd) continue;
-        var sv = s[sd.id] || 0;
+        var sv = Math.min(s[sd.id] || 0, sd.max);
         grpTotal += sv;
         var sSliderId = 'evalSlider_'+sd.id;
         subRows += '<div class="eval-dim-item eval-sub-item">'+
@@ -11014,9 +11077,12 @@ function renderScorePanelV2(t, weekId, weekLabel, canEdit, container){
     (canEdit ? '<div class="eval-save-row" style="margin-bottom:16px">'+prevDataBtn + saveBtn+'</div>' : '')+
   '</div>';
 
+  var readonlyBannerV2 = !canEdit ? '<div style="text-align:center;padding:6px;background:#FDF6EC;border-radius:8px;margin-bottom:12px;font-size:9px;color:#E0956A">仅限直属上级（'+t.supervisor+'）或管理员编辑评分</div>' : '';
   container.innerHTML +=
     '<div class="eval-score-panel">'+
       stickyHtml+
+      readonlyBannerV2 +
+      buildWeekTaskList(t.name, weekId) +
       '<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">带教评分 <span style="font-weight:400;color:var(--text-dim);font-size:9px">满分 100 分</span></div>'+
       '<div class="eval-dims">'+groupsHtml+'</div>'+
       '<div style="display:flex;align-items:center;gap:8px;margin-top:16px;margin-bottom:8px">'+
@@ -11032,7 +11098,12 @@ function renderScorePanelV2(t, weekId, weekLabel, canEdit, container){
 var _v2RenderTimer = null;
 function updateV2DimScore(traineeName, dimId, value, weekId){
   var s = getEvalScore(traineeName, weekId) || {};
-  s[dimId] = parseFloat(value) || 0;
+  var val = parseFloat(value) || 0;
+  // Clamp to dimension max (prevents V1→V2 data leakage, e.g. responseSpeed 15→5)
+  for(var di=0;di<EVAL_DIMS_V2.length;di++){
+    if(EVAL_DIMS_V2[di].id===dimId){ val = Math.min(val, EVAL_DIMS_V2[di].max); break; }
+  }
+  s[dimId] = val;
   setEvalScore(traineeName, weekId, s);
   // Debounce re-render to avoid jank during slider drag (data saved immediately)
   if(_v2RenderTimer) clearTimeout(_v2RenderTimer);
@@ -11048,7 +11119,7 @@ function saveCurrentEvalV2(traineeName, weekId){
     if(!dims[i].auto) continue;
     var el = document.getElementById('evalDim_'+dims[i].id);
     if(el && !el.disabled){
-      var val = parseFloat(el.value) || 0;
+      var val = Math.min(parseFloat(el.value) || 0, dims[i].max);
       s[dims[i].id] = val;
     }
     var commentEl = document.getElementById('evalComment_'+dims[i].id);
@@ -11146,7 +11217,20 @@ function saveCurrentEval(traineeId, weekId){
 function restorePrevWeekData(traineeId, prevWeekId, weekId){
   var prevScore = getEvalScore(traineeId, prevWeekId);
   if(!prevScore){ alert('上一周无评分数据'); return; }
-  setEvalScore(traineeId, weekId, JSON.parse(JSON.stringify(prevScore)));
+  var scoreCopy = JSON.parse(JSON.stringify(prevScore));
+  // Clamp to target week's dimension maxes when crossing V1→V2 boundary
+  var prevIdx = parseInt(prevWeekId.slice(1)) - 1;
+  var curIdx = parseInt(weekId.slice(1)) - 1;
+  var prevIsV2 = prevIdx >= EVAL_V2_CUTOFF_WEEK;
+  var curIsV2 = curIdx >= EVAL_V2_CUTOFF_WEEK;
+  if(!prevIsV2 && curIsV2){
+    EVAL_DIMS_V2.forEach(function(d){
+      if(d.auto && scoreCopy[d.id] !== undefined){
+        scoreCopy[d.id] = Math.min(scoreCopy[d.id], d.max);
+      }
+    });
+  }
+  setEvalScore(traineeId, weekId, scoreCopy);
   var prevExtras = getEvalExtras(traineeId, prevWeekId);
   if(prevExtras && prevExtras.length){
     setEvalExtras(traineeId, weekId, JSON.parse(JSON.stringify(prevExtras)));
@@ -11544,6 +11628,37 @@ function calcTaskCompletionForTrainee(traineeName, weekId){
     allTotal: allTotal, allDone: allDone, allRate: allRate,
     suggestedScore: suggestedScore
   };
+}
+
+function getTraineeWeekTasks(traineeName, weekId){
+  var weekIdx = parseInt(weekId.slice(1)) - 1;
+  var tasks = [];
+  // 1. Reference tasks (refTasks)
+  var refTasks = (tnData && tnData.refTasks && tnData.refTasks.length) ? tnData.refTasks : (typeof TN_REF_TASKS !== 'undefined' ? TN_REF_TASKS : []);
+  refTasks.forEach(function(r){
+    if(!r.executors || r.executors.indexOf(traineeName)===-1) return;
+    if(!r.weeks || !r.weeks[weekIdx]) return;
+    tasks.push({name: r.name, source: 'ref', status: r.refStatus||'todo', sys: r.sysName||r.sys||'', module: r.module||'', deliverable: r.deliverable||''});
+  });
+  // 2. Weekly tasks (wtasks)
+  if(tnData && tnData.wtasks){
+    tnData.wtasks.forEach(function(w){
+      if(w.person!==traineeName) return;
+      if(w.week !== weekId) return;
+      tasks.push({name: w.name, source: 'weekly', status: w.status||'pending', sys: w.sys||'', module: w.module||w.taskCategory||''});
+    });
+  }
+  // 3. Plan tasks (TN_TASKS)
+  if(typeof TN_TASKS !== 'undefined' && TN_TASKS){
+    TN_TASKS.forEach(function(t){
+      if(t.R!==traineeName && t.A!==traineeName && (t.I||'').indexOf(traineeName)===-1) return;
+      if(!t.weeks || !t.weeks[weekIdx]) return;
+      var td = getTnTask(t.id);
+      var status = (td && td.status) || t.status || 'todo';
+      tasks.push({name: t.name, source: 'plan', status: status, sys: t.sys||'', module: t.module||''});
+    });
+  }
+  return tasks;
 }
 
 function getTnStorageKey(k){ return 'otms_trainee_'+k+'_v1'; }
