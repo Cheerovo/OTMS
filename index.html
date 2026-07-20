@@ -8025,13 +8025,55 @@ function collectLocalData(){
   return data;
 }
 
+function mergeEvalData(localEval, cloudEval){
+  // Deep merge evalData: merge peerVotes from both sources
+  var merged = localEval ? JSON.parse(JSON.stringify(localEval)) : {};
+  if(!cloudEval) return merged;
+  // Merge peerVotes: for each week, merge voters (local voter's votes take priority)
+  if(cloudEval.peerVotes){
+    if(!merged.peerVotes) merged.peerVotes = {};
+    Object.keys(cloudEval.peerVotes).forEach(function(wk){
+      if(!merged.peerVotes[wk]) merged.peerVotes[wk] = {};
+      Object.keys(cloudEval.peerVotes[wk]).forEach(function(voter){
+        if(!merged.peerVotes[wk][voter]){
+          merged.peerVotes[wk][voter] = cloudEval.peerVotes[wk][voter];
+        }
+      });
+    });
+  }
+  // Merge mentors: fill missing weeks
+  if(cloudEval.mentors){
+    if(!merged.mentors) merged.mentors = {};
+    Object.keys(cloudEval.mentors).forEach(function(k){
+      if(!merged.mentors[k]) merged.mentors[k] = cloudEval.mentors[k];
+    });
+  }
+  // Merge rankings
+  if(cloudEval.rankings){
+    if(!merged.rankings) merged.rankings = {};
+    Object.keys(cloudEval.rankings).forEach(function(k){
+      if(!merged.rankings[k]) merged.rankings[k] = cloudEval.rankings[k];
+    });
+  }
+  return merged;
+}
+
 function importDataToLocal(data){
   _isImporting = true;
   var imported = 0;
   Object.keys(data).forEach(function(k){
     if(k[0]==='_') return;
     if(k==='okr_users') return; // 密码不同步，防止云端数据覆盖本地
-    localStorage.setItem(k, typeof data[k]==='string'?data[k]:JSON.stringify(data[k]));
+    // 管培生打分数据：深度合并 peerVotes/mentors/rankings，避免多人互评互相覆盖
+    if(k==='otms_trainee_eval_v1'){
+      try{
+        var localEval = JSON.parse(localStorage.getItem(k)||'null');
+        var merged = mergeEvalData(localEval, data[k]);
+        localStorage.setItem(k, JSON.stringify(merged));
+      }catch(e){ localStorage.setItem(k, JSON.stringify(data[k])); }
+    } else {
+      localStorage.setItem(k, typeof data[k]==='string'?data[k]:JSON.stringify(data[k]));
+    }
     imported++;
   });
   _isImporting = false;
@@ -8039,12 +8081,44 @@ function importDataToLocal(data){
 }
 
 // 自动上传：数据变更后 3 秒防抖，自动推送到 Supabase
+// 上传前先检查云端版本，如有更新先合并再上传，避免多人同时操作互相覆盖
 function scheduleAutoUpload(){
   if (_isImporting || _autoUploadBusy) return;
   clearTimeout(_autoUploadTimer);
   _autoUploadTimer = setTimeout(async function(){
     _autoUploadBusy = true;
     try{
+      // 1. 拉取云端最新版本号，检查是否有他人更新
+      var localVer = parseInt(localStorage.getItem(LOCAL_DATA_VER_KEY)) || 0;
+      try{
+        const { data: cloudRow } = await supabaseClient
+          .from('team_data')
+          .select('version, data')
+          .eq('id', 1)
+          .maybeSingle();
+        // 2. 如果云端版本更新，先合并云端数据到本地
+        if(cloudRow && cloudRow.version > localVer && cloudRow.data){
+          _isImporting = true;
+          Object.keys(cloudRow.data).forEach(function(k){
+            if(k[0]==='_' || k==='okr_users') return;
+            // 管培生打分数据：深度合并，避免互评数据被覆盖
+            if(k==='otms_trainee_eval_v1'){
+              try{
+                var localEval = JSON.parse(localStorage.getItem(k)||'null');
+                var merged = mergeEvalData(localEval, cloudRow.data[k]);
+                localStorage.setItem(k, JSON.stringify(merged));
+              }catch(e){ localStorage.setItem(k, JSON.stringify(cloudRow.data[k])); }
+            } else if(localStorage.getItem(k) === null){
+              // 其他 key：只导入本地不存在的，已存在的保留本地最新修改
+              localStorage.setItem(k, typeof cloudRow.data[k]==='string' ? cloudRow.data[k] : JSON.stringify(cloudRow.data[k]));
+            }
+          });
+          _isImporting = false;
+          console.log('📥 上传前已合并云端 v'+cloudRow.version+' 的新数据');
+        }
+      }catch(e){ console.log('上传前检查云端版本失败:', e.message); }
+
+      // 3. 上传合并后的全量数据
       var data = collectLocalData();
       var version = Math.floor(Date.now() / 1000);
       const { error } = await supabaseClient
