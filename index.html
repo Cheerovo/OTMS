@@ -12214,6 +12214,7 @@ function renderTraineeTasks(){
     document.getElementById('tnCardPane').innerHTML = '<div class="tn-gantt-empty" style="color:#C94F66">卡片渲染失败: '+esc(e.message)+'<br><span style="font-size:9px">请刷新页面重试</span></div>';
   }
   console.log('管培生任务看板: '+filtered.length+' 条任务');
+  updateNewTaskLabels();
 }
 
 function renderTraineeCards(filtered, sysOrder, curWkIdx, groups){
