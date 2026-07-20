@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HRO 人事员工全生命周期流程</title>
+<style>
+  :root {
+    /* Phase functional colors (Morandi) — preserved for clear phase distinction */
+    --recruit:      #8a76a3; --recruit-bg:  #f5f2f8; --recruit-line:  #cebbdb; --recruit-text: #5c4a71;
+    --onboard:      #5f9877; --onboard-bg:  #eef6f1; --onboard-line:  #b3d7c1; --onboard-text: #35624a;
+    --active:       #c2984f; --active-bg:   #faf5ea; --active-line:   #e6cd97; --active-text: #86642a;
+    --leave:        #ba6b5c; --leave-bg:    #faf0ee; --leave-line:    #e7c0b7; --leave-text: #7c4133;
+    --trainee:      #8d9aab; --trainee-bg:  #f4f5f7; --trainee-line:  #d0d6df; --trainee-text: #5a6370;
+    /* Neutrals — warmed up to align with main page */
+    --text:         #3B3835;
+    --text-dim:     #605C56;
+    --text-muted:   #8D8883;
+    --border:       #DCD8D2;
+    --border-light: #E5E2DC;
+    --divider:      #EDEAE5;
+    --bg-card:      #FEFDFC;
+    --bg-wash:      #F7F5F2;
+    --bg-muted:     #F9F8F5;
+    --bg-hover:     #F5F3EF;
+    --accent:       #C94F66;
+    --accent-wash:  #FDE8EC;
+    --shadow-xs:    0 1px 2px rgba(30,25,18,0.04);
+    --shadow-sm:    0 1px 3px rgba(30,25,18,0.05);
+    --shadow-md:    0 2px 8px rgba(30,25,18,0.06);
+    --shadow-lg:    0 4px 16px rgba(30,25,18,0.08);
+    --transition:   0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --radius:       14px;
+    --radius-sm:    10px;
+    --radius-xs:    8px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:transparent;color:var(--text);display:flex;flex-direction:column;overflow:hidden}
+
+  /* ── slim topbar: badges + tabs + legend in one row ── */
+  .topbar{display:flex;align-items:center;gap:12px;padding:10px 20px;background:var(--bg-card);border-bottom:1px solid var(--border-light);flex-shrink:0;flex-wrap:wrap}
+  .phase-badges{display:flex;gap:6px;flex-shrink:0}
+  .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:10.5px;font-weight:600;color:#fff;letter-spacing:.3px}
+  .badge.r{background:var(--recruit)} .badge.o{background:var(--onboard)}
+	.badge[data-phase]{cursor:pointer;transition:var(--transition);position:relative}
+	.badge[data-phase]:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,.15)}
+	.badge[data-phase].spy-active{box-shadow:0 0 0 3px rgba(255,255,255,.5),0 0 0 5px currentColor;transform:translateY(-1px)}
+  .badge.a{background:var(--active)}  .badge.l{background:var(--leave)}
+  .badge.t{background:var(--trainee)}
+  /* Pill tabs — matching main page oc-sub-tab style */
+  .tabbar{display:flex;gap:5px;flex:1}
+  .tab-btn{border:none;background:var(--bg-wash);color:var(--text-dim);font-size:12px;font-weight:500;padding:6px 16px;border-radius:20px;cursor:pointer;transition:var(--transition);white-space:nowrap}
+  .tab-btn:hover{color:var(--text);background:var(--bg-hover)}
+  .tab-btn.active{background:var(--accent);color:#fff}
+  .legend{display:flex;gap:14px;font-size:10.5px;color:var(--text-muted);align-items:center;flex-shrink:0;margin-left:auto}
+  .legend span{white-space:nowrap}
+	.tab-panel{opacity:0;position:absolute;pointer-events:none;overflow:hidden;transition:opacity .25s cubic-bezier(0.4,0,0.2,1),transform .25s cubic-bezier(0.4,0,0.2,1);transform:translateY(6px)}
+	.tab-panel.active{opacity:1;position:relative;pointer-events:auto;overflow:visible;display:flex;flex-direction:column;flex:1;min-height:0;transform:translateY(0)}
+
+  /* ── AI banner ── */
+  .ai-banner{flex-shrink:0;background:linear-gradient(90deg,#FDF8F0,#F8F4FA);border-bottom:1px solid var(--border-light);padding:6px 20px;font-size:10.5px;color:var(--text-dim);display:flex;align-items:center;gap:8px}
+
+  /* ── scroll shadow indicators ── */
+  .scroll-container{position:relative;flex:1;min-height:0;overflow:hidden}
+  .scroll-shadow{position:absolute;top:0;bottom:0;width:28px;z-index:55;pointer-events:none;transition:opacity .3s;opacity:0}
+  .scroll-shadow.left{left:0;background:linear-gradient(90deg,rgba(200,195,185,.35),transparent)}
+  .scroll-shadow.right{right:0;background:linear-gradient(270deg,rgba(200,195,185,.35),transparent)}
+  .scroll-shadow.show{opacity:1}
+
+  /* ── table wrapper ── */
+  .wrap{overflow:auto;height:100%;background:var(--bg-card)}
+  table{border-collapse:collapse;min-width:2190px;width:100%}
+  col.col-lane{width:44px} col.col-form{width:210px}
+  col.col-r1{width:110px} col.col-r2{width:130px} col.col-r3{width:110px}
+  col.col-r4{width:120px} col.col-r5{width:115px} col.col-r6{width:115px}
+  col.col-r7{width:110px} col.col-r8{width:110px} col.col-r9{width:110px} col.col-r10{width:110px}
+  col.col-r11{width:110px}
+  col.col-st{width:128px}
+
+  /* ── thead — lighter, warm header ── */
+  thead th{background:#E8E4DD;color:var(--text-dim);font-size:10.5px;font-weight:600;padding:9px 4px;text-align:center;border-right:1px solid var(--divider);position:sticky;top:0;z-index:35;white-space:nowrap;letter-spacing:.2px}
+  thead th.lh{background:#E8E4DD;border-right:none;left:0;z-index:45}
+  thead th.fh{left:44px;z-index:45}
+
+  /* ── lane cell ── */
+  td.lc{text-align:center;vertical-align:middle;border-right:2px solid;font-size:13px;font-weight:700;position:sticky;left:0;z-index:31}
+  td.lc.r{background:var(--recruit-bg);color:var(--recruit-text);border-right-color:var(--recruit-line)}
+  td.lc.o{background:var(--onboard-bg);color:var(--onboard-text);border-right-color:var(--onboard-line)}
+  td.lc.a{background:var(--active-bg);color:var(--active-text);border-right-color:var(--active-line)}
+  td.lc.l{background:var(--leave-bg);color:var(--leave-text);border-right-color:var(--leave-line)}
+  td.lc.t{background:var(--trainee-bg);color:var(--trainee-text);border-right-color:var(--trainee-line)}
+  .vtext{display:inline-block;width:1.3em;white-space:normal;word-break:break-all;overflow-wrap:break-word;text-align:center;line-height:1.5}
+
+  /* ── form cell ── */
+  td.fc{padding:8px 10px;font-size:11.5px;vertical-align:middle;border-right:1px solid var(--divider);background:var(--bg-muted);position:sticky;left:44px;z-index:31}
+  td.fc .cat{font-weight:700;color:var(--text);font-size:12px}
+  td.fc .sub{display:block;font-size:10px;color:var(--text-muted);margin-top:2px;line-height:1.55}
+  td.fc .sub em{font-style:normal;background:var(--bg-wash);border-radius:3px;padding:0 4px;font-size:9px;margin-right:2px;color:var(--text-dim)}
+  td.fc .tag{display:inline-block;font-size:9.5px;background:var(--bg-wash);color:var(--text-muted);padding:1px 6px;border-radius:99px;margin-right:5px;vertical-align:middle;border:1px solid var(--border-light)}
+  td.fc .lv{font-weight:700;color:var(--text);font-size:11px}
+
+  /* ── role cells ── */
+  td.rl{text-align:center;vertical-align:middle;position:relative;padding:5px 6px;border-right:1px solid var(--divider)}
+  td.rl.track::before{content:'';position:absolute;top:50%;left:0;right:0;height:2px;transform:translateY(-50%);border-radius:1px;z-index:0;opacity:.7}
+  .r td.rl.track::before{background:var(--recruit-line)}
+  .o td.rl.track::before{background:var(--onboard-line)}
+  .a td.rl.track::before{background:var(--active-line)}
+  .l td.rl.track::before{background:var(--leave-line)}
+  .t td.rl.track::before{background:var(--trainee-line)}
+
+  /* ── node box ── */
+  .nd{display:inline-block;position:relative;z-index:2;padding:7px 10px;border-radius:var(--radius-xs);font-size:11px;font-weight:600;color:#fff;white-space:nowrap;text-align:center;box-shadow:var(--shadow-sm);min-width:68px;max-width:108px;transition:transform .2s cubic-bezier(0.4,0,0.2,1),box-shadow .2s cubic-bezier(0.4,0,0.2,1)}
+  .nd small{display:block;font-size:10px;font-weight:400;opacity:.88;margin-top:1px}
+  .nd em{display:block;font-size:9px;font-weight:400;opacity:.78;margin-top:1px;font-style:normal}
+  .r .nd{background:var(--recruit)}
+  .o .nd{background:var(--onboard)}
+  .a .nd{background:var(--active)}
+  .l .nd{background:var(--leave)}
+  .t .nd{background:var(--trainee)}
+
+  /* clickable node — enhanced hover */
+  .nd.nd-clk{cursor:pointer;padding-right:18px}
+  .nd.nd-clk::after{content:'⋯';position:absolute;right:4px;top:2px;font-size:10px;font-weight:700;opacity:.7;line-height:1}
+  .nd.nd-clk:hover{transform:translateY(-1.5px);box-shadow:0 4px 12px rgba(0,0,0,.18)}
+  .nd.nd-clk:active{transform:translateY(0);box-shadow:var(--shadow-sm)}
+
+  /* ── arrows ── */
+  .nd.ar-right::before{content:'';position:absolute;right:-9px;top:50%;transform:translateY(-50%);border:5px solid transparent;border-left-width:7px;z-index:3}
+  .r .nd.ar-right::before{border-left-color:var(--recruit)}
+  .o .nd.ar-right::before{border-left-color:var(--onboard)}
+  .a .nd.ar-right::before{border-left-color:var(--active)}
+  .l .nd.ar-right::before{border-left-color:var(--leave)}
+  .t .nd.ar-right::before{border-left-color:var(--trainee)}
+
+  .nd.ar-left::after{content:'';position:absolute;left:-9px;top:50%;transform:translateY(-50%);border:5px solid transparent;border-right-width:7px;z-index:3}
+  .r .nd.ar-left::after{border-right-color:var(--recruit)}
+  .o .nd.ar-left::after{border-right-color:var(--onboard)}
+  .a .nd.ar-left::after{border-right-color:var(--active)}
+  .l .nd.ar-left::after{border-right-color:var(--leave)}
+  .t .nd.ar-left::after{border-right-color:var(--trainee)}
+
+  /* ── stack ── */
+  td.rl .nstack{display:flex;flex-direction:column;gap:4px;align-items:center}
+  td.rl .nstack .nd{min-width:72px;max-width:106px;font-size:10.5px}
+
+  /* ── status column ── */
+  td.st{text-align:center;vertical-align:middle;padding:6px 8px;position:relative}
+  td.st .st-tag{display:inline-block;padding:5px 10px;border-radius:var(--radius-xs);border:2px dashed;font-size:10px;font-weight:600;line-height:1.4;max-width:118px}
+  .r td.st .st-tag{border-color:var(--recruit-line);color:var(--recruit-text);background:var(--recruit-bg)}
+  .o td.st .st-tag{border-color:var(--onboard-line);color:var(--onboard-text);background:var(--onboard-bg)}
+  .a td.st .st-tag{border-color:var(--active-line);color:var(--active-text);background:var(--active-bg)}
+  .l td.st .st-tag{border-color:var(--leave-line);color:var(--leave-text);background:var(--leave-bg)}
+  .t td.st .st-tag{border-color:var(--trainee-line);color:var(--trainee-text);background:var(--trainee-bg)}
+  td.st.st-ctn .st-tag{position:relative}
+  td.st.st-ctn .st-tag::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);width:0;height:0;border:5px solid transparent;border-top:7px solid;border-bottom:0;z-index:5}
+  .r td.st.st-ctn .st-tag::after{border-top-color:var(--recruit-line)}
+  .o td.st.st-ctn .st-tag::after{border-top-color:var(--onboard-line)}
+  .a td.st.st-ctn .st-tag::after{border-top-color:var(--active-line)}
+  .l td.st.st-ctn .st-tag::after{border-top-color:var(--leave-line)}
+  .t td.st.st-ctn .st-tag::after{border-top-color:var(--trainee-line)}
+  td.st.st-shared .st-tag{border-style:solid}
+
+  /* ── row hover ── */
+
+  .foot-note{padding:14px 20px;font-size:10.5px;color:var(--text-muted);text-align:center;border-top:1px solid var(--border-light);line-height:1.7;background:var(--bg-muted)}
+
+
+	/* ── search input ── */
+	.search-input{border:1px solid var(--border-light);border-radius:20px;padding:4px 12px;font-size:11px;background:var(--bg-wash);color:var(--text);width:150px;outline:none;transition:var(--transition)}
+	.search-input:focus{border-color:var(--accent);width:190px;background:var(--bg-card);box-shadow:0 0 0 3px var(--accent-wash)}
+	.search-input::placeholder{color:var(--text-muted)}
+	/* search highlight */
+	tbody.search-mode tr{transition:opacity .2s}
+	tbody.search-mode tr.search-dim{opacity:.18;pointer-events:none}
+	tbody.search-mode tr.search-match td{background:rgba(255,245,200,.4)}
+	tbody.search-mode tr.search-match td.lc{filter:brightness(0.92)}
+
+	/* ── focus-visible for clickable nodes ── */
+	.nd-clk:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:var(--radius-xs)}
+
+	/* ── row hover enhanced ── */
+	tbody tr{transition:background .15s,box-shadow .15s}
+	tbody tr:hover td{background:rgba(30,25,18,.025)}
+	tbody tr:hover td.lc.r{background:#e8e0f2}
+	tbody tr:hover td.lc.o{background:#ddece4}
+	tbody tr:hover td.lc.a{background:#f4e8cf}
+	tbody tr:hover td.lc.l{background:#f3ded9}
+
+	/* ── status tag: completed (end-of-section) vs in-progress ── */
+	td.st:not(.st-ctn) .st-tag{border-style:solid}
+	td.st:not(.st-ctn) .st-tag::before{content:'✓ ';font-size:11px;font-weight:700}
+	td.st.st-ctn .st-tag{border-style:dashed;animation:statusPulse 2.5s ease-in-out infinite}
+	@keyframes statusPulse{0%,100%{opacity:1}50%{opacity:.7}}
+
+	/* ── sticky column shadow when scrolled right ── */
+	.wrap.scrolled-right td.lc::after,.wrap.scrolled-right td.fc::after{content:'';position:absolute;top:0;bottom:0;right:-10px;width:10px;pointer-events:none;z-index:50;background:linear-gradient(90deg,rgba(30,25,18,.1),transparent)}
+	.wrap.scrolled-right td.lc,.wrap.scrolled-right td.fc{box-shadow:6px 0 8px -4px rgba(30,25,18,.06)}
+
+	/* ── AI banner collapsed ── */
+	.ai-banner-collapsed{display:none!important}
+	.ai-banner-toggle{display:inline-flex;align-items:center;gap:4px;border:none;background:none;color:var(--text-dim);font-size:10.5px;cursor:pointer;padding:2px 8px;border-radius:4px;transition:var(--transition)}
+	.ai-banner-toggle:hover{color:var(--text);background:var(--bg-hover)}
+	.ai-banner-toggle .arrow{transition:transform .25s;font-size:9px}
+
+	/* ── legend help tooltip ── */
+	.legend-help{position:relative;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--bg-wash);border:1px solid var(--border);font-size:10px;color:var(--text-muted);cursor:pointer;transition:var(--transition);flex-shrink:0}
+	.legend-help:hover,.legend-help.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+	.legend-help .help-tip{position:absolute;top:calc(100% + 8px);right:0;width:200px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);padding:10px 14px;font-size:10.5px;color:var(--text-dim);line-height:1.7;z-index:100;opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity .2s,transform .2s;white-space:normal}
+	.legend-help.active .help-tip{opacity:1;pointer-events:auto;transform:translateY(0)}
+
+	/* ── print styles ── */
+		/* ── back to top ── */
+	#backToTop{position:fixed;bottom:24px;right:24px;width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;box-shadow:var(--shadow-md);z-index:200;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .25s,transform .25s;display:flex;align-items:center;justify-content:center;font-size:16px}
+	#backToTop.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+	#backToTop:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+
+@media print{
+	  .topbar,.ai-banner,.foot-note,.scroll-shadow,.legend-help,.ai-banner-toggle{display:none!important}
+	  body{overflow:visible;display:block;font-size:9px}
+	  .wrap{overflow:visible}
+	  table{min-width:0;width:100%;font-size:8px;page-break-inside:auto}
+	  thead{display:table-header-group}
+	  thead th{position:static;background:#fff;color:#000;border:1px solid #ccc;font-size:7.5px;padding:4px 1px}
+	  td.lc,td.fc{position:static;background:#fff!important;color:#000!important;border:1px solid #ccc}
+	  .nd{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:8px;padding:3px 6px}
+	  tbody tr{page-break-inside:avoid}
+	  tr.r .nd{background:var(--recruit)!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+	  tr.o .nd{background:var(--onboard)!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+	  tr.a .nd{background:var(--active)!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+	  tr.l .nd{background:var(--leave)!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+	  tr.t .nd{background:var(--trainee)!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+	}
+  #tab-trainee.active{display:block;overflow-y:auto;height:100%}
+  /* ── trainee tab ── */
+  #tab-trainee{padding:20px 24px;max-width:860px}
+  .note-card{border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);background:var(--bg-card);border:1px solid var(--border-light);overflow:hidden;margin-bottom:24px}
+  .note-card-head{padding:16px 20px;background:linear-gradient(135deg,var(--trainee-bg),#f0edf4);border-bottom:1px solid var(--trainee-line)}
+  .note-card-head h2{font-size:15px;font-weight:700;color:var(--trainee-text)}
+  .note-card-head p{font-size:11.5px;color:var(--text-muted);margin-top:4px;line-height:1.6}
+  .note-item{padding:16px 20px;border-bottom:1px solid var(--divider)}
+  .note-item:last-child{border-bottom:none}
+  .note-item:nth-child(even){background:var(--bg-muted)}
+  .note-item h3{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:6px}
+  .note-item h3::before{content:'';display:inline-block;width:3px;height:14px;border-radius:2px;background:var(--accent);margin-right:8px;vertical-align:middle;position:relative;top:-1px}
+  .note-item .desc{font-size:12px;color:var(--text-dim);line-height:1.7}
+  .note-item .compliance{margin-top:8px;background:var(--accent-wash);border-radius:var(--radius-xs);padding:7px 12px;font-size:11px;color:var(--accent);line-height:1.6;border-left:3px solid var(--accent)}
+  .note-item .compliance b{font-weight:700}
+</style>
+</head>
+<body>
+
+<!-- Slim integrated top bar -->
+<div class="topbar">
+  <div class="phase-badges" id="phaseBadges">
+    <span class="badge r" data-phase="r" onclick="scrollToPhase('r')" title="跳转到招聘流程">招聘 <small style="opacity:.75;font-weight:400" id="cnt-r"></small></span>
+    <span class="badge o" data-phase="o" onclick="scrollToPhase('o')" title="跳转到入职流程">入职 <small style="opacity:.75;font-weight:400" id="cnt-o"></small></span>
+    <span class="badge a" data-phase="a" onclick="scrollToPhase('a')" title="跳转到在职管理">在职 <small style="opacity:.75;font-weight:400" id="cnt-a"></small></span>
+    <span class="badge l" data-phase="l" onclick="scrollToPhase('l')" title="跳转到离职流程">离职 <small style="opacity:.75;font-weight:400" id="cnt-l"></small></span>
+  </div>
+  <input type="text" class="search-input" placeholder="搜索表单或角色..." oninput="searchTable(this.value)" title="在表格中搜索表单名称或角色节点">
+  <div class="tabbar">
+    <button class="tab-btn active" data-tab="main" onclick="switchTab('main')">员工全生命周期</button>
+    <button class="tab-btn" data-tab="trainee" onclick="switchTab('trainee')">管培生专项</button>
+  </div>
+  <div class="legend">
+    <span>━ 轨迹线</span><span>▸ 流转方向</span><span>⋯ 查看详情</span><span>▼ 流程推进</span>
+    <span class="legend-help" id="legendHelp" onclick="toggleHelpTip(event)" title="图例说明">
+      ?
+      <span class="help-tip"><b>━</b> 彩色轨迹线 = 该角色参与此流程<br><b>▸</b> 箭头 = 流程流转方向<br><b>⋯</b> 可点击节点查看审核要点<br><b>▼</b> 流程推进至下一阶段<br><b>✓</b> 实线状态 = 里程碑完成</span>
+    </span>
+  </div>
+</div>
+
+<div style="flex:1;min-height:0;position:relative;display:flex;flex-direction:column">
+<div id="tab-main" class="tab-panel active">
+<div class="ai-banner" id="aiBannerExpanded">
+  <span>🤖</span>
+  <span><b>AI 辅助说明</b>：涉及<b>三级审批</b>（BU负责人→人事负责人→最高负责人）的审核要点均有 <b style="color:#6b5bce">AI 辅助参考</b>，标注于弹窗中；其余节点弹窗内容根据实际情况设定。</span>
+  <button class="ai-banner-toggle" onclick="toggleAIBanner()" title="收起说明" style="margin-left:auto"><span class="arrow">▲</span> 收起</button>
+</div>
+<div class="ai-banner ai-banner-collapsed" id="aiBannerCollapsed">
+  <span>🤖</span>
+  <span>AI 辅助说明已收起</span>
+  <button class="ai-banner-toggle" onclick="toggleAIBanner()" title="展开说明" style="margin-left:auto"><span class="arrow" style="transform:rotate(180deg)">▲</span> 展开</button>
+</div>
+
+<div class="scroll-container" id="scrollContainer">
+  <div class="scroll-shadow left" id="scrollShadowLeft"></div>
+  <div class="scroll-shadow right show" id="scrollShadowRight"></div>
+  <div class="wrap" id="wrap">
+
+<table>
+<colgroup>
+  <col class="col-lane"><col class="col-form">
+  <col class="col-r1"><col class="col-r2"><col class="col-r3">
+  <col class="col-r4"><col class="col-r5"><col class="col-r6">
+  <col class="col-r7"><col class="col-r8"><col class="col-r9"><col class="col-r10">
+  <col class="col-r11"><col class="col-st">
+</colgroup>
+<thead>
+<tr>
+  <th class="lh"></th><th class="fh">表单</th>
+  <th>求职者<br>/ 员工</th><th>人事专员1<br>人事服务</th><th>人事专员2<br>薪酬结算</th>
+  <th>BU负责人</th><th>人事负责人</th><th>最高负责人</th>
+  <th>物业行政</th><th>IT</th><th>用印人</th><th>财务</th>
+  <th>公寓</th><th>状态 / 里程碑</th>
+</tr>
+</thead>
+<tbody>
+
+<!-- ═══════════ 一、招聘流程 rowspan=7 ═══════════ -->
+<tr class="r"><td class="lc r" data-spy-phase="r" rowspan="7"><span class="vtext">招聘流程</span></td>
+  <td class="fc"><span class="tag">HRT-2022</span><span class="cat">聘用员工申请表</span></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-hire-bu">发起</div></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-hire-hr">审核</div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="appr-hire-ceo">终审</div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st st-ctn"><span class="st-tag">聘用审批通过</span></td>
+</tr>
+<tr class="r"><td class="fc"><span class="tag">HRP-2020</span><span class="cat">求职申请表</span><div class="sub">P1 基础信息（一面前填写）</div></td>
+  <td class="rl track"><div class="nd">填写P1</div></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st st-ctn"><span class="st-tag">候选人信息收集完成</span></td>
+</tr>
+<tr class="r"><td class="fc"><span class="lv">Ⅰ职级的面试</span><div class="sub">P2 面试评估</div></td>
+  <td class="rl"></td>
+  <td class="rl track"><div class="nd ar-right">一面<small>填P2-1</small></div></td>
+  <td class="rl track"></td>
+  <td class="rl track"><div class="nd ar-right">二面<small>完善P2</small></div></td>
+  <td class="rl track"><div class="nd ar-right">终面</div></td>
+  <td class="rl track"><div class="nd">终面<small>选择"放弃/录用"</small></div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st st-ctn" rowspan="3"><span class="st-tag">面试评估完成</span></td>
+</tr>
+<tr class="r"><td class="fc"><span class="lv">Ⅱ职级的面试</span></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl track"><div class="nd ar-right">一面<small>填写P2</small></div></td>
+  <td class="rl track"><div class="nd ar-right">终面</div></td>
+  <td class="rl track"><div class="nd">终面<small>选择"放弃/录用"</small></div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+
+</tr>
+<tr class="r"><td class="fc"><span class="lv">Ⅱ职级+的面试</span></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td>
+  <td class="rl track"><div class="nd ar-right">面试</div></td>
+  <td class="rl track"><div class="nd">面试<small>选择"放弃/录用"</small></div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+
+</tr>
+<tr class="r"><td class="fc"><span class="cat">录用审批</span><div class="sub">P3 录用信息</div></td>  <td class="rl"></td>
+  <td class="rl track"><div class="nd ar-right">发起</div></td>
+  <td class="rl track"></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-offer-bu">审核</div></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-offer-hr">审核</div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="appr-offer-ceo">终审</div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st st-ctn"><span class="st-tag">录用审批通过</span></td>
+</tr>
+<tr class="r"><td class="fc"><span class="tag">HRT-2020</span><span class="cat">录用通知书</span></td>
+  <td class="rl track"><div class="nd">确认接受<small>Offer</small></div></td>
+  <td class="rl track"><div class="nd ar-left">发送Offer<small>入职沟通后</small></div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st"><span class="st-tag">候选人确认Offer → 进入入职</span></td>
+</tr>
+
+<!-- ═══════════ 二、入职流程 rowspan=5 ═══════════ -->
+<tr class="o"><td class="lc o" data-spy-phase="o" rowspan="5"><span class="vtext">入职流程</span></td>
+  <td class="fc"><span class="tag">HRT-2026</span><span class="cat">新员工入职引导表</span>
+    <div class="sub">人事专员1发起，分配至各部门（点击节点 ⋯ 查看详情）</div></td>
+  <td class="rl"></td>
+  <td class="rl track"><div class="nstack">
+    <div class="nd nd-clk" data-detail="guide-hr">发起分配任务</div>
+    <div style="font-size:9px;color:var(--onboard);font-weight:600">▼ 分派</div>
+  </div></td>
+  <td class="rl track"></td><td class="rl track"></td><td class="rl track"></td><td class="rl track"></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="guide-admin">安排工位·电脑<small>发放办公用品</small><em>开通门禁卡</em></div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="guide-it">开通企业邮箱<small>HKMS账户+权限</small></div></td>
+  <td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st st-ctn"><span class="st-tag">入职任务分配完成</span></td>
+</tr>
+<tr class="o"><td class="fc"><span class="tag">HRT-2020</span><span class="cat">员工信息登记表</span>
+  <div class="sub">需提交归档材料（点击节点 ⋯ 查看清单）</div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="info-reg">填写信息<small>+ 提交归档材料</small></div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st st-ctn"><span class="st-tag">员工档案建立</span></td>
+</tr>
+<tr class="o"><td class="fc"><span class="cat">合同签署及用印</span>
+  <div class="sub"><em>HRC-2024</em>劳动合同（全日制-标准工时，含管培生）</div>
+  <div class="sub"><em>HRC-2020</em>劳务协议（退休返聘-标准工时）</div>
+  <div class="sub"><em>HRT-2020</em>实习协议（在校实习生-标准工时）</div>
+  <div class="sub"><em>HRC-2024</em>保安人员的劳动合同（自用保安-综合工时）</div></td>
+  <td class="rl track"><div class="nd ar-right">乙方签署</div></td>
+  <td class="rl track"><div class="nd ar-right">发起用印申请</div></td>
+  <td class="rl track"></td><td class="rl track"></td>
+  <td class="rl track"><div class="nd ar-right">甲方签字<small>审核用印</small></div></td>
+  <td class="rl track"></td><td class="rl track"></td><td class="rl track"></td>
+  <td class="rl track"><div class="nd ar-right">执行盖章</div></td>
+  <td class="rl"></td>
+  <td class="rl"></td><td class="st st-ctn"><span class="st-tag">合同签署完成</span></td>
+</tr>
+<tr class="o"><td class="fc" style="text-align:center;color:var(--text-muted);font-size:10px">↳ 归档</td>
+  <td class="rl"></td>
+  <td class="rl track"><div class="nd">文件归档</div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st st-ctn"><span class="st-tag">合同文件归档完成</span></td>
+</tr>
+<tr class="o"><td class="fc"><span class="tag">HRT-2020</span><span class="cat">培训签到表</span></td>
+  <td class="rl track"><div class="nd ar-right">参训人签字</div></td>
+  <td class="rl track"><div class="nd ar-right">组织培训<small>签字确认</small></div></td>
+  <td class="rl track"></td><td class="rl track"></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="appr-train-hr">终审</div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st"><span class="st-tag">新员工培训完成</span></td>
+</tr>
+
+<!-- ═══════════ 三、在职管理 rowspan=9 ═══════════ -->
+<tr class="a"><td class="lc a" data-spy-phase="a" rowspan="9"><span class="vtext">在职管理</span></td>
+  <td class="fc"><span class="tag">HRP-2023</span><span class="cat">实习生评估表</span><div class="sub">实习转合同</div></td>
+  <td class="rl"></td>
+  <td class="rl track"><div class="nd ar-right">发起表单</div></td>
+  <td class="rl track"></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-eval-intern-bu">填写实习评估</div></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-eval-intern-hr">审核</div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="appr-eval-intern-ceo">终审</div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st st-ctn"><span class="st-tag">实习转正完成</span></td>
+</tr>
+<tr class="a"><td class="fc"><span class="tag">HRP-2020</span><span class="cat">新员工试用期评估表</span><div class="sub">转正流程</div></td>
+  <td class="rl"></td>
+  <td class="rl track"><div class="nd ar-right">发起表单</div></td>
+  <td class="rl track"></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-eval-prob-bu">填写试用期评估</div></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-eval-prob-hr">审核</div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="appr-eval-prob-ceo">终审</div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st"><span class="st-tag">转正审批通过</span></td>
+</tr>
+<tr class="a"><td class="fc"><span class="tag">HRP-2020</span><span class="cat">员工流动表</span><div class="sub">调动·晋升·调薪</div></td>
+  <td class="rl"></td>
+  <td class="rl track"><div class="nd ar-right">发起</div></td>
+  <td class="rl track"></td>
+  <td class="rl track"><div class="nstack">
+<div class="nd ar-right nd-clk" data-detail="appr-flow-ori-bu">原BU审核</div>
+<div class="nd ar-right nd-clk" data-detail="appr-flow-new-bu">现BU审核<small>如有调入部门</small></div>
+  </div></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-flow-hr">审核</div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="appr-flow-ceo">终审</div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st"><span class="st-tag">流动审批通过</span></td>
+</tr>
+<tr class="a"><td class="fc"><span class="cat">合同到期续签申请</span>
+  <div class="sub"><em>HRP-2020</em>续签劳动合同申请表</div>
+  <div class="sub"><em>HRP-2026</em>续签劳务协议申请表</div></td>
+  <td class="rl track"><div class="nd ar-right">发起申请</div></td>
+  <td class="rl track"></td><td class="rl track"></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-renew-bu">审核</div></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-renew-hr">审核</div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="appr-renew-ceo">终审</div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st st-ctn"><span class="st-tag">续签审批通过</span></td>
+</tr>
+<tr class="a"><td class="fc"><span class="cat">续签合同用印</span>
+  <div class="sub"><em>HRC-2020</em>劳动合同续签书</div>
+  <div class="sub"><em>HRC-2025</em>劳务协议续签书</div></td>
+  <td class="rl"></td>
+  <td class="rl track"><div class="nd ar-right">发起用印申请</div></td>
+  <td class="rl track"></td><td class="rl track"></td>
+  <td class="rl track"><div class="nd ar-right">甲方签字<small>审核用印</small></div></td>
+  <td class="rl track"></td><td class="rl track"></td><td class="rl track"></td>
+  <td class="rl track"><div class="nd ar-right">执行盖章</div></td>
+  <td class="rl"></td>
+  <td class="rl"></td><td class="st st-ctn"><span class="st-tag">续签用印完成</span></td>
+</tr>
+<tr class="a"><td class="fc" style="text-align:center;color:var(--text-muted);font-size:10px">↳ 归档</td>
+  <td class="rl"></td>
+  <td class="rl track"><div class="nd">文件归档</div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st"><span class="st-tag">续签文件归档完成</span></td>
+</tr>
+<tr class="a"><td class="fc"><span class="cat">员工福利工作</span>
+  <div class="sub">点击节点 ⋯ 查看福利详情</div></td>
+  <td class="rl"></td>
+<td class="rl"><div class="nstack"><div class="nd nd-clk" data-detail="welfare-hr">运动卡发放<small>人才公寓申请</small><em>年度体检通知</em><small>商保增员</small></div></div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"><div class="nstack"><div class="nd nd-clk" data-detail="welfare-admin">年度节日福利<small>员工生日福利</small></div></div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st"><span class="st-tag">福利发放完成</span></td>
+</tr>
+<tr class="a"><td class="fc"><span class="cat">考勤汇总与审批</span>
+  <div class="sub">月度考勤数据汇总与确认</div></td>
+  <td class="rl"></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="attend-hr">汇总月度考勤</div></td>
+  <td class="rl track"></td>
+  <td class="rl track"></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-attend-review">审批考勤</div></td>
+  <td class="rl track"></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st st-ctn"><span class="st-tag">考勤审批完成</span></td>
+</tr>
+<tr class="a"><td class="fc"><span class="cat">薪资核算与发放</span>
+  <div class="sub">依据考勤核算工资并发放</div></td>
+  <td class="rl"></td>
+  <td class="rl track"></td>
+  <td class="rl track"><div class="nd ar-right">核算工资</div></td>
+  <td class="rl track"></td><td class="rl track"></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-salary-review">审核薪资</div></td>
+  <td class="rl track"></td><td class="rl track"></td><td class="rl track"></td>
+  <td class="rl track"><div class="nd">发放工资</div></td>
+  <td class="rl"></td><td class="st"><span class="st-tag">薪资发放完成</span></td>
+</tr>
+
+<!-- ═══════════ 四、离职流程 rowspan=2 ═══════════ -->
+<tr class="l"><td class="lc l" data-spy-phase="l" rowspan="2"><span class="vtext">离职流程</span></td>
+  <td class="fc"><span class="tag">HRT-2023</span><span class="cat">离职申请表</span><div class="sub">双通道发起</div></td>
+  <td class="rl track"><div class="nd ar-right">主动辞职<small>员工个人发起</small></div></td>
+  <td class="rl track"><div class="nd ar-right">发起解雇<small>公司方发起</small></div></td>
+  <td class="rl track"></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-exit-bu">审核</div></td>
+  <td class="rl track"><div class="nd ar-right nd-clk" data-detail="appr-exit-hr">审核</div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="appr-exit-ceo">终审</div></td>
+  <td class="rl"></td><td class="rl"></td><td class="rl"></td><td class="rl"></td>
+  <td class="rl"></td><td class="st st-ctn"><span class="st-tag">离职审批通过</span></td>
+</tr>
+<tr class="l"><td class="fc"><span class="tag">HRT-2020</span><span class="cat">职工离职交接清单</span>
+  <div class="sub">点击各节点 ⋯ 查看完整交接事项</div></td>
+  <td class="rl"></td>
+  <td class="rl track"><div class="nstack">
+    <div class="nd nd-clk" data-detail="exit-hr1">发起交接</div>
+    <div class="nd nd-clk" data-detail="exit-hr1" style="font-size:10px">收回档案·联系信息<small>合同解除·福利结算</small><em>社保退工·收回手册</em></div>
+  </div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="exit-hr2">薪资结算</div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="exit-bu">文件合同·电子文档<small>在办工作·客户关系</small></div></td>
+  <td class="rl track"></td><td class="rl track"></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="exit-admin">注销门禁·归还电脑<small>归还设备·交还钥匙</small><em>交还手机·书籍等</em></div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="exit-it">备份邮箱+注销<small>注销HKMS权限</small></div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="exit-seal">归还保管<small>授权印章</small></div></td>
+  <td class="rl track"><div class="nd nd-clk" data-detail="exit-fin">应收应付结算<small>预借款结清</small><em>未报销单据</em></div></td>
+  <td class="rl"></td><td class="st"><span class="st-tag">交接完成<br>劳动关系终止</span></td>
+</tr>
+</tbody>
+</table>
+<div class="foot-note">
+  📌 彩色横线 = 流程轨迹线　|　<span id="rowStats" style="font-weight:600"></span>　|　▸ = 流转方向（右箭头=正向流转，左箭头=回传）　|　<b>带 ⋯ 的节点可点击查看详情弹窗</b>　|　▼ = 流程推进至下一阶段
+</div>
+  </div><!-- .wrap -->
+</div><!-- .scroll-container -->
+</div><!-- #tab-main -->
+
+<div id="tab-trainee" class="tab-panel">
+<div class="note-card">
+  <div class="note-card-head">
+    <h2>管培生专项</h2>
+    <p>管培生同时适用上方四大板块中的通用节点（如合同签署、考勤薪资等），以下为管培生特有的专项管理内容，仅作说明备注，不纳入员工全生命周期四大板块的审批流程展示。</p>
+  </div>
+
+  <div class="note-item">
+    <h3>管培生特招与伯乐机制</h3>
+    <div class="desc">学历硬标准筛选 + 高管终面（热爱度/韧性打分）<br>伯乐备注：是否适用80%薪资考察期</div>
+    <div class="compliance"><b>合规注意</b>：伯乐考察期薪资须不低于当地最低工资标准。</div>
+  </div>
+
+  <div class="note-item">
+    <h3>管培生入职专项</h3>
+    <div class="desc">合同特殊条款：见习期/试用期工资=转正后80%<br>双轨制账号：国内（HKMS/钉钉）+ 北美（远程协作工具）</div>
+    <div class="compliance"><b>合规注意</b>：该80%比例不得低于当地最低工资标准，建议合同条款增加"不低于当地最低工资标准"的兜底表述。</div>
+  </div>
+
+  <div class="note-item">
+    <h3>月度KPI量化考核（120分制）</h3>
+    <div class="desc">A/B/C/D 四级 → 对应晋升/续用/考察期/绩效改进<br>D级触发：当月工资按60%执行 → 连续3次D→解约</div>
+    <div class="compliance"><b>合规注意</b>：若直接将基本工资扣减至60%，存在被认定为违法克扣工资的风险，建议仅调整绩效工资部分（基本工资不变）并配合书面警示/PIP；"连续3次D→解约"建议统一按"书面提醒→培训调岗→协商解除"三步流程执行，避免"自动解约"表述带来的合规风险。</div>
+  </div>
+
+  <div class="note-item">
+    <h3>专项软素质与协同考核</h3>
+    <div class="desc">季度考核：抗压韧性、热爱投入、岗位融入度</div>
+    <div class="compliance"><b>合规注意</b>：建议增加评估异议申诉通道（如3个工作日内可向人事负责人申请复核），保障程序正当性。</div>
+  </div>
+
+  <div class="note-item">
+    <h3>伯乐转正与晋升</h3>
+    <div class="desc">1年期满评估：80%薪金→100%薪金 正式定岗<br>Band IV及以下空缺绝对优先面向管培生选聘</div>
+  </div>
+
+  <div class="note-item">
+    <h3>红线与淘汰机制</h3>
+    <div class="desc">红线一票否决：旷工/考勤作弊/迟到早退累计→直接辞退<br>年度内第三次D级→协商解除（书面提醒→培训调岗→协商解除）</div>
+    <div class="compliance"><b>合规注意</b>：红线情形须已在《员工手册》中列明并完成公示告知，方可依据《劳动合同法》第39条解除，否则存在举证不利的风险。</div>
+  </div>
+</div>
+</div>
+</div>
+
+<script>
+// ── Node detail data ──
+var DETAILS = {
+  'guide-hr': {
+    title: '人事专员1 — 入职引导任务（10项）',
+    items: [
+      '发送录用通知书',
+      '沟通跟踪候选人到岗动态',
+      '收取材料并核验原件',
+      '带领参观办公场地',
+      '介绍同事姓名、岗位',
+      '陪同新员工午餐',
+      '引导加入微信群并修改群昵称',
+      '录入钉钉、配置考勤组',
+      '签订劳动合同 / 录用通知书 / 员工登记表 / 员工手册',
+      '组织新员工培训'
+    ]
+  },
+  'guide-admin': {
+    title: '物业行政部 — 入职引导任务（3项）',
+    items: [
+      '安排工位、电脑',
+      '发放办公用品',
+      '开通门禁卡'
+    ]
+  },
+  'guide-it': {
+    title: 'IT部 — 入职引导任务（2项）',
+    items: [
+      '开通企业邮箱、HKMS账户',
+      '配置权限'
+    ]
+  },
+  'info-reg': {
+    title: '员工信息登记 — 归档材料清单（8项）',
+    items: [
+      '身份证正反面复印件',
+      '银行卡复印件',
+      '户口本户主页+本人页复印件',
+      '上家单位退工单',
+      '学历/学位证书复印件',
+      '学生证',
+      '1个月内体检合格证明',
+      '简历提及及其他资质文件'
+    ]
+  },
+  'welfare-hr': {
+    title: '人事专员1 — 员工福利工作（4项）',
+    items: [
+      '运动卡发放',
+      '人才公寓申请办理',
+      '年度体检通知下发',
+      '商保增员（通知商保专员操作）'
+    ]
+  },
+  'welfare-admin': {
+    title: '物业行政部 — 员工福利工作（2项）',
+    items: [
+      '年度节日福利发放',
+      '员工生日福利发放'
+    ]
+  },
+  'exit-hr1': {
+    title: '人事专员1 — 离职交接事项（6项）',
+    items: [
+      '收回公司档案',
+      '登记员工个人联系信息',
+      '办理劳动合同解除/终止手续',
+      '员工福利结算',
+      '通知社保部门办理退工',
+      '收回员工手册'
+    ]
+  },
+  'exit-hr2': {
+    title: '人事专员2 — 离职交接事项（1项）',
+    items: ['薪资结算']
+  },
+  'exit-bu': {
+    title: 'BU负责人 — 离职交接事项（4项）',
+    items: [
+      '书面文件、合同交接',
+      '电子文档移交',
+      '在办工作交接',
+      '客户关系及对接进度移交'
+    ]
+  },
+  'exit-admin': {
+    title: '物业行政部 — 离职交接事项（6项）',
+    items: [
+      '注销门禁权限',
+      '归还电脑及配套设备',
+      '归还各类领用保管设备',
+      '交还门禁卡',
+      '交还办公室/办公桌/储物柜等各类钥匙',
+      '交还公司电话/手机/电话卡/书籍/计算器等物资'
+    ]
+  },
+  'exit-it': {
+    title: 'IT部 — 离职交接事项（2项）',
+    items: [
+      '备份员工邮箱数据并注销邮箱账号',
+      '注销代收代付、HKMS系统账号权限'
+    ]
+  },
+  'exit-seal': {
+    title: '用印人 — 离职交接事项（1项）',
+    items: ['归还公司保管授权印章']
+  },
+  'exit-fin': {
+    title: '财务部 — 离职交接事项（3项）',
+    items: [
+      '应收、应付款项结算',
+      '员工预借款结清',
+      '未报销单据结算'
+    ]
+  },
+
+  // ═══════════ 审批要点 ═══════════
+  'appr-hire-bu': {
+    title: 'HRT-2022 聘用员工申请表 — BU负责人（发起）',
+    groups: [
+      { form: null, points: [
+        '确认招聘需求的合理性与必要性',
+        '审核部门、职位、招聘数量是否与实际业务需求匹配',
+        '确认职级设定是否合理',
+        '审核薪酬范围是否在部门预算范围内',
+        '确认招聘原因（业务扩大/员工离职/新设职位/其他）是否充分',
+        '审核期望到岗时间是否合理（I级和实习生60天/II-III级90天/IV级以上150天）',
+        '确认资历要求（性别年龄、学历、工作经历、户籍等）是否符合岗位实际需要且无不合理限制',
+        '审核优先专业、证书要求、其他要求是否明确',
+        '确认简要职位描述是否完整',
+        '首次提交新职位需附上《职位说明书》'
+      ]}
+    ]
+  },
+  'appr-hire-hr': {
+    title: 'HRT-2022 聘用员工申请表 — 人事负责人（审核）',
+    groups: [
+      { form: null, points: [
+        '审核招聘需求是否符合公司年度人力资源规划',
+        '确认薪酬范围是否符合公司薪酬体系及预算',
+        '审核招聘原因的合理性',
+        '确认资历要求是否符合公司招聘标准，无歧视性条款',
+        '审核到岗时间是否符合招聘周期标准',
+        '确认职位说明书是否完整/有变更',
+        '确认用人部门负责人已签字确认',
+        '综合评估后提交最高负责人终审'
+      ]}
+    ]
+  },
+  'appr-hire-ceo': {
+    title: 'HRT-2022 聘用员工申请表 — 最高负责人（终审）',
+    groups: [
+      { form: null, points: [
+        '审批招聘需求的必要性与紧迫性',
+        '确认是否符合公司战略发展方向',
+        '审核预算是否在可控范围内',
+        '确认职位设置合理，无冗余',
+        '最终批准或退回申请'
+      ]}
+    ]
+  },
+  'appr-offer-bu': {
+    title: '录用审批 P3 录用信息 — BU负责人（审核）',
+    groups: [
+      { form: null, points: [
+        '审核拟录用公司主体是否正确',
+        '审核职位名称（中英文）是否准确',
+        '审核部门归属是否合理',
+        '审核汇报关系是否明确',
+        '审核名片抬头是否规范',
+        '审核级别设定是否符合岗位标准',
+        '审核薪酬区域与目标薪酬区域是否匹配',
+        '审核建议每月税前收入及试用期税前工资是否在预算范围内',
+        '确认用工类型（正式员工/实习生）',
+        '审核基本工资、履职津贴等各项薪酬构成是否合理',
+        '审核饭贴、车贴、房贴、其他补贴是否合规',
+        '审核福利方案（社会保险、商业保险等）是否到位',
+        '审核开始工作日期是否合理',
+        '审核合同期限与试用期设定是否合规'
+      ]}
+    ]
+  },
+  'appr-offer-hr': {
+    title: '录用审批 P3 录用信息 — 人事负责人（审核）',
+    groups: [
+      { form: null, points: [
+        '审核拟录用公司主体合规性',
+        '审核职位名称与聘用申请一致性',
+        '审核级别与薪酬区域符合公司薪酬体系',
+        '审核建议每月税前收入及试用期工资符合审批标准',
+        '审核用工类型合规',
+        '审核各项薪酬构成（基本工资/津贴/补贴）符合公司标准',
+        '审核福利方案（社会保险/商业保险）合规',
+        '确认候选人已通过背景调查',
+        '审核入职材料齐全',
+        '审核合同期限与试用期符合劳动法规定'
+      ]}
+    ]
+  },
+  'appr-offer-ceo': {
+    title: '录用审批 P3 录用信息 — 最高负责人（终审）',
+    groups: [
+      { form: null, points: [
+        '最终确认录用决定（录用/放弃）',
+        '审批特殊薪酬或岗位安排',
+        '审核合同期限与试用期合理性',
+        '最终批准或退回'
+      ]}
+    ]
+  },
+  'appr-train-hr': {
+    title: 'HRT-2020 培训签到表 — 人事负责人（终审）',
+    groups: [
+      { form: null, points: [
+        '确认培训主题（新员工入职培训）已完成',
+        '审核培训内容覆盖全面（公司概况、公司制度、流程工具、员工义务）',
+        '确认所有参加人员已签到签字',
+        '确认培训人已签字',
+        '确认培训时间和地点记录完整',
+        '最终确认新员工培训完成'
+      ]}
+    ]
+  },
+  'appr-eval-intern-bu': {
+    title: 'HRP-2023 实习生评估表 — BU负责人（填写评估）',
+    groups: [
+      { form: null, points: [
+        '对实习生各项能力进行客观评价（适应能力、沟通能力、工作主动性、责任心、与他人合作、开拓性、学习能力、发展潜力）',
+        '给出综合评价和具体评价意见',
+        '指出需提升之处',
+        '给出明确建议：放弃或保留',
+        '确认建议定岗是否与实习生表现匹配',
+        '确认预计转正日期是否合理'
+      ]}
+    ]
+  },
+  'appr-eval-intern-hr': {
+    title: 'HRP-2023 实习生评估表 — 人事负责人（审核）',
+    groups: [
+      { form: null, points: [
+        '审核评估内容填写完整性和客观性',
+        '确认各项评价维度均有评分',
+        '审核综合评价是否与分项评价一致',
+        '确认建议（放弃/保留）的合理性',
+        '审核是否存在用工风险或合规问题',
+        '综合评估后给出人力资源部意见'
+      ]}
+    ]
+  },
+  'appr-eval-intern-ceo': {
+    title: 'HRP-2023 实习生评估表 — 最高负责人（终审）',
+    groups: [
+      { form: null, points: [
+        '审阅实习期整体表现评价',
+        '确认是否同意部门保留/放弃建议',
+        '如保留，确认转正岗位和日期安排',
+        '最终批准实习转正或终止实习'
+      ]}
+    ]
+  },
+  'appr-eval-prob-bu': {
+    title: 'HRP-2020 新员工试用期评估表 — BU负责人（填写评估）',
+    groups: [
+      { form: null, points: [
+        '对试用期员工各项能力进行全面评价（适应能力、沟通能力、主动性、责任心、与他人合作、工作知识、判断力、工作质量、出勤）',
+        '给出综合评价和需改进之处',
+        '给出明确建议：放弃或保留',
+        '如放弃，说明放弃原因',
+        '如保留，确认是否需要调整：工资调整（调整后工资）、部门调整（调整后部门）、其他调整',
+        '在生效日当月25日前返还人力资源部'
+      ]}
+    ]
+  },
+  'appr-eval-prob-hr': {
+    title: 'HRP-2020 新员工试用期评估表 — 人事负责人（审核）',
+    groups: [
+      { form: null, points: [
+        '审核评估内容完整性和评价客观性',
+        '确认员工已签字确认',
+        '审核综合评价是否与支持性评价一致',
+        '确认部门意见（放弃/保留）的合理性',
+        '如保留，审核工资调整、部门调整等是否在政策范围内',
+        '确认试用期时长符合合同约定',
+        '综合评估后给出人力资源部意见'
+      ]}
+    ]
+  },
+  'appr-eval-prob-ceo': {
+    title: 'HRP-2020 新员工试用期评估表 — 最高负责人（终审）',
+    groups: [
+      { form: null, points: [
+        '审阅试用期整体评估结果',
+        '确认部门与人力资源部意见',
+        '审核调整方案（如有）的合理性',
+        '最终批准转正或解除劳动合同',
+        '批准相关薪酬/岗位调整'
+      ]}
+    ]
+  },
+  'appr-flow-ori-bu': {
+    title: 'HRP-2020 员工流动表 — 原BU负责人（流出部门审批）',
+    groups: [
+      { form: null, points: [
+        '确认员工流动原因的真实性和合理性',
+        '审核目前职位、级别、薪酬、区域信息准确性',
+        '确认工作交接安排和执行变动的关键行动',
+        '如为调出，确认部门人员配置影响',
+        '审核流动的生效日期是否合理',
+        '签署部门经理/总监意见及日期'
+      ]}
+    ]
+  },
+  'appr-flow-new-bu': {
+    title: 'HRP-2020 员工流动表 — 现BU负责人（接受部门审批）',
+    groups: [
+      { form: null, points: [
+        '确认接受该员工的意愿和岗位匹配度',
+        '审核新职位、新部门、新主管安排合理性',
+        '确认新级别、新区域、新薪酬方案',
+        '确认接收部门的人员编制和预算支持',
+        '签署部门经理/总监意见及日期'
+      ]}
+    ]
+  },
+  'appr-flow-hr': {
+    title: 'HRP-2020 员工流动表 — 人事负责人（审核）',
+    groups: [
+      { form: null, points: [
+        '审核流动类型（薪酬调整/重新定级/晋升/开发流动/市场调整/调动/其他）的合规性',
+        '确认目前与新职位、级别、薪酬、区域的变更合理性',
+        '审核薪酬调整是否符合公司薪酬体系',
+        '确认流动生效日期及操作安排',
+        '确认原BU和现BU（如有）均已审批同意',
+        '审核是否存在合同/协议变更需求'
+      ]}
+    ]
+  },
+  'appr-flow-ceo': {
+    title: 'HRP-2020 员工流动表 — 最高负责人（终审）',
+    groups: [
+      { form: null, points: [
+        '审批员工流动方案的整体合理性',
+        '确认对公司组织架构和人员配置的影响',
+        '审核薪酬/级别调整的合理性',
+        '最终批准或退回流动申请'
+      ]}
+    ]
+  },
+  'appr-renew-bu': {
+    title: '合同到期续签申请 — BU负责人（审核）',
+    groups: [
+      { form: 'HRP-2020 续签劳动合同申请表', points: [
+        '确认员工合同到期信息（姓名、性别、身份证号、部门职位）准确',
+        '评估员工在合同期内的工作表现和岗位匹配度',
+        '确认部门对该员工的续签意愿',
+        '审核申请续签期限的合理性',
+        '确认续签期间员工是否愿意严格遵守公司规章制度'
+      ]},
+      { form: 'HRP-2026 续签劳务协议申请表', points: [
+        '确认劳务人员协议到期信息准确',
+        '评估劳务人员工作表现和岗位需求持续性',
+        '确认部门续签意愿',
+        '审核续签期限合理'
+      ]}
+    ]
+  },
+  'appr-renew-hr': {
+    title: '合同到期续签申请 — 人事负责人（审核）',
+    groups: [
+      { form: 'HRP-2020 续签劳动合同申请表', points: [
+        '确认原劳动合同到期日及续签期限的合规性',
+        '审核员工合同期内的综合表现记录',
+        '确认员工无未处理的违纪或绩效问题',
+        '审核续签条件是否符合公司政策',
+        '确认劳动合同的其他事项按原合同履行'
+      ]},
+      { form: 'HRP-2026 续签劳务协议申请表', points: [
+        '确认劳务协议到期日及续签期限',
+        '审核劳务人员工作期间表现',
+        '确认劳务关系仍符合法律要求（如退休人员继续留用）',
+        '审核劳务协议条款合规性',
+        '确认商业保险等保障措施延续'
+      ]}
+    ]
+  },
+  'appr-renew-ceo': {
+    title: '合同到期续签申请 — 最高负责人（终审）',
+    groups: [
+      { form: 'HRP-2020 续签劳动合同申请表', points: [
+        '审批续签的必要性',
+        '确认员工价值和岗位重要性',
+        '综合部门与人力资源部意见',
+        '最终批准或不予续签'
+      ]},
+      { form: 'HRP-2026 续签劳务协议申请表', points: [
+        '审批劳务协议续签的必要性',
+        '确认劳务用工的持续合理性',
+        '最终批准或不予续签'
+      ]}
+    ]
+  },
+  'appr-exit-bu': {
+    title: 'HRT-2023 离职申请表 — BU负责人（审核）',
+    groups: [
+      { form: null, points: [
+        '确认员工基本信息（姓名、部门、职位、入职日期）准确',
+        '了解并确认离职事由的真实性和合理性',
+        '审核计划离职日期是否合理，确保工作交接时间充分',
+        '确认离职类型：主动辞职（员工个人发起）或解雇/终止（公司方发起）',
+        '安排工作交接事宜',
+        '评估离职对部门工作的影响'
+      ]}
+    ]
+  },
+  'appr-exit-hr': {
+    title: 'HRT-2023 离职申请表 — 人事负责人（审核）',
+    groups: [
+      { form: null, points: [
+        '确认离职申请的合规性（如辞职需提前30天通知）',
+        '审核离职手续完整性',
+        '确认工作交接安排及完成情况',
+        '审核社保、公积金等停缴时间安排',
+        '确认薪资结算（最后工作日工资、未休年假折算等）',
+        '确认员工已归还公司资产',
+        '如为公司方发起解雇，确认是否符合劳动法规定及公司制度'
+      ]}
+    ]
+  },
+  'appr-exit-ceo': {
+    title: 'HRT-2023 离职申请表 — 最高负责人（终审）',
+    groups: [
+      { form: null, points: [
+        '审批离职决定的合理性',
+        '如为公司方解雇/终止，确认符合法律规定和公司政策',
+        '确认离职交接和风险可控',
+        '处理特殊情况或争议',
+        '最终批准离职申请'
+      ]}
+    ]
+  },
+  'appr-trainee-recruit': {
+    title: '管培生特招 — HR学历筛选',
+    groups: [
+      { form: null, points: [
+        '执行院校层次判断自律性的硬规定',
+        '过滤不符合学历硬标准的申请',
+        '确认候选人符合管培生专项招募条件',
+        '通过后推送至高管终面环节'
+      ]}
+    ]
+  },
+  'appr-trainee-bole': {
+    title: '管培生特招 — 人事负责人伯乐机制审核',
+    groups: [
+      { form: null, points: [
+        '审核高管终面中热爱度与韧性打分结果',
+        '确认是否适用伯乐机制（80%薪资考察期）',
+        '评估候选人发展潜力与岗位匹配度',
+        '备注伯乐考察期条款至录用审批单'
+      ]}
+    ]
+  },
+  'appr-trainee-recruit-ceo': {
+    title: '管培生特招 — 最高负责人终审',
+    groups: [
+      { form: null, points: [
+        '审批管培生录用决定（录用/放弃）',
+        '确认伯乐机制适用性（80%薪资考察）',
+        '审核特殊薪酬或岗位安排',
+        '最终批准或退回'
+      ]}
+    ]
+  },
+  'appr-trainee-kpi-hr': {
+    title: '月度KPI量化考核（120分制）— 人事专员发起',
+    groups: [
+      { form: null, points: [
+        '每月发起管培生KPI量化考核流程',
+        '分发考核表至各BU负责人评分',
+        '汇总评分结果并计算等级（A/B/C/D）',
+        'D级触发：通知薪资调整（当月工资按60%执行）',
+        '累计追踪：连续3次D级自动触发淘汰流程'
+      ]}
+    ]
+  },
+  'appr-trainee-kpi-bu': {
+    title: '月度KPI量化考核（120分制）— BU负责人评分',
+    groups: [
+      { form: null, points: [
+        '按120分制对管培生进行月度量化评分',
+        'A级（≥108分）：晋升候选池',
+        'B级（96-107分）：续用',
+        'C级（84-95分）：进入考察期',
+        'D级（<84分）：触发薪资调整（工资60%）及书面警告',
+        '连续三月D级建议协商解除'
+      ]}
+    ]
+  },
+  'appr-trainee-kpi-ceo': {
+    title: '月度KPI量化考核（120分制）— 最高负责人终审',
+    groups: [
+      { form: null, points: [
+        '终审月度KPI评级结果',
+        '审批D级人员的薪资调整方案（60%执行）',
+        '审批连续3次D级人员的淘汰决定',
+        '最终确认A级人员进入晋升候选池'
+      ]}
+    ]
+  },
+  'appr-trainee-soft-hr': {
+    title: '专项软素质考核 — 人事专员1发起考核',
+    groups: [
+      { form: null, points: [
+        '每季度末发起管培生软素质考核流程',
+        '分发考核表至各BU负责人进行评分',
+        '汇总BU负责人软素质评分结果',
+        '推送至人事负责人审核及最高负责人终审'
+      ]}
+    ]
+  },
+  'appr-trainee-soft-ceo': {
+    title: '专项软素质考核 — 最高负责人终审',
+    groups: [
+      { form: null, points: [
+        '终审管培生季度软素质考核结果',
+        '综合评估抗压韧性、热爱投入、岗位融入度',
+        '确认考核结果应用（薪资/晋升/淘汰参考）',
+        '最终批准或退回'
+      ]}
+    ]
+  },
+  'appr-trainee-soft-bu': {
+    title: '专项软素质考核 — BU负责人评分',
+    groups: [
+      { form: null, points: [
+        '每季度末对管培生进行软素质评分',
+        '抗压与韧性：评估面对困难时的坚持与适应能力',
+        '热爱与投入：评估对岗位和业务的热情与主动程度',
+        '岗位融入度：评估团队协作与文化融入表现',
+        '综合评分纳入管培生年度综合考评',
+        '该评分与带教负责人绩效考核挂钩'
+      ]}
+    ]
+  },
+  'appr-trainee-promote-hr': {
+    title: '伯乐转正与晋升 — 人事专员发起评估',
+    groups: [
+      { form: null, points: [
+        '管培生满1年后启动伯乐考察期满评估',
+        '汇总月度KPI评分及季度软素质考核结果',
+        '计算综合得分并提出转正建议（80%→100%薪金）',
+        '评估是否符合Band IV及以下晋升优先条件',
+        '发起综合评估流程至BU负责人及最高负责人'
+      ]}
+    ]
+  },
+  'appr-trainee-promote-bu': {
+    title: '伯乐转正与晋升 — BU负责人综合评估',
+    groups: [
+      { form: null, points: [
+        '综合评估管培生1年期内KPI与软素质表现',
+        '给出转正建议：80%→100%薪金 或 延长考察期',
+        '评估是否推荐晋升至Band IV岗位',
+        '确认定岗部门、职级与薪酬方案',
+        '不达标者按目标薪金80%录用再考察一年'
+      ]}
+    ]
+  },
+  'appr-trainee-promote-ceo': {
+    title: '伯乐转正与晋升 — 最高负责人终审',
+    groups: [
+      { form: null, points: [
+        '终审批复管培生转正定岗方案',
+        '审核薪金调整（80%→100%）的合理性',
+        '审批Band IV晋升提名',
+        '符合条件者正式定岗，不达标者延长考察或退出',
+        '最终批准或退回'
+      ]}
+    ]
+  },
+  'appr-trainee-redline-hr': {
+    title: '红线与淘汰机制 — 人事专员触发',
+    groups: [
+      { form: null, points: [
+        '红线一票否决（直接辞退）：旷工、考勤作弊、迟到早退累计超标',
+        '年度内累计第3次KPI评级D→触发协商解除流程',
+        '执行递进流程：书面提醒 → 培训调岗 → 协商解除',
+        '确认事实后发起淘汰审批至BU负责人及最高负责人',
+        '同步启动离职交接及薪资结算'
+      ]}
+    ]
+  },
+  'appr-trainee-redline-ceo': {
+    title: '红线与淘汰机制 — 最高负责人终审',
+    groups: [
+      { form: null, points: [
+        '审批红线违规人员的辞退决定',
+        '审批年度内第三次D级人员的协商解除',
+        '确认离职交接及风险可控',
+        '最终批准解除劳动合同'
+      ]}
+    ]
+  },
+  'appr-trainee-recruit-exec': {
+    title: '管培生特招 — 高管终面（热爱度/韧性打分）',
+    groups: [
+      { form: null, points: [
+        '考核候选人的业务逻辑与协同能力',
+        '面试必须增加热爱度与韧性打分项',
+        '评估候选人发展潜力与岗位匹配度',
+        '给出面试结论（推荐录用/不推荐）及伯乐机制建议'
+      ]}
+    ]
+  },
+  'appr-trainee-onboard-hr': {
+    title: '管培生入职专项 — 人事专员1发起合同',
+    groups: [
+      { form: null, points: [
+        '确认合同特殊条款：见习期/试用期工资=转正后80%（约8,000元/月）',
+        '明确见习期/试用期纳入正式合同',
+        '审核劳动期限及试用期符合规定',
+        '发起合同签署及后续用印流程'
+      ]}
+    ]
+  },
+  'appr-trainee-onboard-review': {
+    title: '管培生入职专项 — 人事负责人审核特殊条款',
+    groups: [
+      { form: null, points: [
+        '审核见习期/试用期80%薪资条款合规性',
+        '确认合同条款符合公司管培生政策',
+        '审核劳动期限与试用期符合劳动法规定',
+        '确认合同甲方签字及用印流程完整'
+      ]}
+    ]
+  },
+  'appr-trainee-onboard-admin': {
+    title: '管培生入职专项 — 公寓分配宿舍',
+    groups: [
+      { form: null, points: [
+        '根据候选人定级（核心人才/普通）分配宿舍',
+        '单人单间：成本+3,000元/月',
+        '双人间：成本+2,000元/月',
+        '同步核算用人成本并反馈人事部'
+      ]}
+    ]
+  },
+  'appr-trainee-onboard-it': {
+    title: '管培生入职专项 — IT开通双轨账号',
+    groups: [
+      { form: null, points: [
+        '国内管培生：开通HKMS/TAI系统及钉钉账号',
+        '北美AI实习生：开通远程协作工具（Claude Code、Cursor、Github等）权限',
+        '确认账号权限配置完成并通知相关人员',
+        '记录双轨账号信息至IT资产台账'
+      ]}
+    ]
+  },
+  'appr-trainee-kpi-review': {
+    title: '月度KPI量化考核 — 人事负责人审核评级',
+    groups: [
+      { form: null, points: [
+        '审核BU负责人评分客观性与完整性',
+        '确认A/B/C/D评级依据120分制标准',
+        'D级人员：确认触发薪资调整（当月工资60%执行）',
+        '累计3次D级人员：确认启动淘汰流程',
+        'A级人员：确认进入晋升候选池'
+      ]}
+    ]
+  },
+  'appr-trainee-soft-review': {
+    title: '专项软素质考核 — 人事负责人审核',
+    groups: [
+      { form: null, points: [
+        '审核BU负责人软素质评分的客观性与完整性',
+        '确认抗压韧性、热爱投入、岗位融入度各项均有评价',
+        '综合评估软素质结果与KPI表现的一致性',
+        '推送至最高负责人终审'
+      ]}
+    ]
+  },
+  'appr-trainee-promote-review': {
+    title: '伯乐转正与晋升 — 人事负责人审核',
+    groups: [
+      { form: null, points: [
+        '审核1年期综合评估结果（KPI+软素质）',
+        '确认转正建议（80%→100%薪金）的合理性',
+        '审核Band IV晋升提名符合优先选聘政策',
+        '不达标者：确认延长考察期或退出方案',
+        '综合评估后推送至最高负责人终审'
+      ]}
+    ]
+  },
+  'appr-trainee-redline-bu': {
+    title: '红线与淘汰机制 — BU负责人确认事实',
+    groups: [
+      { form: null, points: [
+        '确认红线违规事实（旷工/考勤作弊/迟到早退累计）',
+        '核实年度内KPI评级D级累计次数',
+        '评估违规严重程度并提出处理建议',
+        '确认事实后提交至人事负责人审核'
+      ]}
+    ]
+  },
+  'appr-trainee-redline-review': {
+    title: '红线与淘汰机制 — 人事负责人审核',
+    groups: [
+      { form: null, points: [
+        '审核红线违规事实的认定与证据',
+        '确认递进流程：书面提醒 → 培训调岗 → 协商解除',
+        '审核年度第三次D级人员的淘汰方案',
+        '确认离职交接及薪资结算安排',
+        '推送至最高负责人终审'
+      ]}
+    ]
+  },
+  'attend-hr': {
+    title: '薪资发放流程 — 人事专员1汇总月度考勤',
+    items: [
+      '汇总当月员工打卡记录及OA审批单',
+      '核对考勤异常（迟到/早退/旷工/缺卡）',
+      '与各部门确认异常考勤处理结果',
+      '编制月度考勤汇总表作为薪资核算依据'
+    ]
+  },
+  'appr-attend-review': {
+    title: '考勤汇总与审批 — 人事负责人审批考勤',
+    groups: [
+      { form: null, points: [
+        '审核月度考勤汇总数据的准确性与完整性',
+        '确认考勤异常处理（迟到/早退/旷工/缺卡）是否符合考勤制度',
+        '审核加班、请假等是否按规定完成审批',
+        '确认考勤数据可作为薪资核算依据'
+      ]}
+    ]
+  },
+  'appr-salary-review': {
+    title: '薪资核算与发放 — 最高负责人审核薪资',
+    groups: [
+      { form: null, points: [
+        '审核月度薪资核算结果的准确性',
+        '确认考勤数据与薪资计算逻辑一致',
+        '审核薪酬调整、补贴、扣款等特殊项',
+        '批准薪资发放'
+      ]}
+    ]
+  }
+};
+
+// ── Modal via postMessage to parent page ──
+function openModal(key) {
+  var d = DETAILS[key];
+  if (!d) return;
+  var titleHTML = d.title + (key.indexOf('appr-')===0 ? ' <span style="font-size:10px;background:#6b5bce;color:#fff;padding:2px 8px;border-radius:99px;vertical-align:middle;margin-left:6px">AI辅助</span>' : '');
+  var html = '';
+  if (d.groups) {
+    d.groups.forEach(function(g) {
+      if (g.form) {
+        html += '<div style="color:var(--accent);font-weight:700;margin-top:14px;margin-bottom:2px;font-size:13px;padding:4px 0">' + g.form + '</div>';
+      }
+      html += '<div style="font-weight:600;margin-top:12px;font-size:13px;color:var(--text)">审核要点：</div>';
+      html += '<ol style="margin:6px 0 12px 0;padding:0 12px 0 20px">';
+      g.points.forEach(function(p) {
+        html += '<li style="font-size:13px;color:var(--text);line-height:2.1;padding:2px 0">' + p + '</li>';
+      });
+      html += '</ol>';
+    });
+  } else if (d.items) {
+    html = '<ul style="margin:6px 0;padding:0 12px 0 16px">';
+    d.items.forEach(function(item) {
+      html += '<li style="font-size:13px;color:var(--text);line-height:2.1;padding:2px 0">' + item + '</li>';
+    });
+    html += '</ul>';
+  }
+  try {
+    parent.postMessage({type:'hrManualModal', action:'open', title: titleHTML, body: html}, '*');
+  } catch(e) {
+    // Fallback: try to open in parent's openModal
+    var fullHTML = '<div style="padding:0"><h3 style="font-size:16px;font-weight:700;margin-bottom:16px;color:#3B3835">'+titleHTML+'</h3>'+html+'</div>';
+    try { parent.openModal(fullHTML); } catch(e2) {}
+  }
+}
+
+// ── Tab switching ──
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(function(p) {
+    p.classList.toggle('active', p.id === 'tab-' + name);
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-tab') === name);
+  });
+  var wrap = document.getElementById('wrap');
+  if (wrap) { wrap.scrollTop = 0; wrap.scrollLeft = 0; }
+  // Remember last tab
+  try { localStorage.setItem('hrManualLastTab', name); } catch(e) {}
+  updateScrollShadows();
+  // Clear search when switching tabs
+  var searchInput = document.querySelector('.search-input');
+  if (searchInput) { searchInput.value = ''; searchTable(''); }
+}
+
+// ── Search / filter table rows ──
+function searchTable(query) {
+  var tbody = document.querySelector('table tbody');
+  if (!tbody) return;
+  var q = query.trim().toLowerCase();
+  var trs = tbody.querySelectorAll('tr');
+  var found = false;
+  if (!q) {
+    tbody.classList.remove('search-mode');
+    trs.forEach(function(tr) {
+      tr.classList.remove('search-dim', 'search-match');
+    });
+    return;
+  }
+  tbody.classList.add('search-mode');
+  trs.forEach(function(tr) {
+    var text = (tr.textContent || '').toLowerCase();
+    if (text.indexOf(q) !== -1) {
+      tr.classList.remove('search-dim');
+      tr.classList.add('search-match');
+      found = true;
+    } else {
+      tr.classList.remove('search-match');
+      tr.classList.add('search-dim');
+    }
+  });
+  // Scroll to first match
+  if (found) {
+    var firstMatch = tbody.querySelector('.search-match');
+    if (firstMatch) {
+      var mr = firstMatch.getBoundingClientRect();
+	      window.scrollTo({top: window.scrollY + mr.top - 200, left: 0, behavior: 'smooth'});
+    }
+  }
+}
+
+// ── Scroll shadow indicators + sticky column shadow ──
+function updateScrollShadows() {
+  var wrap = document.getElementById('wrap');
+  var left = document.getElementById('scrollShadowLeft');
+  var right = document.getElementById('scrollShadowRight');
+  if (!wrap || !left || !right) return;
+  var hasOverflow = wrap.scrollWidth > wrap.clientWidth + 2;
+  if (!hasOverflow) {
+    left.classList.remove('show');
+    right.classList.remove('show');
+    wrap.classList.remove('scrolled-right');
+    return;
+  }
+  if (wrap.scrollLeft <= 2) left.classList.remove('show');
+  else left.classList.add('show');
+  if (wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 2) right.classList.remove('show');
+  else right.classList.add('show');
+  // Sticky column shadow
+  if (wrap.scrollLeft > 4) wrap.classList.add('scrolled-right');
+  else wrap.classList.remove('scrolled-right');
+}
+
+// ── AI banner collapse ──
+function toggleAIBanner() {
+  var expanded = document.getElementById('aiBannerExpanded');
+  var collapsed = document.getElementById('aiBannerCollapsed');
+  if (!expanded || !collapsed) return;
+  if (expanded.classList.contains('ai-banner-collapsed')) {
+    expanded.classList.remove('ai-banner-collapsed');
+    collapsed.classList.add('ai-banner-collapsed');
+    try { localStorage.setItem('hrManualAIBanner', 'expanded'); } catch(e) {}
+  } else {
+    expanded.classList.add('ai-banner-collapsed');
+    collapsed.classList.remove('ai-banner-collapsed');
+    try { localStorage.setItem('hrManualAIBanner', 'collapsed'); } catch(e) {}
+  }
+}
+
+// ── Legend help tooltip ──
+function toggleHelpTip(e) {
+  e.stopPropagation();
+  var el = document.getElementById('legendHelp');
+  if (!el) return;
+  el.classList.toggle('active');
+}
+document.addEventListener('click', function(e) {
+  var help = document.getElementById('legendHelp');
+  if (help && !help.contains(e.target)) {
+    help.classList.remove('active');
+  }
+});
+
+// ── Scroll to phase section ──
+function scrollToPhase(phaseClass) {
+  var wrap = document.getElementById('wrap');
+  var target = document.querySelector('tr.' + phaseClass);
+  if (!wrap || !target) return;
+  function doScroll() {
+    var top = target.offsetTop - 8;
+    wrap.scrollTo({top: top, left: 0, behavior: 'smooth'});
+  }
+  var mainPanel = document.getElementById('tab-main');
+  if (mainPanel && !mainPanel.classList.contains('active')) {
+    switchTab('main');
+    setTimeout(doScroll, 300);
+  } else {
+    doScroll();
+  }
+}
+
+// ── Back to top ──
+function scrollToTop() {
+  var wrap = document.getElementById('wrap');
+  if (wrap) { wrap.scrollTo({top:0,left:0,behavior:'smooth'}); }
+}
+
+// ── Section row count ──
+function updateRowCounts() {
+  var tbody = document.querySelector('table tbody');
+  if (!tbody) return;
+  var counts = {r:0, o:0, a:0, l:0};
+  tbody.querySelectorAll('tr').forEach(function(tr) {
+    if (tr.classList.contains('r')) counts.r++;
+    else if (tr.classList.contains('o')) counts.o++;
+    else if (tr.classList.contains('a')) counts.a++;
+    else if (tr.classList.contains('l')) counts.l++;
+  });
+  ['r','o','a','l'].forEach(function(phase) {
+    var el = document.getElementById('cnt-' + phase);
+    if (el) el.textContent = ' ' + counts[phase] + '行';
+  });
+  var statsEl = document.getElementById('rowStats');
+  if (statsEl) {
+    statsEl.innerHTML = '招聘' + counts.r + '行 | 入职' + counts.o + '行 | 在职' + counts.a + '行 | 离职' + counts.l + '行';
+  }
+}
+
+// ── Scroll spy: highlight active phase badge ──
+function initScrollSpy() {
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      var phase = entry.target.dataset.spyPhase;
+      var badge = document.querySelector('.badge[data-phase="' + phase + '"]');
+      if (!badge) return;
+      if (entry.isIntersecting) {
+        // Remove active from all badges
+        document.querySelectorAll('.badge[data-phase]').forEach(function(b) {
+          b.classList.remove('spy-active');
+        });
+        badge.classList.add('spy-active');
+      }
+    });
+  }, {root: document.getElementById('wrap'), rootMargin:'-60px 0px -70% 0px', threshold:0});
+
+  document.querySelectorAll('.lc[data-spy-phase]').forEach(function(el) {
+    observer.observe(el);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // ── Restore last tab ──
+  try {
+    var lastTab = localStorage.getItem('hrManualLastTab');
+    if (lastTab && lastTab !== 'main') {
+      switchTab(lastTab);
+    }
+  } catch(e) {}
+
+  // ── Restore AI banner state ──
+  try {
+    if (localStorage.getItem('hrManualAIBanner') === 'collapsed') {
+      toggleAIBanner();
+    }
+  } catch(e) {}
+
+  // ── Add title tooltips to clickable nodes ──
+  document.querySelectorAll('.nd-clk').forEach(function(el) {
+    if (!el.hasAttribute('title')) {
+      el.setAttribute('title', '点击查看审核要点与详情');
+    }
+  });
+
+  // ── Row counts ──
+  updateRowCounts();
+
+  // ── Init scroll spy ──
+  initScrollSpy();
+
+  // ── / key to focus search ──
+  document.addEventListener('keydown', function(e) {
+    if (e.key === '/' && document.activeElement !== document.querySelector('.search-input') && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      var si = document.querySelector('.search-input');
+      if (si) si.focus();
+    }
+  });
+
+  // ── Back to top button visibility ──
+  var backBtn = document.getElementById('backToTop');
+  var wrap = document.getElementById('wrap');
+  function toggleBackBtn() {
+    if (!backBtn || !wrap) return;
+    if (wrap.scrollTop > 400) backBtn.classList.add('show');
+    else backBtn.classList.remove('show');
+  }
+
+  if (wrap) {
+    wrap.addEventListener('scroll', function() {
+      updateScrollShadows();
+      toggleBackBtn();
+    }, {passive: true});
+    updateScrollShadows();
+    window.addEventListener('resize', updateScrollShadows);
+    // Re-check when tab becomes visible
+    var observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+      if (m.target.id === 'tab-main' && m.target.classList.contains('active')) {
+        setTimeout(updateScrollShadows, 100);
+      }
+    });
+  });
+    var tabMain = document.getElementById('tab-main');
+    if (tabMain) observer.observe(tabMain, {attributes: true, attributeFilter: ['class']});
+  }
+
+  // Bind clickable nodes
+  document.querySelectorAll('.nd-clk').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var key = el.getAttribute('data-detail');
+      if (key) openModal(key);
+    });
+  });
+});
+</script>
+
+<button id="backToTop" onclick="scrollToTop()" title="返回顶部">↑</button>
+</body>
+</html>

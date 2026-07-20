@@ -2930,11 +2930,13 @@ body.tn-resizing * { pointer-events:none; }
     <button class="oc-sub-tab" onclick="switchOrgSubView('edit',this)">员工花名册</button>
     <button class="oc-sub-tab" onclick="switchOrgSubView('func',this)">职能分工</button>
     <button class="oc-sub-tab" onclick="switchOrgSubView('attend',this)">在岗状态</button>
+    <button class="oc-sub-tab" onclick="switchOrgSubView('hrmanual',this)">HR Manual</button>
   </div>
   <div id="orgTreeView"></div>
   <div id="orgFuncView" style="display:none;"></div>
   <div id="orgBUFuncView" style="display:none;"></div>
   <div id="orgAttendView" style="display:none;"></div>
+  <div id="orgHRManualView" style="display:none;"><iframe src="hr-manual.html" style="width:100%;height:calc(100vh - 200px);border:none;border-radius:12px;background:var(--card)" title="HR Manual"></iframe></div>
   <div id="orgEditView" style="display:none;">
     <div class="filter-row">
       <input id="empSearchInput" placeholder="搜索姓名..." oninput="renderEmployeeTable()" style="width:130px">
@@ -5525,6 +5527,17 @@ function deleteKPI(id){if(!confirm('确定删除？'))return;kpis=kpis.filter(x=
 function openModal(html,wide){var ov=document.getElementById('modalOverlay'),md=document.getElementById('modal');md.innerHTML=html;if(wide)md.classList.add('wide');ov.classList.add('show');document.body.style.overflow='hidden';ov.onclick=function(ev){if(ev.target===ov)closeModal();};document.addEventListener('keydown',escClose);}
 function closeModal(){var ov=document.getElementById('modalOverlay'),md=document.getElementById('modal');ov.classList.remove('show');md.classList.remove('wide','emp-modal');document.body.style.overflow='';document.removeEventListener('keydown',escClose);}
 function escClose(e){if(e.key==='Escape'){e.preventDefault();closeModal();}}
+// HR Manual modal bridge — receives postMessage from hr-manual.html iframe
+window.addEventListener('message',function(e){
+  if(!e.data||e.data.type!=='hrManualModal') return;
+  if(e.data.action==='open'){
+    var html='<div style="padding:12px 8px">'+
+      '<h3 style="font-size:16px;font-weight:700;margin-bottom:18px;color:#3B3835;padding-right:28px">'+e.data.title+'</h3>'+
+      '<div style="max-height:60vh;overflow-y:auto;padding:0 16px 0 0">'+e.data.body+'</div>'+
+    '</div>';
+    openModal(html);
+  }
+});
 function showToast(msg,type){
   type=type||'info';var icons={success:'✓',error:'✕',info:'ℹ',warning:'⚠'};
   var c=document.getElementById('toastContainer');
@@ -6824,6 +6837,7 @@ function switchOrgSubView(view, tab) {
   document.getElementById('orgBUFuncView').style.display = (view === 'func' && funcSubView === 'bu') ? '' : 'none';
   document.getElementById('orgEditView').style.display = view === 'edit' ? '' : 'none';
   document.getElementById('orgAttendView').style.display = view === 'attend' ? '' : 'none';
+  document.getElementById('orgHRManualView').style.display = view === 'hrmanual' ? '' : 'none';
   if (view === 'tree') renderOrgChart();
   else if (view === 'func') { if (funcSubView === 'backend') renderOrgFuncView(); else renderBUFuncView(); }
   else if (view === 'attend') renderAttendView();
