@@ -2661,7 +2661,7 @@ body.tn-resizing * { pointer-events:none; }
           <button class="btn btn-outline btn-sm" onclick="closeRankingModal()" style="flex:1">取消</button>
           <button class="btn btn-primary btn-sm" id="rankingSubmitBtn" onclick="submitRankings()" style="flex:1;padding:10px">确认提交排名</button>
         </div>
-        <div style="font-size:8px;color:var(--text-muted);margin-top:8px;text-align:center">提交后系统自动汇总投票：3分×1人 + 2分×2人 + 1分×3人，每人得分直接相加</div>
+        <div style="font-size:8px;color:var(--text-muted);margin-top:8px;text-align:center">提交后系统自动汇总投票：3分×1人 + 2分×2人 + 1分×3人（杜宪4人），每人得分直接相加</div>
       </div>
     </div>
 
@@ -3063,7 +3063,7 @@ var EVAL_DIMS_V2 = [
   {id:'innovationInsight',name:'问题识别与机会洞察',max:3,auto:true,group:'主动创新',groupId:'innovation',desc:'找到项目问题'},
   {id:'innovationProposal',name:'方案提出与创意质量',max:3,auto:true,group:'主动创新',groupId:'innovation',desc:'提出建设性方案'},
   {id:'innovationImpl',name:'试点推进与落地验证',max:4,auto:true,group:'主动创新',groupId:'innovation',desc:'推进实施'},
-  {id:'collaboration',name:'协作贡献',max:21,minScore:6,type:'peerVote',desc:'管培生互评投票(6-21分)'}
+  {id:'collaboration',name:'协作贡献',max:21,minScore:7,type:'peerVote',desc:'管培生互评投票(7-21分)'}
 ];
 
 // Grouped display config for V2 score panel
@@ -10427,7 +10427,7 @@ function calcPeerVoteScore(traineeName, weekId){
       total += votes[voter][traineeName];
     }
   });
-  return total; // Range: 6-21
+  return total; // Range: 7-21
 }
 
 function getPeerVoteCount(weekId){
@@ -10450,7 +10450,7 @@ function getPeerVoteDetails(traineeName, weekId){
 }
 
 function calcTraineeTotalScoreV2(traineeName, weekId){
-  // V2: auto-scored dimensions (100pts) + peer vote (6-21pts)
+  // V2: auto-scored dimensions (100pts) + peer vote (7-21pts)
   var s = getEvalScore(traineeName, weekId) || {};
   var total = 0;
   EVAL_DIMS_V2.forEach(function(d){
@@ -10552,7 +10552,10 @@ function openRankingModal(){
 
   document.getElementById('rankingModalTitle').textContent = '协作贡献互评投票';
   document.getElementById('rankingModalSub').innerHTML = EVAL_WEEKS[evalCurrentWeek].label + ' (' + EVAL_WEEKS[evalCurrentWeek].start + ' - ' + EVAL_WEEKS[evalCurrentWeek].end + ') · <strong>提交人：'+userName+'</strong>';
-  document.getElementById('rankingInstructions').textContent = '请投票评选协作贡献：3分×1人 + 2分×2人 + 1分×3人，共投6票';
+  var isCheerInst = (userName === PEER_CHEER);
+  var instCount1 = isCheerInst ? 4 : 3;
+  var instTotal = 1 + 2 + instCount1;
+  document.getElementById('rankingInstructions').textContent = '请投票评选协作贡献：3分×1人 + 2分×2人 + 1分×'+instCount1+'人，共投'+instTotal+'票';
   renderPeerVoteForm(weekId, userName);
   document.getElementById('rankingModal').style.display = '';
 }
@@ -10570,11 +10573,17 @@ function updateRankingBtn(){
 }
 
 function renderPeerVoteForm(weekId, voterName){
-  // Build candidate list: only the other 6 trainees (not including self)
+  // Build candidate list: only the other trainees (not including self)
+  // 杜宪 sees all 7 trainees, trainees see 6 others
   var candidates = [];
   for(var i=0;i<EVAL_TRAINEES.length;i++){
     if(EVAL_TRAINEES[i].name !== voterName) candidates.push(EVAL_TRAINEES[i].name);
   }
+  var isCheer = (voterName === PEER_CHEER);
+  // 杜宪 7 candidates → 1分×4, 其他人 6 candidates → 1分×3
+  var targetCount1 = isCheer ? 4 : 3;
+  var totalVotes = 1 + 2 + targetCount1;
+  window._voteTargetCount1 = targetCount1;
 
   // Load existing votes
   var existing = {};
@@ -10590,7 +10599,7 @@ function renderPeerVoteForm(weekId, voterName){
   html += '<div style="font-size:9px;color:var(--text-muted);margin-bottom:12px;display:flex;gap:16px">';
   html += '<span>🥇 3分: <strong id="voteCount3" style="color:var(--accent)">0</strong>/1人</span>';
   html += '<span>🥈 2分: <strong id="voteCount2" style="color:var(--accent)">0</strong>/2人</span>';
-  html += '<span>🥉 1分: <strong id="voteCount1" style="color:var(--accent)">0</strong>/3人</span>';
+  html += '<span>🥉 1分: <strong id="voteCount1" style="color:var(--accent)">0</strong>/'+targetCount1+'人</span>';
   html += '</div>';
 
   html += '<table style="width:100%;border-collapse:collapse;font-size:10px">';
@@ -10609,7 +10618,7 @@ function renderPeerVoteForm(weekId, voterName){
   });
   html += '</tbody></table>';
   html += '<div id="voteFormError" style="font-size:9px;color:var(--warning-text);margin-top:8px;display:none"></div>';
-  html += '<div style="font-size:8px;color:var(--text-muted);margin-top:8px">规则：3分×1人 + 2分×2人 + 1分×3人 = 共6票</div>';
+  html += '<div style="font-size:8px;color:var(--text-muted);margin-top:8px">规则：3分×1人 + 2分×2人 + 1分×'+targetCount1+'人 = 共'+totalVotes+'票</div>';
   document.getElementById('rankingModalBody').innerHTML = html;
 
   // Restore counts from existing data
@@ -10633,14 +10642,15 @@ function validateVoteForm(){
   if(el1) el1.textContent = count1;
   if(el3) el3.style.color = count3 === 1 ? 'var(--success-text)' : 'var(--warning-text)';
   if(el2) el2.style.color = count2 === 2 ? 'var(--success-text)' : 'var(--warning-text)';
-  if(el1) el1.style.color = count1 === 3 ? 'var(--success-text)' : 'var(--warning-text)';
+  var tgt1 = window._voteTargetCount1 || 3;
+  if(el1) el1.style.color = count1 === tgt1 ? 'var(--success-text)' : 'var(--warning-text)';
 
   if(errEl){
     if(count3 !== 1) errEl.innerHTML = '需要选 <strong>1</strong> 人给3分（当前'+count3+'人）';
     else if(count2 !== 2) errEl.innerHTML = '需要选 <strong>2</strong> 人给2分（当前'+count2+'人）';
-    else if(count1 !== 3) errEl.innerHTML = '需要选 <strong>3</strong> 人给1分（当前'+count1+'人）';
+    else if(count1 !== tgt1) errEl.innerHTML = '需要选 <strong>'+tgt1+'</strong> 人给1分（当前'+count1+'人）';
     else errEl.innerHTML = '';
-    errEl.style.display = (count3===1 && count2===2 && count1===3) ? 'none' : '';
+    errEl.style.display = (count3===1 && count2===2 && count1===tgt1) ? 'none' : '';
   }
 }
 
@@ -10661,9 +10671,10 @@ function submitRankings(){
     if(v) entry[sel.dataset.candidate] = v;
   });
 
+  var tgt1 = window._voteTargetCount1 || 3;
   if(count3 !== 1){ alert('必须选恰好 1 人给3分（当前'+count3+'人）'); return; }
   if(count2 !== 2){ alert('必须选恰好 2 人给2分（当前'+count2+'人）'); return; }
-  if(count1 !== 3){ alert('必须选恰好 3 人给1分（当前'+count1+'人）'); return; }
+  if(count1 !== tgt1){ alert('必须选恰好 '+tgt1+' 人给1分（当前'+count1+'人）'); return; }
 
   if(!evalData.peerVotes) evalData.peerVotes = {};
   if(!evalData.peerVotes[weekId]) evalData.peerVotes[weekId] = {};
@@ -11116,7 +11127,7 @@ function renderScorePanelV2(t, weekId, weekLabel, canEdit, container){
       '<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">带教评分 <span style="font-weight:400;color:var(--text-dim);font-size:9px">满分 100 分</span></div>'+
       '<div class="eval-dims">'+groupsHtml+'</div>'+
       '<div style="display:flex;align-items:center;gap:8px;margin-top:16px;margin-bottom:8px">'+
-        '<span style="font-size:12px;font-weight:600;color:var(--text)">协作贡献互评 <span style="font-weight:400;color:var(--text-dim);font-size:9px">6-21 分 · '+voteCount+' 人已投票</span></span>'+
+        '<span style="font-size:12px;font-weight:600;color:var(--text)">协作贡献互评 <span style="font-weight:400;color:var(--text-dim);font-size:9px">7-21 分 · '+voteCount+' 人已投票</span></span>'+
       '</div>'+
       '<div class="eval-dims">'+voteScoreHtml+'</div>'+
       '<div style="margin-top:16px;padding:12px;background:var(--bg-surface);border-radius:8px">'+
