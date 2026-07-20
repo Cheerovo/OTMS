@@ -8080,59 +8080,100 @@ function importDataToLocal(data){
   return imported;
 }
 
-// 自动上传：数据变更后 3 秒防抖，自动推送到 Supabase
-// 上传前先检查云端版本，如有更新先合并再上传，避免多人同时操作互相覆盖
+// 自动上传：数据变更后 3 秒防抖，使用乐观锁（CAS）防止并发覆盖
 function scheduleAutoUpload(){
   if (_isImporting || _autoUploadBusy) return;
   clearTimeout(_autoUploadTimer);
   _autoUploadTimer = setTimeout(async function(){
     _autoUploadBusy = true;
     try{
-      // 1. 拉取云端最新版本号，检查是否有他人更新
-      var localVer = parseInt(localStorage.getItem(LOCAL_DATA_VER_KEY)) || 0;
-      try{
-        const { data: cloudRow } = await supabaseClient
-          .from('team_data')
-          .select('version, data')
-          .eq('id', 1)
-          .maybeSingle();
-        // 2. 如果云端版本更新，先合并云端数据到本地
-        if(cloudRow && cloudRow.version > localVer && cloudRow.data){
-          _isImporting = true;
-          Object.keys(cloudRow.data).forEach(function(k){
-            if(k[0]==='_' || k==='okr_users') return;
-            // 管培生打分数据：深度合并，避免互评数据被覆盖
-            if(k==='otms_trainee_eval_v1'){
-              try{
-                var localEval = JSON.parse(localStorage.getItem(k)||'null');
-                var merged = mergeEvalData(localEval, cloudRow.data[k]);
-                localStorage.setItem(k, JSON.stringify(merged));
-              }catch(e){ localStorage.setItem(k, JSON.stringify(cloudRow.data[k])); }
-            } else if(localStorage.getItem(k) === null){
-              // 其他 key：只导入本地不存在的，已存在的保留本地最新修改
-              localStorage.setItem(k, typeof cloudRow.data[k]==='string' ? cloudRow.data[k] : JSON.stringify(cloudRow.data[k]));
-            }
-          });
-          _isImporting = false;
-          console.log('📥 上传前已合并云端 v'+cloudRow.version+' 的新数据');
-        }
-      }catch(e){ console.log('上传前检查云端版本失败:', e.message); }
-
-      // 3. 上传合并后的全量数据
-      var data = collectLocalData();
-      var version = Math.floor(Date.now() / 1000);
-      const { error } = await supabaseClient
-        .from('team_data')
-        .upsert({ id: 1, data: data, version: version, updated_at: new Date().toISOString() });
-      if(!error){
-        localStorage.setItem(LOCAL_DATA_VER_KEY, version);
-        console.log('🔄 已自动同步到云端 v'+version);
-      } else {
-        console.error('自动同步数据库错误:', error.message, error);
-      }
+      await doAutoUpload(0);
     }catch(e){ console.error('自动同步异常:', e.message, e); }
     _autoUploadBusy = false;
   }, 3000);
+}
+
+async function doAutoUpload(retryCount){
+  if(retryCount >= 3){ console.log('⚠️ 同步重试已达上限，放弃本次上传'); return; }
+
+  var localVer = parseInt(localStorage.getItem(LOCAL_DATA_VER_KEY)) || 0;
+
+  // 1. 拉取云端最新版本
+  var cloudVer = 0;
+  try{
+    const { data: cloudRow } = await supabaseClient
+      .from('team_data')
+      .select('version, data')
+      .eq('id', 1)
+      .maybeSingle();
+    // 2. 如果云端版本更新，先合并到本地
+    if(cloudRow && cloudRow.version > localVer && cloudRow.data){
+      _isImporting = true;
+      Object.keys(cloudRow.data).forEach(function(k){
+        if(k[0]==='_' || k==='okr_users') return;
+        if(k==='otms_trainee_eval_v1'){
+          try{
+            var localEval = JSON.parse(localStorage.getItem(k)||'null');
+            var merged = mergeEvalData(localEval, cloudRow.data[k]);
+            localStorage.setItem(k, JSON.stringify(merged));
+          }catch(e){ localStorage.setItem(k, JSON.stringify(cloudRow.data[k])); }
+        } else if(localStorage.getItem(k) === null){
+          localStorage.setItem(k, typeof cloudRow.data[k]==='string' ? cloudRow.data[k] : JSON.stringify(cloudRow.data[k]));
+        }
+      });
+      _isImporting = false;
+      localVer = cloudRow.version;
+      console.log('📥 上传前已合并云端 v'+localVer+' 的新数据');
+    }
+    cloudVer = cloudRow ? cloudRow.version : 0;
+  }catch(e){ console.log('上传前检查云端版本失败:', e.message); }
+
+  // 3. 乐观锁上传：用 expectedVersion 做 CAS
+  var data = collectLocalData();
+  var newVersion = Math.floor(Date.now() / 1000);
+  var expectedVer = localVer;
+
+  if(cloudVer === 0){
+    // 首次上传，使用 upsert 创建行
+    const { error } = await supabaseClient
+      .from('team_data')
+      .upsert({ id: 1, data: data, version: newVersion, updated_at: new Date().toISOString() });
+    if(!error){
+      localStorage.setItem(LOCAL_DATA_VER_KEY, newVersion);
+      console.log('🔄 已初始化云端 v'+newVersion);
+    }
+  } else {
+    // CAS 更新：仅当 version 匹配时才写入，防止并发覆盖
+    const { error } = await supabaseClient
+      .from('team_data')
+      .update({ data: data, version: newVersion, updated_at: new Date().toISOString() })
+      .eq('id', 1)
+      .eq('version', expectedVer);
+
+    if(error){
+      console.error('自动同步数据库错误:', error.message, error);
+      return;
+    }
+
+    // 验证写入是否成功（可能被他人抢先更新）
+    const { data: verifyRow } = await supabaseClient
+      .from('team_data')
+      .select('version')
+      .eq('id', 1)
+      .maybeSingle();
+
+    if(verifyRow && verifyRow.version === newVersion){
+      // 写入成功
+      localStorage.setItem(LOCAL_DATA_VER_KEY, newVersion);
+      console.log('🔄 已自动同步到云端 v'+newVersion);
+    } else {
+      // 版本冲突：他人已更新，合并后重试
+      console.log('⚠️ CAS 冲突 (expected v'+expectedVer+', cloud v'+(verifyRow?verifyRow.version:'?')+')，重试 #'+(retryCount+1));
+      // 降低 localVer 以触发下次合并
+      if(verifyRow) localStorage.setItem(LOCAL_DATA_VER_KEY, verifyRow.version - 1);
+      setTimeout(function(){ doAutoUpload(retryCount + 1); }, 800);
+    }
+  }
 }
 
 // 自动下载：每 30 秒静默检查云端是否有新数据
