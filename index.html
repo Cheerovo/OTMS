@@ -10545,8 +10545,8 @@ function openRankingModal(){
   var isTrainee = isUserTrainee();
   var isCheer = (userName === PEER_CHEER);
 
-  if(!(isAdmin || isTrainee || isCheer)){
-    alert('仅管培生、杜宪和管理员可以参与协作互评投票。');
+  if(!(isTrainee || isCheer)){
+    alert('仅管培生和杜宪可以参与协作互评投票。');
     return;
   }
 
@@ -10565,7 +10565,7 @@ function updateRankingBtn(){
   var btn = document.getElementById('evalRankingBtn');
   if(!btn) return;
   var userName = getCurrentUserDisplayName();
-  var show = evalCurrentWeek >= EVAL_V2_CUTOFF_WEEK && (isGlobalAdmin(currentUser) || isUserTrainee() || userName === PEER_CHEER);
+  var show = evalCurrentWeek >= EVAL_V2_CUTOFF_WEEK && (isUserTrainee() || userName === PEER_CHEER);
   btn.style.display = show ? '' : 'none';
 }
 
