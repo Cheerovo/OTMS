@@ -3037,7 +3037,7 @@ var MENTOR_LIST = ['Jenny','王倩','黄一萧','王妤扬','杜宪','邵吴慧'
 
 var EVAL_TRAINEES = [
   {id:'chendshuangjie',name:'陈双杰',role:'DS小队长',level:'第二层',supervisor:'邵吴慧',location:'香港(6.7到港)',color:'#5D8AA8',avatarBg:'#5D8AA8'},
-  {id:'chenjin',name:'陈锦',role:'账务管培生',level:'第二层',supervisor:'王倩',location:'上海',color:'#D4A76A',avatarBg:'#D4A76A'},
+  {id:'chenjin',name:'陈锦',role:'账务管培生',level:'第二层',supervisor:'邵吴慧',location:'上海',color:'#D4A76A',avatarBg:'#D4A76A'},
   {id:'zhaoliuwen',name:'赵柳文',role:'法务管培生',level:'第二层',supervisor:'Jenny',location:'香港(6.7到港)',color:'#8BA89C',avatarBg:'#8BA89C'},
   {id:'anziyue',name:'安子玥',role:'法务管培生',level:'第二层',supervisor:'Bella',location:'上海',color:'#A09DB5',avatarBg:'#A09DB5'},
   {id:'huangyanting',name:'黄燕婷',role:'HR管培生',level:'第二层',supervisor:'Shaun',location:'上海→香港',color:'#D4A76A',avatarBg:'#D4A76A'},
@@ -3244,10 +3244,19 @@ function isGlobalAdmin(user){var u=users[user];return u&&u.role==='admin';}
 function isMentor(user){
   if(!user) return false;
   if(isGlobalAdmin(user)) return true;
-  if(typeof EVAL_TRAINEES === 'undefined') return false;
-  for(var i=0;i<EVAL_TRAINEES.length;i++){
-    if(EVAL_TRAINEES[i].supervisor === user) return true;
-    if(users && users[user] && users[user].name === EVAL_TRAINEES[i].supervisor) return true;
+  var userName = (users && users[user] && users[user].name) || user;
+  // Check evalData.mentors (weekly assignments) first
+  if(evalData && evalData.mentors){
+    var mentorKeys = Object.keys(evalData.mentors);
+    for(var i=0;i<mentorKeys.length;i++){
+      if(evalData.mentors[mentorKeys[i]] === userName) return true;
+    }
+  }
+  // Fallback: check hardcoded supervisor
+  if(typeof EVAL_TRAINEES !== 'undefined'){
+    for(var i=0;i<EVAL_TRAINEES.length;i++){
+      if(EVAL_TRAINEES[i].supervisor === userName) return true;
+    }
   }
   return false;
 }
@@ -11101,7 +11110,8 @@ function renderScorePanelV1(t, weekId, weekLabel, canEdit, container){
     prevDataBtn = '<button class="eval-btn-restore" onclick="restorePrevWeekData(\''+t.name+'\',\''+prevWeekId+'\',\''+weekId+'\')">恢复'+EVAL_WEEKS[prevWeekIdx].label+'数据</button>';
   }
   var saveBtn = canEdit ? '<button class="eval-btn-save" onclick="saveCurrentEval(\''+t.name+'\',\''+weekId+'\')">保存评分</button>' : '';
-  var readonlyBanner = !canEdit ? '<div style="text-align:center;padding:6px;background:#FDF6EC;border-radius:8px;margin-bottom:12px;font-size:9px;color:#E0956A">仅限直属上级（'+t.supervisor+'）或管理员编辑评分</div>' : '';
+  var weekMentorV1 = (evalData.mentors && evalData.mentors[t.name + '|' + weekId]) || t.supervisor;
+  var readonlyBanner = !canEdit ? '<div style="text-align:center;padding:6px;background:#FDF6EC;border-radius:8px;margin-bottom:12px;font-size:9px;color:#E0956A">仅限直属上级（'+weekMentorV1+'）或管理员编辑评分</div>' : '';
 
   container.innerHTML +=
     '<div class="eval-score-panel">'+
@@ -11233,7 +11243,8 @@ function renderScorePanelV2(t, weekId, weekLabel, canEdit, container){
     (canEdit ? '<div class="eval-save-row" style="margin-bottom:16px">'+prevDataBtn + saveBtn+'</div>' : '')+
   '</div>';
 
-  var readonlyBannerV2 = !canEdit ? '<div style="text-align:center;padding:6px;background:#FDF6EC;border-radius:8px;margin-bottom:12px;font-size:9px;color:#E0956A">仅限直属上级（'+t.supervisor+'）或管理员编辑评分</div>' : '';
+  var weekMentorV2 = (evalData.mentors && evalData.mentors[t.name + '|' + weekId]) || t.supervisor;
+  var readonlyBannerV2 = !canEdit ? '<div style="text-align:center;padding:6px;background:#FDF6EC;border-radius:8px;margin-bottom:12px;font-size:9px;color:#E0956A">仅限直属上级（'+weekMentorV2+'）或管理员编辑评分</div>' : '';
   container.innerHTML +=
     '<div class="eval-score-panel">'+
       stickyHtml+
