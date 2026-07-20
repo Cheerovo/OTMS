@@ -1627,9 +1627,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-child-task-row:last-child { border-bottom:none; }
 .tn-child-connector { width:8px; height:8px; border-left:2px solid var(--accent); border-bottom:2px solid var(--accent); margin-right:2px; flex-shrink:0; }
 .tn-child-task-body { flex:1; display:flex; align-items:center; gap:6px; min-width:0; overflow:hidden; }
-.tn-child-task-name { font-size:11px; color:var(--text); cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tn-child-task-name { font-size:11px; font-weight:300; color:var(--text-dim); cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .tn-child-task-name:hover { color:var(--accent); text-decoration:underline; }
-.tn-child-task-meta { font-size:9px; color:var(--text-dim); white-space:nowrap; flex-shrink:0; }
+.tn-child-task-meta { font-size:9px; font-weight:300; color:var(--text-muted); white-space:nowrap; flex-shrink:0; }
 .tn-child-task-desc { font-size:9px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; flex-shrink:1; }
 .tn-child-task-time { font-size:8px; color:var(--text-muted); white-space:nowrap; flex-shrink:0; }
 .tn-child-task-actions { display:flex; align-items:center; gap:3px; flex-shrink:0; }
@@ -1642,8 +1642,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-child-count.has-children { background:var(--accent-wash); color:var(--accent); font-weight:600; cursor:pointer; }
 .tn-child-count.has-children:hover { background:var(--accent); color:#fff; }
 .tn-child-badge { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:10px; background:var(--accent-wash); color:var(--accent); font-size:9px; font-weight:500; flex-shrink:0; }
-.tn-task-card-new.is-child { padding:3px 10px; min-height:30px; font-size:11px; gap:8px; }
-.tn-task-card-new.is-child .tn-task-title { font-size:12px; }
+.tn-task-card-new.is-child { padding:3px 10px; min-height:30px; font-size:11px; font-weight:300; gap:8px; color:var(--text-dim); }
+.tn-task-card-new.is-child .tn-task-title { font-size:12px; font-weight:300; color:var(--text-dim); }
 .tn-task-card-new.is-child:hover { background:var(--bg-surface-hover); }
 .tn-task-card-new.is-child.highlighted { background:var(--accent-wash) !important; box-shadow:inset 3px 0 0 var(--accent); }
 .tn-task-card-new.is-child:hover .tn-child-task-del { opacity:1; }
