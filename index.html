@@ -10358,13 +10358,13 @@ function getEvalStorageKey(){ return 'otms_trainee_eval_v1'; }
 function loadEvalData(){
   try{
     var raw = localStorage.getItem(getEvalStorageKey());
-    if(raw){ evalData = JSON.parse(raw); if(!evalData.mentors) evalData.mentors={}; if(!evalData.rankings) evalData.rankings={}; return; }
+    if(raw){ evalData = JSON.parse(raw); if(!evalData.mentors) evalData.mentors={}; if(!evalData.rankings) evalData.rankings={}; if(!evalData.peerVotes) evalData.peerVotes={}; return; }
   }catch(e){}
-  evalData = {scores:{}, extras:{}, mentors:{}, rankings:{}};
+  evalData = {scores:{}, extras:{}, mentors:{}, rankings:{}, peerVotes:{}};
 }
 
 function saveEvalData(){
-  try{ localStorage.setItem(getEvalStorageKey(), JSON.stringify(evalData)); }catch(e){}
+  try{ localStorage.setItem(getEvalStorageKey(), JSON.stringify(evalData)); }catch(e){ console.error('saveEvalData 失败:', e.message); alert('评分数据保存失败，可能存储空间不足，请清理旧数据。\n错误：'+e.message); }
 }
 
 function getEvalScore(traineeId, weekId){
@@ -10757,22 +10757,23 @@ function initEvalSystem(){
 
 function initSampleData(){
   if(typeof TN_EVAL_SEED === 'undefined') return;
+  var changed = false;
   // Always load from embedded seed data (imported from JSON)
   if(TN_EVAL_SEED.scores){
     if(!evalData) loadEvalData();
     if(!evalData.scores) evalData.scores = {};
     Object.keys(TN_EVAL_SEED.scores).forEach(function(k){
-      if(!evalData.scores[k]) evalData.scores[k] = TN_EVAL_SEED.scores[k];
+      if(!evalData.scores[k]){ evalData.scores[k] = TN_EVAL_SEED.scores[k]; changed = true; }
     });
   }
   if(TN_EVAL_SEED.extras){
     if(!evalData) loadEvalData();
     if(!evalData.extras) evalData.extras = {};
     Object.keys(TN_EVAL_SEED.extras).forEach(function(k){
-      if(!evalData.extras[k]) evalData.extras[k] = TN_EVAL_SEED.extras[k];
+      if(!evalData.extras[k]){ evalData.extras[k] = TN_EVAL_SEED.extras[k]; changed = true; }
     });
   }
-  saveEvalData();
+  if(changed) saveEvalData();
 }
 
 function switchEvalView(view){
