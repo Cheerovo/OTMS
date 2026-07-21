@@ -685,8 +685,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .meeting-bar-row .kr-bar-wrap { width:100%; }
 .meeting-meta { font-size:10px; color:var(--text-dim); display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
 .meeting-meta .meta-sep { color:var(--border); }
-.meeting-card-body { padding:0 20px 16px; display:none; }
-.meeting-card.open .meeting-card-body { display:block; }
+.meeting-card-body { padding:0 20px 16px; max-height:0; overflow:hidden; transition:max-height .35s ease; }
+.meeting-card.open .meeting-card-body { max-height:3000px; }
 .meeting-chevron { transition:transform .25s ease; font-size:10px; color:var(--text-muted); margin-top:5px; flex-shrink:0; }
 .meeting-card.open .meeting-chevron { transform:rotate(180deg); }
 .meeting-section { margin-top:12px; }
@@ -731,8 +731,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .rpt-meta .meta-sep { color:var(--border); }
 .rpt-chevron { font-size:10px; color:var(--text-muted); transition:transform .25s ease; margin-top:5px; flex-shrink:0; }
 .report-card.open .rpt-chevron { transform:rotate(180deg); }
-.report-card-body { padding:0 16px 12px; display:none; overflow-x:hidden; }
-.report-card.open .report-card-body { display:block; }
+.report-card-body { padding:0 16px 12px; max-height:0; overflow:hidden; transition:max-height .35s ease; }
+.report-card.open .report-card-body { max-height:2000px; }
 
 /* Report group sub-items */
 .rpt-group-header { padding:14px 18px; display:flex; align-items:flex-start; gap:10px; cursor:pointer; }
@@ -776,7 +776,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .mo-cell .mo-fn { font-size:8px; color:var(--text-dim); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.2; }
 .mo-cell .mo-up { font-size:9px; color:var(--accent); }
 .file-count-badge { font-size:8px; background:var(--accent); color:#fff; border-radius:10px; padding:0 4px; line-height:14px; margin-left:2px; font-weight:400; }
-.file-count-badge-grp { font-size:7px; background:var(--accent); color:#fff; border-radius:10px; padding:0 3px; line-height:12px; margin-left:1px; font-weight:400; }
+.file-count-badge-grp { font-size:7px; background:var(--accent); color:#fff; border-radius:10px; padding:0 2px; line-height:12px; margin-left:1px; font-weight:400; }
 .rpt-tabs { display:flex; gap:0; margin-left:12px; }
 .rpt-tabs button { padding:8px 20px; border:none; font-size:12px; cursor:pointer; background:var(--bg-surface); color:var(--text-dim); font-weight:400; transition:var(--transition); box-shadow:var(--shadow-xs); }
 .rpt-tabs button:first-child { border-radius:var(--radius-xs) 0 0 var(--radius-xs); }
@@ -1710,7 +1710,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-raci-badge.A { background:#FDEDEF; color:#992F48; }
 .tn-raci-badge.I { background:#F4F6FB; color:#5D8AA8; }
 .tn-raci-badge.C { background:#FFF8E1; color:#B45309; }
-.tn-trainee-link { font-size:10px; color:var(--text-muted); cursor:pointer; flex-shrink:0; opacity:0; transition:opacity .15s; padding:0 2px; }
+.tn-trainee-link { font-size:10px; color:var(--text-muted); cursor:pointer; flex-shrink:0; opacity:0; transition:opacity .15s; padding:0 3px; }
 .tn-task-card-new:hover .tn-trainee-link { opacity:1; }
 .tn-trainee-link:hover { color:var(--accent); }
 .tn-src-badge { font-size:7px; padding:1px 5px; border-radius:4px; font-weight:600; flex-shrink:0; }
@@ -1781,7 +1781,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-child-task-desc { font-size:9px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; flex-shrink:1; }
 .tn-child-task-time { font-size:8px; color:var(--text-muted); white-space:nowrap; flex-shrink:0; }
 .tn-child-task-actions { display:flex; align-items:center; gap:3px; flex-shrink:0; }
-.tn-child-task-del { cursor:pointer; font-size:10px; color:var(--text-dim); border:none; background:none; padding:0 3px; border-radius:2px; line-height:1; opacity:0; transition:opacity .15s; }
+.tn-child-task-del { cursor:pointer; font-size:10px; color:var(--text-dim); border:none; background:none; padding:0 2px; border-radius:2px; line-height:1; opacity:0; transition:opacity .15s; }
 .tn-child-task-del:hover { color:var(--danger); }
 .tn-child-task-row:hover .tn-child-task-del { opacity:1; }
 .tn-child-task-row:hover .tn-task-edit-btn { opacity:1; }
@@ -2116,7 +2116,7 @@ body.tn-resizing * { pointer-events:none; }
 .tn-ov-mod-desc { font-size:8px; color:var(--text-muted); flex-shrink:0; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .tn-ov-mod-badge { font-size:7.5px; padding:2px 8px; border-radius:10px; font-weight:600; flex-shrink:0; letter-spacing:.2px; }
 .tn-ov-prog-done { background:#E6F0EC; color:#5C9A82; }
-.tn-ov-prog-active { background:var(--accent-wash); color:var(--accent-dim); }
+.tn-ov-prog-active { background:var(--accent-wash); color:var(--accent); }
 .tn-ov-prog-pend { background:#F4F6FB; color:#5D8AA8; }
 .tn-ov-mod-subs { border-left:2px solid var(--border-light); margin-left:21px; overflow:hidden; transition:max-height .3s; }
 .tn-ov-mod-sub { padding:5px 16px 5px 12px; background:var(--bg-surface); }
@@ -2185,6 +2185,7 @@ body.tn-resizing * { pointer-events:none; }
     <div class="nav-divider"></div>
     <button data-tab="vision" onclick="switchTab('vision')" title="使命愿景·战略定位·业务赛道"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><polygon points="12,2 9,9 2,12 9,15 12,22 15,15 22,12 15,9"/></svg></span><span>愿景与战略</span></button>
     <button data-tab="org" onclick="switchTab('org')" title="管理部门、团队和人员架构"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="2.5"/><path d="M3 20v-1.5c0-2 2.5-4 6-4s6 2 6 4V20"/><circle cx="18" cy="7" r="2"/><path d="M14 19v-1c0-1.5 2-3 4.5-3s4.5 1.5 4.5 3v1"/></svg></span><span>组织管理</span></button>
+    <button data-tab="company" onclick="switchTab('company')" title="管理公司法律实体、证照、分管与合同用印"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="7" height="13" rx="1"/><rect x="14" y="4" width="7" height="17" rx="1"/><line x1="6.5" y1="11" x2="6.5" y2="11.01"/><line x1="6.5" y1="14" x2="6.5" y2="14.01"/><line x1="6.5" y1="17" x2="6.5" y2="17.01"/><line x1="17.5" y1="7" x2="17.5" y2="7.01"/><line x1="17.5" y1="10" x2="17.5" y2="10.01"/><line x1="17.5" y1="13" x2="17.5" y2="13.01"/><line x1="17.5" y1="16" x2="17.5" y2="16.01"/></svg></span><span>公司管理</span></button>
     <button data-tab="okr" onclick="switchTab('okr')" title="制定季度目标与关键结果，跟踪执行进度"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span><span>OKR 目标管理</span></button>
     <button data-tab="kpi" onclick="switchTab('kpi')" title="追踪收入、效率、质量等量化指标"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="13" width="4" height="8" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg></span><span>KPI 指标管理</span></button>
     <button data-tab="trainee" onclick="switchTab('trainee')" title="管培生任务看板、反馈、打分与绩效"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/></svg></span><span>管培生管理</span></button>
@@ -2825,7 +2826,7 @@ body.tn-resizing * { pointer-events:none; }
 <!-- ==================== REPORT TAB ==================== -->
 <div class="tab-content" id="tabRPT">
 <div class="main">
-  <div class="page-hd"><span class="ph-dot c4"></span><div class="ph-title">报表提交</div><div class="ph-sub c4">Monthly Reports</div><button class="ph-act" id="btnNewReport" onclick="openReportModal()">+ 新建报表</button></div>
+  <div class="page-hd"><span class="ph-dot c4"></span><div class="ph-title">报表提交</div><div class="ph-sub c4" id="rptSubtitle">Monthly Reports</div><button class="ph-act" id="btnNewReport" onclick="openReportModal()">+ 新建报表</button><button class="btn btn-sm btn-outline" onclick="restoreMissingReports()" title="恢复默认报表中已被删除的项目" style="font-size:9px;color:var(--text2);margin-left:6px;padding:5px 10px">恢复已删除</button></div>
   <div class="stats" id="rptStats"></div>
   <div class="filter-row">
     <select id="rptOwnerFilter" onchange="renderReports()"><option value="all">全部负责人</option></select>
@@ -2833,7 +2834,6 @@ body.tn-resizing * { pointer-events:none; }
       <button class="active" onclick="switchRptView('monthly')">月度报表</button>
       <button onclick="switchRptView('yearly')">年度报表</button>
     </div>
-    <button class="btn btn-sm btn-outline" onclick="restoreMissingReports()" title="恢复默认报表中已被删除的项目" style="margin-left:auto;font-size:9px;color:var(--text2)">恢复已删除报表</button>
   </div>
   <div class="filter-chips" id="rptFilterChips"></div>
   <div class="report-list cols2" id="rptList"></div>
@@ -3120,6 +3120,26 @@ body.tn-resizing * { pointer-events:none; }
 </div>
 </div>
 
+<!-- ==================== COMPANY MANAGEMENT TAB ==================== -->
+<div class="tab-content" id="tabCompany">
+<div class="main">
+  <div class="page-hd"><span class="ph-dot c6"></span><div class="ph-title">公司管理</div><div class="ph-sub c6">Company Management</div></div>
+  <div class="oc-sub-tabs" style="margin-bottom:16px">
+    <button class="oc-sub-tab active" onclick="switchCompanyView('list',this)">公司列表</button>
+    <button class="oc-sub-tab" onclick="switchCompanyView('license',this)">证照管理</button>
+    <button class="oc-sub-tab" onclick="switchCompanyView('allocation',this)">公司分管</button>
+    <button class="oc-sub-tab" onclick="switchCompanyView('equity',this)">股权架构</button>
+    <button class="oc-sub-tab" onclick="switchCompanyView('contract',this)">合同用印</button>
+  </div>
+  <div id="companyListView"></div>
+  <div id="companyLicenseView" style="display:none"></div>
+  <div id="companyAllocationView" style="display:none"></div>
+  <div id="companyEquityView" style="display:none"></div>
+  <div id="companyContractView" style="display:none"></div>
+</div>
+</div>
+
+
 <div style="text-align:center;padding:12px 0 20px;font-size:9px;color:var(--text2)">
   v2026.07.01
 </div>
@@ -3258,19 +3278,19 @@ var TN_WEEK_LABELS = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','
 var TN_ALL_WEEKS = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12','W13','W14'];
 
 // ===== User & Auth =====
-const MODULES = ['org','okr','kpi','report','meeting','trainee'];
-const MOD_LABELS = {vision:'愿景与战略',org:'组织管理',okr:'OKR目标',kpi:'KPI指标',report:'报表提交',meeting:'例会管理',trainee:'管培生管理'};
-const PERM_MODULES = ['okr','kpi','report','meeting','trainee']; // modules requiring explicit permission grants
-const SUBTABS = {vision:['strategy','trainee','backend'],org:['tree','edit','func','attend'],okr:['cards','gantt','tree'],kpi:['indicators'],report:['monthly','yearly'],meeting:['weekly'],trainee:['overview','tasks','gantt','reports','evaluation','dashboard']};
-const SUBTAB_LABELS = {org_tree:'树状架构图',org_edit:'员工花名册',org_func:'职能分工',org_attend:'在岗状态',okr_cards:'总览',okr_gantt:'甘特图',okr_tree:'树形图',kpi_indicators:'KPI 指标',report_monthly:'月度报表',report_yearly:'年度报表',vision_strategy:'战略总览',vision_trainee:'管培生计划',vision_backend:'大后台系统',meeting_weekly:'周例会',trainee_overview:'总览',trainee_tasks:'任务看板',trainee_gantt:'甘特图',trainee_reports:'每周反馈',trainee_evaluation:'管培生打分',trainee_dashboard:'管培生绩效'};
+const MODULES = ['org','company','okr','kpi','report','meeting','trainee'];
+const MOD_LABELS = {vision:'愿景与战略',org:'组织管理',company:'公司管理',okr:'OKR目标',kpi:'KPI指标',report:'报表提交',meeting:'例会管理',trainee:'管培生管理'};
+const PERM_MODULES = ['okr','kpi','report','meeting','trainee','company']; // modules requiring explicit permission grants
+const SUBTABS = {vision:['strategy','trainee','backend'],org:['tree','edit','func','attend'],company:['list','license','allocation','equity','contract'],okr:['cards','gantt','tree'],kpi:['indicators'],report:['monthly','yearly'],meeting:['weekly'],trainee:['overview','tasks','gantt','reports','evaluation','dashboard']};
+const SUBTAB_LABELS = {org_tree:'树状架构图',org_edit:'员工花名册',org_func:'职能分工',org_attend:'在岗状态',company_list:'公司列表',company_license:'证照管理',company_allocation:'公司分管',company_equity:'股权架构',company_contract:'合同用印',okr_cards:'总览',okr_gantt:'甘特图',okr_tree:'树形图',kpi_indicators:'KPI 指标',report_monthly:'月度报表',report_yearly:'年度报表',vision_strategy:'战略总览',vision_trainee:'管培生计划',vision_backend:'大后台系统',meeting_weekly:'周例会',trainee_overview:'总览',trainee_tasks:'任务看板',trainee_gantt:'甘特图',trainee_reports:'每周反馈',trainee_evaluation:'管培生打分',trainee_dashboard:'管培生绩效'};
 var PERM_SELMOD = 'vision';
 const escAttr=s=>String(s).replace(/[^a-zA-Z0-9\u4e00-\u9fff_-]/g,'_');
 function defaultRoles(){
   return {
-    '部门主管':{modules:{okr:'edit',kpi:'edit',report:'edit',meeting:'view',trainee:'edit'},subtabs:{vision_trainee:'hidden'}},
-    '标准员工':{modules:{okr:'view',kpi:'view',report:'view',meeting:'none',trainee:'none'},subtabs:{vision_trainee:'hidden'}},
-    '管培生':{modules:{okr:'view',kpi:'view',report:'none',meeting:'none',trainee:'view'},subtabs:{vision_trainee:'hidden'}},
-    '仅组织架构':{modules:{okr:'none',kpi:'none',report:'none',meeting:'none',trainee:'none'},subtabs:{vision_trainee:'hidden'}}
+    '部门主管':{modules:{okr:'edit',kpi:'edit',report:'edit',meeting:'view',trainee:'edit',company:'view'},subtabs:{vision_trainee:'hidden'}},
+    '标准员工':{modules:{okr:'view',kpi:'view',report:'view',meeting:'none',trainee:'none',company:'view'},subtabs:{vision_trainee:'hidden'}},
+    '管培生':{modules:{okr:'view',kpi:'view',report:'none',meeting:'none',trainee:'view',company:'none'},subtabs:{vision_trainee:'hidden'}},
+    '仅组织架构':{modules:{okr:'none',kpi:'none',report:'none',meeting:'none',trainee:'none',company:'none'},subtabs:{vision_trainee:'hidden'}}
   };
 }
 function ensureDefaultRoles(p){
@@ -3455,8 +3475,8 @@ function getRoleLabel(u){if(!u)return'未分配';var un=getUsername(u);if(un&&is
 function canAccessAdminSettings(u){if(!u)return false;var un=getUsername(u);return un&&isGlobalAdmin(un);}
 const ADMINS = ['杜宪','Jenny'];
 function defaultUsers(){return{
-  '杜宪':{pw:'112233',role:'admin',name:'杜宪',modules:['org','okr','kpi','report','meeting']},
-  'Jenny':{pw:'32508000',role:'admin',name:'张毅',modules:['org','okr','kpi','report','meeting']},
+  '杜宪':{pw:'112233',role:'admin',name:'杜宪',modules:['org','okr','kpi','report','meeting','company']},
+  'Jenny':{pw:'32508000',role:'admin',name:'张毅',modules:['org','okr','kpi','report','meeting','company']},
   '汪顺':{pw:'123123',role:'user',name:'汪顺'},
   '王倩':{pw:'123123',role:'user',name:'王倩'},
   '邵吴慧':{pw:'123123',role:'user',name:'邵吴慧'},
@@ -4287,6 +4307,7 @@ function switchRptView(view){
   document.querySelectorAll('#rptViewToggle button').forEach((b,i)=>b.classList.toggle('active',i===['monthly','yearly'].indexOf(view)));
   const el=document.getElementById('rptList');
   el.className='report-list '+(view==='monthly'?'cols2':'cols2');
+  document.getElementById('rptSubtitle').textContent=view==='monthly'?'Monthly Reports':'Annual Reports';
   renderReports();
 }
 
@@ -4404,7 +4425,7 @@ function renderRptList(f){
         <div class="card-actions">
           ${ref.nudge&&getOwners(ref.owner).includes(currentUser)?`<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();clearNudgeReport('${ref.id}')" title="清除Ding标记">✓ 已处理</button>`:''}
           <button class="btn btn-sm btn-outline" onclick="event.stopPropagation();openReportModal('${ref.id}')">编辑</button>
-          <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteReport('${ref.id}')">删除</button>
+          <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();if(confirm('确定删除「${esc(ref.name)}」？\\n（仅删除该分组中的这一张表，不影响其他报表）'))deleteReport('${ref.id}')">删除</button>
         </div></div></div>`;
   });
   // Render standalone reports
@@ -4892,6 +4913,7 @@ function switchTab(tab) {
   document.getElementById('tabORG').className = 'tab-content' + (tab==='org'?' active':'');
   document.getElementById('tabWS').className = 'tab-content' + (tab==='workspace'?' active':'');
   document.getElementById('tabVision').className = 'tab-content' + (tab==='vision'?' active':'');
+  document.getElementById('tabCompany').className = 'tab-content' + (tab==='company'?' active':'');
   document.querySelectorAll('#sidebarNav button[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
   var isAdmin = canEditModule(currentUser,'org');
   const btnIds={okr:'btnNewOKR',kpi:'btnNewKPI',report:'btnNewReport',meeting:'btnNewMeeting',org:'btnNewOrg'};
@@ -4930,6 +4952,12 @@ function switchTab(tab) {
     hidePermBlock('tabORG');
     if((orgSubView==='func'||orgSubView==='attend')&&!currentUser){switchOrgSubView('tree',document.querySelector('.oc-sub-tab'));return;}
     if(orgSubView==='tree')renderOrgChart(); else if(orgSubView==='func')renderOrgFuncView(); else if(orgSubView==='attend')renderAttendView(); else renderEmployeeTable();
+  }
+  else if (tab==='company') {
+    hidePermBlock('tabCompany');
+    if(!currentUser){ showPermBlock('tabCompany','请先登录','登录后查看公司管理'); setNewBtn(false); return; }
+    if(!canViewModule(currentUser,'company')){showPermBlock('tabCompany','暂无权限访问公司管理','请联系管理员开通公司查看权限');setNewBtn(false);return;}
+    switchCompanyView(companyView, document.querySelector('#tabCompany .oc-sub-tab[onclick*="'+companyView+'"]'));
   }
   else {
     if(!currentUser){pendingTab=tab;showPermBlock('tabMET','暂无权限访问例会管理','请先登录后查看');setNewBtn(false);return;}
@@ -5392,9 +5420,9 @@ function renderTreeView(f) {
           ${depth>0?`<span style="font-size:8px;color:var(--primary);background:var(--primary-light);padding:0 4px;border-radius:3px;margin-left:4px">子目标</span>`:''}
           <span style="font-size:10px;font-weight:500;margin-left:4px">${esc(node.title)}</span>
         </div>
-        ${getOwners(node.owner).map(ow=>`<span class="meta-owner" style="font-size:8px;padding:0 3px">${ow}</span>`).join('')}
+        ${getOwners(node.owner).map(ow=>`<span class="meta-owner" style="font-size:8px;padding:0 2px">${ow}</span>`).join('')}
         <span style="font-size:10px;font-weight:600;color:${p>=70?'var(--success)':p>=40?'var(--warning)':'var(--danger)'};min-width:36px;text-align:right">${p}%</span>
-        <span class="meta-deadline${isOverdue?' overdue':''}" style="font-size:8px;padding:0 3px">${node.end||'-'}</span>
+        <span class="meta-deadline${isOverdue?' overdue':''}" style="font-size:8px;padding:0 2px">${node.end||'-'}</span>
         <div class="tree-actions">
           <button class="btn btn-xs btn-outline" onclick="event.stopPropagation();switchOkrView('cards');document.querySelector('.okr-card[data-id=\\'${node.id}\\']')?.scrollIntoView({behavior:'smooth'})" title="在总览中查看详情">🔍</button>
           <button class="btn btn-xs btn-outline" onclick="event.stopPropagation();openOkrModal('${node.id}')" title="编辑">✎</button>
@@ -5878,12 +5906,11 @@ function renderMeetingStats(f){
   const t=f.length;
   const allTasks=f.reduce((s,m)=>s+(m.tempTasks?m.tempTasks.length:0),0);
   const doneTasks=f.reduce((s,m)=>s+(m.tempTasks?m.tempTasks.filter(tk=>tk.status==='done').length:0),0);
-  const allFiles=f.reduce((s,m)=>s+(m.files?m.files.length:0),0);
   document.getElementById('meetingStats').innerHTML=`
     <div class="stat-card"><div class="label">例会次数</div><div class="value">${t}</div><div class="sub">当前筛选范围</div></div>
     <div class="stat-card"><div class="label">临时任务</div><div class="value">${allTasks}</div><div class="sub">已完成 ${doneTasks} 项</div></div>
     <div class="stat-card"><div class="label">任务完成率</div><div class="value">${allTasks?Math.round(doneTasks/allTasks*100):0}%</div><div class="sub">临时任务闭环率</div></div>
-    <div class="stat-card"><div class="label">会议资料</div><div class="value">${allFiles}</div><div class="sub">已上传文件数</div></div>`;
+    <div class="stat-card"><div class="label">本月会议</div><div class="value">${f.filter(m=>m.date.startsWith(new Date().toISOString().slice(0,7))).length}</div><div class="sub">当前月份例会次数</div></div>`;
 }
 
 function renderMeetingList(f){
@@ -5902,7 +5929,8 @@ function renderMeetingList(f){
     const today=new Date().toISOString().slice(0,10);
     const getDlClass=dl=>{if(!dl)return'normal';return dl<today?'overdue':dl<=today.replace(/(\d+)$/,d=>String(Number(d)+3))?'warn':'normal';};
     const attendees=getOwners(m.attendees);
-    const primAttendee=attendees[0]||'';
+    const topAttendees=attendees.slice(0,3);
+    const extraCount=Math.max(0,attendees.length-3);
     return `<div class="meeting-card" data-id="${m.id}">
       <div class="meeting-card-header" onclick="toggleCard(this.parentElement)">
         <span class="meeting-dot ${dotCls}"></span>
@@ -5910,11 +5938,11 @@ function renderMeetingList(f){
           <div class="meeting-title-row"><h3>${esc(m.title)}</h3>${tks.length?`<span class="meeting-pct">${taskPct}%</span>`:''}</div>
           ${tks.length?`<div class="meeting-bar-row"><div class="kr-bar-wrap"><div class="kr-bar ${barCls}" style="width:${taskPct}%"></div></div></div>`:''}
           <div class="meeting-meta">
-            <span class="meta-tag" style="background:#fdf2f2;color:var(--primary);font-weight:500">${m.date} ${dayName}</span>
+            <span class="meta-tag" style="background:var(--bg-surface-alt);color:var(--text-dim);font-weight:500">${m.date} ${dayName}</span>
             ${tks.length?`<span class="meta-sep">·</span><span class="meta-tag">任务 ${doneT}/${tks.length}</span>`:''}
             ${fls.length?`<span class="meta-sep">·</span><span class="meta-tag">资料 ${fls.length}</span>`:''}
-            ${primAttendee?`<span class="meta-sep">·</span><span class="meta-tag owner">${primAttendee}</span>`:''}
-            ${attendees.length>1?`<span class="meta-tag">+${attendees.length-1}</span>`:''}
+            ${topAttendees.length?`<span class="meta-sep">·</span>${topAttendees.map(a=>`<span class="meta-tag owner">${a}</span>`).join(' ')}`:''}
+            ${extraCount>0?`<span class="meta-tag">+${extraCount}</span>`:''}
           </div>
         </div>
         <span class="meeting-chevron">▼</span>
@@ -7892,7 +7920,7 @@ function renderOrgChart() {
   html += '</svg></div>';
 
   // BU columns
-  html += '<div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:16px;align-items:flex-start;">';
+  html += '<div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:16px;align-items:flex-start;">';
   tree.bus.forEach((bu, bi) => {
     let buDepts = 0;
     let buNames = new Set();
@@ -7903,7 +7931,7 @@ function renderOrgChart() {
     bu.depts.forEach(d => { if(bu.head && d.name === bu.name) return; buDepts++; if(d.head)addBuName(d.head); addStaffName(d.staff); if(d.subdepts) d.subdepts.forEach(s=>{buDepts++; if(s.head)addBuName(s.head); addStaffName(s.staff);}); });
     let buStaff = buNames.size;
 
-    html += '<div style="flex:1 1 0;min-width:130px;max-width:210px;display:flex;flex-direction:column;">';
+    html += '<div style="flex:1 1 0;min-width:180px;display:flex;flex-direction:column;">';
     html += '<div class="oc-bu-col" style="border-top:3px solid '+bu.color+';" onclick="toggleBU('+bi+')">';
     html += '<div class="bu-name">'+bu.name+'</div>';
     if (bu.head) {
@@ -15226,9 +15254,9 @@ function renderTraineeOverview(){
         var prog=g.progress||'待开始';
         var progCls=prog==='已完成'?'tn-ov-prog-done':(prog==='进行中'?'tn-ov-prog-active':'tn-ov-prog-pend');
         var hasSubs=g.subs&&g.subs.length>0;
-        panelsHtml+='<div class="tn-ov-mod-row tn-ov-mod-parent" data-expand="1"><span class="tn-ov-mod-dot" style="background:'+l.color+'"></span>'+(hasSubs?'<span class="tn-ov-mod-arrow">\u25BC</span>':'<span class="tn-ov-mod-arrow"></span>')+'<span class="tn-ov-mod-name">'+esc(g.mod)+'</span><span class="tn-ov-mod-badge '+progCls+'">'+prog+'</span></div>';
+        panelsHtml+='<div class="tn-ov-mod-row tn-ov-mod-parent" data-expand="1"><span class="tn-ov-mod-dot" style="background:'+l.color+'"></span>'+(hasSubs?'<span class="tn-ov-mod-arrow">\u25B6</span>':'<span class="tn-ov-mod-arrow"></span>')+'<span class="tn-ov-mod-name">'+esc(g.mod)+'</span><span class="tn-ov-mod-badge '+progCls+'">'+prog+'</span></div>';
         if(hasSubs){
-          panelsHtml+='<div class="tn-ov-mod-subs">';
+          panelsHtml+='<div class="tn-ov-mod-subs" style="max-height:0">';
           g.subs.forEach(function(sb){
             panelsHtml+='<div class="tn-ov-mod-row tn-ov-mod-sub"><span class="tn-ov-mod-dot" style="background:'+l.color+';opacity:.3"></span><span class="tn-ov-mod-name" style="font-size:10px;font-weight:400">'+esc(sb.mod)+'</span><span class="tn-ov-mod-desc">'+esc(sb.desc||'')+'</span></div>';
           });
@@ -15246,10 +15274,14 @@ function renderTraineeOverview(){
         el.addEventListener('click',function(){
           var subs=this.nextElementSibling;
           if(subs&&subs.classList.contains('tn-ov-mod-subs')){
-            var hidden=subs.style.display==='none';
-            subs.style.display=hidden?'':'none';
+            var collapsed=subs.style.maxHeight==='0px'||subs.style.maxHeight==='';
+            if(collapsed){
+              subs.style.maxHeight=subs.scrollHeight+'px';
+            } else {
+              subs.style.maxHeight='0px';
+            }
             var arrow=this.querySelector('.tn-ov-mod-arrow');
-            if(arrow) arrow.style.transform=hidden?'':'rotate(-90deg)';
+            if(arrow) arrow.style.transform=collapsed?'rotate(90deg)':'';
           }
         });
       });
@@ -16592,6 +16624,380 @@ function renderTnMeetingList(){
     html += '</div></div>';
   });
   container.innerHTML = html;
+}
+
+// ===== Company Management =====
+var companyView = 'list';
+var COMPANIES = [
+  {id:'c1',name:'开弈人力',fullName:'开弈人力资源管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'人力资源',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c2',name:'靠普人力',fullName:'靠普人力资源管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'人力资源',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c3',name:'开博人力',fullName:'开博人力资源管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'人力资源',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c4',name:'南京开弈',fullName:'南京开弈人力资源有限公司',legalRep:'',capital:'',regDate:'',addr:'南京',type:'人力资源',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c5',name:'乾钵',fullName:'乾钵企业管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'企业管理',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'蔡心宇',accountExec:'韩燕&王永佳'},
+  {id:'c6',name:'开弈信息',fullName:'开弈信息技术有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'信息技术',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c7',name:'深圳和弈',fullName:'深圳和弈人力资源有限公司',legalRep:'',capital:'',regDate:'',addr:'深圳',type:'人力资源',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c8',name:'天津英才',fullName:'天津英才人力资源有限公司',legalRep:'',capital:'',regDate:'',addr:'天津',type:'人力资源',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c9',name:'弈享天津',fullName:'弈享（天津）人力资源有限公司',legalRep:'',capital:'',regDate:'',addr:'天津',type:'人力资源',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c10',name:'开弈医疗',fullName:'开弈医疗健康管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'医疗健康',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c11',name:'市场营销',fullName:'市场营销有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'市场营销',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c12',name:'开弈外包',fullName:'开弈外包服务有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'外包服务',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c13',name:'时代人才',fullName:'时代人才服务有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'人力资源',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'蔡心宇',accountExec:'韩燕&王永佳'},
+  {id:'c14',name:'开弈人才',fullName:'开弈人才服务有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'人力资源',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c15',name:'弈工分健康',fullName:'弈工分健康管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'健康管理',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c16',name:'弈工分文化体育',fullName:'弈工分文化体育发展有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'文化体育',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c17',name:'开弈人力研究院',fullName:'开弈人力资源研究院',legalRep:'',capital:'',regDate:'',addr:'上海',type:'研究机构',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c18',name:'微芮洺',fullName:'微芮洺文化传播有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'文化传播',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c19',name:'老龙馄饨',fullName:'老龙馄饨餐饮管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'餐饮',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c20',name:'开弈投资',fullName:'开弈投资管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'投资管理',financeHead:'吴松成',financeExec:'刘阳阳',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c21',name:'弈工分信息',fullName:'弈工分信息技术有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'信息技术',financeHead:'吴松成',financeExec:'刘阳阳',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c22',name:'智名',fullName:'智名企业咨询有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'企业咨询',financeHead:'吴松成',financeExec:'刘阳阳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c23',name:'北京点才',fullName:'北京点才人力资源有限公司',legalRep:'',capital:'',regDate:'',addr:'北京',type:'人力资源',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c24',name:'香港开弈',fullName:'香港开弈人力资源有限公司',legalRep:'',capital:'',regDate:'',addr:'香港',type:'人力资源',financeHead:'Ruby',financeExec:'Yvonne',accountHead:'王倩',accountExec:'王倩'}
+];
+
+function switchCompanyView(view, btn) {
+  companyView = view;
+  document.querySelectorAll('#tabCompany .oc-sub-tab').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  document.getElementById('companyListView').style.display = view === 'list' ? '' : 'none';
+  document.getElementById('companyLicenseView').style.display = view === 'license' ? '' : 'none';
+  document.getElementById('companyAllocationView').style.display = view === 'allocation' ? '' : 'none';
+  document.getElementById('companyEquityView').style.display = view === 'equity' ? '' : 'none';
+  document.getElementById('companyContractView').style.display = view === 'contract' ? '' : 'none';
+  if (view === 'list') renderCompanyList();
+  else if (view === 'license') renderCompanyLicense();
+  else if (view === 'allocation') renderCompanyAllocation();
+  else if (view === 'equity') renderCompanyEquity();
+  else if (view === 'contract') renderCompanyContract();
+}
+
+function renderCompanyList() {
+  var typeColors = {'人力资源':'#5D8AA8','信息技术':'#8B7AAA','投资管理':'#C94F66','企业管理':'#D4A76A','医疗健康':'#6AAA8A','健康管理':'#6AAA8A','市场营销':'#E0956A','外包服务':'#8BA89C','文化体育':'#A09DB5','文化传播':'#A09DB5','研究机构':'#7B8EA0','餐饮':'#D4735A','企业咨询':'#5D8AA8'};
+  var html = '<div class="stats" style="margin-bottom:16px">';
+  html += '<div class="stat-card"><div class="label">公司总数</div><div class="value">' + COMPANIES.length + '</div><div class="sub">法律实体</div></div>';
+  html += '<div class="stat-card"><div class="label">覆盖城市</div><div class="value">' + [...new Set(COMPANIES.map(function(c){return c.addr;}))].length + '</div><div class="sub">上海/南京/深圳/天津/北京/香港</div></div>';
+  html += '<div class="stat-card"><div class="label">行业类型</div><div class="value">' + [...new Set(COMPANIES.map(function(c){return c.type;}))].length + '</div><div class="sub">种类</div></div>';
+  html += '<div class="stat-card"><div class="label">财务分管人</div><div class="value">4</div><div class="sub">蔡心宇/芦智蔚/吴松成/Ruby</div></div>';
+  html += '</div>';
+  html += '<div class="report-list cols2">';
+  COMPANIES.forEach(function(c) {
+    var tc = typeColors[c.type] || '#8D8883';
+    html += '<div class="report-card" style="cursor:default">';
+    html += '<div class="report-card-header" style="cursor:default">';
+    html += '<span style="width:8px;height:8px;border-radius:2px;flex-shrink:0;margin-top:6px;background:' + tc + '"></span>';
+    html += '<div class="rpt-info">';
+    html += '<div class="rpt-title-row"><span class="rpt-name">' + c.name + '</span><span style="font-size:9px;padding:2px 8px;border-radius:10px;background:' + tc + '15;color:' + tc + ';font-weight:500">' + c.type + '</span></div>';
+    html += '<div class="rpt-meta">';
+    html += '<span style="font-size:10px;color:var(--text-dim)">' + (c.fullName || '') + '</span>';
+    html += '</div>';
+    html += '<div class="rpt-meta" style="margin-top:4px">';
+    if (c.financeHead) html += '<span class="meta-tag" style="background:#fdf2f2;color:var(--primary);font-weight:500">财务：' + c.financeHead + '</span>';
+    if (c.accountHead) html += '<span class="meta-tag" style="background:#f0fdf4;color:#166534">账务：' + c.accountHead + '</span>';
+    html += '<span class="meta-tag" style="background:var(--bg-surface-alt);color:var(--text-dim)">' + c.addr + '</span>';
+    html += '</div></div></div></div>';
+  });
+  html += '</div>';
+  document.getElementById('companyListView').innerHTML = html;
+}
+
+function renderCompanyLicense() {
+  document.getElementById('companyLicenseView').innerHTML = '<div class="empty" style="padding:40px"><p style="font-size:11px">证照管理</p><p style="color:var(--text2)">营业执照、资质证书到期提醒与电子存档 · 即将上线</p></div>';
+}
+
+function renderCompanyAllocation() {
+  var cc = function(count, companies, head, exec) {
+    return '<tr><td class="fcc-cnt">'+count+'</td><td class="fcc-co">'+companies+'</td><td class="fcc-head">'+head+'</td><td class="fcc-exec">'+exec+'</td></tr>';
+  };
+  var html = '';
+  // 财务分管
+  html += '<div class="func-part-label" style="margin-bottom:12px;font-size:12px;font-weight:600;color:var(--text)">财务部 — 公司分管（23家）</div>';
+  html += '<table class="func-tbl"><thead><tr><th class="fcc-cnt">数量</th><th class="fcc-co">适用公司</th><th class="fcc-head">财务负责人</th><th class="fcc-exec">财务执行人</th></tr></thead><tbody>';
+  html += cc('5家','开弈人力、靠普人力、开博人力、南京开弈、乾钵','蔡心宇','王永佳');
+  html += cc('7家','开弈信息、深圳和弈、天津英才、弈享天津、开弈医疗、市场营销、开弈外包','蔡心宇','韩燕');
+  html += cc('1家','时代人才','蔡心宇','韩燕');
+  html += cc('6家','开弈人才、弈工分健康、弈工分文化体育、开弈人力研究院、微芮洺、老龙馄饨','芦智蔚','李蕾');
+  html += cc('3家','开弈投资、弈工分信息、智名','吴松成','刘阳阳');
+  html += cc('1家','香港开弈 + 家办','Ruby','Yvonne');
+  html += '</tbody></table>';
+  // 账务分管
+  html += '<div class="func-part-label" style="margin:24px 0 12px;font-size:12px;font-weight:600;color:var(--text)">账务部 — 公司分管（23家）</div>';
+  html += '<table class="func-tbl"><thead><tr><th class="fcc-cnt">数量</th><th class="fcc-co">适用公司</th><th class="fcc-head">账务负责人</th><th class="fcc-exec">账务执行人</th></tr></thead><tbody>';
+  html += cc('12家','开弈人才、开弈人力、靠普人力、开博人力、开弈外包、开弈信息、北京点才、天津英才、弈享天津、深圳和弈、南京开弈、智名','黄欢欢','季嘉莉');
+  html += cc('8家','开弈投资、弈工分健康、弈工分信息、弈工分文化体育、微芮洺、开弈人力研究院、老龙馄饨、市场营销','邵吴慧','李佳');
+  html += cc('2家','时代人才、乾钵','蔡心宇','韩燕&王永佳');
+  html += cc('1家','香港开弈 + 家办','王倩','王倩');
+  html += '</tbody></table>';
+  html += '<div style="font-size:9px;color:var(--text-muted);margin-top:8px">* 数据同步自「组织管理 > 职能分工 > 公司分管」</div>';
+  document.getElementById('companyAllocationView').innerHTML = html;
+}
+
+// ===== 股权架构数据（来源：弈计划｜开弈2023年整体架构图 v20230813）=====
+// 节点: { name, role, ratio, color?, children? }
+// color: offshore=#6B7FA8  wfoe=#5D9A8A  domestic-holding=#C94F66  domestic-ops=#D49A5A  domestic-regional=#7B9AAD  side=#9B8BAA
+var EQUITY_TREE = {
+  name: '张毅', role: '自然人股东 / UBO 境内居民', color: '#C94F66',
+  children: [
+    { name: 'Champion Tech\nDevelopments', role: 'BVI公司', ratio: '100%', color: '#6B7FA8' },
+    { name: '开弈环球集团\n有限公司', role: 'BVI公司\n(南洋商业银行账户)', ratio: '100%', color: '#6B7FA8' },
+    { name: 'CODAN Trustees\n(B.V.I.) Ltd.', role: 'BVI信托', ratio: '受托人', color: '#8899B0',
+      children: [
+        { name: '安普资产管理\n有限公司', role: 'BVI公司', ratio: '100%', color: '#8899B0',
+          sub: '注册股东: KIM TAE WAN\n实际控制人: 鲁千林'
+        }
+      ]
+    },
+    { name: '开弈控股\n有限公司', role: '开曼公司\n(IPO主体·第一方案)', ratio: '—', color: '#5D9A8A',
+      sub: '2015/1/27成立 · 注册资本50000美金\n董事: 张毅',
+      children: [
+        { name: '侰溤服务有限公司\nJohn Service Co.,Ltd', role: 'BVI公司', ratio: '100%', color: '#6B7FA8',
+          sub: '2014/10/3成立 · 注册资本50000美金\n董事: 张毅'
+        },
+        { name: '中国开弈云数据管理\nChina Key Cloud Data Mgmt', role: 'BVI公司', ratio: '100%', color: '#6B7FA8',
+          sub: '2015/7/10成立 · 注册资本50000美金\n董事: 张毅 · 股东: China Key Holding',
+          children: [
+            { name: '开弈（中国）人才服务\nChina-Key HR Outsourcing', role: '香港运营实体', ratio: '100%', color: '#4682B4',
+              sub: '2004/12/24成立 · 汇丰银行账户\n董事: 张毅',
+              children: [
+                { name: '开弈信息科技（中国）\n有限公司', role: 'WFOE · 上海', ratio: '97.17%', color: '#5D9A8A',
+                  sub: '2006/4/29成立 · 注册资本6000万(实缴)\n法人&董事长&总经理: 张毅\n2015年安永合并利润3122.7万',
+                  children: [
+                    { name: '上海开弈人才服务\n（集团）有限公司', role: '境内控股 · 上海', ratio: '100%', color: '#C94F66',
+                      sub: '2003/7/24成立 · 注册资本3000万(实缴)\n法人&总经理: 张毅',
+                      children: [
+                        { name: '上海开弈人力资源管理\n有限公司', role: '境内运营 · 上海', ratio: '100%', color: '#D49A5A',
+                          sub: '2016/12/12成立 · 注册资本1500万(实缴)\n法人: 王倩',
+                          children: [
+                            { name: '上海靠普人力资源\n管理有限公司', role: '境内 · 上海', ratio: '100%', color: '#7B9AAD', sub: '2021/5/7成立 · 注册资本200万 · 法人: 杜宪' },
+                            { name: '上海开博人才服务\n有限公司', role: '境内 · 上海', ratio: '100%', color: '#7B9AAD', sub: '2009/7/24成立 · 注册资本300万(实缴) · 法人: 王倩' },
+                            { name: '北京开弈点才劳务\n服务有限公司', role: '境内 · 北京', ratio: '100%', color: '#7B9AAD', sub: '2009/3/30成立 · 注册资本200万(实缴) · 法人: 王倩' },
+                            { name: '开弈英才（天津）\n劳务服务有限公司', role: '境内 · 天津', ratio: '100%', color: '#7B9AAD', sub: '2008/12/11成立 · 注册资本200万(实缴) · 法人: 王倩' },
+                            { name: '深圳市和弈劳务\n派遣有限公司', role: '境内 · 深圳', ratio: '100%', color: '#7B9AAD', sub: '2011/12/5成立 · 注册资本200万(实缴) · 法人: 王倩' },
+                            { name: '南京开弈人力资源\n管理有限公司', role: '境内 · 南京', ratio: '100%', color: '#7B9AAD', sub: '2019/11/22成立 · 注册资本200万(实缴) · 法人: 郭志洪' }
+                          ]
+                        },
+                        { name: '上海开弈人力资源\n研究院', role: '境内 · 上海', ratio: '100%', color: '#7B9AAD', sub: '2018/1/10成立 · 注册资本50万(实缴) · 法人: 王妤扬' },
+                        { name: '上海开弈投资管理\n有限公司', role: '境内投资平台', ratio: '94%', color: '#C94F66',
+                          sub: '2015/6/26成立 · 注册资本50000万(实缴7010万)\n法人&执行董事&总经理: 张毅\n其他股东: 杨柏国3%(代张毅) / 鲁一思3%',
+                          children: [
+                            { name: '上海开弈市场营销\n策划有限公司', role: '境内 · 上海', ratio: '65%', color: '#D49A5A',
+                              sub: '2016/10/9成立 · 注册资本1000万(实缴425万)\n法人&总经理: 李瑷瑄\n其他股东: 李瑷瑄35%' },
+                            { name: '上海弈工分信息\n科技有限公司', role: '境内 · 上海', ratio: '30%', color: '#8B7AAA',
+                              sub: '2017/7/3成立 · 注册资本5000万(实缴3000万)\n法人&董事长: 张毅\n其他股东: 智名信息30% / 世纪设计40%',
+                              children: [
+                                { name: '上海开弈企业服务\n外包有限公司', role: '境内 · 上海', ratio: '100%', color: '#D4A76A',
+                                  sub: '2017/3/10成立 · 注册资本200万(实缴)\n法人: 王倩 · 通过弈工分信息间接持股' }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    { name: '上海弈工分文化体育\n发展有限公司', role: '境内 · 上海', ratio: '100%', color: '#A09DB5', sub: '2017/7/3成立 · 注册资本1000万 · 法人: 张毅' },
+                    { name: '上海弈工分健康信息\n咨询有限公司', role: '境内 · 上海', ratio: '62%', color: '#6AAA8A', sub: '2017/7/4成立 · 注册资本2100万 · 法人: 戴琼琪\n其他股东: 弈工分信息30% / 世纪设计8%' },
+                    { name: '弈享（天津）共享经济\n信息咨询有限公司', role: '境内 · 天津', ratio: '100%', color: '#7B9AAD', sub: '2017/7/4成立 · 注册资本1000万(实缴20万) · 法人: 杜宪' },
+                    { name: '上海弈工分企业服务\n外包有限公司', role: '境内 · 上海', ratio: '70%', color: '#D4A76A', sub: '2017/8/9成立 · 注册资本200万(实缴) · 法人: 姚娟\n其他股东: 姚娟30% · 2019拟注销' }
+                  ]
+                },
+                { name: '开弈信息技术（深圳）\n有限公司', role: 'WFOE · 深圳', ratio: '100%', color: '#5D9A8A',
+                  sub: '2016/8/16成立 · 注册资本1000万港币(未实缴)\n法人: 王倩 · 董事: 张毅/郭志洪/王鹰鹰/王倩'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+// 境内平行持股（非 WFOE 链路 / 张毅个人持股）
+var EQUITY_DOMESTIC_SIDE = [
+  {
+    name: '智名信息技术（上海）\n有限公司', ratio: '—', color: '#9B8BAA',
+    sub: '2008/5/25成立 · 注册资本1200万(实缴)\n法人&执行董事: 张涛\n股东: 张毅99% / 王倩1%'
+  },
+  {
+    name: '中國時代開弈投資\n集團有限公司', ratio: '—', color: '#6B7FA8',
+    sub: 'HRO INVESTMENT GROUP LIMITED\n2018/1/18成立 · 注册资本1港币\n董事&股东: 蔡志强 100% · 香港公司'
+  },
+  {
+    name: '开弈美国公司\nCHINA-KEY HRO CO.,INC', ratio: '—', color: '#6B7FA8',
+    sub: '暂未实缴 · 董事: 张毅\n董事长: 戴琼琪'
+  }
+];
+
+// ---- 树状图渲染引擎（从上往下）----
+
+function _eqCard(node, compact) {
+  var pad = compact ? '4px 6px' : '5px 8px';
+  var fsName = compact ? '9.5px' : '10.5px';
+  var fsRole = compact ? '6.5px' : '7px';
+  var fsSub = compact ? '6px' : '6.5px';
+  var w = compact ? '112px' : '140px';
+  var h = '';
+  h += '<div style="background:var(--bg-surface);border:1.5px solid '+node.color+';border-radius:7px;padding:'+pad+';text-align:center;width:'+w+';height:120px;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,0.03);line-height:1.25;display:flex;flex-direction:column;justify-content:center;overflow:hidden">';
+  h += '<div style="font-size:'+fsName+';font-weight:700;color:var(--text);white-space:pre-line;line-height:1.2">'+node.name+'</div>';
+  if (node.ratio) h += '<div style="font-size:8px;color:'+node.color+';font-weight:700;margin-top:1px">'+node.ratio+'</div>';
+  h += '<div style="font-size:'+fsRole+';color:var(--text-dim);margin-top:1px;white-space:pre-line;line-height:1.15">'+node.role+'</div>';
+  if (node.sub && !compact) h += '<div style="font-size:'+fsSub+';color:var(--text-muted);margin-top:2px;white-space:pre-line;border-top:1px dotted var(--border);padding-top:2px;line-height:1.15">'+node.sub+'</div>';
+  h += '</div>';
+  return h;
+}
+
+var _LC = 'var(--border)';
+
+	// === 树状图布局引擎（绝对定位） ===
+	// 先序遍历分配列坐标：叶子节点依次排开，父节点居中
+	function _layoutNodes(node, depth, nextCol, nodes) {
+	  if (!node.children || node.children.length === 0) {
+	    nodes.push({node:node, depth:depth, col:nextCol});
+	    return {col:nextCol, nextCol:nextCol+1};
+	  }
+	  var childCols = [];
+	  var nc = nextCol;
+	  for (var i = 0; i < node.children.length; i++) {
+	    var r = _layoutNodes(node.children[i], depth+1, nc, nodes);
+	    childCols.push(r.col);
+	    nc = r.nextCol;
+	  }
+	  var myCol = (childCols[0] + childCols[childCols.length-1]) / 2;
+	  nodes.push({node:node, depth:depth, col:myCol});
+	  return {col:myCol, nextCol:nc};
+	}
+
+	// 渲染树状图：绝对定位卡片 + SVG 连接线
+	function _renderTree(rootNode, compact) {
+	  var nodes = [];
+	  _layoutNodes(rootNode, 0, 0, nodes);
+
+	  var cw = compact ? 112 : 140;  // card width
+	  var ch = 120;                    // card height
+	  var hGap = compact ? 8 : 16;    // horizontal gap
+	  var vGap = compact ? 36 : 48;   // vertical gap
+	  var colW = cw + hGap;
+	  var rowH = ch + vGap;
+
+	  // 总画布尺寸
+	  var maxCol = 0, maxDepth = 0;
+	  nodes.forEach(function(n){ if(n.col>maxCol) maxCol=n.col; if(n.depth>maxDepth) maxDepth=n.depth; });
+	  var totalW = Math.ceil((maxCol+1)*colW) + 20;
+	  var totalH = (maxDepth+1)*rowH + 20;
+
+	  var offsetX = (colW - cw)/2;
+	  var cardTop = function(depth){ return depth*rowH + 10; };
+	  var cardLeft = function(col){ return col*colW + offsetX + 10; };
+	  var cardCX = function(col){ return col*colW + colW/2 + 10; };
+
+	  var h = '';
+	  h += '<div style="position:relative;width:'+totalW+'px;height:'+totalH+'px;font-size:0;line-height:0">';
+
+	  // SVG 连接线（z-index:0 在卡片下方）
+	  h += '<svg style="position:absolute;left:0;top:0;width:'+totalW+'px;height:'+totalH+'px;pointer-events:none;z-index:0" xmlns="http://www.w3.org/2000/svg">';
+	  h += '<defs><style>line{stroke:var(--border);stroke-width:1.2;stroke-linecap:round}</style></defs>';
+
+	  nodes.forEach(function(pn){
+	    if (!pn.node.children || pn.node.children.length === 0) return;
+	    var kids = pn.node.children;
+	    var kidNodes = [];
+	    nodes.forEach(function(cn){ if (kids.indexOf(cn.node) >= 0) kidNodes.push(cn); });
+	    if (kidNodes.length === 0) return;
+
+	    var px = cardCX(pn.col);
+	    var py = cardTop(pn.depth) + ch;
+	    var barY = py + (cardTop(kidNodes[0].depth) - py) / 2;
+
+	    // 父→横杠竖线
+	    h += '<line x1="'+px+'" y1="'+py+'" x2="'+px+'" y2="'+barY+'"/>';
+
+	    // 横杠
+	    var x1 = cardCX(kidNodes[0].col);
+	    var x2 = cardCX(kidNodes[kidNodes.length-1].col);
+	    h += '<line x1="'+x1+'" y1="'+barY+'" x2="'+x2+'" y2="'+barY+'"/>';
+
+	    // 横杠→每个子节点竖线
+	    kidNodes.forEach(function(kn){
+	      var cx = cardCX(kn.col);
+	      var cy = cardTop(kn.depth);
+	      h += '<line x1="'+cx+'" y1="'+barY+'" x2="'+cx+'" y2="'+cy+'"/>';
+	    });
+	  });
+
+	  h += '</svg>';
+
+	  // 卡片（z-index:1 在 SVG 上方）
+	  nodes.forEach(function(n){
+	    h += '<div style="position:absolute;left:'+cardLeft(n.col)+'px;top:'+cardTop(n.depth)+'px;z-index:1">';
+	    h += _eqCard(n.node, compact);
+	    h += '</div>';
+	  });
+
+	  h += '</div>';
+	  return h;
+	}
+
+
+function renderCompanyEquity() {
+  var h = '';
+
+  // Stats bar
+  h += '<div class="stats" style="margin-bottom:18px">';
+  h += '<div class="stat-card"><div class="label">实际控制人</div><div class="value">张毅</div><div class="sub">境内居民 / UBO</div></div>';
+  h += '<div class="stat-card"><div class="label">架构层级</div><div class="value">7</div><div class="sub">BVI → 开曼 → BVI → HK → WFOE → 境内</div></div>';
+  h += '<div class="stat-card"><div class="label">法律实体</div><div class="value">29</div><div class="sub">含境外+境内</div></div>';
+  h += '<div class="stat-card"><div class="label">IPO主体</div><div class="value" style="font-size:13px">开曼-开弈控股</div><div class="sub">第一方案 · 已注册未使用</div></div>';
+  h += '</div>';
+
+  // Legend
+  h += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;font-size:9px;color:var(--text-dim)">';
+  var leg = [
+    {color:'#C94F66',label:'UBO / 境内控股'},
+    {color:'#6B7FA8',label:'BVI / 境外'},
+    {color:'#8899B0',label:'BVI信托'},
+    {color:'#5D9A8A',label:'开曼 / WFOE'},
+    {color:'#4682B4',label:'香港运营实体'},
+    {color:'#D49A5A',label:'境内运营主体'},
+    {color:'#7B9AAD',label:'区域子公司'},
+    {color:'#9B8BAA',label:'平行持股'}
+  ];
+  leg.forEach(function(l){
+    h += '<span style="display:inline-flex;align-items:center;gap:3px;background:var(--bg-surface-alt);padding:2px 7px;border-radius:4px">';
+    h += '<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+l.color+'"></span>'+l.label+'</span>';
+  });
+  h += '</div>';
+
+  // === 主链路 · VIE 架构 ===
+  h += '<div id="eqScroll" style="background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:24px 16px 16px;margin-bottom:24px;overflow-x:auto;-webkit-overflow-scrolling:touch">';
+  h += '<div style="font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:14px;letter-spacing:.5px">主链路 · VIE 架构（从上往下）</div>';
+  h += '<div id="eqTreeWrap">';
+  h += _renderTree(EQUITY_TREE, false);
+  h += '</div>';
+  h += '</div>';
+
+  // === 侧链 · 平行持股 ===
+  h += '<div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:24px 16px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch">';
+  h += '<div style="font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:14px;letter-spacing:.5px">境内平行持股 / 非 WFOE 链路</div>';
+  h += '<div style="display:flex;justify-content:flex-start;gap:32px;flex-wrap:wrap;padding:8px 4px">';
+  EQUITY_DOMESTIC_SIDE.forEach(function(item) {
+    h += '<div>';
+    h += _renderTree(item, true);
+    h += '</div>';
+  });
+  h += '</div>';
+  h += '</div>';
+
+  h += '<div style="font-size:9px;color:var(--text-muted);margin-top:14px;text-align:center">* 股权架构来源：弈计划｜开弈2023年整体架构图 v20230813 · 杜宪整理 | 乾钵/时代人才/微芮洺/老龙馄饨等公司待补充确认</div>';
+
+  document.getElementById('companyEquityView').innerHTML = h;
+
+  // 滚动容器自适应内容宽度
+  setTimeout(function(){
+    var sc = document.getElementById('eqScroll');
+    if (sc) sc.scrollLeft = 0;
+  }, 20);
+}
+
+function renderCompanyContract() {
+  document.getElementById('companyContractView').innerHTML = '<div class="empty" style="padding:40px"><p style="font-size:11px">合同与用印</p><p style="color:var(--text2)">公司间合同、用印审批记录汇总 · 即将上线</p></div>';
 }
 
 </script>
