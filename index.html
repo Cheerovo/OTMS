@@ -2363,7 +2363,6 @@ body.tn-resizing * { pointer-events:none; }
   <!-- Trainee Management page -->
   <div class="page active" id="kpiTraineePage">
     <div class="trainee-summary" id="traineeSummary" style="display:none"></div>
-    <div class="org-breadcrumb" id="tnBreadcrumb" style="display:none;margin-bottom:12px"><span onclick="switchTraineeView('tasks')">管培生管理</span> &rsaquo; <span id="tnBreadcrumbCurrent"></span></div>
     <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;background:var(--bg-surface);border-radius:10px;padding:3px;width:fit-content">
       <button class="tn-sub-tab" onclick="switchTraineeView('overview')">总览</button>
       <button class="tn-sub-tab active" onclick="switchTraineeView('tasks')">任务看板</button>
@@ -12926,10 +12925,6 @@ function initTraineeSystem(){
 function switchTraineeView(view){
   console.log('[switchTraineeView] switching to:', view);
   tnCurrentView = view;
-  var viewNames={overview:'总览',tasks:'任务看板',gantt:'甘特图',reports:'周报/会议',evaluation:'管培生打分',dashboard:'管培生绩效'};
-  var bc=document.getElementById('tnBreadcrumb'),bcCur=document.getElementById('tnBreadcrumbCurrent');
-  if(bc) bc.style.display = (view==='overview')?'none':'';
-  if(bcCur) bcCur.textContent = viewNames[view]||view;
   document.getElementById('tnOverviewView').style.display = view==='overview'?'':'none';
   document.getElementById('tnTaskView').style.display = view==='tasks'?'':'none';
   document.getElementById('tnReportView').style.display = view==='reports'?'':'none';
@@ -14669,10 +14664,6 @@ function openTaskDetail(source, taskId, mode){
   var info = getTaskData(source, taskId);
   if(!info || !info.task) return;
   var t = info.task;
-  // Update breadcrumb
-  var bc=document.getElementById('tnBreadcrumb'),bcCur=document.getElementById('tnBreadcrumbCurrent');
-  if(bc)bc.style.display='';
-  if(bcCur)bcCur.textContent='任务详情: '+(t.name||'未命名');
 
   // Hide current view's content, show shared detail panel
   var cardPane = document.getElementById('tnCardPane');
