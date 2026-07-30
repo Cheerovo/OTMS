@@ -859,7 +859,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
   .main { padding:16px 20px; }
   .stats { grid-template-columns:repeat(2,1fr); }
   .filter-row { flex-direction:column; }
-  .modal { width:95%; }
+  .modal { width:95%; max-height:85vh; overflow-y:auto; }
   .form-row { grid-template-columns:1fr; }
   .tl-date { min-width:80px; font-size:8px; }
   .gantt-name { width:160px; } .gantt-name-col { width:160px; }
@@ -1766,6 +1766,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-task-edit-btn:hover { background:var(--bg-surface-hover); color:var(--text); }
 .tn-task-card-new:hover .tn-task-edit-btn { opacity:1; }
 .tn-task-edit-btn-inline { border:none; background:none; cursor:pointer; color:var(--text-dim); padding:4px; border-radius:4px; }
+.tn-task-pin-btn { border:none; background:none; cursor:pointer; padding:4px; color:var(--text-muted); border-radius:4px; transition:all .15s; flex-shrink:0; }
+.tn-task-pin-btn:hover { color:var(--accent); background:var(--accent-wash); }
+.tn-task-pin-btn.pinned { color:var(--accent); }
 
 /* Unified modal week checkboxes */
 .um-week-cb { display:inline-flex; align-items:center; gap:2px; font-size:8px; color:var(--text-dim); padding:3px 6px; background:var(--bg-surface); border-radius:5px; cursor:pointer; white-space:nowrap; }
@@ -2360,6 +2363,7 @@ body.tn-resizing * { pointer-events:none; }
   <!-- Trainee Management page -->
   <div class="page active" id="kpiTraineePage">
     <div class="trainee-summary" id="traineeSummary" style="display:none"></div>
+    <div class="org-breadcrumb" id="tnBreadcrumb" style="display:none;margin-bottom:12px"><span onclick="switchTraineeView('tasks')">管培生管理</span> &rsaquo; <span id="tnBreadcrumbCurrent"></span></div>
     <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;background:var(--bg-surface);border-radius:10px;padding:3px;width:fit-content">
       <button class="tn-sub-tab" onclick="switchTraineeView('overview')">总览</button>
       <button class="tn-sub-tab active" onclick="switchTraineeView('tasks')">任务看板</button>
@@ -4796,9 +4800,13 @@ function saveReport(id){
   const viewers=Array.from(viewerEls).map(cb=>cb.value);
   const obj={id:id||'r'+Date.now(),name:n,desc:document.getElementById('fRD').value.trim(),freq,deadlineDay:parseInt(document.getElementById('fRDay').value)||15,deadlineMonth:freq==='yearly'?parseInt(document.getElementById('fRMo').value)||1:null,owner:document.getElementById('fRO').value,companies:document.getElementById('fRC').value.trim(),group:grp||(freq==='monthly'?'月度财务报表':undefined),viewers:viewers.length?viewers:undefined,subs:id?(reports.find(x=>x.id===id)?.subs||{}):{}};
   if(id){const i=reports.findIndex(x=>x.id===id);if(i>=0)reports[i]=obj;}else reports.push(obj);
-  saveReports(reports);closeModal();renderReports();
+  saveReports(reports);closeModal();renderReports();showToast('保存成功','success');
 }
-function deleteReport(id){if(!confirm('确定删除？'))return;const r=reports.find(x=>x.id===id);if(r&&r.subs){Object.values(r.subs).forEach(s=>{const files=getSubFiles(s);files.forEach(f=>{if(f&&f.fileId)fileStore.del(f.fileId)});});}reports=reports.filter(x=>x.id!==id);saveReports(reports);renderReports();}
+function deleteReport(id){
+  dangerConfirm('确定删除该报表及其提交记录吗？',function(){
+    const r=reports.find(x=>x.id===id);if(r&&r.subs){Object.values(r.subs).forEach(s=>{const files=getSubFiles(s);files.forEach(f=>{if(f&&f.fileId)fileStore.del(f.fileId)});});}reports=reports.filter(x=>x.id!==id);saveReports(reports);renderReports();showToast('已删除','success');
+  });
+}
 function showFileListPopover(rptId,key){
   const ov=document.getElementById('modalOverlay'),md=document.getElementById('modal');
   const r=reports.find(x=>x.id===rptId);
@@ -5535,7 +5543,7 @@ function saveOKR(id) {
       checkins:old.checkins||[], source:old.source||null, cat:old.cat, upd:Date.now()};
     const i=okrs.findIndex(o=>o.id===id);
     if(i>=0)okrs[i]=obj;
-    saveOKRs(okrs);closeModal();renderOKR();
+    saveOKRs(okrs);closeModal();renderOKR();showToast('已更新','success');
     return;
   }
   const oldKRs=old?old.krs:[];
@@ -5549,9 +5557,13 @@ function saveOKR(id) {
   }).filter(k=>k.t);
   const obj={id:id||'o'+Date.now(),title:t,desc:document.getElementById('fD').value.trim(),type:document.getElementById('fTp').value,quarter:document.getElementById('fQ').value,owner:document.getElementById('fOw').value,status:document.getElementById('fS').value,start:document.getElementById('fSt').value,end:document.getElementById('fEn').value,raci:{R:parseRaciInput('fRaR'),A:parseRaciInput('fRaA'),C:parseRaciInput('fRaC'),I:parseRaciInput('fRaI')},krs,parent:document.getElementById('fParent').value||null,approval:old?old.approval:'draft',review:old?old.review:null,archived:old?old.archived:false,public:true,visibleTo:document.getElementById('fPriv').checked?Array.from(document.querySelectorAll('.privUser:checked')).map(cb=>cb.value):[],checkins:old?old.checkins:[],source:old?old.source||null:null,cat:id?(okrs.find(o=>o.id===id)?.cat||Date.now()):Date.now(),upd:Date.now()};
   if(id){const i=okrs.findIndex(o=>o.id===id);if(i>=0)okrs[i]=obj;}else okrs.push(obj);
-  saveOKRs(okrs);closeModal();renderOKR();
+  saveOKRs(okrs);closeModal();renderOKR();showToast('保存成功','success');
 }
-function deleteOKR(id){if(!confirm('确定删除？'))return;const o=okrs.find(x=>x.id===id);if(o&&o.source&&o.source.type==='meeting'){const m=meetings.find(x=>x.id===o.source.meetingId);if(m&&m.tempTasks){m.tempTasks.forEach(tk=>{if(tk.linkOkrId===id){tk.syncToOKR=false;tk.linkOkrId=null;tk.linkKrId=null;tk.syncStatus='none';}});saveMeetings(meetings);}}okrs=okrs.filter(o=>o.id!==id);saveOKRs(okrs);renderOKR();}
+function deleteOKR(id){
+  dangerConfirm('确定删除该目标吗？关联的会议任务同步将被解除。',function(){
+    const o=okrs.find(x=>x.id===id);if(o&&o.source&&o.source.type==='meeting'){const m=meetings.find(x=>x.id===o.source.meetingId);if(m&&m.tempTasks){m.tempTasks.forEach(tk=>{if(tk.linkOkrId===id){tk.syncToOKR=false;tk.linkOkrId=null;tk.linkKrId=null;tk.syncStatus='none';}});saveMeetings(meetings);}}okrs=okrs.filter(o=>o.id!==id);saveOKRs(okrs);renderOKR();showToast('已删除','success');
+  });
+}
 function archiveOKR(id){if(!confirm('归档此目标？归档后将从主列表隐藏。'))return;const o=okrs.find(x=>x.id===id);if(!o)return;o.archived=true;o.upd=Date.now();saveOKRs(okrs);renderOKR();}
 function unarchiveOKR(id){const o=okrs.find(x=>x.id===id);if(!o)return;o.archived=false;o.upd=Date.now();saveOKRs(okrs);renderOKR();}
 function openCloneModal(id){
@@ -5776,13 +5788,19 @@ function saveKPI(id) {
   });
   const kpi={id:id||'i'+Date.now(),name:n,bu:document.getElementById('fKBu').value,cat:document.getElementById('fKC').value,cycle:document.getElementById('fKCy').value,target:t,cur:c,u:document.getElementById('fKU').value||'%',owner:document.getElementById('fKO').value,history};
   if(id){const i=kpis.findIndex(x=>x.id===id);if(i>=0)kpis[i]=kpi;}else kpis.push(kpi);
-  saveKPIs(kpis);closeModal();renderKPI();
+  saveKPIs(kpis);closeModal();renderKPI();showToast('保存成功','success');
 }
-function deleteKPI(id){if(!confirm('确定删除？'))return;kpis=kpis.filter(x=>x.id!==id);saveKPIs(kpis);renderKPI();}
+function deleteKPI(id){
+  dangerConfirm('确定删除该指标吗？',function(){
+    kpis=kpis.filter(x=>x.id!==id);saveKPIs(kpis);renderKPI();showToast('已删除','success');
+  });
+}
 
-function openModal(html,wide){var ov=document.getElementById('modalOverlay'),md=document.getElementById('modal');md.innerHTML=html;if(wide)md.classList.add('wide');ov.classList.add('show');document.body.style.overflow='hidden';ov.onclick=function(ev){if(ev.target===ov)closeModal();};document.addEventListener('keydown',escClose);}
-function closeModal(){var ov=document.getElementById('modalOverlay'),md=document.getElementById('modal');ov.classList.remove('show');md.classList.remove('wide','emp-modal');document.body.style.overflow='';document.removeEventListener('keydown',escClose);}
+function openModal(html,wide){var ov=document.getElementById('modalOverlay'),md=document.getElementById('modal');md.innerHTML=html;if(wide)md.classList.add('wide');ov.classList.add('show');document.body.style.overflow='hidden';ov.onclick=function(ev){if(ev.target===ov)closeModal();};document.addEventListener('keydown',escClose);document.addEventListener('keydown',enterSubmit);}
+function closeModal(){var ov=document.getElementById('modalOverlay'),md=document.getElementById('modal');ov.classList.remove('show');md.classList.remove('wide','emp-modal');document.body.style.overflow='';document.removeEventListener('keydown',escClose);document.removeEventListener('keydown',enterSubmit);}
 function escClose(e){if(e.key==='Escape'){e.preventDefault();closeModal();}}
+function enterSubmit(e){if(e.key==='Enter'&&document.getElementById('modalOverlay').classList.contains('show')){var ae=document.activeElement;if(ae&&ae.tagName==='TEXTAREA')return;if(ae&&(ae.tagName==='BUTTON'||ae.type==='submit'))return;e.preventDefault();var btn=document.querySelector('#modal .btn-primary');if(btn)btn.click();}}
+function dangerConfirm(msg,cb){var h='<div style="padding:12px 8px"><div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px"><span style="font-size:22px;flex-shrink:0">!</span><div><h3 style="font-size:14px;font-weight:600;color:#992F48;margin:0">确认操作</h3><p style="font-size:11px;color:var(--text-dim);margin:4px 0 0">'+msg+'</p></div></div><div style="display:flex;justify-content:flex-end;gap:8px"><button class="btn btn-outline" onclick="closeModal()" style="font-size:11px;padding:8px 20px">取消</button><button class="btn btn-primary" id="dangerConfirmBtn" style="background:#992F48;font-size:11px;padding:8px 20px">确认删除</button></div></div>';openModal(h,false);document.getElementById('dangerConfirmBtn').onclick=function(){closeModal();cb();};}
 // HR Manual modal bridge — receives postMessage from hr-manual.html iframe
 window.addEventListener('message',function(e){
   if(!e.data||e.data.type!=='hrManualModal') return;
@@ -6400,9 +6418,13 @@ function saveMeeting(id){
   // Sync tasks to OKR first (may update task objects with linkOkrId/linkKrId)
   tks.forEach(tk=>{if(tk.syncToOKR)syncTaskToOKR(tk,meetingId);});
   saveMeetings(meetings);
-  closeModal();renderMeetings();
+  closeModal();renderMeetings();showToast('保存成功','success');
 }
-function deleteMeeting(id){if(!confirm('确定删除该例会？'))return;const m=meetings.find(x=>x.id===id);if(m&&m.tempTasks){m.tempTasks.forEach(tk=>{if(tk.syncToOKR)unlinkTaskFromOKR(tk);});}meetings=meetings.filter(x=>x.id!==id);saveMeetings(meetings);renderMeetings();}
+function deleteMeeting(id){
+  dangerConfirm('确定删除该例会吗？关联的同步任务也将被清理。',function(){
+    const m=meetings.find(x=>x.id===id);if(m&&m.tempTasks){m.tempTasks.forEach(tk=>{if(tk.syncToOKR)unlinkTaskFromOKR(tk);});}meetings=meetings.filter(x=>x.id!==id);saveMeetings(meetings);renderMeetings();showToast('已删除','success');
+  });
+}
 
 // Close notify dropdown on outside click
 document.addEventListener('click',function(e){
@@ -6953,10 +6975,12 @@ function openEmployeeModal(id){
 
 function deleteEmployee(id){
   let e=empList.find(x=>x.id===id); if(!e)return;
-  if(!confirm('确定删除员工「'+e.name+'」吗？'))return;
-  empList=empList.filter(x=>x.id!==id);
-  saveEmployees(empList);
-  renderEmployeeTable();
+  dangerConfirm('确定删除员工「'+esc(e.name)+'」吗？此操作不可撤销。',function(){
+    empList=empList.filter(x=>x.id!==id);
+    saveEmployees(empList);
+    renderEmployeeTable();
+    showToast('已删除','success');
+  });
 }
 
 // --- Department Management ---
@@ -6992,10 +7016,12 @@ function addDept(){
 
 function deleteDept(name,count){
   if(count>0){alert('该部门下有'+count+'名员工，无法删除。请先将员工转移至其他部门。');return;}
-  if(!confirm('确定删除部门「'+name+'」吗？'))return;
-  deptList=deptList.filter(d=>d!==name);
-  saveDepts(deptList);
-  openDeptManageModal();
+  dangerConfirm('确定删除部门「'+esc(name)+'」吗？',function(){
+    deptList=deptList.filter(d=>d!==name);
+    saveDepts(deptList);
+    openDeptManageModal();
+    showToast('已删除','success');
+  });
 }
 
 function quickAddDept(){
@@ -8861,6 +8887,12 @@ function handleImportFile(event){
 window.addEventListener('beforeunload', function(){ autoBackupSystemData(true); });
 
 // ===== Global Search =====
+function highlightMatch(text,query){
+  if(!query||!text)return esc(text);
+  var escaped=esc(text);
+  var q=query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return escaped.replace(new RegExp('('+q+')','gi'),'<mark style="background:#FFF3B0;color:inherit;border-radius:2px;padding:0 1px">$1</mark>');
+}
 function globalSearch(q){
   q=(q||'').trim().toLowerCase();
   const el=document.getElementById('searchResults');
@@ -8933,7 +8965,7 @@ function globalSearch(q){
     let html='', lastCat='';
     results.slice(0,20).forEach((r,i)=>{
       if(r.cat!==lastCat){html+='<div class="sr-cat">'+r.cat+'</div>';lastCat=r.cat;}
-      html+='<div class="sr-item" onclick="document.getElementById(\'searchResults\').__actions['+i+']();closeSearchResults();"><span class="sr-tag '+r.tag+'">'+r.cat+'</span><div class="sr-body"><div class="sr-text">'+r.text+'</div><div class="sr-sub">'+r.sub+'</div></div></div>';
+      html+='<div class="sr-item" onclick="document.getElementById(\'searchResults\').__actions['+i+']();closeSearchResults();"><span class="sr-tag '+r.tag+'">'+r.cat+'</span><div class="sr-body"><div class="sr-text">'+highlightMatch(r.text,q)+'</div><div class="sr-sub">'+highlightMatch(r.sub,q)+'</div></div></div>';
     });
     el.innerHTML=html;
     el.__actions=results.slice(0,20).map(r=>r.action);
@@ -12894,6 +12926,10 @@ function initTraineeSystem(){
 function switchTraineeView(view){
   console.log('[switchTraineeView] switching to:', view);
   tnCurrentView = view;
+  var viewNames={overview:'总览',tasks:'任务看板',gantt:'甘特图',reports:'周报/会议',evaluation:'管培生打分',dashboard:'管培生绩效'};
+  var bc=document.getElementById('tnBreadcrumb'),bcCur=document.getElementById('tnBreadcrumbCurrent');
+  if(bc) bc.style.display = (view==='overview')?'none':'';
+  if(bcCur) bcCur.textContent = viewNames[view]||view;
   document.getElementById('tnOverviewView').style.display = view==='overview'?'':'none';
   document.getElementById('tnTaskView').style.display = view==='tasks'?'':'none';
   document.getElementById('tnReportView').style.display = view==='reports'?'':'none';
@@ -13088,6 +13124,13 @@ function renderTraineeTasks(){
   var sysOrder = ['yyda','rssw','cwzw','itpm'];
   sysOrder.forEach(function(s){ groups[s] = []; });
   filtered.forEach(function(t){ groups[t.sys].push(t); });
+  // Sort pinned tasks to the top within each system group
+  Object.keys(groups).forEach(function(sys){
+    groups[sys].sort(function(a,b){
+      var pa=a.pinned?1:0, pb=b.pinned?1:0;
+      return pb-pa;
+    });
+  });
 
   try { renderTraineeCards(filtered, sysOrder, curWkIdx, groups); } catch(e) {
     console.error('renderTraineeCards 失败:', e.message, e.stack);
@@ -13372,6 +13415,8 @@ function renderTraineeCards(filtered, sysOrder, curWkIdx, groups){
           html += '<button onclick="setTnTaskStatus(\''+t.id+'\',\'pending\')">重置</button>';
           html += '<button class="tn-wtask-del" onclick="deleteTnTask(\''+t.id+'\')" title="删除任务"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';
         }
+        var isPinned=t.pinned||false;
+        html += '<button class="tn-task-pin-btn'+(isPinned?' pinned':'')+'" onclick="event.stopPropagation();togglePinTask(\''+t.id+'\')" title="'+(isPinned?'取消置顶':'置顶')+'"><svg width="11" height="11" viewBox="0 0 24 24" fill="'+(isPinned?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></button>';
         html += '<button class="tn-task-edit-btn-inline" onclick="openTaskDetail(\''+t._source+'\',\''+t.id+'\',\'edit\')" title="编辑"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
         html += '</div></div>';
         }
@@ -13382,7 +13427,7 @@ function renderTraineeCards(filtered, sysOrder, curWkIdx, groups){
   });
 
   var cardPane = document.getElementById('tnCardPane');
-  if(cardPane) cardPane.innerHTML = html || '<div class="eval-empty">无匹配任务</div>';
+  if(cardPane) cardPane.innerHTML = html || '<div class="ws-empty"><span class="icon">📋</span><p>无匹配任务</p><p class="hint">尝试调整筛选条件或切换系统</p></div>';
 }
 
 // ===== SPLIT PANE DRAG-RESIZE =====
@@ -14423,6 +14468,7 @@ function saveWeeklyTask(){
   closeWeeklyTaskModal();
   renderTraineeSummary();
   renderTraineeTasks();
+  showToast('任务已创建','success');
   if(!isAdmin){ renderApprovalPanel(); }
 }
 
@@ -14443,7 +14489,7 @@ function setWeeklyTaskStatus(wid, status){
 }
 
 function deleteWeeklyTask(wid){
-  if(!confirm('确认删除该任务？')) return;
+  dangerConfirm('确认删除该任务？此操作不可撤销。',function(){
   if(!tnData || !tnData.wtasks) return;
   var delTask = null;
   for(var i=0;i<tnData.wtasks.length;i++){ if(tnData.wtasks[i].id===wid){ delTask=tnData.wtasks[i]; break; } }
@@ -14467,6 +14513,21 @@ function deleteWeeklyTask(wid){
   if(delTask) addTaskLog('delete', wid, delTask.name, 'weekly', {});
   renderTraineeSummary();
   renderTraineeTasks();
+  showToast('已删除','success');
+  });
+}
+
+function togglePinTask(taskId){
+  if(!tnData||!tnData.wtasks)return;
+  for(var i=0;i<tnData.wtasks.length;i++){
+    if(tnData.wtasks[i].id===taskId){
+      tnData.wtasks[i].pinned=!tnData.wtasks[i].pinned;
+      saveTnData();
+      renderTraineeTasks();
+      showToast(tnData.wtasks[i].pinned?'已置顶':'已取消置顶','info');
+      return;
+    }
+  }
 }
 
 function setRefTaskStatus(rid, status){
@@ -14487,7 +14548,7 @@ function setRefTaskStatus(rid, status){
 }
 
 function deleteRefTask(rid){
-  if(!confirm('确认删除该任务？')) return;
+  dangerConfirm('确认删除该任务？此操作不可撤销。',function(){
   if(!tnData) loadTnData();
   if(!tnData.refTasks) tnData.refTasks = JSON.parse(JSON.stringify(TN_REF_TASKS));
   var delTask = null;
@@ -14512,10 +14573,12 @@ function deleteRefTask(rid){
   if(delTask) addTaskLog('delete', rid, delTask.name, 'ref', {});
   renderTraineeSummary();
   renderTraineeTasks();
+  showToast('已删除','success');
+  });
 }
 
 function deleteTnTask(tid){
-  if(!confirm('确认删除该任务？')) return;
+  dangerConfirm('确认删除该任务？此操作不可撤销。',function(){
   if(!tnData) loadTnData();
   var delTask = getTnTask(tid) || {};
   var ch2 = getChildTasks(tid);
@@ -14538,6 +14601,8 @@ function deleteTnTask(tid){
   addTaskLog('delete', tid, delTask.name||tid, 'plan', {});
   renderTraineeSummary();
   renderTraineeTasks();
+  showToast('已删除','success');
+  });
 }
 
 // ===== UNIFIED TASK EDIT MODAL =====
@@ -14604,6 +14669,10 @@ function openTaskDetail(source, taskId, mode){
   var info = getTaskData(source, taskId);
   if(!info || !info.task) return;
   var t = info.task;
+  // Update breadcrumb
+  var bc=document.getElementById('tnBreadcrumb'),bcCur=document.getElementById('tnBreadcrumbCurrent');
+  if(bc)bc.style.display='';
+  if(bcCur)bcCur.textContent='任务详情: '+(t.name||'未命名');
 
   // Hide current view's content, show shared detail panel
   var cardPane = document.getElementById('tnCardPane');
@@ -14928,6 +14997,7 @@ function saveTaskDetail(source, taskId){
 
   // Re-render in view mode
   openTaskDetail(source, taskId, 'view');
+  showToast('已保存','success');
 }
 
 async function uploadDeliverableFile(source, taskId, input){
@@ -15205,10 +15275,11 @@ function saveUnifiedTask(){
   closeUnifiedTaskModal();
   renderTraineeSummary();
   renderTraineeTasks();
+  showToast('已保存','success');
 }
 
 function deleteUnifiedTask(){
-  if(!confirm('确认删除该任务？此操作不可撤销。')) return;
+  dangerConfirm('确认删除该任务？此操作不可撤销。',function(){
 
   var ch3 = getChildTasks(unifiedEditTaskId);
   if(ch3.length > 0){
@@ -15244,6 +15315,8 @@ function deleteUnifiedTask(){
   closeUnifiedTaskModal();
   renderTraineeSummary();
   renderTraineeTasks();
+  showToast('已删除','success');
+  });
 }
 
 // ===== TRAINEE DETAIL POPUP =====
@@ -17042,7 +17115,7 @@ function loadTnMeeting(id){
 }
 
 function deleteTnMeeting(id){
-  if(!confirm('确认删除该会议？关联的任务也将被删除。')) return;
+  dangerConfirm('确认删除该会议？关联的任务也将被删除。',function(){
   if(!tnData || !tnData.meetings) return;
   var meeting = null;
   for(var i=0;i<tnData.meetings.length;i++){
@@ -17066,6 +17139,8 @@ function deleteTnMeeting(id){
   renderTnMeetingList();
   renderTraineeSummary();
   renderTraineeTasks();
+  showToast('已删除','success');
+  });
 }
 
 function renderTnMeetingList(){
