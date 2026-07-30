@@ -13355,6 +13355,8 @@ function renderTraineeCards(filtered, sysOrder, curWkIdx, groups){
           html += '<button class="tn-task-status-btn current '+stCls+'" onclick="event.stopPropagation();var next={\'pending\':\'active\',\'active\':\'done\',\'done\':\'pending\'};setTnTaskStatus(\''+t.id+'\',next[\''+st+'\'])">'+(st==='done'?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':st==='active'?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>':'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/></svg>')+'</button>';
           html += '<button class="tn-wtask-del" onclick="event.stopPropagation();deleteTnTask(\''+t.id+'\')" title="删除任务"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';
         }
+        var isPinned=t.pinned||false;
+        html += '<button class="tn-task-pin-btn'+(isPinned?' pinned':'')+'" onclick="event.stopPropagation();togglePinTask(\''+t.id+'\')" title="'+(isPinned?'取消置顶':'置顶')+'"><svg width="11" height="11" viewBox="0 0 24 24" fill="'+(isPinned?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></button>';
         html += editBtnSVG;
         html += '</div>';
         } // end if(isChild)
@@ -14513,15 +14515,37 @@ function deleteWeeklyTask(wid){
 }
 
 function togglePinTask(taskId){
-  if(!tnData||!tnData.wtasks)return;
-  for(var i=0;i<tnData.wtasks.length;i++){
-    if(tnData.wtasks[i].id===taskId){
-      tnData.wtasks[i].pinned=!tnData.wtasks[i].pinned;
-      saveTnData();
-      renderTraineeTasks();
-      showToast(tnData.wtasks[i].pinned?'已置顶':'已取消置顶','info');
-      return;
+  if(!tnData)loadTnData();
+  // Try weekly tasks
+  if(tnData.wtasks){
+    for(var i=0;i<tnData.wtasks.length;i++){
+      if(tnData.wtasks[i].id===taskId){
+        tnData.wtasks[i].pinned=!tnData.wtasks[i].pinned;
+        saveTnData();
+        renderTraineeTasks();
+        showToast(tnData.wtasks[i].pinned?'已置顶':'已取消置顶','info');
+        return;
+      }
     }
+  }
+  // Try reference tasks
+  if(tnData.refTasks){
+    for(var i=0;i<tnData.refTasks.length;i++){
+      if(tnData.refTasks[i].id===taskId){
+        tnData.refTasks[i].pinned=!tnData.refTasks[i].pinned;
+        saveTnData();
+        renderTraineeTasks();
+        showToast(tnData.refTasks[i].pinned?'已置顶':'已取消置顶','info');
+        return;
+      }
+    }
+  }
+  // Try plan tasks
+  if(tnData.tasks&&tnData.tasks[taskId]){
+    tnData.tasks[taskId].pinned=!tnData.tasks[taskId].pinned;
+    saveTnData();
+    renderTraineeTasks();
+    showToast(tnData.tasks[taskId].pinned?'已置顶':'已取消置顶','info');
   }
 }
 
