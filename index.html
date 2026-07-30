@@ -8632,7 +8632,7 @@ try { initApp(); } catch(e) { console.error('initApp 失败:', e.message); }
 
 // ===== 全系统数据备份与恢复 =====
 var BACKUP_KEY = 'otms_system_backup';
-var MAX_BACKUPS = 3;
+var MAX_BACKUPS = 2;
 var BACKUP_EXCLUDE_PREFIXES = ['_okr_cleared', '_oplog_cleared', 'bk_collapse', 'okr_sync_version'];
 
 function getBackupData(){
@@ -8700,7 +8700,7 @@ function openRestoreModal(){
 
   var html = '<div style="padding:12px 8px">';
   html += '<h3 style="font-size:16px;font-weight:700;margin-bottom:6px;color:#3B3835;padding-right:28px">系统数据备份管理</h3>';
-  html += '<p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">系统每次打开页面时自动备份全部数据，保留最近 '+MAX_BACKUPS+' 个版本。恢复将覆盖当前数据，请谨慎操作。</p>';
+  html += '<p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">系统每次打开页面时自动备份全部数据，保留最近 '+MAX_BACKUPS+' 份备份。恢复将覆盖当前数据，请谨慎操作。</p>';
 
   if(backups.length === 0){
     html += '<div style="text-align:center;color:var(--text-muted);padding:32px;background:var(--bg-surface);border-radius:8px">暂无自动备份记录<br><span style="font-size:10px">刷新页面后将自动生成首次备份</span></div>';
