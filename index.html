@@ -262,6 +262,40 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .nd-section-hd .nd-read-all { font-size:10px; color:var(--accent); cursor:pointer; text-transform:none; letter-spacing:0; font-weight:400; }
 .nd-section-hd .nd-read-all:hover { text-decoration:underline; }
 .nd-footer { padding:12px 16px; text-align:center; font-size:11px; color:var(--accent); cursor:pointer; border-top:1px solid var(--border-subtle); transition:var(--transition); }
+/* 任务操作记录抽屉 */
+.tl-overlay { position:fixed; inset:0; background:rgba(10,15,22,.3); z-index:9991; display:none; }
+.tl-overlay.show { display:block; }
+.tl-drawer { position:fixed; top:0; right:0; width:440px; height:100vh; background:var(--card); box-shadow:-4px 0 32px rgba(0,0,0,.12); z-index:9992; transform:translateX(100%); transition:transform .3s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; }
+.tl-drawer.show { transform:translateX(0); }
+.tl-drawer .tl-header { display:flex; align-items:center; gap:12px; padding:16px 20px; border-bottom:1px solid var(--border-light); flex-shrink:0; }
+.tl-drawer .tl-header h3 { margin:0; font-size:14px; font-weight:600; }
+.tl-drawer .tl-close { width:32px; height:32px; border:none; background:var(--bg-surface); border-radius:8px; cursor:pointer; font-size:16px; color:var(--text-dim); display:flex; align-items:center; justify-content:center; margin-left:auto; transition:var(--transition); }
+.tl-drawer .tl-close:hover { background:var(--bg-surface-hover); color:var(--text); }
+.tl-drawer .tl-body { flex:1; overflow-y:auto; padding:16px 20px; }
+.tl-drawer .tl-filter-row { display:flex; gap:6px; padding:8px 20px; border-bottom:1px solid var(--border-subtle); flex-shrink:0; flex-wrap:wrap; }
+.tl-drawer .tl-filter-chip { font-size:9px; padding:3px 10px; border-radius:12px; cursor:pointer; border:1px solid var(--border-light); background:transparent; color:var(--text-dim); font-family:inherit; transition:all .15s; white-space:nowrap; }
+.tl-drawer .tl-filter-chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.tl-drawer .tl-empty { padding:40px 20px; text-align:center; font-size:11px; color:var(--text-muted); }
+.tl-item { display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--border-subtle); align-items:flex-start; }
+.tl-item:last-child { border-bottom:none; }
+.tl-item .tl-icon { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px; }
+.tl-item .tl-icon.create { background:#E8F5E9; color:#2E7D32; }
+.tl-item .tl-icon.edit { background:#E3F2FD; color:#1565C0; }
+.tl-item .tl-icon.status { background:#FFF3E0; color:#E65100; }
+.tl-item .tl-icon.approve { background:#E8F5E9; color:#2E7D32; }
+.tl-item .tl-icon.reject { background:#FFEBEE; color:#C62828; }
+.tl-item .tl-icon.delete { background:#F3E5F5; color:#7B1FA2; }
+.tl-item .tl-icon.resubmit { background:#E0F7FA; color:#00838F; }
+.tl-item .tl-icon.sync { background:#F9FBE7; color:#827717; }
+.tl-item .tl-content { flex:1; min-width:0; }
+.tl-item .tl-task-name { font-size:11px; font-weight:600; color:var(--text); line-height:1.4; word-break:break-all; }
+.tl-item .tl-detail { font-size:9.5px; color:var(--text-dim); margin-top:2px; line-height:1.5; }
+.tl-item .tl-meta { display:flex; align-items:center; gap:8px; margin-top:3px; font-size:9px; color:var(--text-muted); }
+.tl-item .tl-tag { display:inline-block; padding:1px 6px; border-radius:3px; font-size:8px; font-weight:500; }
+.tl-item .tl-tag.weekly { background:#E8F0FE; color:#3A6BC5; }
+.tl-item .tl-tag.ref { background:#FDF8F2; color:#D4A76A; }
+.tl-item .tl-tag.plan { background:#F4F6FB; color:#5D8AA8; }
+.tl-stats { display:flex; gap:12px; padding:8px 20px; font-size:9px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); flex-shrink:0; }
 .nd-footer:hover { background:var(--accent-wash); }
 .nd-ding-toggle { display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 16px; font-size:12px; font-weight:400; cursor:pointer; color:var(--accent); background:var(--accent-wash); user-select:none; }
 .nd-ding-toggle svg { flex-shrink:0; }
@@ -480,6 +514,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .gstat-active { background:#FBF6EC; color:#C48A4A; }
 .gstat-pending { background:#EEEEEE; color:#6E6E6E; }
 .gstat-done { background:#EAF0EE; color:#6B9A8A; }
+/* ---- Large screen scaling ---- */
+@media (min-width: 1920px) { html { zoom: 1.12; } }
+@media (min-width: 2560px) { html { zoom: 1.25; } }
+@media (min-width: 3840px) { html { zoom: 1.4; } }
 /* ---- Optimisation 7: Print styles ---- */
 @media print {
   /* Hide non-Gantt UI */
@@ -2175,6 +2213,17 @@ body.tn-resizing * { pointer-events:none; }
       <div class="nd-header"><h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> 消息中心</h3><button class="nd-close" onclick="closeNotify()">✕</button></div>
       <div class="nd-body" id="notifyBody"></div>
     </div>
+    <!-- 任务操作记录抽屉 -->
+    <div class="tl-overlay" id="tlOverlay" onclick="closeTaskLogDrawer()"></div>
+    <div class="tl-drawer" id="tlDrawer">
+      <div class="tl-header">
+        <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 操作记录</h3>
+        <button class="tl-close" onclick="closeTaskLogDrawer()">✕</button>
+      </div>
+      <div class="tl-stats" id="tlStats"></div>
+      <div class="tl-filter-row" id="tlFilterRow"></div>
+      <div class="tl-body" id="tlBody"></div>
+    </div>
   </div>
 </div>
 
@@ -2339,7 +2388,8 @@ body.tn-resizing * { pointer-events:none; }
         <select id="tnPersonFilter" onchange="renderTraineeTasks()"><option value="all">全部执行者</option></select>
         <select id="tnParentFilter" onchange="renderTraineeTasks()"><option value="all">全部层级</option><option value="parent">仅父任务</option><option value="child">仅子任务</option><option value="independent">仅独立任务</option></select>
         <span style="margin-left:auto;font-size:10px;color:var(--text-dim)" id="tnTaskCount"></span>
-        <button class="btn btn-primary btn-sm" onclick="openWeeklyTaskModal()" style="font-size:9px;padding:6px 14px;border-radius:8px;margin-left:8px"><span class="tn-add-task-label">+ 发布任务</span></button>
+        <button class="btn btn-outline btn-sm" onclick="toggleTaskLogDrawer()" style="font-size:9px;padding:6px 10px;border-radius:8px;margin-left:4px" title="操作记录"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>操作记录</button>
+        <button class="btn btn-primary btn-sm" onclick="openWeeklyTaskModal()" style="font-size:9px;padding:6px 14px;border-radius:8px;margin-left:4px"><span class="tn-add-task-label">+ 发布任务</span></button>
       </div>
       <div id="tnApprovalPanel" class="tn-approval-panel" style="display:none">
         <div class="tn-approval-header" onclick="toggleApprovalPanel()">
@@ -2353,86 +2403,6 @@ body.tn-resizing * { pointer-events:none; }
         <div id="tnCardPane"></div>
         <div class="tn-divider" id="tnDivider"></div>
         <div id="tnGanttPane"></div>
-      </div>
-      <!-- Weekly task modal -->
-      <div class="tn-detail-overlay" id="weeklyTaskModal" style="display:none" onclick="if(event.target===this)closeWeeklyTaskModal()">
-        <div class="tn-detail-modal" style="width:440px;max-height:90vh" onclick="event.stopPropagation()">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-            <h4 id="wtModalTitle" style="margin:0;font-size:14px">新增本周任务</h4>
-            <button style="margin-left:auto;border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-dim)" onclick="closeWeeklyTaskModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-          </div>
-          <div id="wtModalHint" style="display:none;margin-bottom:12px;padding:6px 10px;background:#FFF8E1;border-radius:6px;font-size:10px;color:#B45309"></div>
-          <div class="tn-report-field" style="margin-bottom:10px">
-            <label>任务名称</label>
-            <input id="wtName" placeholder="输入任务名称…" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box">
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:10px">
-            <div class="tn-report-field" style="flex:1">
-              <label>所属系统</label>
-              <select id="wtSystem"><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option></select>
-            </div>
-          <div style="display:flex;gap:10px;margin-bottom:10px">
-            <div class="tn-report-field" style="flex:1">
-              <label>起始周次</label>
-              <select id="wtWeekStart" onchange="var v=document.getElementById('wtWeekStart').value;var e=document.getElementById('wtWeekEnd');if(v&&e&&parseInt(v.slice(1))>parseInt(e.value.slice(1)))e.value=v;"></select>
-            </div>
-            <div class="tn-report-field" style="flex:1">
-              <label>结束周次</label>
-              <select id="wtWeekEnd"></select>
-            </div>
-          </div>
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:10px">
-            <div class="tn-report-field" style="flex:1">
-              <label>任务类型</label>
-              <select id="wtTaskType"><option value="normal">普通任务</option><option value="meeting">会议任务</option></select>
-            </div>
-            <div class="tn-report-field" style="flex:1">
-              <label>任务类别</label>
-              <select id="wtTaskCategory"><option value="deliverable">交付物</option><option value="okr">OKR</option><option value="milestone">里程碑</option><option value="review">评审</option></select>
-            </div>
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:10px">
-            <div class="tn-report-field" style="flex:1">
-              <label>R 执行人</label>
-              <select id="wtR"><option value="">选择执行人</option></select>
-            </div>
-            <div class="tn-report-field" style="flex:1">
-              <label>A 负责人</label>
-              <select id="wtA"><option value="">选择负责人</option></select>
-            </div>
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:10px">
-            <div class="tn-report-field" style="flex:1">
-              <label>C 咨询人</label>
-              <select id="wtC"><option value="">选择咨询人</option></select>
-            </div>
-            <div class="tn-report-field" style="flex:1">
-              <label>I 知会人</label>
-              <select id="wtI"><option value="">选择知会人</option></select>
-            </div>
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:16px">
-            <div class="tn-report-field" style="flex:1">
-              <label>优先级</label>
-              <select id="wtPriority"><option value="P0">P0 · 紧急</option><option value="P1" selected>P1 · 重要</option><option value="P2">P2 · 普通</option></select>
-            </div>
-          </div>
-          <div class="tn-report-field" style="margin-bottom:10px">
-            <label>任务描述</label>
-            <textarea id="wtDesc" placeholder="添加详细说明…" rows="2" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:11px;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none;box-sizing:border-box;resize:vertical"></textarea>
-          </div>
-          <div class="tn-report-field" style="margin-bottom:10px">
-            <label>父任务（可选）</label>
-            <select id="wtParentId" style="width:100%;padding:8px 10px;border:1px solid var(--border-light);border-radius:8px;font-size:10px;font-family:inherit;background:var(--bg-surface);color:var(--text);outline:none">
-              <option value="">无父任务</option>
-            </select>
-          </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-outline btn-sm" onclick="closeWeeklyTaskModal()" style="flex:1">取消</button>
-            <button class="btn btn-primary btn-sm" id="wtSaveBtn" onclick="saveWeeklyTask()" style="flex:1">保存任务</button>
-          </div>
-        </div>
       </div>
       <!-- Unified task edit modal -->
       <div class="tn-detail-overlay" id="unifiedTaskModal" style="display:none" onclick="if(event.target===this)closeUnifiedTaskModal()">
@@ -3125,17 +3095,19 @@ body.tn-resizing * { pointer-events:none; }
 <div class="main">
   <div class="page-hd"><span class="ph-dot c6"></span><div class="ph-title">公司管理</div><div class="ph-sub c6">Company Management</div></div>
   <div class="oc-sub-tabs" style="margin-bottom:16px">
-    <button class="oc-sub-tab active" onclick="switchCompanyView('list',this)">公司列表</button>
+    <button class="oc-sub-tab active" onclick="switchCompanyView('equity',this)">股权架构</button>
+    <button class="oc-sub-tab" onclick="switchCompanyView('list',this)">公司列表</button>
     <button class="oc-sub-tab" onclick="switchCompanyView('license',this)">证照管理</button>
     <button class="oc-sub-tab" onclick="switchCompanyView('allocation',this)">公司分管</button>
-    <button class="oc-sub-tab" onclick="switchCompanyView('equity',this)">股权架构</button>
     <button class="oc-sub-tab" onclick="switchCompanyView('contract',this)">合同用印</button>
+    <button class="oc-sub-tab" onclick="switchCompanyView('calendar',this)">境外公司月历</button>
   </div>
   <div id="companyListView"></div>
   <div id="companyLicenseView" style="display:none"></div>
   <div id="companyAllocationView" style="display:none"></div>
   <div id="companyEquityView" style="display:none"></div>
   <div id="companyContractView" style="display:none"></div>
+  <div id="companyCalendarView" style="display:none"></div>
 </div>
 </div>
 
@@ -3281,8 +3253,8 @@ var TN_ALL_WEEKS = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W1
 const MODULES = ['org','company','okr','kpi','report','meeting','trainee'];
 const MOD_LABELS = {vision:'愿景与战略',org:'组织管理',company:'公司管理',okr:'OKR目标',kpi:'KPI指标',report:'报表提交',meeting:'例会管理',trainee:'管培生管理'};
 const PERM_MODULES = ['okr','kpi','report','meeting','trainee','company']; // modules requiring explicit permission grants
-const SUBTABS = {vision:['strategy','trainee','backend'],org:['tree','edit','func','attend'],company:['list','license','allocation','equity','contract'],okr:['cards','gantt','tree'],kpi:['indicators'],report:['monthly','yearly'],meeting:['weekly'],trainee:['overview','tasks','gantt','reports','evaluation','dashboard']};
-const SUBTAB_LABELS = {org_tree:'树状架构图',org_edit:'员工花名册',org_func:'职能分工',org_attend:'在岗状态',company_list:'公司列表',company_license:'证照管理',company_allocation:'公司分管',company_equity:'股权架构',company_contract:'合同用印',okr_cards:'总览',okr_gantt:'甘特图',okr_tree:'树形图',kpi_indicators:'KPI 指标',report_monthly:'月度报表',report_yearly:'年度报表',vision_strategy:'战略总览',vision_trainee:'管培生计划',vision_backend:'大后台系统',meeting_weekly:'周例会',trainee_overview:'总览',trainee_tasks:'任务看板',trainee_gantt:'甘特图',trainee_reports:'每周反馈',trainee_evaluation:'管培生打分',trainee_dashboard:'管培生绩效'};
+const SUBTABS = {vision:['strategy','trainee','backend'],org:['tree','edit','func','attend'],company:['list','license','allocation','equity','contract','calendar'],okr:['cards','gantt','tree'],kpi:['indicators'],report:['monthly','yearly'],meeting:['weekly'],trainee:['overview','tasks','gantt','reports','evaluation','dashboard']};
+const SUBTAB_LABELS = {org_tree:'树状架构图',org_edit:'员工花名册',org_func:'职能分工',org_attend:'在岗状态',company_list:'公司列表',company_license:'证照管理',company_allocation:'公司分管',company_equity:'股权架构',company_contract:'合同用印',company_calendar:'境外公司月历',okr_cards:'总览',okr_gantt:'甘特图',okr_tree:'树形图',kpi_indicators:'KPI 指标',report_monthly:'月度报表',report_yearly:'年度报表',vision_strategy:'战略总览',vision_trainee:'管培生计划',vision_backend:'大后台系统',meeting_weekly:'周例会',trainee_overview:'总览',trainee_tasks:'任务看板',trainee_gantt:'甘特图',trainee_reports:'每周反馈',trainee_evaluation:'管培生打分',trainee_dashboard:'管培生绩效'};
 var PERM_SELMOD = 'vision';
 const escAttr=s=>String(s).replace(/[^a-zA-Z0-9\u4e00-\u9fff_-]/g,'_');
 function defaultRoles(){
@@ -3295,7 +3267,28 @@ function defaultRoles(){
 }
 function ensureDefaultRoles(p){
   var defs=defaultRoles();
-  Object.keys(defs).forEach(function(r){if(!p.roles[r])p.roles[r]=defs[r];});
+  Object.keys(defs).forEach(function(r){
+    if(!p.roles[r]){
+      p.roles[r]=JSON.parse(JSON.stringify(defs[r]));
+    } else {
+      // Merge default modules for existing roles (fill in any missing module permissions)
+      if(!p.roles[r].modules) p.roles[r].modules = {};
+      var defMods = defs[r].modules || {};
+      Object.keys(defMods).forEach(function(m){
+        if(p.roles[r].modules[m] === undefined){
+          p.roles[r].modules[m] = defMods[m];
+        }
+      });
+      // Merge default subtabs
+      if(!p.roles[r].subtabs) p.roles[r].subtabs = {};
+      var defSubs = defs[r].subtabs || {};
+      Object.keys(defSubs).forEach(function(k){
+        if(p.roles[r].subtabs[k] === undefined){
+          p.roles[r].subtabs[k] = defSubs[k];
+        }
+      });
+    }
+  });
 }
 function loadPerms(){
   try{
@@ -3942,10 +3935,10 @@ function editRolePerms(roleName){
 function saveRolePerms(roleName){
   var p=loadPerms();
   if(!p.roles[roleName])return;
-  p.roles[roleName].modules={};
+  if(!p.roles[roleName].modules) p.roles[roleName].modules = {};
   PERM_MODULES.forEach(function(m){
     var el=document.getElementById('rpMod_'+escAttr(roleName)+'_'+m);
-    if(el&&el.value!=='none')p.roles[roleName].modules[m]=el.value;
+    if(el) p.roles[roleName].modules[m] = el.value;
   });
   savePerms(p);
   var pel=document.getElementById('permContent');
@@ -12376,6 +12369,125 @@ function saveTnData(){
   try{ localStorage.setItem(getTnStorageKey('data'), JSON.stringify(tnData)); }catch(e){}
 }
 
+// ---- 任务操作记录 ----
+function addTaskLog(action, taskId, taskName, taskSource, details){
+  if(!tnData) loadTnData();
+  if(!tnData.taskLog) tnData.taskLog = [];
+  tnData.taskLog.unshift({
+    id: 'log_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    time: new Date().toISOString(),
+    action: action,
+    taskId: taskId,
+    taskName: taskName,
+    taskSource: taskSource,
+    user: currentUser || '系统',
+    details: details || {}
+  });
+  if(tnData.taskLog.length > 300) tnData.taskLog = tnData.taskLog.slice(0, 300);
+  saveTnData();
+}
+
+var tlActionFilter = 'all';
+function toggleTaskLogDrawer(){
+  var drawer = document.getElementById('tlDrawer');
+  var overlay = document.getElementById('tlOverlay');
+  if(drawer.classList.contains('show')){ closeTaskLogDrawer(); return; }
+  renderTaskLogDrawer();
+  drawer.classList.add('show'); overlay.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeTaskLogDrawer(){
+  var drawer = document.getElementById('tlDrawer');
+  var overlay = document.getElementById('tlOverlay');
+  if(drawer) drawer.classList.remove('show');
+  if(overlay) overlay.classList.remove('show');
+  document.body.style.overflow = '';
+}
+function filterTaskLog(action){
+  tlActionFilter = action;
+  renderTaskLogDrawer();
+}
+function renderTaskLogDrawer(){
+  if(!tnData) loadTnData();
+  var logs = tnData.taskLog || [];
+  // Stats
+  var total = logs.length;
+  var today = new Date().toISOString().slice(0,10);
+  var todayCount = logs.filter(function(l){ return l.time.slice(0,10) === today; }).length;
+  document.getElementById('tlStats').innerHTML = '<span>共 <b>'+total+'</b> 条记录</span><span>今日 <b>'+todayCount+'</b> 条</span>';
+
+  // Filter chips
+  var actions = [
+    {key:'all',label:'全部',icon:''},
+    {key:'create',label:'创建',icon:'+'},
+    {key:'edit',label:'编辑',icon:'✎'},
+    {key:'status',label:'状态变更',icon:'↻'},
+    {key:'approve',label:'通过',icon:'✓'},
+    {key:'reject',label:'驳回',icon:'✕'},
+    {key:'resubmit',label:'重新提交',icon:'↺'},
+    {key:'delete',label:'删除',icon:'🗑'},
+    {key:'sync',label:'会议同步',icon:'↗'}
+  ];
+  var chipHtml = '';
+  actions.forEach(function(a){
+    chipHtml += '<button class="tl-filter-chip'+(tlActionFilter===a.key?' active':'')+'" onclick="filterTaskLog(\''+a.key+'\')">'+(a.icon?'<span style="margin-right:2px">'+a.icon+'</span>':'')+a.label+'</button>';
+  });
+  document.getElementById('tlFilterRow').innerHTML = chipHtml;
+
+  // Filter logs
+  var filtered = logs;
+  if(tlActionFilter !== 'all'){
+    filtered = logs.filter(function(l){ return l.action === tlActionFilter; });
+  }
+
+  // Render
+  var bodyHtml = '';
+  if(filtered.length === 0){
+    bodyHtml = '<div class="tl-empty">暂无操作记录</div>';
+  } else {
+    var actionIcons = {
+      create: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+      edit: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+      status: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>',
+      approve: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+      reject: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+      resubmit: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>',
+      delete: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+      sync: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>'
+    };
+    var sourceLabels = {weekly:'周任务', ref:'参考任务', plan:'计划任务'};
+    var actionLabels = {create:'创建了任务', edit:'编辑了任务', status:'变更了状态', approve:'通过了任务', reject:'驳回了任务', resubmit:'重新提交了任务', delete:'删除了任务', sync:'会议同步创建'};
+    filtered.forEach(function(l){
+      var d = l.details || {};
+      var detailHtml = '';
+      if(l.action === 'status' || l.action === 'status_change'){
+        detailHtml = '状态 ' + (d.from||'?') + ' → ' + (d.to||'?');
+      } else if(l.action === 'edit'){
+        detailHtml = '修改了 ' + (d.fields||[]).join('、');
+      } else if(l.action === 'approve'){
+        detailHtml = '审批通过' + (d.by ? ' · ' + d.by : '');
+      } else if(l.action === 'reject'){
+        detailHtml = '审批驳回' + (d.by ? ' · ' + d.by : '');
+      } else if(l.action === 'create'){
+        detailHtml = (d.sys ? '系统: '+d.sys : '') + (d.person ? ' · 执行人: '+d.person : '');
+      }
+      var timeStr = l.time.slice(0,16).replace('T',' ');
+      bodyHtml += '<div class="tl-item">';
+      bodyHtml += '<div class="tl-icon '+l.action+'">'+(actionIcons[l.action]||'')+'</div>';
+      bodyHtml += '<div class="tl-content">';
+      bodyHtml += '<div class="tl-task-name">'+esc(l.taskName)+'</div>';
+      if(detailHtml) bodyHtml += '<div class="tl-detail">'+detailHtml+'</div>';
+      bodyHtml += '<div class="tl-meta">';
+      bodyHtml += '<span>'+esc(l.user)+'</span>';
+      bodyHtml += '<span>'+(actionLabels[l.action]||l.action)+'</span>';
+      bodyHtml += '<span class="tl-tag '+(l.taskSource||'weekly')+'">'+(sourceLabels[l.taskSource]||l.taskSource||'周任务')+'</span>';
+      bodyHtml += '<span style="margin-left:auto">'+timeStr+'</span>';
+      bodyHtml += '</div></div></div>';
+    });
+  }
+  document.getElementById('tlBody').innerHTML = bodyHtml;
+}
+
 function getTnTask(taskId){
   if(!tnData) loadTnData();
   return tnData.tasks[taskId] || null;
@@ -13742,8 +13854,10 @@ function toggleTnWeek(taskId, weekIdx){
 
 function setTnTaskStatus(taskId, status){
   var td = getTnTask(taskId) || {};
+  var oldStatus = td.status || 'pending';
   td.status = status;
   setTnTask(taskId, td);
+  addTaskLog('status', taskId, td.name||taskId, 'plan', {from: oldStatus, to: status});
   renderTraineeSummary();
   renderTraineeTasks();
 }
@@ -13785,10 +13899,11 @@ function approveTask(taskId){
       tnData.wtasks[i].approvalStatus = 'approved';
       tnData.wtasks[i].approvedBy = currentUser || '';
       tnData.wtasks[i].approvedAt = new Date().toISOString();
+      saveTnData();
+      addTaskLog('approve', taskId, tnData.wtasks[i].name, 'weekly', {by: currentUser});
       break;
     }
   }
-  saveTnData();
   renderApprovalPanel();
   renderTraineeTasks();
 }
@@ -13801,10 +13916,11 @@ function rejectTask(taskId){
       tnData.wtasks[i].approvalStatus = 'rejected';
       tnData.wtasks[i].approvedBy = currentUser || '';
       tnData.wtasks[i].approvedAt = new Date().toISOString();
+      saveTnData();
+      addTaskLog('reject', taskId, tnData.wtasks[i].name, 'weekly', {by: currentUser});
       break;
     }
   }
-  saveTnData();
   renderApprovalPanel();
   renderTraineeTasks();
 }
@@ -13816,10 +13932,11 @@ function resubmitTask(taskId){
       tnData.wtasks[i].approvalStatus = 'pending';
       tnData.wtasks[i].approvedBy = '';
       tnData.wtasks[i].approvedAt = '';
+      saveTnData();
+      addTaskLog('resubmit', taskId, tnData.wtasks[i].name, 'weekly', {});
       break;
     }
   }
-  saveTnData();
   renderTraineeTasks();
 }
 
@@ -13887,10 +14004,36 @@ function populateWeekSelect(selId, includeAll){
 }
 function openWeeklyTaskModal(){
   try {
-  // Populate week dropdowns with date ranges
-  populateWeekSelect('wtWeekStart', false);
-  populateWeekSelect('wtWeekEnd', false);
-  // Set default weeks
+  // Switch to trainee tasks view if not already there
+  if(curTab !== 'trainee'){ switchTab('trainee'); }
+  if(tnCurrentView !== 'tasks'){ switchTraineeView('tasks'); }
+
+  // switchTraineeView hides tnTaskDetail, hide card/gantt panes then show detail
+  var cardPane = document.getElementById('tnCardPane');
+  var divider = document.getElementById('tnDivider');
+  var ganttPane = document.getElementById('tnGanttPane');
+  var detailPane = document.getElementById('tnTaskDetail');
+  if(cardPane) cardPane.style.display = 'none';
+  if(divider) divider.style.display = 'none';
+  if(ganttPane) ganttPane.style.display = 'none';
+  if(detailPane) detailPane.style.display = '';
+
+  // Set modal title/hint based on role
+  var canPub = canPublishTask(currentUser);
+  var title = canPub ? '发布任务' : '提议任务';
+  var hintHtml = canPub ? '' : '<div style="margin-bottom:12px;padding:6px 10px;background:#FFF8E1;border-radius:6px;font-size:10px;color:#B45309">提交后需带教老师或管理员审核通过方可转为正式任务</div>';
+  var btnLabel = canPub ? '发布任务' : '提交审核';
+
+  // Populate week dropdowns
+  var weekOpts = '';
+  if(typeof EVAL_WEEKS !== 'undefined' && EVAL_WEEKS && typeof EVAL_WEEKS.forEach === 'function'){
+    EVAL_WEEKS.forEach(function(w){
+      weekOpts += '<option value="'+w.id+'">'+w.label+' ('+w.start+'-'+w.end+')</option>';
+    });
+  } else {
+    for(var i=1;i<=14;i++){ weekOpts += '<option value="W'+i+'">W'+i+'</option>'; }
+  }
+
   var tnWkEl = document.getElementById('tnWeekFilter');
   var wkFilter = tnWkEl ? tnWkEl.value : 'all';
   var now = new Date();
@@ -13899,33 +14042,97 @@ function openWeeklyTaskModal(){
   if(diffDays < 0) diffDays = 0;
   var curWk = 'W' + Math.min(Math.floor(diffDays / 7) + 1, 14);
   var defStart = wkFilter !== 'all' ? wkFilter : curWk;
-  document.getElementById('wtWeekStart').value = defStart;
-  document.getElementById('wtWeekEnd').value = defStart;
-  // Populate RACI selects with trainee names
+
   var tOpts = TN_TRAINEES.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
-  document.getElementById('wtR').innerHTML = '<option value="">选择执行人</option>' + tOpts;
-  document.getElementById('wtA').innerHTML = '<option value="">选择负责人</option>' + tOpts;
-  document.getElementById('wtC').innerHTML = '<option value="">选择知会人</option>' + tOpts;
-  document.getElementById('wtI').innerHTML = '<option value="">选择审核人</option>' + tOpts;
-  document.getElementById('wtName').value = '';
-  // Set modal title/hint based on role
-  var canPub = canPublishTask(currentUser);
-  document.getElementById('wtModalTitle').textContent = canPub ? '发布任务' : '提议任务';
-  var hint = document.getElementById('wtModalHint');
-  if(canPub){
-    hint.style.display = 'none';
-  } else {
-    hint.style.display = 'block';
-    hint.textContent = '提交后需带教老师或管理员审核通过方可转为正式任务';
-  }
-  document.getElementById('wtSaveBtn').textContent = canPub ? '发布任务' : '提交审核';
-  document.getElementById('weeklyTaskModal').style.display = 'flex';
-  document.getElementById('wtName').focus();
+
+  // Build the inline create form (same style as task detail edit view)
+  var html = '';
+  // Header with title and action buttons
+  html += '<div class="td-header">';
+  html += '<button class="td-back" onclick="closeWeeklyTaskModal()">← 返回任务列表</button>';
+  html += '<span class="td-sys" style="font-size:11px;font-weight:600">'+title+'</span>';
+  html += '<button class="td-cancel-btn" style="margin-left:auto" onclick="closeWeeklyTaskModal()">取消</button>';
+  html += '<button class="td-save-btn" id="wtSaveBtn" onclick="saveWeeklyTask()">'+btnLabel+'</button>';
+  html += '</div>';
+
+  // Body content with padding
+  html += '<div class="td-body">';
+  html += hintHtml;
+
+  // Task name
+  html += '<div class="td-section"><div class="td-section-title">任务名称</div>';
+  html += '<input class="td-edit-input" id="wtName" placeholder="输入任务名称…" style="width:100%;box-sizing:border-box">';
+  html += '</div>';
+
+  // System + weeks
+  html += '<div class="td-section"><div class="td-section-title">基本信息</div>';
+  html += '<div class="td-edit-row">';
+  html += '<div><span class="td-edit-label">所属系统</span><select class="td-edit-select" id="wtSystem"><option value="yyda">用印档案管理系统</option><option value="rssw">人事事务自动化系统</option><option value="cwzw">财务账务自动化系统</option></select></div>';
+  html += '<div><span class="td-edit-label">优先级</span><select class="td-edit-select" id="wtPriority"><option value="P0">P0 · 紧急</option><option value="P1" selected>P1 · 重要</option><option value="P2">P2 · 普通</option></select></div>';
+  html += '</div>';
+  html += '<div class="td-edit-row">';
+  html += '<div><span class="td-edit-label">起始周次</span><select class="td-edit-select" id="wtWeekStart" onchange="var v=document.getElementById(\'wtWeekStart\').value;var e=document.getElementById(\'wtWeekEnd\');if(v&&e&&parseInt(v.slice(1))>parseInt(e.value.slice(1)))e.value=v;">'+weekOpts+'</select></div>';
+  html += '<div><span class="td-edit-label">结束周次</span><select class="td-edit-select" id="wtWeekEnd">'+weekOpts+'</select></div>';
+  html += '</div>';
+  html += '<div class="td-edit-row">';
+  html += '<div><span class="td-edit-label">任务类型</span><select class="td-edit-select" id="wtTaskType"><option value="normal">普通任务</option><option value="meeting">会议任务</option></select></div>';
+  html += '<div><span class="td-edit-label">任务类别</span><select class="td-edit-select" id="wtTaskCategory"><option value="deliverable">交付物</option><option value="okr">OKR</option><option value="milestone">里程碑</option><option value="review">评审</option></select></div>';
+  html += '</div>';
+  html += '</div>';
+
+  // RACI
+  html += '<div class="td-section"><div class="td-section-title">RACI 分工</div>';
+  html += '<div class="td-edit-row">';
+  html += '<div><span class="td-edit-label">R · 执行人</span><select class="td-edit-select" id="wtR"><option value="">选择执行人</option>'+tOpts+'</select></div>';
+  html += '<div><span class="td-edit-label">A · 负责人</span><select class="td-edit-select" id="wtA"><option value="">选择负责人</option>'+tOpts+'</select></div>';
+  html += '</div>';
+  html += '<div class="td-edit-row">';
+  html += '<div><span class="td-edit-label">C · 咨询人</span><select class="td-edit-select" id="wtC"><option value="">选择咨询人</option>'+tOpts+'</select></div>';
+  html += '<div><span class="td-edit-label">I · 知会人</span><select class="td-edit-select" id="wtI"><option value="">选择知会人</option>'+tOpts+'</select></div>';
+  html += '</div>';
+  html += '</div>';
+
+  // Description
+  html += '<div class="td-section"><div class="td-section-title">任务描述</div>';
+  html += '<textarea class="td-edit-textarea" id="wtDesc" placeholder="添加任务详细说明、备注…" style="min-height:80px"></textarea>';
+  html += '</div>';
+
+  // Parent task
+  html += '<div class="td-section"><div class="td-section-title">父任务（可选）</div>';
+  html += '<select class="td-edit-select" id="wtParentId" style="width:100%"><option value="">无父任务</option></select>';
+  html += '</div>';
+
+  html += '</div>'; // end td-body
+
+  if(detailPane) detailPane.innerHTML = html;
+
+  // Set default week values
+  setTimeout(function(){
+    var wsEl = document.getElementById('wtWeekStart');
+    var weEl = document.getElementById('wtWeekEnd');
+    if(wsEl) wsEl.value = defStart;
+    if(weEl) weEl.value = defStart;
+    var nameEl = document.getElementById('wtName');
+    if(nameEl) nameEl.focus();
+
+    // Populate parent task dropdown
+    if(!tnData) loadTnData();
+    var parentSel = document.getElementById('wtParentId');
+    if(parentSel && tnData){
+      var allTasks = (tnData.wtasks||[]).concat(tnData.refTasks||[]);
+      allTasks.forEach(function(t){
+        if(!t.parentId){
+          parentSel.innerHTML += '<option value="'+t.id+'">'+esc(t.name)+'</option>';
+        }
+      });
+    }
+  }, 50);
+
   } catch(e) { alert('打开失败: '+e.message); console.error(e); }
 }
 
 function closeWeeklyTaskModal(){
-  document.getElementById('weeklyTaskModal').style.display = 'none';
+  closeTaskDetail();
 }
 
 function saveWeeklyTask(){
@@ -13944,12 +14151,15 @@ function saveWeeklyTask(){
   var priority = document.getElementById('wtPriority').value;
   var taskType = document.getElementById('wtTaskType').value;
   var taskCategory = document.getElementById('wtTaskCategory').value;
+  var desc = document.getElementById('wtDesc') ? document.getElementById('wtDesc').value.trim() : '';
+  var parentId = document.getElementById('wtParentId') ? document.getElementById('wtParentId').value : '';
   if(!personR && !personA){ alert('请至少指定执行人或负责人'); return; }
   if(!tnData) loadTnData();
   if(!tnData.wtasks) tnData.wtasks = [];
   var approvalStatus = canPublishTask(currentUser) ? 'approved' : 'pending';
+  var newTaskId = 'w'+Date.now();
   tnData.wtasks.push({
-    id: 'w'+Date.now(),
+    id: newTaskId,
     name: name,
     sys: sys,
     week: weekStart,
@@ -13963,6 +14173,8 @@ function saveWeeklyTask(){
     priority: priority,
     taskType: taskType,
     taskCategory: taskCategory,
+    desc: desc,
+    parentId: parentId,
     status: 'pending',
     createdAt: new Date().toISOString(),
     approvalStatus: approvalStatus,
@@ -13971,6 +14183,7 @@ function saveWeeklyTask(){
     approvedAt: isAdmin ? new Date().toISOString() : ''
   });
   saveTnData();
+  addTaskLog('create', newTaskId, name, 'weekly', {sys: sys, person: personR, priority: priority});
   closeWeeklyTaskModal();
   renderTraineeSummary();
   renderTraineeTasks();
@@ -13981,11 +14194,14 @@ function setWeeklyTaskStatus(wid, status){
   if(!tnData || !tnData.wtasks) return;
   for(var i=0;i<tnData.wtasks.length;i++){
     if(tnData.wtasks[i].id === wid){
+      var oldStatus = tnData.wtasks[i].status;
+      var tName = tnData.wtasks[i].name;
       tnData.wtasks[i].status = status;
+      saveTnData();
+      addTaskLog('status', wid, tName, 'weekly', {from: oldStatus, to: status});
       break;
     }
   }
-  saveTnData();
   renderTraineeSummary();
   renderTraineeTasks();
 }
@@ -13993,6 +14209,8 @@ function setWeeklyTaskStatus(wid, status){
 function deleteWeeklyTask(wid){
   if(!confirm('确认删除该任务？')) return;
   if(!tnData || !tnData.wtasks) return;
+  var delTask = null;
+  for(var i=0;i<tnData.wtasks.length;i++){ if(tnData.wtasks[i].id===wid){ delTask=tnData.wtasks[i]; break; } }
   var ch = getChildTasks(wid);
   if(ch.length > 0){
     ch.forEach(function(c){
@@ -14010,6 +14228,7 @@ function deleteWeeklyTask(wid){
   }
   tnData.wtasks = tnData.wtasks.filter(function(w){ return w.id !== wid; });
   saveTnData();
+  if(delTask) addTaskLog('delete', wid, delTask.name, 'weekly', {});
   renderTraineeSummary();
   renderTraineeTasks();
 }
@@ -14019,11 +14238,14 @@ function setRefTaskStatus(rid, status){
   if(!tnData.refTasks) tnData.refTasks = JSON.parse(JSON.stringify(TN_REF_TASKS));
   for(var i=0;i<tnData.refTasks.length;i++){
     if(tnData.refTasks[i].id === rid){
+      var oldStatus = tnData.refTasks[i].refStatus || 'pending';
+      var tName = tnData.refTasks[i].name;
       tnData.refTasks[i].refStatus = status;
+      saveTnData();
+      addTaskLog('status', rid, tName, 'ref', {from: oldStatus, to: status});
       break;
     }
   }
-  saveTnData();
   renderTraineeSummary();
   renderTraineeTasks();
 }
@@ -14032,6 +14254,8 @@ function deleteRefTask(rid){
   if(!confirm('确认删除该任务？')) return;
   if(!tnData) loadTnData();
   if(!tnData.refTasks) tnData.refTasks = JSON.parse(JSON.stringify(TN_REF_TASKS));
+  var delTask = null;
+  for(var i=0;i<tnData.refTasks.length;i++){ if(tnData.refTasks[i].id===rid){ delTask=tnData.refTasks[i]; break; } }
   var ch2 = getChildTasks(rid);
   if(ch2.length > 0){
     ch2.forEach(function(c){
@@ -14049,6 +14273,7 @@ function deleteRefTask(rid){
   }
   tnData.refTasks = tnData.refTasks.filter(function(r){ return r.id !== rid; });
   saveTnData();
+  if(delTask) addTaskLog('delete', rid, delTask.name, 'ref', {});
   renderTraineeSummary();
   renderTraineeTasks();
 }
@@ -14056,6 +14281,7 @@ function deleteRefTask(rid){
 function deleteTnTask(tid){
   if(!confirm('确认删除该任务？')) return;
   if(!tnData) loadTnData();
+  var delTask = getTnTask(tid) || {};
   var ch2 = getChildTasks(tid);
   if(ch2.length > 0){
     ch2.forEach(function(c){
@@ -14073,6 +14299,7 @@ function deleteTnTask(tid){
   if(!tnData) loadTnData();
   delete tnData.tasks[tid];
   saveTnData();
+  addTaskLog('delete', tid, delTask.name||tid, 'plan', {});
   renderTraineeSummary();
   renderTraineeTasks();
 }
@@ -14371,6 +14598,7 @@ function saveTaskDetail(source, taskId){
   var module = document.getElementById('tde-module') ? document.getElementById('tde-module').value.trim() : '';
   var deliverable = document.getElementById('tde-deliverable') ? document.getElementById('tde-deliverable').value.trim() : '';
   var desc = document.getElementById('tde-desc') ? document.getElementById('tde-desc').value.trim() : '';
+  var changedFields = [];
 
   // Collect weeks from checkboxes
   var weeks = [];
@@ -14385,58 +14613,81 @@ function saveTaskDetail(source, taskId){
 
   if(source === 'plan'){
     var td = getTnTask(taskId) || {};
+    if(td.status !== status) changedFields.push('状态');
     td.status = status;
     if(weeks.length > 0) td.weeks = weeks;
+    if(td.R !== R) changedFields.push('R执行人');
     td.R = R; td.A = A; td.I = I;
+    if(td.desc !== desc) changedFields.push('描述');
     td.desc = desc;
+    if(td.parentId !== parentId) changedFields.push('父任务');
     td.parentId = parentId;
     if(module) td.module = module;
     if(deliverable) td.deliverable = deliverable;
     td.C = C;
     setTnTask(taskId, td);
+    addTaskLog('edit', taskId, td.name||name, 'plan', {fields: changedFields.length ? changedFields : ['基本信息']});
   } else if(source === 'weekly'){
     if(!tnData || !tnData.wtasks) return;
     for(var i=0;i<tnData.wtasks.length;i++){
       if(tnData.wtasks[i].id === taskId){
-        tnData.wtasks[i].name = name;
-        tnData.wtasks[i].sys = sys; tnData.wtasks[i].sysName = sysNames[sys]||''; tnData.wtasks[i].sysColor = sysColors[sys]||''; tnData.wtasks[i].sysBg = sysBgs[sys]||'';
-        tnData.wtasks[i].priority = priority;
-        tnData.wtasks[i].taskType = taskType;
-        tnData.wtasks[i].taskCategory = taskCategory;
-        tnData.wtasks[i].status = status;
-        tnData.wtasks[i].R = R; tnData.wtasks[i].A = A; tnData.wtasks[i].C = C; tnData.wtasks[i].I = I;
-        tnData.wtasks[i].person = R;
-        tnData.wtasks[i].desc = desc;
-        tnData.wtasks[i].parentId = parentId;
-        if(module) tnData.wtasks[i].module = module;
-        if(deliverable) tnData.wtasks[i].deliverable = deliverable;
+        var wt = tnData.wtasks[i];
+        if(wt.name !== name) changedFields.push('名称');
+        if(wt.sys !== sys) changedFields.push('系统');
+        if(wt.priority !== priority) changedFields.push('优先级');
+        if(wt.status !== status) changedFields.push('状态');
+        if(wt.R !== R) changedFields.push('R执行人');
+        if(wt.desc !== desc) changedFields.push('描述');
+        if(wt.parentId !== parentId) changedFields.push('父任务');
+        wt.name = name;
+        wt.sys = sys; wt.sysName = sysNames[sys]||''; wt.sysColor = sysColors[sys]||''; wt.sysBg = sysBgs[sys]||'';
+        wt.priority = priority;
+        wt.taskType = taskType;
+        wt.taskCategory = taskCategory;
+        wt.status = status;
+        wt.R = R; wt.A = A; wt.C = C; wt.I = I;
+        wt.person = R;
+        wt.desc = desc;
+        wt.parentId = parentId;
+        if(module) wt.module = module;
+        if(deliverable) wt.deliverable = deliverable;
         break;
       }
     }
     saveTnData();
+    addTaskLog('edit', taskId, name, 'weekly', {fields: changedFields.length ? changedFields : ['基本信息']});
   } else if(source === 'ref'){
     if(!tnData) loadTnData();
     if(!tnData.refTasks) tnData.refTasks = JSON.parse(JSON.stringify(TN_REF_TASKS));
     for(var i=0;i<tnData.refTasks.length;i++){
       if(tnData.refTasks[i].id === taskId){
-        tnData.refTasks[i].name = name;
-        tnData.refTasks[i].sys = sys; tnData.refTasks[i].sysName = sysNames[sys]||''; tnData.refTasks[i].sysColor = sysColors[sys]||''; tnData.refTasks[i].sysBg = sysBgs[sys]||'';
-        tnData.refTasks[i].priority = priority;
-        tnData.refTasks[i].taskType = taskType;
-        tnData.refTasks[i].taskCategory = taskCategory;
-        tnData.refTasks[i].refStatus = status;
-        tnData.refTasks[i].executors = R ? R.replace(/、/g,',').split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
-        tnData.refTasks[i].approver = A;
-        tnData.refTasks[i].R = R; tnData.refTasks[i].A = A; tnData.refTasks[i].C = C; tnData.refTasks[i].I = I;
-        tnData.refTasks[i].desc = desc;
-        tnData.refTasks[i].parentId = parentId;
-        if(weeks.length > 0) tnData.refTasks[i].weeks = weeks;
-        tnData.refTasks[i].module = module;
-        tnData.refTasks[i].deliverable = deliverable;
+        var rt = tnData.refTasks[i];
+        if(rt.name !== name) changedFields.push('名称');
+        if(rt.sys !== sys) changedFields.push('系统');
+        if(rt.priority !== priority) changedFields.push('优先级');
+        if(rt.refStatus !== status) changedFields.push('状态');
+        if(rt.R !== R) changedFields.push('R执行人');
+        if(rt.desc !== desc) changedFields.push('描述');
+        if(rt.parentId !== parentId) changedFields.push('父任务');
+        rt.name = name;
+        rt.sys = sys; rt.sysName = sysNames[sys]||''; rt.sysColor = sysColors[sys]||''; rt.sysBg = sysBgs[sys]||'';
+        rt.priority = priority;
+        rt.taskType = taskType;
+        rt.taskCategory = taskCategory;
+        rt.refStatus = status;
+        rt.executors = R ? R.replace(/、/g,',').split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+        rt.approver = A;
+        rt.R = R; rt.A = A; rt.C = C; rt.I = I;
+        rt.desc = desc;
+        rt.parentId = parentId;
+        if(weeks.length > 0) rt.weeks = weeks;
+        rt.module = module;
+        rt.deliverable = deliverable;
         break;
       }
     }
     saveTnData();
+    addTaskLog('edit', taskId, name, 'ref', {fields: changedFields.length ? changedFields : ['基本信息']});
   }
 
   // Re-render in view mode
@@ -16627,32 +16878,48 @@ function renderTnMeetingList(){
 }
 
 // ===== Company Management =====
-var companyView = 'list';
+var companyView = 'equity';
 var COMPANIES = [
-  {id:'c1',name:'开弈人力',fullName:'开弈人力资源管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'人力资源',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
-  {id:'c2',name:'靠普人力',fullName:'靠普人力资源管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'人力资源',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
-  {id:'c3',name:'开博人力',fullName:'开博人力资源管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'人力资源',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
-  {id:'c4',name:'南京开弈',fullName:'南京开弈人力资源有限公司',legalRep:'',capital:'',regDate:'',addr:'南京',type:'人力资源',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
-  {id:'c5',name:'乾钵',fullName:'乾钵企业管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'企业管理',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'蔡心宇',accountExec:'韩燕&王永佳'},
-  {id:'c6',name:'开弈信息',fullName:'开弈信息技术有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'信息技术',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
-  {id:'c7',name:'深圳和弈',fullName:'深圳和弈人力资源有限公司',legalRep:'',capital:'',regDate:'',addr:'深圳',type:'人力资源',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
-  {id:'c8',name:'天津英才',fullName:'天津英才人力资源有限公司',legalRep:'',capital:'',regDate:'',addr:'天津',type:'人力资源',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
-  {id:'c9',name:'弈享天津',fullName:'弈享（天津）人力资源有限公司',legalRep:'',capital:'',regDate:'',addr:'天津',type:'人力资源',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
-  {id:'c10',name:'开弈医疗',fullName:'开弈医疗健康管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'医疗健康',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'邵吴慧',accountExec:'李佳'},
-  {id:'c11',name:'市场营销',fullName:'市场营销有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'市场营销',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'邵吴慧',accountExec:'李佳'},
-  {id:'c12',name:'开弈外包',fullName:'开弈外包服务有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'外包服务',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
-  {id:'c13',name:'时代人才',fullName:'时代人才服务有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'人力资源',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'蔡心宇',accountExec:'韩燕&王永佳'},
-  {id:'c14',name:'开弈人才',fullName:'开弈人才服务有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'人力资源',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'黄欢欢',accountExec:'季嘉莉'},
-  {id:'c15',name:'弈工分健康',fullName:'弈工分健康管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'健康管理',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'邵吴慧',accountExec:'李佳'},
-  {id:'c16',name:'弈工分文化体育',fullName:'弈工分文化体育发展有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'文化体育',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'邵吴慧',accountExec:'李佳'},
-  {id:'c17',name:'开弈人力研究院',fullName:'开弈人力资源研究院',legalRep:'',capital:'',regDate:'',addr:'上海',type:'研究机构',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'邵吴慧',accountExec:'李佳'},
-  {id:'c18',name:'微芮洺',fullName:'微芮洺文化传播有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'文化传播',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'邵吴慧',accountExec:'李佳'},
-  {id:'c19',name:'老龙馄饨',fullName:'老龙馄饨餐饮管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'餐饮',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'邵吴慧',accountExec:'李佳'},
-  {id:'c20',name:'开弈投资',fullName:'开弈投资管理有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'投资管理',financeHead:'吴松成',financeExec:'刘阳阳',accountHead:'邵吴慧',accountExec:'李佳'},
-  {id:'c21',name:'弈工分信息',fullName:'弈工分信息技术有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'信息技术',financeHead:'吴松成',financeExec:'刘阳阳',accountHead:'邵吴慧',accountExec:'李佳'},
-  {id:'c22',name:'智名',fullName:'智名企业咨询有限公司',legalRep:'',capital:'',regDate:'',addr:'上海',type:'企业咨询',financeHead:'吴松成',financeExec:'刘阳阳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
-  {id:'c23',name:'北京点才',fullName:'北京点才人力资源有限公司',legalRep:'',capital:'',regDate:'',addr:'北京',type:'人力资源',accountHead:'黄欢欢',accountExec:'季嘉莉'},
-  {id:'c24',name:'香港开弈',fullName:'香港开弈人力资源有限公司',legalRep:'',capital:'',regDate:'',addr:'香港',type:'人力资源',financeHead:'Ruby',financeExec:'Yvonne',accountHead:'王倩',accountExec:'王倩'}
+  // === 境外控股层（BVI / 开曼） ===
+  {id:'c101',name:'Champion Tech',fullName:'Champion Tech Developments',legalRep:'张毅',capital:'',regDate:'',addr:'BVI',type:'BVI公司',financeHead:'',financeExec:'',accountHead:'',accountExec:''},
+  {id:'c102',name:'开弈环球',fullName:'开弈环球集团有限公司',legalRep:'张毅',capital:'',regDate:'',addr:'BVI',type:'BVI公司',financeHead:'',financeExec:'',accountHead:'',accountExec:''},
+  {id:'c103',name:'CODAN Trustees',fullName:'CODAN Trustees (B.V.I.) Ltd.',legalRep:'',capital:'',regDate:'',addr:'BVI',type:'BVI信托',financeHead:'',financeExec:'',accountHead:'',accountExec:''},
+  {id:'c104',name:'安普资产',fullName:'安普资产管理有限公司',legalRep:'KIM TAE WAN',capital:'',regDate:'',addr:'BVI',type:'BVI公司',financeHead:'',financeExec:'',accountHead:'',accountExec:''},
+  {id:'c105',name:'开弈控股',fullName:'开弈控股有限公司',legalRep:'张毅',capital:'50000美金',regDate:'2015/1/27',addr:'开曼',type:'开曼公司',financeHead:'',financeExec:'',accountHead:'',accountExec:''},
+  {id:'c106',name:'侰溤服务',fullName:'侰溤服务有限公司',legalRep:'张毅',capital:'50000美金',regDate:'2014/10/3',addr:'BVI',type:'BVI公司',financeHead:'',financeExec:'',accountHead:'',accountExec:''},
+  {id:'c107',name:'开弈云数据',fullName:'中国开弈云数据管理有限公司',legalRep:'张毅',capital:'50000美金',regDate:'2015/7/10',addr:'BVI',type:'BVI公司',financeHead:'',financeExec:'',accountHead:'',accountExec:''},
+  // === 香港运营层 ===
+  {id:'c24',name:'香港开弈',fullName:'开弈（中国）人才服务有限公司',legalRep:'张毅',capital:'',regDate:'2004/12/24',addr:'香港',type:'香港公司',financeHead:'Ruby',financeExec:'Yvonne',accountHead:'王倩',accountExec:'王倩'},
+  // === WFOE 层 ===
+  {id:'c6',name:'开弈信息',fullName:'开弈信息科技（中国）有限公司',legalRep:'张毅',capital:'6000万(实缴)',regDate:'2006/4/29',addr:'上海',type:'信息技术',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c108',name:'开弈信息深圳',fullName:'开弈信息技术（深圳）有限公司',legalRep:'王倩',capital:'1000万港币(未实缴)',regDate:'2016/8/16',addr:'深圳',type:'信息技术',financeHead:'',financeExec:'',accountHead:'',accountExec:''},
+  // === 境内控股层 ===
+  {id:'c14',name:'开弈人才',fullName:'上海开弈人才服务（集团）有限公司',legalRep:'张毅',capital:'3000万(实缴)',regDate:'2003/7/24',addr:'上海',type:'人力资源',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  // === 境内运营层（开弈人力 子公司） ===
+  {id:'c1',name:'开弈人力',fullName:'上海开弈人力资源管理有限公司',legalRep:'王倩',capital:'1500万(实缴)',regDate:'2016/12/12',addr:'上海',type:'人力资源',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c2',name:'靠普人力',fullName:'上海靠普人力资源管理有限公司',legalRep:'杜宪',capital:'200万',regDate:'2021/5/7',addr:'上海',type:'人力资源',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c3',name:'开博人力',fullName:'上海开博人才服务有限公司',legalRep:'王倩',capital:'300万(实缴)',regDate:'2009/7/24',addr:'上海',type:'人力资源',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c23',name:'北京点才',fullName:'北京开弈点才劳务服务有限公司',legalRep:'王倩',capital:'200万(实缴)',regDate:'2009/3/30',addr:'北京',type:'人力资源',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c8',name:'天津英才',fullName:'开弈英才（天津）劳务服务有限公司',legalRep:'王倩',capital:'200万(实缴)',regDate:'2008/12/11',addr:'天津',type:'人力资源',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c7',name:'深圳和弈',fullName:'深圳市和弈劳务派遣有限公司',legalRep:'王倩',capital:'200万(实缴)',regDate:'2011/12/5',addr:'深圳',type:'人力资源',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c4',name:'南京开弈',fullName:'南京开弈人力资源管理有限公司',legalRep:'郭志洪',capital:'200万(实缴)',regDate:'2019/11/22',addr:'南京',type:'人力资源',financeHead:'蔡心宇',financeExec:'王永佳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  // === 境内运营层（开弈人才集团 直属） ===
+  {id:'c17',name:'开弈人力研究院',fullName:'上海开弈人力资源研究院',legalRep:'王妤扬',capital:'50万(实缴)',regDate:'2018/1/10',addr:'上海',type:'研究机构',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c20',name:'开弈投资',fullName:'上海开弈投资管理有限公司',legalRep:'张毅',capital:'50000万(实缴7010万)',regDate:'2015/6/26',addr:'上海',type:'投资管理',financeHead:'吴松成',financeExec:'刘阳阳',accountHead:'邵吴慧',accountExec:'李佳'},
+  // === 境内运营层（开弈投资 子公司） ===
+  {id:'c11',name:'市场营销',fullName:'上海开弈市场营销策划有限公司',legalRep:'李瑷瑄',capital:'1000万(实缴425万)',regDate:'2016/10/9',addr:'上海',type:'市场营销',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c21',name:'弈工分信息',fullName:'上海弈工分信息科技有限公司',legalRep:'张毅',capital:'5000万(实缴3000万)',regDate:'2017/7/3',addr:'上海',type:'信息技术',financeHead:'吴松成',financeExec:'刘阳阳',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c12',name:'开弈外包',fullName:'上海开弈企业服务外包有限公司',legalRep:'王倩',capital:'200万(实缴)',regDate:'2017/3/10',addr:'上海',type:'外包服务',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  // === 境内运营层（开弈信息科技 直属） ===
+  {id:'c16',name:'弈工分文化体育',fullName:'上海弈工分文化体育发展有限公司',legalRep:'张毅',capital:'1000万',regDate:'2017/7/3',addr:'上海',type:'文化体育',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c15',name:'弈工分健康',fullName:'上海弈工分健康信息咨询有限公司',legalRep:'戴琼琪',capital:'2100万',regDate:'2017/7/4',addr:'上海',type:'健康管理',financeHead:'芦智蔚',financeExec:'李蕾',accountHead:'邵吴慧',accountExec:'李佳'},
+  {id:'c9',name:'弈享天津',fullName:'弈享（天津）共享经济信息咨询有限公司',legalRep:'杜宪',capital:'1000万(实缴20万)',regDate:'2017/7/4',addr:'天津',type:'企业咨询',financeHead:'蔡心宇',financeExec:'韩燕',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  {id:'c109',name:'弈工分企服',fullName:'上海弈工分企业服务外包有限公司',legalRep:'姚娟',capital:'200万(实缴)',regDate:'2017/8/9',addr:'上海',type:'外包服务',financeHead:'',financeExec:'',accountHead:'',accountExec:''},
+  // === 境内平行持股 ===
+  {id:'c22',name:'智名',fullName:'智名信息技术（上海）有限公司',legalRep:'张涛',capital:'1200万(实缴)',regDate:'2008/5/25',addr:'上海',type:'信息技术',financeHead:'吴松成',financeExec:'刘阳阳',accountHead:'黄欢欢',accountExec:'季嘉莉'},
+  // === 其他境外 ===
+  {id:'c110',name:'时代开弈投资',fullName:'中國時代開弈投資集團有限公司',legalRep:'蔡志强',capital:'1港币',regDate:'2018/1/18',addr:'香港',type:'香港公司',financeHead:'',financeExec:'',accountHead:'',accountExec:''},
+  {id:'c111',name:'开弈美国',fullName:'CHINA-KEY HRO CO.,INC',legalRep:'张毅',capital:'暂未实缴',regDate:'',addr:'美国',type:'境外公司',financeHead:'',financeExec:'',accountHead:'',accountExec:''}
 ];
 
 function switchCompanyView(view, btn) {
@@ -16664,18 +16931,20 @@ function switchCompanyView(view, btn) {
   document.getElementById('companyAllocationView').style.display = view === 'allocation' ? '' : 'none';
   document.getElementById('companyEquityView').style.display = view === 'equity' ? '' : 'none';
   document.getElementById('companyContractView').style.display = view === 'contract' ? '' : 'none';
+  document.getElementById('companyCalendarView').style.display = view === 'calendar' ? '' : 'none';
   if (view === 'list') renderCompanyList();
   else if (view === 'license') renderCompanyLicense();
   else if (view === 'allocation') renderCompanyAllocation();
   else if (view === 'equity') renderCompanyEquity();
   else if (view === 'contract') renderCompanyContract();
+  else if (view === 'calendar') renderCompanyCalendar();
 }
 
 function renderCompanyList() {
-  var typeColors = {'人力资源':'#5D8AA8','信息技术':'#8B7AAA','投资管理':'#C94F66','企业管理':'#D4A76A','医疗健康':'#6AAA8A','健康管理':'#6AAA8A','市场营销':'#E0956A','外包服务':'#8BA89C','文化体育':'#A09DB5','文化传播':'#A09DB5','研究机构':'#7B8EA0','餐饮':'#D4735A','企业咨询':'#5D8AA8'};
+  var typeColors = {'人力资源':'#5D8AA8','信息技术':'#8B7AAA','投资管理':'#C94F66','企业管理':'#D4A76A','医疗健康':'#6AAA8A','健康管理':'#6AAA8A','市场营销':'#E0956A','外包服务':'#8BA89C','文化体育':'#A09DB5','文化传播':'#A09DB5','研究机构':'#7B8EA0','餐饮':'#D4735A','企业咨询':'#5D8AA8','BVI公司':'#6B7FA8','BVI信托':'#8899B0','开曼公司':'#5D9A8A','香港公司':'#4682B4','境外公司':'#7B8AA0'};
   var html = '<div class="stats" style="margin-bottom:16px">';
   html += '<div class="stat-card"><div class="label">公司总数</div><div class="value">' + COMPANIES.length + '</div><div class="sub">法律实体</div></div>';
-  html += '<div class="stat-card"><div class="label">覆盖城市</div><div class="value">' + [...new Set(COMPANIES.map(function(c){return c.addr;}))].length + '</div><div class="sub">上海/南京/深圳/天津/北京/香港</div></div>';
+  html += '<div class="stat-card"><div class="label">覆盖城市</div><div class="value">' + [...new Set(COMPANIES.map(function(c){return c.addr;}))].length + '</div><div class="sub">上海/南京/深圳/天津/北京/香港/BVI/开曼/美国</div></div>';
   html += '<div class="stat-card"><div class="label">行业类型</div><div class="value">' + [...new Set(COMPANIES.map(function(c){return c.type;}))].length + '</div><div class="sub">种类</div></div>';
   html += '<div class="stat-card"><div class="label">财务分管人</div><div class="value">4</div><div class="sub">蔡心宇/芦智蔚/吴松成/Ruby</div></div>';
   html += '</div>';
@@ -16998,6 +17267,1554 @@ function renderCompanyEquity() {
 
 function renderCompanyContract() {
   document.getElementById('companyContractView').innerHTML = '<div class="empty" style="padding:40px"><p style="font-size:11px">合同与用印</p><p style="color:var(--text2)">公司间合同、用印审批记录汇总 · 即将上线</p></div>';
+}
+
+var COMPLIANCE_COMPANIES = [
+  {
+    "seq": 1,
+    "juris": "HK",
+    "name": "开弈（中国）人才服务有限公司",
+    "status": "运营中",
+    "founding": "12-24",
+    "months": [
+      "—",
+      "⚠ NAR1≈2.4\n整理年度账目",
+      "启动审计",
+      "BIR56A雇主申报",
+      "审计收尾",
+      "年中复核\nSCR核对",
+      "劳工险检查",
+      "⚠ 利得税报税 8.15",
+      "缓冲",
+      "—",
+      "⚠ BR续期≈11.24",
+      "年度结账\n盘点"
+    ]
+  },
+  {
+    "seq": 2,
+    "juris": "HK",
+    "name": "世纪设计制作有限公司",
+    "status": "运营中",
+    "founding": "01-18",
+    "months": [
+      "⚠ NAR1≈3.1\nBR准备",
+      "整理年度账目",
+      "⚠ NAR1约3.1\n启动审计",
+      "BIR56A雇主申报",
+      "审计收尾",
+      "年中复核\nSCR核对",
+      "劳工险检查",
+      "⚠ 利得税报税 8.15",
+      "缓冲",
+      "—",
+      "劳工险续保",
+      "⚠ BR续期≈12.19\n年度盘点"
+    ]
+  },
+  {
+    "seq": 3,
+    "juris": "HK",
+    "name": "RISE MEGA (ASIA) LIMITED",
+    "status": "注销中",
+    "founding": "?",
+    "months": [
+      "注销推进",
+      "注销推进",
+      "注销推进",
+      "注销推进",
+      "注销推进",
+      "确认清税",
+      "注销推进",
+      "注销推进",
+      "注销推进",
+      "注销推进",
+      "注销推进",
+      "注销完成确认"
+    ]
+  },
+  {
+    "seq": 4,
+    "juris": "Cayman",
+    "name": "开弈控股有限公司",
+    "status": "运营中",
+    "founding": "01-27",
+    "months": [
+      "⚠ 年审+ESN 1.31\n续签办事处",
+      "CRS数据准备",
+      "CRS数据整理",
+      "ES分类评估",
+      "BO/董事名册核对",
+      "CRS XML生成",
+      "⚠ CRS/FATCA 7.31",
+      "缓冲",
+      "CRS合规表 9.15",
+      "ES报告准备\n除名决策窗口",
+      "除名窗口",
+      "⚠ ES报告 12.31\n准备下年1月年审"
+    ]
+  },
+  {
+    "seq": 5,
+    "juris": "US",
+    "name": "China-Key HRO CO., INC",
+    "status": "运营中",
+    "founding": "05-01",
+    "months": [
+      "1099/W-2 1.31\n年度申报",
+      "年度账目整理",
+      "⚠ DE Franchise Tax 3.1",
+      "⚠ 联邦税+州税 4.15",
+      "税务复核\n延期评估",
+      "预估税Q2\n年中复核",
+      "缓冲",
+      "薪资税复核",
+      "预估税Q3",
+      "下年度规划",
+      "年末税务筹划",
+      "年度结账\nW-2/1099准备"
+    ]
+  },
+  {
+    "seq": 6,
+    "juris": "BVI",
+    "name": "Codan Trustees LTD",
+    "status": "运营中",
+    "founding": "07-20",
+    "months": [
+      "⚠ ROM+BO备案\n代理人续费",
+      "AFR准备\nCRS确认",
+      "⚠ ROM+BO宽限 3.31\nES分类评估",
+      "ES准备",
+      "缓冲",
+      "⚠ ES申报 6.30",
+      "★Nov窗口准备\n(非May)",
+      "AFR准备",
+      "⚠ AFR 9.30",
+      "牌照费准备",
+      "⚠ 牌照费 11.30 ★修正",
+      "年度盘点"
+    ]
+  },
+  {
+    "seq": 7,
+    "juris": "BVI",
+    "name": "开弈环球集团有限公司",
+    "status": "运营中",
+    "founding": "01-19",
+    "months": [
+      "⚠ ROM+BO备案\n代理人续费",
+      "AFR准备\nCRS确认",
+      "⚠ ROM+BO宽限 3.31\nES评估",
+      "ES准备",
+      "⚠ 牌照费 5.31",
+      "⚠ ES申报 6.30\n年中复核",
+      "缓冲",
+      "AFR准备",
+      "⚠ AFR 9.30",
+      "名册核对",
+      "缓冲",
+      "年度盘点"
+    ]
+  },
+  {
+    "seq": 8,
+    "juris": "BVI",
+    "name": "创享空间有限公司",
+    "status": "运营中",
+    "founding": "?",
+    "months": [
+      "⚠ ROM+BO备案\n代理人续费",
+      "AFR准备\nCRS确认",
+      "⚠ ROM+BO宽限 3.31\nES评估",
+      "⚠ 代理人续费\nES准备",
+      "⚠ 牌照费 5.31",
+      "⚠ ES申报 6.30",
+      "缓冲",
+      "AFR准备",
+      "⚠ AFR 9.30",
+      "名册核对",
+      "缓冲",
+      "年度盘点"
+    ]
+  },
+  {
+    "seq": 9,
+    "juris": "BVI",
+    "name": "中国开弈云数据管理有限公司",
+    "status": "运营中",
+    "founding": "07-10",
+    "months": [
+      "⚠ ROM+BO备案",
+      "AFR准备\nCRS确认",
+      "⚠ ROM+BO宽限 3.31\nES评估",
+      "ES准备",
+      "缓冲 ★修正\n(原May→现Nov)",
+      "⚠ ES申报 6.30",
+      "★Nov窗口准备\n代理人续费准备",
+      "AFR准备",
+      "⚠ AFR 9.30",
+      "牌照费准备",
+      "⚠ 牌照费 11.30 ★修正",
+      "年度盘点"
+    ]
+  },
+  {
+    "seq": 10,
+    "juris": "BVI",
+    "name": "侰溤服务有限公司",
+    "status": "运营中",
+    "founding": "10-03",
+    "months": [
+      "⚠ ROM+BO备案",
+      "AFR准备\nCRS确认",
+      "⚠ ROM+BO宽限 3.31\nES评估",
+      "ES准备",
+      "缓冲",
+      "⚠ ES申报 6.30",
+      "代理人续费准备",
+      "AFR准备",
+      "⚠ AFR 9.30",
+      "牌照费准备",
+      "⚠ 牌照费 11.30",
+      "年度盘点"
+    ]
+  },
+  {
+    "seq": 11,
+    "juris": "BVI",
+    "name": "独角兽环宇有限公司",
+    "status": "运营中",
+    "founding": "?",
+    "months": [
+      "⚠ ROM+BO备案",
+      "AFR准备\nCRS确认",
+      "⚠ ROM+BO宽限 3.31\nES评估",
+      "ES准备",
+      "缓冲",
+      "⚠ ES申报 6.30",
+      "代理人续费准备",
+      "AFR准备\n代理人续费",
+      "⚠ AFR 9.30",
+      "牌照费准备",
+      "⚠ 牌照费 11.30",
+      "年度盘点"
+    ]
+  },
+  {
+    "seq": 12,
+    "juris": "BVI",
+    "name": "智鸿企业服务有限公司",
+    "status": "运营中",
+    "founding": "?",
+    "months": [
+      "⚠ ROM+BO备案",
+      "AFR准备\nCRS确认",
+      "⚠ ROM+BO宽限 3.31\nES评估",
+      "ES准备",
+      "缓冲",
+      "⚠ ES申报 6.30",
+      "代理人续费准备",
+      "AFR准备",
+      "⚠ AFR 9.30\n代理人续费",
+      "牌照费准备",
+      "⚠ 牌照费 11.30",
+      "年度盘点"
+    ]
+  },
+  {
+    "seq": 13,
+    "juris": "BVI",
+    "name": "开弈仁云数据科技有限公司",
+    "status": "运营中",
+    "founding": "?",
+    "months": [
+      "⚠ ROM+BO备案",
+      "AFR准备\nCRS确认",
+      "⚠ ROM+BO宽限 3.31\nES评估",
+      "ES准备",
+      "缓冲",
+      "⚠ ES申报 6.30",
+      "缓冲",
+      "AFR准备",
+      "⚠ AFR 9.30",
+      "代理人准备\n牌照费准备",
+      "⚠ 牌照费 11.30\n代理人续费",
+      "年度盘点"
+    ]
+  },
+  {
+    "seq": 14,
+    "juris": "BVI",
+    "name": "CHAMPION TECH DEVELOPMENTS\nLIMITED",
+    "status": "运营中",
+    "founding": "09-23",
+    "months": [
+      "⚠ ROM+BO备案",
+      "AFR准备\nCRS确认",
+      "⚠ ROM+BO宽限 3.31\nES评估",
+      "ES准备",
+      "缓冲",
+      "⚠ ES申报 6.30",
+      "缓冲",
+      "AFR准备",
+      "⚠ AFR 9.30",
+      "牌照费准备",
+      "⚠ 牌照费 11.30\n代理人续费",
+      "年度盘点"
+    ]
+  },
+  {
+    "seq": 15,
+    "juris": "BVI",
+    "name": "桥明投资有限公司",
+    "status": "无人管理",
+    "founding": "?",
+    "months": [
+      "⚠ ROM+BO备案\n维持/除名决策",
+      "—",
+      "⚠ ROM+BO宽限 3.31\n确认去留",
+      "—",
+      "—",
+      "年中复核",
+      "—",
+      "—",
+      "—",
+      "—",
+      "—",
+      "决定去留"
+    ]
+  },
+  {
+    "seq": 16,
+    "juris": "BVI",
+    "name": "安普资产管理有限公司",
+    "status": "无人管理",
+    "founding": "?",
+    "months": [
+      "⚠ ROM+BO备案\n维持/除名决策",
+      "—",
+      "⚠ ROM+BO宽限 3.31\n确认去留",
+      "—",
+      "—",
+      "年中复核",
+      "—",
+      "—",
+      "—",
+      "—",
+      "—",
+      "决定去留"
+    ]
+  }
+];
+var COMPLIANCE_DEADLINES = [
+  {
+    "due": "2026-01-01",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "Codan Trustees LTD",
+    "juris": "BVI",
+    "item": "ROM+BO备案法定截止（2026.1.1大限）",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-01-01",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "开弈环球集团有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案法定截止（2026.1.1大限）",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-01-01",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "创享空间有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案法定截止（2026.1.1大限）",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-01-01",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "中国开弈云数据管理有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案法定截止（2026.1.1大限）",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-01-01",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "侰溤服务有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案法定截止（2026.1.1大限）",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-01-01",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "独角兽环宇有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案法定截止（2026.1.1大限）",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-01-01",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "智鸿企业服务有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案法定截止（2026.1.1大限）",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-01-01",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "开弈仁云数据科技有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案法定截止（2026.1.1大限）",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-01-01",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "CHAMPION TECH DEVELOPMENTSLIMITED",
+    "juris": "BVI",
+    "item": "ROM+BO备案法定截止（2026.1.1大限）",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-01-01",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "桥明投资有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案法定截止（2026.1.1大限）",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-01-01",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "安普资产管理有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案法定截止（2026.1.1大限）",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-01-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-01-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-01-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "开弈控股有限公司",
+    "juris": "Cayman",
+    "item": "周年申报+政府年费",
+    "source": "✅ 架构图",
+    "d30": "01/01",
+    "d14": "01/17",
+    "d7": "01/24"
+  },
+  {
+    "due": "2026-01-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "开弈控股有限公司",
+    "juris": "Cayman",
+    "item": "经济实质通知（ESN）",
+    "source": "✅ 架构图",
+    "d30": "01/01",
+    "d14": "01/17",
+    "d7": "01/24"
+  },
+  {
+    "due": "2026-01-31",
+    "countdown": "已逾期",
+    "priority": "high",
+    "company": "China-Key HRO CO., INC",
+    "juris": "US",
+    "item": "W-2/1099雇员税务报表",
+    "source": "⚠ 预估",
+    "d30": "",
+    "d14": "01/17",
+    "d7": "01/24"
+  },
+  {
+    "due": "2026-02-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-02-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-02-28",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "上年度账目整理完毕（审计前准备）",
+    "source": "建议",
+    "d30": "01/29",
+    "d14": "02/14",
+    "d7": ""
+  },
+  {
+    "due": "2026-03-01",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "NAR1周年申报（成立1.18+42天）",
+    "source": "✅ 架构图",
+    "d30": "01/30",
+    "d14": "02/15",
+    "d7": "02/22"
+  },
+  {
+    "due": "2026-03-01",
+    "countdown": "已逾期",
+    "priority": "high",
+    "company": "China-Key HRO CO., INC",
+    "juris": "US",
+    "item": "Delaware Franchise Tax（待确认注册州）",
+    "source": "⚠ 预估",
+    "d30": "01/30",
+    "d14": "02/15",
+    "d7": "02/22"
+  },
+  {
+    "due": "2026-03-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-03-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-03-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "Codan Trustees LTD",
+    "juris": "BVI",
+    "item": "ROM+BO备案宽限截止日（免罚最后日）",
+    "source": "✅ 架构图",
+    "d30": "03/01",
+    "d14": "03/17",
+    "d7": "03/24"
+  },
+  {
+    "due": "2026-03-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "开弈环球集团有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案宽限截止日（免罚最后日）",
+    "source": "✅ 架构图",
+    "d30": "03/01",
+    "d14": "03/17",
+    "d7": "03/24"
+  },
+  {
+    "due": "2026-03-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "创享空间有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案宽限截止日（免罚最后日）",
+    "source": "✅ 架构图",
+    "d30": "03/01",
+    "d14": "03/17",
+    "d7": "03/24"
+  },
+  {
+    "due": "2026-03-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "中国开弈云数据管理有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案宽限截止日（免罚最后日）",
+    "source": "✅ 架构图",
+    "d30": "03/01",
+    "d14": "03/17",
+    "d7": "03/24"
+  },
+  {
+    "due": "2026-03-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "侰溤服务有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案宽限截止日（免罚最后日）",
+    "source": "✅ 架构图",
+    "d30": "03/01",
+    "d14": "03/17",
+    "d7": "03/24"
+  },
+  {
+    "due": "2026-03-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "独角兽环宇有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案宽限截止日（免罚最后日）",
+    "source": "✅ 架构图",
+    "d30": "03/01",
+    "d14": "03/17",
+    "d7": "03/24"
+  },
+  {
+    "due": "2026-03-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "智鸿企业服务有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案宽限截止日（免罚最后日）",
+    "source": "✅ 架构图",
+    "d30": "03/01",
+    "d14": "03/17",
+    "d7": "03/24"
+  },
+  {
+    "due": "2026-03-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "开弈仁云数据科技有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案宽限截止日（免罚最后日）",
+    "source": "✅ 架构图",
+    "d30": "03/01",
+    "d14": "03/17",
+    "d7": "03/24"
+  },
+  {
+    "due": "2026-03-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "CHAMPION TECH DEVELOPMENTSLIMITED",
+    "juris": "BVI",
+    "item": "ROM+BO备案宽限截止日（免罚最后日）",
+    "source": "✅ 架构图",
+    "d30": "03/01",
+    "d14": "03/17",
+    "d7": "03/24"
+  },
+  {
+    "due": "2026-03-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "桥明投资有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案宽限截止日（免罚最后日）",
+    "source": "✅ 架构图",
+    "d30": "03/01",
+    "d14": "03/17",
+    "d7": "03/24"
+  },
+  {
+    "due": "2026-03-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "安普资产管理有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案宽限截止日（免罚最后日）",
+    "source": "✅ 架构图",
+    "d30": "03/01",
+    "d14": "03/17",
+    "d7": "03/24"
+  },
+  {
+    "due": "2026-03-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "桥明投资有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案宽限截止+确认维持/除名",
+    "source": "✅ 架构图",
+    "d30": "03/01",
+    "d14": "03/17",
+    "d7": "03/24"
+  },
+  {
+    "due": "2026-03-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "安普资产管理有限公司",
+    "juris": "BVI",
+    "item": "ROM+BO备案宽限截止+确认维持/除名",
+    "source": "✅ 架构图",
+    "d30": "03/01",
+    "d14": "03/17",
+    "d7": "03/24"
+  },
+  {
+    "due": "2026-04-01",
+    "countdown": "已逾期",
+    "priority": "high",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "收到BIR56A·启动雇主薪酬申报",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": "03/25"
+  },
+  {
+    "due": "2026-04-01",
+    "countdown": "已逾期",
+    "priority": "high",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "收到BIR56A·启动雇主薪酬申报",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": "03/25"
+  },
+  {
+    "due": "2026-04-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-04-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-04-15",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "China-Key HRO CO., INC",
+    "juris": "US",
+    "item": "联邦公司税+州税申报",
+    "source": "⚠ 预估",
+    "d30": "03/16",
+    "d14": "04/01",
+    "d7": "04/08"
+  },
+  {
+    "due": "2026-05-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-05-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-05-31",
+    "countdown": "已逾期",
+    "priority": "high",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "BIR56A提交截止（预估）",
+    "source": "⚠ 预估",
+    "d30": "",
+    "d14": "05/17",
+    "d7": "05/24"
+  },
+  {
+    "due": "2026-05-31",
+    "countdown": "已逾期",
+    "priority": "high",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "BIR56A提交截止（预估）",
+    "source": "⚠ 预估",
+    "d30": "",
+    "d14": "05/17",
+    "d7": "05/24"
+  },
+  {
+    "due": "2026-05-31",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "开弈环球集团有限公司",
+    "juris": "BVI",
+    "item": "政府年度牌照费（May窗口·成立1月）",
+    "source": "✅ 架构图",
+    "d30": "05/01",
+    "d14": "05/17",
+    "d7": "05/24"
+  },
+  {
+    "due": "2026-05-31",
+    "countdown": "已逾期",
+    "priority": "high",
+    "company": "创享空间有限公司",
+    "juris": "BVI",
+    "item": "政府年度牌照费（成立月未知·暂估May）",
+    "source": "⚠ 预估",
+    "d30": "05/01",
+    "d14": "05/17",
+    "d7": "05/24"
+  },
+  {
+    "due": "2026-05-31",
+    "countdown": "已逾期",
+    "priority": "high",
+    "company": "独角兽环宇有限公司",
+    "juris": "BVI",
+    "item": "政府年度牌照费（成立月未知·暂估May）",
+    "source": "⚠ 预估",
+    "d30": "05/01",
+    "d14": "05/17",
+    "d7": "05/24"
+  },
+  {
+    "due": "2026-05-31",
+    "countdown": "已逾期",
+    "priority": "high",
+    "company": "智鸿企业服务有限公司",
+    "juris": "BVI",
+    "item": "政府年度牌照费（成立月未知·暂估May）",
+    "source": "⚠ 预估",
+    "d30": "05/01",
+    "d14": "05/17",
+    "d7": "05/24"
+  },
+  {
+    "due": "2026-05-31",
+    "countdown": "已逾期",
+    "priority": "high",
+    "company": "开弈仁云数据科技有限公司",
+    "juris": "BVI",
+    "item": "政府年度牌照费（成立月未知·暂估May）",
+    "source": "⚠ 预估",
+    "d30": "05/01",
+    "d14": "05/17",
+    "d7": "05/24"
+  },
+  {
+    "due": "2026-06-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-06-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-06-15",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "所有运营中公司",
+    "juris": "ALL",
+    "item": "年中合规复核",
+    "source": "建议",
+    "d30": "",
+    "d14": "06/01",
+    "d7": "06/08"
+  },
+  {
+    "due": "2026-06-30",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "Codan Trustees LTD",
+    "juris": "BVI",
+    "item": "经济实质ES申报（12.31年结）",
+    "source": "⚠ 预估",
+    "d30": "05/31",
+    "d14": "06/16",
+    "d7": "06/23"
+  },
+  {
+    "due": "2026-06-30",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "开弈环球集团有限公司",
+    "juris": "BVI",
+    "item": "经济实质ES申报（12.31年结）",
+    "source": "⚠ 预估",
+    "d30": "05/31",
+    "d14": "06/16",
+    "d7": "06/23"
+  },
+  {
+    "due": "2026-06-30",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "中国开弈云数据管理有限公司",
+    "juris": "BVI",
+    "item": "经济实质ES申报（12.31年结）",
+    "source": "⚠ 预估",
+    "d30": "05/31",
+    "d14": "06/16",
+    "d7": "06/23"
+  },
+  {
+    "due": "2026-06-30",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "侰溤服务有限公司",
+    "juris": "BVI",
+    "item": "经济实质ES申报（12.31年结）",
+    "source": "⚠ 预估",
+    "d30": "05/31",
+    "d14": "06/16",
+    "d7": "06/23"
+  },
+  {
+    "due": "2026-06-30",
+    "countdown": "已逾期",
+    "priority": "critical",
+    "company": "CHAMPION TECH DEVELOPMENTS LIMITED",
+    "juris": "BVI",
+    "item": "经济实质ES申报（12.31年结）",
+    "source": "⚠ 预估",
+    "d30": "05/31",
+    "d14": "06/16",
+    "d7": "06/23"
+  },
+  {
+    "due": "2026-07-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-07-10",
+    "countdown": "已逾期",
+    "priority": "medium",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-07-31",
+    "countdown": "16天",
+    "priority": "critical",
+    "company": "开弈控股有限公司",
+    "juris": "Cayman",
+    "item": "CRS/FATCA年度报告（2025年度）",
+    "source": "⚠ 预估",
+    "d30": "07/01",
+    "d14": "07/17",
+    "d7": "07/24"
+  },
+  {
+    "due": "2026-08-10",
+    "countdown": "26天",
+    "priority": "medium",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-08-10",
+    "countdown": "26天",
+    "priority": "medium",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-08-15",
+    "countdown": "31天",
+    "priority": "critical",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "利得税报税+审计报告（12.31年结）",
+    "source": "✅ 架构图",
+    "d30": "07/16",
+    "d14": "08/01",
+    "d7": "08/08"
+  },
+  {
+    "due": "2026-08-15",
+    "countdown": "31天",
+    "priority": "critical",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "利得税报税+审计报告（12.31年结）",
+    "source": "✅ 架构图",
+    "d30": "07/16",
+    "d14": "08/01",
+    "d7": "08/08"
+  },
+  {
+    "due": "2026-09-10",
+    "countdown": "57天",
+    "priority": "medium",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-09-10",
+    "countdown": "57天",
+    "priority": "medium",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-09-15",
+    "countdown": "62天",
+    "priority": "high",
+    "company": "开弈控股有限公司",
+    "juris": "Cayman",
+    "item": "CRS合规表（2025年度）",
+    "source": "⚠ 预估",
+    "d30": "08/16",
+    "d14": "09/01",
+    "d7": "09/08"
+  },
+  {
+    "due": "2026-09-30",
+    "countdown": "77天",
+    "priority": "high",
+    "company": "创享空间有限公司",
+    "juris": "BVI",
+    "item": "年度财务申报AFR（12.31年结·预估）",
+    "source": "⚠ 预估",
+    "d30": "08/31",
+    "d14": "09/16",
+    "d7": "09/23"
+  },
+  {
+    "due": "2026-09-30",
+    "countdown": "77天",
+    "priority": "high",
+    "company": "独角兽环宇有限公司",
+    "juris": "BVI",
+    "item": "年度财务申报AFR（12.31年结·预估）",
+    "source": "⚠ 预估",
+    "d30": "08/31",
+    "d14": "09/16",
+    "d7": "09/23"
+  },
+  {
+    "due": "2026-09-30",
+    "countdown": "77天",
+    "priority": "high",
+    "company": "智鸿企业服务有限公司",
+    "juris": "BVI",
+    "item": "年度财务申报AFR（12.31年结·预估）",
+    "source": "⚠ 预估",
+    "d30": "08/31",
+    "d14": "09/16",
+    "d7": "09/23"
+  },
+  {
+    "due": "2026-09-30",
+    "countdown": "77天",
+    "priority": "high",
+    "company": "开弈仁云数据科技有限公司",
+    "juris": "BVI",
+    "item": "年度财务申报AFR（12.31年结·预估）",
+    "source": "⚠ 预估",
+    "d30": "08/31",
+    "d14": "09/16",
+    "d7": "09/23"
+  },
+  {
+    "due": "2026-09-30",
+    "countdown": "77天",
+    "priority": "critical",
+    "company": "Codan Trustees LTD",
+    "juris": "BVI",
+    "item": "年度财务申报AFR（12.31年结）",
+    "source": "✅ 架构图",
+    "d30": "08/31",
+    "d14": "09/16",
+    "d7": "09/23"
+  },
+  {
+    "due": "2026-09-30",
+    "countdown": "77天",
+    "priority": "critical",
+    "company": "开弈环球集团有限公司",
+    "juris": "BVI",
+    "item": "年度财务申报AFR（12.31年结）",
+    "source": "✅ 架构图",
+    "d30": "08/31",
+    "d14": "09/16",
+    "d7": "09/23"
+  },
+  {
+    "due": "2026-09-30",
+    "countdown": "77天",
+    "priority": "critical",
+    "company": "中国开弈云数据管理有限公司",
+    "juris": "BVI",
+    "item": "年度财务申报AFR（12.31年结）",
+    "source": "✅ 架构图",
+    "d30": "08/31",
+    "d14": "09/16",
+    "d7": "09/23"
+  },
+  {
+    "due": "2026-09-30",
+    "countdown": "77天",
+    "priority": "critical",
+    "company": "侰溤服务有限公司",
+    "juris": "BVI",
+    "item": "年度财务申报AFR（12.31年结）",
+    "source": "✅ 架构图",
+    "d30": "08/31",
+    "d14": "09/16",
+    "d7": "09/23"
+  },
+  {
+    "due": "2026-09-30",
+    "countdown": "77天",
+    "priority": "critical",
+    "company": "CHAMPION TECH DEVELOPMENTS LIMITED",
+    "juris": "BVI",
+    "item": "年度财务申报AFR（12.31年结）",
+    "source": "✅ 架构图",
+    "d30": "08/31",
+    "d14": "09/16",
+    "d7": "09/23"
+  },
+  {
+    "due": "2026-10-10",
+    "countdown": "87天",
+    "priority": "medium",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-10-10",
+    "countdown": "87天",
+    "priority": "medium",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-11-10",
+    "countdown": "118天",
+    "priority": "medium",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-11-10",
+    "countdown": "118天",
+    "priority": "medium",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-11-24",
+    "countdown": "132天",
+    "priority": "high",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "BR商业登记证续期（成立12.24前1月）",
+    "source": "✅ 架构图",
+    "d30": "10/25",
+    "d14": "11/10",
+    "d7": "11/17"
+  },
+  {
+    "due": "2026-11-30",
+    "countdown": "138天",
+    "priority": "critical",
+    "company": "Codan Trustees LTD",
+    "juris": "BVI",
+    "item": "政府年度牌照费（Nov窗口·成立7月） ★修正",
+    "source": "✅ 架构图",
+    "d30": "10/31",
+    "d14": "11/16",
+    "d7": "11/23"
+  },
+  {
+    "due": "2026-11-30",
+    "countdown": "138天",
+    "priority": "critical",
+    "company": "中国开弈云数据管理有限公司",
+    "juris": "BVI",
+    "item": "政府年度牌照费（Nov窗口·成立7月） ★修正",
+    "source": "✅ 架构图",
+    "d30": "10/31",
+    "d14": "11/16",
+    "d7": "11/23"
+  },
+  {
+    "due": "2026-11-30",
+    "countdown": "138天",
+    "priority": "critical",
+    "company": "侰溤服务有限公司",
+    "juris": "BVI",
+    "item": "政府年度牌照费（Nov窗口·成立10月）",
+    "source": "✅ 架构图",
+    "d30": "10/31",
+    "d14": "11/16",
+    "d7": "11/23"
+  },
+  {
+    "due": "2026-11-30",
+    "countdown": "138天",
+    "priority": "critical",
+    "company": "CHAMPION TECH DEVELOPMENTS LIMITED",
+    "juris": "BVI",
+    "item": "政府年度牌照费（Nov窗口·成立9月）",
+    "source": "✅ 架构图",
+    "d30": "10/31",
+    "d14": "11/16",
+    "d7": "11/23"
+  },
+  {
+    "due": "2026-12-10",
+    "countdown": "148天",
+    "priority": "medium",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-12-10",
+    "countdown": "148天",
+    "priority": "medium",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "MPF供款",
+    "source": "✅ 架构图",
+    "d30": "",
+    "d14": "",
+    "d7": ""
+  },
+  {
+    "due": "2026-12-15",
+    "countdown": "153天",
+    "priority": "medium",
+    "company": "所有运营中公司",
+    "juris": "ALL",
+    "item": "全年合规自查+下年度日历准备",
+    "source": "建议",
+    "d30": "",
+    "d14": "12/01",
+    "d7": "12/08"
+  },
+  {
+    "due": "2026-12-19",
+    "countdown": "157天",
+    "priority": "high",
+    "company": "世纪设计制作有限公司",
+    "juris": "HK",
+    "item": "BR商业登记证续期（成立1.18前1月）",
+    "source": "✅ 架构图",
+    "d30": "11/19",
+    "d14": "12/05",
+    "d7": "12/12"
+  },
+  {
+    "due": "2026-12-31",
+    "countdown": "169天",
+    "priority": "critical",
+    "company": "开弈控股有限公司",
+    "juris": "Cayman",
+    "item": "经济实质ES报告（12.31年结）",
+    "source": "⚠ 预估",
+    "d30": "12/01",
+    "d14": "12/17",
+    "d7": "12/24"
+  },
+  {
+    "due": "2027-02-04",
+    "countdown": "204天",
+    "priority": "critical",
+    "company": "开弈（中国）人才服务有限公司",
+    "juris": "HK",
+    "item": "NAR1周年申报（成立12.24+42天）",
+    "source": "✅ 架构图",
+    "d30": "01/05",
+    "d14": "01/21",
+    "d7": "01/28"
+  }
+];
+
+function renderCompanyCalendar() {
+  var h = '';
+  h += '<div style="font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:12px;letter-spacing:.5px">境外公司 2026 年度合规日历 — 三层提醒体系</div>';
+
+  // Jurisdiction filter chips
+  h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px" id="calFilterBar">';
+  var jurisColors = {HK:'#4682B4',BVI:'#6B7FA8',Cayman:'#5D9A8A',US:'#C94F66',ALL:'#8D8883'};
+  var jurisList = ['ALL','HK','BVI','Cayman','US'];
+  jurisList.forEach(function(j){
+    h += '<span class="cal-filter-chip" data-j="'+j+'" onclick="filterCalendar(\''+j+'\')" style="display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;cursor:pointer;border:1.5px solid '+jurisColors[j]+';color:'+jurisColors[j]+';background:transparent;transition:all .15s">'+(j==='ALL'?'全部':j)+'</span>';
+  });
+  h += '</div>';
+
+  // Calendar grid
+  h += '<div id="calGrid" style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:10px;background:var(--bg-surface)">';
+  h += '<table style="width:100%;min-width:1100px;border-collapse:collapse;font-size:9.5px;line-height:1.35">';
+
+  // Header row
+  h += '<thead><tr style="background:var(--bg-muted)">';
+  h += '<th style="padding:6px 8px;text-align:left;position:sticky;left:0;background:var(--bg-muted);z-index:1;border-bottom:1px solid var(--border);width:180px;font-size:9px;color:var(--text-dim)">公司</th>';
+  h += '<th style="padding:4px 2px;text-align:center;border-bottom:1px solid var(--border);width:50px;font-size:9px;color:var(--text-dim)">管辖</th>';
+  var months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  months.forEach(function(m){
+    h += '<th style="padding:5px 3px;text-align:center;border-bottom:1px solid var(--border);font-size:9px;color:var(--text-dim);min-width:80px">'+m+'</th>';
+  });
+  h += '</tr></thead><tbody>';
+
+  // Company rows
+  COMPLIANCE_COMPANIES.forEach(function(co, idx){
+    h += '<tr class="cal-row" data-juris="'+co.juris+'" style="border-bottom:1px solid var(--border-light)">';
+    h += '<td style="padding:6px 8px;position:sticky;left:0;background:var(--bg-surface);z-index:1;border-right:1px solid var(--border-light)">';
+    h += '<div style="font-weight:700;color:var(--text);font-size:10px">'+co.name+'</div>';
+    h += '<div style="font-size:8.5px;color:var(--text-dim);margin-top:1px">'+co.status+' · 成立'+co.founding+'</div>';
+    h += '</td>';
+    h += '<td style="text-align:center;padding:4px 2px"><span style="display:inline-block;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700;background:'+jurisColors[co.juris]+'15;color:'+jurisColors[co.juris]+'">'+co.juris+'</span></td>';
+    co.months.forEach(function(m, mi){
+      var hasCritical = m.indexOf('⚠') >= 0;
+      var bg = m === '—' || m === '' ? '' : (hasCritical ? 'background:#FEF2F2' : 'background:#F8F9FB');
+      h += '<td style="padding:4px 3px;text-align:left;vertical-align:top;'+bg+'">';
+      if (m && m !== '—') {
+        h += '<span style="white-space:pre-line;font-size:8.5px;color:'+(hasCritical?'var(--accent)':'var(--text-dim)')+'">'+m+'</span>';
+      }
+      h += '</td>';
+    });
+    h += '</tr>';
+  });
+
+  h += '</tbody></table></div>';
+
+  // Legend
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;font-size:9px;color:var(--text-dim)">';
+  h += '<span>⚠ = 法定截止/关键事项</span>';
+  h += '<span style="display:inline-block;width:3px;height:3px;border-radius:50%;background:#FEF2F2;margin:auto 0"></span><span>红底 = 含关键事项</span>';
+  h += '<span style="display:inline-block;width:3px;height:3px;border-radius:50%;background:#F8F9FB;margin:auto 0"></span><span>灰底 = 常规事项</span>';
+  h += '</div>';
+
+  // Layer 2: Upcoming deadlines
+  h += '<div style="margin-top:24px;font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:10px;letter-spacing:.5px">第二层：近期合规事项（精确到期清单）</div>';
+  h += '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:10px;background:var(--bg-surface);max-height:500px;overflow-y:auto">';
+  h += '<table style="width:100%;min-width:900px;border-collapse:collapse;font-size:9.5px">';
+  h += '<thead><tr style="background:var(--bg-muted);position:sticky;top:0;z-index:1">';
+  h += '<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)">截止日期</th>';
+  h += '<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)">倒计时</th>';
+  h += '<th style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--border)">优先级</th>';
+  h += '<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)">公司</th>';
+  h += '<th style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--border)">管辖</th>';
+  h += '<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)">事项</th>';
+  h += '<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)">前30/14/7天</th>';
+  h += '</tr></thead><tbody>';
+
+  COMPLIANCE_DEADLINES.forEach(function(d){
+    var priColor = d.priority === 'critical' ? '#C94F66' : d.priority === 'high' ? '#D49A5A' : '#8D8883';
+    h += '<tr style="border-bottom:1px solid var(--border-light)">';
+    h += '<td style="padding:5px 8px;white-space:nowrap;font-weight:600">'+d.due+'</td>';
+    h += '<td style="padding:5px 8px;white-space:nowrap;font-size:8.5px;color:'+(d.countdown.indexOf('逾期')>=0?'var(--accent)':'var(--text-dim)')+'">'+d.countdown+'</td>';
+    h += '<td style="padding:5px 8px;text-align:center"><span style="display:inline-block;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700;background:'+priColor+'15;color:'+priColor+'">'+d.priority+'</span></td>';
+    h += '<td style="padding:5px 8px;font-size:9px">'+d.company+'</td>';
+    h += '<td style="padding:5px 8px;text-align:center;font-size:8.5px">'+d.juris+'</td>';
+    h += '<td style="padding:5px 8px;font-size:9px">'+d.item+'</td>';
+    h += '<td style="padding:5px 8px;font-size:8px;color:var(--text-dim);white-space:nowrap">'+(d.d30||'-')+' / '+(d.d14||'-')+' / '+(d.d7||'-')+'</td>';
+    h += '</tr>';
+  });
+
+  h += '</tbody></table></div>';
+
+  h += '<div style="font-size:9px;color:var(--text-muted);margin-top:12px;text-align:center">* 数据来源：三地公司合规事项清单 · 总览-三层提醒体系 | 2026年度</div>';
+
+  document.getElementById('companyCalendarView').innerHTML = h;
+}
+
+function filterCalendar(juris) {
+  var rows = document.querySelectorAll('.cal-row');
+  rows.forEach(function(r){
+    r.style.display = (juris === 'ALL' || r.getAttribute('data-juris') === juris) ? '' : 'none';
+  });
+  var chips = document.querySelectorAll('.cal-filter-chip');
+  chips.forEach(function(c){
+    var isActive = c.getAttribute('data-j') === juris;
+    c.style.background = isActive ? c.style.color : 'transparent';
+    c.style.color = isActive ? '#fff' : c.style.borderColor;
+  });
 }
 
 </script>

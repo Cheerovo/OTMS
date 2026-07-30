@@ -6,23 +6,23 @@
 <title>HRO 人事员工全生命周期流程</title>
 <style>
   :root {
-    /* Phase functional colors (Morandi) — preserved for clear phase distinction */
-    --recruit:      #8a76a3; --recruit-bg:  #f5f2f8; --recruit-line:  #cebbdb; --recruit-text: #5c4a71;
-    --onboard:      #5f9877; --onboard-bg:  #eef6f1; --onboard-line:  #b3d7c1; --onboard-text: #35624a;
-    --active:       #c2984f; --active-bg:   #faf5ea; --active-line:   #e6cd97; --active-text: #86642a;
-    --leave:        #ba6b5c; --leave-bg:    #faf0ee; --leave-line:    #e7c0b7; --leave-text: #7c4133;
-    --trainee:      #8d9aab; --trainee-bg:  #f4f5f7; --trainee-line:  #d0d6df; --trainee-text: #5a6370;
+    /* Phase functional colors — soft Morandi palette, active switched to dusty blue */
+    --recruit:      #9B8FAD; --recruit-bg:  #f4f2f7; --recruit-line:  #d5cee0; --recruit-text: #5e5070;
+    --onboard:      #7AAA96; --onboard-bg:  #eef4f1; --onboard-line:  #c2d8cc; --onboard-text: #3d6852;
+    --active:       #8BA0B2; --active-bg:   #f1f4f7; --active-line:   #ccd6e0; --active-text: #4a6072;
+    --leave:        #C4958A; --leave-bg:    #f7f1ef; --leave-line:    #e0ccc6; --leave-text: #7a5045;
+    --trainee:      #9BA0A8; --trainee-bg:  #f3f4f6; --trainee-line:  #d2d6db; --trainee-text: #5a6068;
     /* Neutrals — warmed up to align with main page */
     --text:         #3B3835;
     --text-dim:     #605C56;
     --text-muted:   #8D8883;
-    --border:       #DCD8D2;
-    --border-light: #E5E2DC;
-    --divider:      #EDEAE5;
-    --bg-card:      #FEFDFC;
-    --bg-wash:      #F7F5F2;
-    --bg-muted:     #F9F8F5;
-    --bg-hover:     #F5F3EF;
+    --border:       #DDD9D2;
+    --border-light: #E6E3DD;
+    --divider:      #EEECE6;
+    --bg-card:      #FCFBFA;
+    --bg-wash:      #F5F3F0;
+    --bg-muted:     #F8F7F4;
+    --bg-hover:     #F2F0EC;
     --accent:       #C94F66;
     --accent-wash:  #FDE8EC;
     --shadow-xs:    0 1px 2px rgba(30,25,18,0.04);
@@ -59,7 +59,7 @@
 	.tab-panel.active{opacity:1;position:relative;pointer-events:auto;overflow:visible;display:flex;flex-direction:column;flex:1;min-height:0;transform:translateY(0)}
 
   /* ── AI banner ── */
-  .ai-banner{flex-shrink:0;background:linear-gradient(90deg,#FDF8F0,#F8F4FA);border-bottom:1px solid var(--border-light);padding:6px 20px;font-size:10.5px;color:var(--text-dim);display:flex;align-items:center;gap:8px}
+  .ai-banner{flex-shrink:0;background:linear-gradient(90deg,#F9F6F2,#F4F2F7);border-bottom:1px solid var(--border-light);padding:6px 20px;font-size:10.5px;color:var(--text-dim);display:flex;align-items:center;gap:8px}
 
   /* ── scroll shadow indicators ── */
   .scroll-container{position:relative;flex:1;min-height:0;overflow:hidden}
@@ -79,8 +79,8 @@
   col.col-st{width:128px}
 
   /* ── thead — lighter, warm header ── */
-  thead th{background:#E8E4DD;color:var(--text-dim);font-size:10.5px;font-weight:600;padding:9px 4px;text-align:center;border-right:1px solid var(--divider);position:sticky;top:0;z-index:35;white-space:nowrap;letter-spacing:.2px}
-  thead th.lh{background:#E8E4DD;border-right:none;left:0;z-index:45}
+  thead th{background:#EBE8E2;color:var(--text-dim);font-size:10.5px;font-weight:600;padding:9px 4px;text-align:center;border-right:1px solid var(--divider);position:sticky;top:0;z-index:35;white-space:nowrap;letter-spacing:.2px}
+  thead th.lh{background:#EBE8E2;border-right:none;left:0;z-index:45}
   thead th.fh{left:44px;z-index:45}
 
   /* ── lane cell ── */
@@ -110,7 +110,7 @@
   .t td.rl.track::before{background:var(--trainee-line)}
 
   /* ── node box ── */
-  .nd{display:inline-block;position:relative;z-index:2;padding:7px 10px;border-radius:var(--radius-xs);font-size:11px;font-weight:600;color:#fff;white-space:nowrap;text-align:center;box-shadow:var(--shadow-sm);min-width:68px;max-width:108px;transition:transform .2s cubic-bezier(0.4,0,0.2,1),box-shadow .2s cubic-bezier(0.4,0,0.2,1)}
+  .nd{display:inline-block;position:relative;z-index:2;padding:7px 10px;border-radius:var(--radius-xs);font-size:11px;font-weight:600;color:#fff;white-space:nowrap;text-align:center;box-shadow:var(--shadow-sm);min-width:68px;max-width:108px;transition:transform .2s cubic-bezier(0.4,0,0.2,1),box-shadow .2s cubic-bezier(0.4,0,0.2,1);text-shadow:0 1px 2px rgba(0,0,0,0.15)}
   .nd small{display:block;font-size:10px;font-weight:400;opacity:.88;margin-top:1px}
   .nd em{display:block;font-size:9px;font-weight:400;opacity:.78;margin-top:1px;font-style:normal}
   .r .nd{background:var(--recruit)}
@@ -184,7 +184,7 @@
 	tbody tr:hover td{background:rgba(30,25,18,.025)}
 	tbody tr:hover td.lc.r{background:#e8e0f2}
 	tbody tr:hover td.lc.o{background:#ddece4}
-	tbody tr:hover td.lc.a{background:#f4e8cf}
+	tbody tr:hover td.lc.a{background:#e4eaf0}
 	tbody tr:hover td.lc.l{background:#f3ded9}
 
 	/* ── status tag: completed (end-of-section) vs in-progress ── */
