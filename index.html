@@ -1766,9 +1766,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-task-edit-btn:hover { background:var(--bg-surface-hover); color:var(--text); }
 .tn-task-card-new:hover .tn-task-edit-btn { opacity:1; }
 .tn-task-edit-btn-inline { border:none; background:none; cursor:pointer; color:var(--text-dim); padding:4px; border-radius:4px; }
-.tn-task-pin-btn { border:none; background:none; cursor:pointer; padding:4px; color:var(--text-muted); border-radius:4px; transition:all .15s; flex-shrink:0; }
-.tn-task-pin-btn:hover { color:var(--accent); background:var(--accent-wash); }
-.tn-task-pin-btn.pinned { color:var(--accent); }
+.tn-task-pin-btn { border:none; background:none; cursor:pointer; padding:4px; color:var(--text-muted); border-radius:4px; transition:all .15s; flex-shrink:0; opacity:0; }
+.tn-task-card-new:hover .tn-task-pin-btn { opacity:1; }
+.tn-task-pin-btn:hover { color:var(--accent); background:var(--accent-wash); opacity:1; }
+.tn-task-pin-btn.pinned { color:var(--accent); opacity:1; }
 
 /* Unified modal week checkboxes */
 .um-week-cb { display:inline-flex; align-items:center; gap:2px; font-size:8px; color:var(--text-dim); padding:3px 6px; background:var(--bg-surface); border-radius:5px; cursor:pointer; white-space:nowrap; }
