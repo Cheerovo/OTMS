@@ -2242,6 +2242,9 @@ body.tn-resizing * { pointer-events:none; }
     <button data-tab="report" onclick="switchTab('report')" title="月度/年度财务报表的提交与汇总"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span><span>报表提交</span></button>
     <button data-tab="meeting" onclick="switchTab('meeting')" title="记录例会纪要、决议事项和临时任务"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><span>例会管理</span></button>
   </nav>
+  <div class="sidebar-footer">
+    <button class="btn" onclick="openRestoreModal()" title="备份与恢复所有系统数据">备份管理</button>
+  </div>
 </aside>
 
 <!-- Main Content -->
@@ -8621,8 +8624,239 @@ function initApp(){
   var homeTab = lastTab || (currentUser ? getPref('homeTab','workspace') : 'workspace');
   switchTab(homeTab);
   updateBellBadge();
+  // 页面加载后自动备份全部系统数据（延迟 2 秒确保数据全部就绪）
+  setTimeout(function(){ autoBackupSystemData(); }, 2000);
 }
 try { initApp(); } catch(e) { console.error('initApp 失败:', e.message); }
+
+// ===== 全系统数据备份与恢复 =====
+var BACKUP_KEY = 'otms_system_backup';
+var MAX_BACKUPS = 3;
+var BACKUP_EXCLUDE_PREFIXES = ['_okr_cleared', '_oplog_cleared', 'bk_collapse', 'okr_sync_version'];
+
+function getBackupData(){
+  try{ return JSON.parse(localStorage.getItem(BACKUP_KEY)) || {backups:[]}; }catch(e){ return {backups:[]}; }
+}
+
+function saveBackupData(data){
+  try{ localStorage.setItem(BACKUP_KEY, JSON.stringify(data)); }catch(e){ console.error('[备份] 存储失败:',e.message); }
+}
+
+function collectAllSystemData(){
+  var data = {};
+  for(var i = 0; i < localStorage.length; i++){
+    var key = localStorage.key(i);
+    if(key === BACKUP_KEY) continue;
+    var skip = false;
+    for(var j = 0; j < BACKUP_EXCLUDE_PREFIXES.length; j++){
+      if(key.indexOf(BACKUP_EXCLUDE_PREFIXES[j]) === 0){ skip = true; break; }
+    }
+    if(skip) continue;
+    var v = localStorage.getItem(key);
+    if(v !== null){
+      try{ data[key] = JSON.parse(v); }catch(er){ data[key] = v; }
+    }
+  }
+  return data;
+}
+
+function autoBackupSystemData(silent){
+  try{
+    var currentData = collectAllSystemData();
+    var currentJson = JSON.stringify(currentData);
+    var backupInfo = getBackupData();
+    var backups = backupInfo.backups || [];
+
+    // 跳过空数据
+    if(Object.keys(currentData).length === 0){ return; }
+
+    // 数据无变化则跳过
+    if(backups.length > 0 && JSON.stringify(backups[0].data) === currentJson){
+      return;
+    }
+
+    var now = new Date();
+    var backup = {
+      timestamp: now.getTime(),
+      date: now.getFullYear()+'-'+('0'+(now.getMonth()+1)).slice(-2)+'-'+('0'+now.getDate()).slice(-2)+' '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2)+':'+('0'+now.getSeconds()).slice(-2),
+      data: currentData
+    };
+
+    backups.unshift(backup);
+    if(backups.length > MAX_BACKUPS) backups = backups.slice(0, MAX_BACKUPS);
+    backupInfo.backups = backups;
+    saveBackupData(backupInfo);
+    if(!silent) console.log('[备份] 系统数据已自动备份 ('+backup.date+', '+Object.keys(currentData).length+' 项)');
+  }catch(e){
+    console.error('[备份] 自动备份失败:',e.message);
+  }
+}
+
+function openRestoreModal(){
+  var backupInfo = getBackupData();
+  var backups = backupInfo.backups || [];
+
+  var html = '<div style="padding:12px 8px">';
+  html += '<h3 style="font-size:16px;font-weight:700;margin-bottom:6px;color:#3B3835;padding-right:28px">系统数据备份管理</h3>';
+  html += '<p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">系统每次打开页面时自动备份全部数据，保留最近 '+MAX_BACKUPS+' 个版本。恢复将覆盖当前数据，请谨慎操作。</p>';
+
+  if(backups.length === 0){
+    html += '<div style="text-align:center;color:var(--text-muted);padding:32px;background:var(--bg-surface);border-radius:8px">暂无自动备份记录<br><span style="font-size:10px">刷新页面后将自动生成首次备份</span></div>';
+  } else {
+    html += '<div style="max-height:360px;overflow-y:auto">';
+    backups.forEach(function(bk, idx){
+      var keyCount = Object.keys(bk.data).length;
+      var sizeKB = Math.round(JSON.stringify(bk.data).length / 1024 * 10) / 10;
+      html += '<div style="display:flex;align-items:center;gap:12px;padding:12px;margin-bottom:8px;background:var(--bg-surface);border-radius:8px;border:1px solid var(--border-subtle)">';
+      html += '<div style="flex:1;min-width:0">';
+      html += '<div style="font-size:13px;font-weight:500;color:var(--text)">备份 #'+(idx+1)+(idx===0?' <span style="font-size:9px;color:var(--accent);font-weight:400">最新</span>':'')+'</div>';
+      html += '<div style="font-size:11px;color:var(--text-muted)">'+bk.date+' · '+keyCount+' 个数据项 · '+sizeKB+' KB</div>';
+      html += '</div>';
+      html += '<button onclick="restoreFromBackup('+idx+')" style="padding:7px 16px;border:none;border-radius:6px;font-size:11px;cursor:pointer;background:var(--danger);color:#fff;white-space:nowrap;transition:var(--transition)">恢复此版本</button>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  html += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border-subtle);display:flex;gap:8px">';
+  html += '<button onclick="exportAllDataToFile()" style="flex:1;padding:9px 16px;border:none;border-radius:8px;font-size:11px;cursor:pointer;background:var(--bg-surface);color:var(--text-dim);transition:var(--transition)">导出到文件</button>';
+  html += '<button onclick="triggerImportFile()" style="flex:1;padding:9px 16px;border:none;border-radius:8px;font-size:11px;cursor:pointer;background:var(--bg-surface);color:var(--text-dim);transition:var(--transition)">从文件导入</button>';
+  html += '</div>';
+  html += '<p style="font-size:10px;color:var(--text-muted);margin-top:10px;text-align:center">导入/导出 JSON 文件可在不同设备间转移数据</p>';
+  html += '<input type="file" id="importFileInput" style="display:none" accept=".json" onchange="handleImportFile(event)">';
+  html += '</div>';
+
+  openModal(html);
+}
+
+function restoreFromBackup(index){
+  var backupInfo = getBackupData();
+  var backup = backupInfo.backups[index];
+  if(!backup){ showToast('备份数据不存在','error'); return; }
+
+  var html = '<div style="padding:12px 8px">';
+  html += '<h3 style="font-size:16px;font-weight:700;margin-bottom:12px;color:#3B3835">确认恢复数据</h3>';
+  html += '<div style="background:var(--danger-bg);border:1px solid var(--danger);border-radius:8px;padding:12px;margin-bottom:16px">';
+  html += '<p style="font-size:12px;color:var(--danger-text);margin:0"><strong>警告：</strong>此操作将用备份版本的数据覆盖当前所有系统数据，包括 OKR、KPI、报表、例会、管培生任务、评分、考勤等全部数据。此操作不可撤销。</p>';
+  html += '</div>';
+  html += '<p style="font-size:12px;color:var(--text-dim);margin-bottom:4px">备份时间：<strong>'+backup.date+'</strong></p>';
+  html += '<p style="font-size:12px;color:var(--text-dim);margin-bottom:16px">包含 '+Object.keys(backup.data).length+' 个数据项</p>';
+  html += '<div style="display:flex;gap:8px">';
+  html += '<button onclick="closeModal()" style="flex:1;padding:10px;border:none;border-radius:8px;font-size:12px;cursor:pointer;background:var(--bg-surface);color:var(--text-dim)">取消</button>';
+  html += '<button id="confirmRestoreBtn" style="flex:1;padding:10px;border:none;border-radius:8px;font-size:12px;cursor:pointer;background:var(--danger);color:#fff">确认恢复</button>';
+  html += '</div>';
+  html += '</div>';
+
+  openModal(html);
+
+  document.getElementById('confirmRestoreBtn').onclick = function(){
+    try{
+      // 恢复前再自动备份一次当前状态（安全兜底）
+      autoBackupSystemData(true);
+
+      var bd = backup.data;
+      var keys = Object.keys(bd);
+      for(var i = 0; i < keys.length; i++){
+        var k = keys[i];
+        var v = bd[k];
+        localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
+      }
+      closeModal();
+      showToast('数据已恢复，页面即将刷新...','success');
+      setTimeout(function(){ location.reload(); }, 1200);
+    }catch(er){
+      showToast('恢复失败: '+er.message,'error');
+    }
+  };
+}
+
+function exportAllDataToFile(){
+  try{
+    var data = collectAllSystemData();
+    var json = JSON.stringify(data, null, 2);
+    var blob = new Blob(['\uFEFF'+json], {type:'application/json;charset=utf-8'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    var now = new Date();
+    a.download = 'OTMS_全系统备份_'+now.getFullYear()+('0'+(now.getMonth()+1)).slice(-2)+('0'+now.getDate()).slice(-2)+'_'+('0'+now.getHours()).slice(-2)+('0'+now.getMinutes()).slice(-2)+'.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    closeModal();
+    showToast('全部系统数据已导出为 JSON 文件','success');
+  }catch(e){
+    showToast('导出失败: '+e.message,'error');
+  }
+}
+
+function triggerImportFile(){
+  var input = document.getElementById('importFileInput');
+  if(input) input.click();
+}
+
+function handleImportFile(event){
+  var file = event.target.files[0];
+  if(!file){ return; }
+
+  var html = '<div style="padding:12px 8px">';
+  html += '<h3 style="font-size:16px;font-weight:700;margin-bottom:12px;color:#3B3835">确认导入数据</h3>';
+  html += '<div style="background:var(--danger-bg);border:1px solid var(--danger);border-radius:8px;padding:12px;margin-bottom:16px">';
+  html += '<p style="font-size:12px;color:var(--danger-text);margin:0"><strong>警告：</strong>导入将用文件中的数据覆盖当前所有系统数据，包括 OKR、KPI、报表、例会、管培生任务、评分、考勤等全部数据。此操作不可撤销。</p>';
+  html += '</div>';
+  html += '<p style="font-size:12px;color:var(--text-dim);margin-bottom:16px">文件：<strong>'+file.name+'</strong>（'+(file.size/1024).toFixed(1)+' KB）</p>';
+  html += '<div style="display:flex;gap:8px">';
+  html += '<button onclick="closeModal()" style="flex:1;padding:10px;border:none;border-radius:8px;font-size:12px;cursor:pointer;background:var(--bg-surface);color:var(--text-dim)">取消</button>';
+  html += '<button id="confirmImportBtn" style="flex:1;padding:10px;border:none;border-radius:8px;font-size:12px;cursor:pointer;background:var(--danger);color:#fff">确认导入</button>';
+  html += '</div>';
+  html += '</div>';
+
+  openModal(html);
+
+  document.getElementById('confirmImportBtn').onclick = function(){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        var data = JSON.parse(e.target.result);
+        if(typeof data !== 'object' || Array.isArray(data)){
+          showToast('导入失败：文件格式不正确（应为对象）','error');
+          return;
+        }
+
+        // 导入前备份当前状态
+        autoBackupSystemData(true);
+
+        var keys = Object.keys(data);
+        if(keys.length === 0){
+          showToast('导入失败：文件中无数据','error');
+          return;
+        }
+
+        for(var i = 0; i < keys.length; i++){
+          var k = keys[i];
+          var v = data[k];
+          localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
+        }
+
+        closeModal();
+        showToast('已导入 '+keys.length+' 个数据项，页面即将刷新...','success');
+        setTimeout(function(){ location.reload(); }, 1200);
+      }catch(er){
+        showToast('导入失败：文件格式不正确 - '+er.message,'error');
+        closeModal();
+      }
+    };
+    reader.onerror = function(){
+      showToast('读取文件失败','error');
+      closeModal();
+    };
+    reader.readAsText(file, 'UTF-8');
+  };
+
+  event.target.value = '';
+}
+
+// 页面关闭前自动备份
+window.addEventListener('beforeunload', function(){ autoBackupSystemData(true); });
 
 // ===== Global Search =====
 function globalSearch(q){
