@@ -15459,10 +15459,10 @@ function openTraineeDetail(name){
   html += '<div class="tn-dash-card" style="flex:1"><div style="font-size:9px;color:var(--text-muted);margin-bottom:4px">综合评估 <span style="color:#E0956A;font-weight:600">'+(detailIsV2?'自动+排名':'手动')+'</span></div><div style="font-size:20px;font-weight:700;color:'+scoreColor+'">'+manualScore+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/'+maxScore+'</span></div><div class="dash-mini-bar" style="margin-top:6px"><div class="dash-mini-fill" style="width:'+scorePct+'%;background:'+scoreColor+'"></div></div><div style="font-size:9px;color:var(--text-muted);margin-top:4px">'+(detailIsV2?'8维评估':'5维评估')+'</div></div>';
   html += '</div></div>';
   
-  // Eval trend: last 6 weeks
-  html += '<div class="tn-detail-section"><h4>评估趋势（近6周）</h4>';
+  // Eval trend: all scored weeks
+  html += '<div class="tn-detail-section"><h4>评估趋势（W1-'+(curWkIdx+1)+'）</h4>';
   var scores = [];
-  for(var i=Math.max(0,curWkIdx-5); i<=curWkIdx; i++){
+  for(var i=0; i<=curWkIdx; i++){
     var wkIdT = 'W'+(i+1);
     var trendIsV2 = i >= EVAL_V2_CUTOFF_WEEK;
     var sTrend = getEvalScore(name, wkIdT);
