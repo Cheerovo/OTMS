@@ -5898,7 +5898,7 @@ function defaultMeetings(){return[
   {id:'m2',date:'2026-06-13',title:'六月第二周周例会',attendees:'杜宪,汪顺,王倩,邵吴慧,黄欢欢',minutes:'1. 大后台服务SOP框架评审\n2. 薪酬绩效KPI政策初稿讨论\n3. 人事档案数字化方案确认\n4. 集团资产管理系统选型汇报',tempTasks:[{id:'mt3',title:'完成SOP框架修订版',owner:'杜宪',deadline:'2026-06-18',status:'done'},{id:'mt4',title:'资产管理系统供应商报价收集',owner:'汪顺',deadline:'2026-06-20',status:'pending'}],files:[],cat:Date.now()}
 ];}
 function loadMeetings(){try{return JSON.parse(localStorage.meeting_data)||defaultMeetings()}catch(e){return defaultMeetings()}}
-function saveMeetings(d){try{localStorage.meeting_data=JSON.stringify(d)}catch(e){alert('存储空间不足，请清理旧数据后重试。\n错误：'+e.message);throw e}}
+function saveMeetings(d){try{localStorage.setItem('meeting_data',JSON.stringify(d))}catch(e){alert('存储空间不足，请清理旧数据后重试。\n错误：'+e.message);throw e}}
 let meetings = loadMeetings();
 
 // ===== Meeting Render =====
@@ -6599,7 +6599,7 @@ if(!empList.length || storedVer !== DATA_VER){
     {id:'e111',name:'季文菊',bu:'职能后台',department:'香港办',reportsTo:'王倩',position:'管家保洁',rank:'I',hireDate:'',phone:''}
   ];
   saveEmployees(empList);
-  localStorage.okr_data_version = DATA_VER;
+  localStorage.setItem('okr_data_version', String(DATA_VER));
 }
 
 // --- Rendering ---
@@ -8572,12 +8572,14 @@ async function autoCheckRemote(){
   }catch(e){ /* silent */ }
 }
 
-// 劫持 localStorage.setItem，数据变更自动触发上传
+// 劫持 localStorage.setItem，数据变更自动触发上传 + 防止被云端旧数据覆盖
 (function(){
   var _orig = localStorage.setItem.bind(localStorage);
   localStorage.setItem = function(key, value){
     _orig(key, value);
     if(!_isImporting && DATA_KEYS.indexOf(key) !== -1){
+      // 立即抬高本地版本号，确保 syncFromRemote / autoCheckRemote 不会用旧云端数据覆盖
+      _orig(LOCAL_DATA_VER_KEY, String(Math.floor(Date.now() / 1000)));
       scheduleAutoUpload();
     }
   };
@@ -15875,7 +15877,20 @@ function renderTraineeOverview(){
     });
   }
   var total=allTasks.length, done=0, active=0, pending=0;
-  var now=new Date(), w9Start=new Date(2026,6,27);
+  var now=new Date(), nowTs=now.getTime();
+  // Find current week from EVAL_WEEKS dynamically
+  var curWeek=null, nextWeek=null;
+  for(var wi=0;wi<EVAL_WEEKS.length;wi++){
+    var ws=new Date(2026,parseInt(EVAL_WEEKS[wi].start.split('/')[0])-1,parseInt(EVAL_WEEKS[wi].start.split('/')[1]));
+    var we=new Date(2026,parseInt(EVAL_WEEKS[wi].end.split('/')[0])-1,parseInt(EVAL_WEEKS[wi].end.split('/')[1])+1); // +1 day to include end date
+    if(nowTs>=ws.getTime()&&nowTs<we.getTime()){ curWeek=EVAL_WEEKS[wi]; nextWeek=EVAL_WEEKS[wi+1]||null; break; }
+    if(nowTs<ws.getTime()&&!curWeek){ curWeek=EVAL_WEEKS[Math.max(0,wi-1)]; nextWeek=EVAL_WEEKS[wi]; break; }
+  }
+  if(!curWeek){ curWeek=EVAL_WEEKS[EVAL_WEEKS.length-1]; nextWeek=null; }
+  var deadlineDate=nextWeek?nextWeek.start:curWeek.end;
+  var deadlineLabel=(nextWeek||curWeek).label+' 截止';
+  var deadlineSub=nextWeek?nextWeek.start:curWeek.end;
+  var w9Start=new Date(2026,parseInt(deadlineDate.split('/')[0])-1,parseInt(deadlineDate.split('/')[1]));
   var startDate=new Date(2026,5,1);
   var diffDays=Math.floor((now-startDate)/(1000*60*60*24));
   if(diffDays<0) diffDays=0;
@@ -15897,7 +15912,7 @@ function renderTraineeOverview(){
     {v:total, l:'总任务数', c:'#5D8AA8', sub:''},
     {v:pct+'%', l:'整体完成率', c:'#8BA89C', sub:done+'/'+total+' 已完成'},
     {v:active, l:'进行中', c:'#D4A76A', sub:pending+' 待开始'},
-    {v:riskDays, l:'距 W9 截止', c:riskDays<=14?'#C94F66':'var(--text)', sub:'7月27日'},
+    {v:riskDays, l:'距 '+deadlineLabel, c:riskDays<=14?'#C94F66':'var(--text)', sub:deadlineSub},
     {v:overdueCount, l:'逾期风险', c:overdueCount>0?'#C94F66':'#8BA89C', sub:'需关注'}
   ];
   var heroHtml='<div class="tn-ov-hero">';
