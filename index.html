@@ -12631,7 +12631,7 @@ function loadTnData(){
         saveTnData();
       }
       // Migration V4: add new seed tasks (r139+) that don't exist yet
-      console.log('[loadTnData] V4 check: _version='+tnData._version+' needV4='+(!tnData._version || tnData._version < 5)+' hasSeed='+(typeof TN_REF_TASKS !== 'undefined' && TN_REF_TASKS.length)+' hasRef='+!!tnData.refTasks+' refCount='+(tnData.refTasks?tnData.refTasks.length:0));
+      console.log('[loadTnData] V4 check: _version='+tnData._version+' needV4='+(!tnData._version || tnData._version < 5)+' typeofTNT='+(typeof TN_REF_TASKS)+' windowTNT='+(typeof window.TN_REF_TASKS)+' isArray='+Array.isArray(window.TN_REF_TASKS)+' hasRef='+!!tnData.refTasks+' refCount='+(tnData.refTasks?tnData.refTasks.length:0));
       if((!tnData._version || tnData._version < 5) && typeof TN_REF_TASKS !== 'undefined' && TN_REF_TASKS.length && tnData.refTasks){
         console.log('[loadTnData] Running V4 migration, seed tasks count: '+TN_REF_TASKS.length);
         var existingIds4 = {};
