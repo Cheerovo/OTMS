@@ -13967,7 +13967,6 @@ function renderTraineeGanttView(){
           if(wks[ow]){ isOverdue = (ow < curWkIdx); break; }
         }
       }
-      }
       var overdueClass = isOverdue ? ' overdue' : '';
 
       html += '<div class="tn-gantt-row' + (isChild ? ' child' : '') + overdueClass + rowDimmed + '" data-task-id="' + t.id + '" onclick="highlightTask(\'' + t.id + '\')">';
