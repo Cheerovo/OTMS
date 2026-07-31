@@ -503,7 +503,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .tn-gantt-row.week-dimmed .tn-gantt-bar { pointer-events:none; }
 /* Overdue risk markers */
 .tn-gantt-bar.overdue { box-shadow:inset 0 0 0 2px #E0556A; animation: overduePulse 2s ease-in-out infinite; }
-@keyframes overduePulse { 0%,100% { box-shadow:inset 0 0 0 2px #E0556A; } 50% { box-shadow:inset 0 0 0 2px rgba(224,85,106,0.35); } }
+.tn-gantt-row.overdue { background:rgba(224,85,106,0.06) !important; }
+.tn-gantt-row.overdue:hover { background:rgba(224,85,106,0.12) !important; }
+@keyframes overduePulse { 0%,100% { box-shadow:inset 0 0 0 2px #E0556A; } 50% { box-shadow:inset 0 0 0 3px rgba(224,85,106,0.6); } }
 .tn-gantt-name .overdue-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#E0556A; flex-shrink:0; margin-left:2px; animation: overduePulse 2s ease-in-out infinite; }
 /* Focus toggle chip */
 .tn-gantt-filter-chip.focus-on { background:#E0556A; color:#fff; border-color:#E0556A; }
@@ -13967,7 +13969,7 @@ function renderTraineeGanttView(){
       }
       var overdueClass = isOverdue ? ' overdue' : '';
 
-      html += '<div class="tn-gantt-row' + (isChild ? ' child' : '') + rowDimmed + '" data-task-id="' + t.id + '" onclick="highlightTask(\'' + t.id + '\')">';
+      html += '<div class="tn-gantt-row' + (isChild ? ' child' : '') + overdueClass + rowDimmed + '" data-task-id="' + t.id + '" onclick="highlightTask(\'' + t.id + '\')">';
       html += '<div class="tn-gantt-name" onclick="event.stopPropagation();openTaskDetail(\'' + t._source + '\',\'' + t.id + '\')" title="' + esc(t.name) + (isOverdue ? ' [逾期风险]' : '') + '">';
       html += '<span class="task-prio-dot ' + prio + '"></span>';
       if(isChild){
@@ -14119,8 +14121,12 @@ function renderTraineeGantt(filtered, curWkIdx){
       var srcTagClass = isWeekly?'weekly':(isRefT?'ref':'plan');
       var srcTagLabel = isWeekly?(t.weekStart||t.week||''):(isRefT?'R':'P');
 
-      html += '<div class="tn-gantt-row'+(isChild?' child':'')+'" data-task-id="'+t.id+'" onclick="highlightTask(\''+t.id+'\')">';
-      html += '<div class="tn-gantt-name" onclick="event.stopPropagation();openTaskDetail(\''+t._source+'\',\''+t.id+'\')" title="'+esc(t.name)+'">';
+      var isOverdue2 = false;
+      if(st==='pending'&&wks){ for(var ow=0;ow<weekCount;ow++){ if(wks[ow]){ isOverdue2=(ow<curWkIdx); break; } } }
+      var overdueClass2 = isOverdue2 ? ' overdue' : '';
+
+      html += '<div class="tn-gantt-row'+(isChild?' child':'')+overdueClass2+'" data-task-id="'+t.id+'" onclick="highlightTask(\''+t.id+'\')">';
+      html += '<div class="tn-gantt-name" onclick="event.stopPropagation();openTaskDetail(\''+t._source+'\',\''+t.id+'\')" title="'+esc(t.name)+(isOverdue2?' [逾期风险]':'')+'">';
       html += '<span class="task-prio-dot '+prio+'"></span>';
       if(isChild){
         html += '<span style="width:8px;height:8px;border-left:2px solid var(--accent);border-bottom:2px solid var(--accent);margin-right:2px;flex-shrink:0"></span>';
@@ -14133,7 +14139,7 @@ function renderTraineeGantt(filtered, curWkIdx){
       for(var c=0;c<weekCount;c++){
         html += '<div class="tn-gw-cell'+(c===curWkIdx?' current':'')+'"></div>';
       }
-      html += renderGanttBar(wks, st, sysColor, weekCount);
+      html += renderGanttBar(wks, st, sysColor, weekCount, t.name, statusLabel(st), isOverdue2);
       html += '</div>';
       html += '</div>';
     });
