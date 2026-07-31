@@ -12452,6 +12452,9 @@ var TN_REF_TASKS = [
   {"id":"r156","sys":"cwzw","sysName":"财务账务自动化系统","sysColor":"#6AAA8A","sysBg":"#F2F6F4","name":"优化P&L 内部结转界面，标签线部分调整；","taskType":"normal","taskCategory":"deliverable","executors":["任梦超"],"approver":"邵吴慧","R":"任梦超","A":"邵吴慧","C":"蔡心宇、芦智蔚","I":"陈双杰","refStatus":"todo","priority":"P1","weeks":[0,0,0,0,0,0,0,0,1,0,0,0,0,0],"parentId":"r110","desc":"","createdAt":"2026-07-31","attachments":0,"module":"页面全栈开发","deliverable":"优化内部P&L结转界面及标签页面","deliverableAttachments":[]},
   {"id":"r157","sys":"cwzw","sysName":"财务账务自动化系统","sysColor":"#6AAA8A","sysBg":"#F2F6F4","name":"测试修改内容调整","taskType":"normal","taskCategory":"deliverable","executors":["任梦超"],"approver":"邵吴慧","R":"任梦超","A":"邵吴慧","C":"蔡心宇、芦智蔚","I":"陈双杰","refStatus":"todo","priority":"P1","weeks":[0,0,0,0,0,0,0,0,1,0,0,0,0,0],"parentId":"r110","desc":"","createdAt":"2026-07-31","attachments":0,"module":"页面全栈开发","deliverable":"最终HKMS2.0系统交付","deliverableAttachments":[]}
 ];
+window.__TN_REF_TASKS_READY = true;
+window.__TN_REF_COUNT = TN_REF_TASKS.length;
+window.TN_REF_TASKS = TN_REF_TASKS;  // explicit window assignment to avoid scope issues
 // Date range + week overlap helper for reference tasks
 function getWeekDateRange(weekIdx){
   // weekIdx is 0-indexed (0=W1 starting 06/01)
@@ -12561,6 +12564,13 @@ function getTraineeWeekTasks(traineeName, weekId){
 
 function getTnStorageKey(k){ return 'otms_trainee_'+k+'_v1'; }
 
+function _getSeedTasks(){
+  // Try multiple ways to access TN_REF_TASKS (some environments lose the var binding)
+  try { if(typeof TN_REF_TASKS !== 'undefined' && TN_REF_TASKS && TN_REF_TASKS.length) return TN_REF_TASKS; } catch(e){}
+  try { if(typeof window.TN_REF_TASKS !== 'undefined' && window.TN_REF_TASKS && window.TN_REF_TASKS.length) return window.TN_REF_TASKS; } catch(e){}
+  return null;
+}
+
 function loadTnData(){
   var cleaned = localStorage.getItem('otms_trainee_cleared_v3');
   try{
@@ -12571,22 +12581,22 @@ function loadTnData(){
       if(!cleaned){
         tnData.tasks = {};
         tnData.wtasks = [];
-        tnData.refTasks = (typeof TN_REF_TASKS!=='undefined' && TN_REF_TASKS.length) ? JSON.parse(JSON.stringify(TN_REF_TASKS)) : [];
+        var seeds0 = _getSeedTasks(); tnData.refTasks = seeds0 ? JSON.parse(JSON.stringify(seeds0)) : [];
         tnData._version = 2;
         localStorage.setItem('otms_trainee_cleared_v3', '1');
         localStorage.setItem('otms_trainee_imported_v1', '1');
         saveTnData();
         return;
       }
-      // Ensure refTasks is always populated from TN_REF_TASKS if empty
+      // Ensure refTasks is always populated from seed if empty
       if(!tnData.refTasks || !tnData.refTasks.length){
-        tnData.refTasks = (typeof TN_REF_TASKS!=='undefined' && TN_REF_TASKS.length) ? JSON.parse(JSON.stringify(TN_REF_TASKS)) : [];
+        var seeds1 = _getSeedTasks(); tnData.refTasks = seeds1 ? JSON.parse(JSON.stringify(seeds1)) : [];
         saveTnData();
       }
       // Migration: add missing fields for backward compat
       if(!tnData.wtasks) tnData.wtasks = [];
       if((!tnData.refTasks || !tnData.refTasks.length || !tnData.refTasks[0].weeks) && !cleaned){
-        tnData.refTasks = JSON.parse(JSON.stringify(TN_REF_TASKS));
+        var seeds2 = _getSeedTasks(); if(seeds2) tnData.refTasks = JSON.parse(JSON.stringify(seeds2));
         saveTnData();
       }
       if(!tnData.meetings) tnData.meetings = [];
@@ -12597,11 +12607,12 @@ function loadTnData(){
       // Migration: add approval fields to existing wtasks
       if(tnData.wtasks){ tnData.wtasks.forEach(function(w){ if(w.approvalStatus===undefined) w.approvalStatus='approved'; if(w.createdBy===undefined) w.createdBy=''; if(w.approvedBy===undefined) w.approvedBy=''; if(w.approvedAt===undefined) w.approvedAt=''; }); }
       // Migration V3: merge new TN_REF_TASKS fields (module,deliverable,C,I) and new tasks
-      if((!tnData._version || tnData._version < 3) && typeof TN_REF_TASKS !== 'undefined' && TN_REF_TASKS.length){
+      var seedsV3 = _getSeedTasks();
+      if((!tnData._version || tnData._version < 3) && seedsV3){
         var refMap = {};
         if(tnData.refTasks){ tnData.refTasks.forEach(function(r){ refMap[r.id] = r; }); }
         var mergedRef = [];
-        TN_REF_TASKS.forEach(function(seed){
+        seedsV3.forEach(function(seed){
           var existing = refMap[seed.id];
           if(existing){
             // Update missing/new fields from seed while preserving user edits
@@ -12630,43 +12641,61 @@ function loadTnData(){
         tnData._version = 3;
         saveTnData();
       }
-      // Migration V4: add new seed tasks (r139+) that don't exist yet
-      console.log('[loadTnData] V4 check: _version='+tnData._version+' needV4='+(!tnData._version || tnData._version < 5)+' typeofTNT='+(typeof TN_REF_TASKS)+' windowTNT='+(typeof window.TN_REF_TASKS)+' isArray='+Array.isArray(window.TN_REF_TASKS)+' hasRef='+!!tnData.refTasks+' refCount='+(tnData.refTasks?tnData.refTasks.length:0));
-      if((!tnData._version || tnData._version < 5) && typeof TN_REF_TASKS !== 'undefined' && TN_REF_TASKS.length && tnData.refTasks){
-        console.log('[loadTnData] Running V4 migration, seed tasks count: '+TN_REF_TASKS.length);
-        var existingIds4 = {};
-        tnData.refTasks.forEach(function(r){ existingIds4[r.id] = true; });
-        var added = false;
-        TN_REF_TASKS.forEach(function(seed){
-          if(!existingIds4[seed.id]){
-            tnData.refTasks.push(JSON.parse(JSON.stringify(seed)));
-            added = true;
-            console.log('[loadTnData] V4 added: '+seed.id+' - '+seed.name.substring(0,60));
+      // Migration V5: add new seed tasks (r139-r157). Self-contained to avoid TN_REF_TASKS scope issues.
+      console.log('[loadTnData] V5 check: _version='+tnData._version+' needV5='+(!tnData._version || tnData._version < 5)+' sentinel='+window.__TN_REF_TASKS_READY+' refCount='+(tnData.refTasks?tnData.refTasks.length:0));
+      if((!tnData._version || tnData._version < 5) && tnData.refTasks){
+        // Check which of the 19 new task IDs are missing
+        var v5NewIds = ['r139','r140','r141','r142','r143','r144','r145','r146','r147','r148','r149','r150','r151','r152','r153','r154','r155','r156','r157'];
+        var existingIds = {};
+        tnData.refTasks.forEach(function(r){ existingIds[r.id] = true; });
+        var missingIds = [];
+        v5NewIds.forEach(function(id){ if(!existingIds[id]) missingIds.push(id); });
+
+        if(missingIds.length > 0){
+          console.log('[loadTnData] V5 migration: missing '+missingIds.length+' tasks: '+missingIds.join(','));
+          var seedSource = _getSeedTasks();
+          if(seedSource){
+            var seedMap = {};
+            seedSource.forEach(function(s){ seedMap[s.id] = s; });
+            missingIds.forEach(function(id){
+              if(seedMap[id]){
+                tnData.refTasks.push(JSON.parse(JSON.stringify(seedMap[id])));
+                console.log('[loadTnData] V5 added from seed: '+id);
+              }
+            });
+          } else {
+            console.log('[loadTnData] V5: seed source unavailable, skipping');
           }
-        });
-        tnData._version = 5;
-        if(added){ saveTnData(); console.log('[loadTnData] V4 migration saved, new refTasks count: '+tnData.refTasks.length); }
-        else { console.log('[loadTnData] V4 migration: no new tasks to add'); }
+          tnData._version = 5;
+          saveTnData();
+        } else {
+          tnData._version = 5;
+          saveTnData();
+          console.log('[loadTnData] V5: all 19 new tasks already present');
+        }
       }
       // Always sync corrected r2/r3/r4 names/deliverables/module from seed
-      if(typeof TN_REF_TASKS !== 'undefined' && tnData.refTasks){
-        var seedMap = {};
-        TN_REF_TASKS.forEach(function(s){ seedMap[s.id] = s; });
-        var changed = false;
-        tnData.refTasks.forEach(function(t){
-          var seed = seedMap[t.id];
-          if(seed && (t.id==='r2'||t.id==='r3'||t.id==='r4')){
-            if(t.name !== seed.name){ t.name = seed.name; changed = true; }
-            if(t.deliverable !== seed.deliverable){ t.deliverable = seed.deliverable; changed = true; }
-            if(t.module !== seed.module){ t.module = seed.module; changed = true; }
-          }
-        });
-        if(changed){ saveTnData(); }
+      if(tnData.refTasks){
+        var seedSource2 = _getSeedTasks();
+        if(seedSource2){
+          var seedMap2 = {};
+          seedSource2.forEach(function(s){ seedMap2[s.id] = s; });
+          var changed = false;
+          tnData.refTasks.forEach(function(t){
+            var seed = seedMap2[t.id];
+            if(seed && (t.id==='r2'||t.id==='r3'||t.id==='r4')){
+              if(t.name !== seed.name){ t.name = seed.name; changed = true; }
+              if(t.deliverable !== seed.deliverable){ t.deliverable = seed.deliverable; changed = true; }
+              if(t.module !== seed.module){ t.module = seed.module; changed = true; }
+            }
+          });
+          if(changed){ saveTnData(); }
+        }
       }
       return;
     }
   }catch(e){}
-  tnData = {tasks:{}, reports:{}, feedback:[], wtasks:[], meetings:[], refTasks:(typeof TN_REF_TASKS!=='undefined'?JSON.parse(JSON.stringify(TN_REF_TASKS)):[]), _version:5};
+  var seedsFb = _getSeedTasks(); tnData = {tasks:{}, reports:{}, feedback:[], wtasks:[], meetings:[], refTasks:(seedsFb?JSON.parse(JSON.stringify(seedsFb)):[]), _version:5};
   localStorage.setItem('otms_trainee_cleared_v3', '1');
 }
 
@@ -19180,6 +19209,8 @@ function filterCalendar(juris) {
     c.style.color = isActive ? '#fff' : c.style.borderColor;
   });
 }
+
+console.log('[INIT] Script loaded. TN_REF_TASKS type='+(typeof TN_REF_TASKS)+' len='+(typeof TN_REF_TASKS!=='undefined'?TN_REF_TASKS.length:'N/A')+' window type='+(typeof window.TN_REF_TASKS)+' sentinel='+window.__TN_REF_TASKS_READY);
 
 </script>
 </body>
