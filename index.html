@@ -11230,18 +11230,17 @@ function getPeerVoteDetails(traineeName, weekId){
 }
 
 function calcTraineeTotalScoreV2(traineeName, weekId){
-  // V2: auto-scored dimensions (100pts) + peer vote (7-21pts)
-  // Only count weeks that have actual scoring data — return null for unscored weeks
+  // V2: auto-scored dimensions + peer vote (additive to eval data)
+  // No eval data → week not scored (peer votes alone don't count)
   var s = getEvalScore(traineeName, weekId);
-  var peerScore = calcPeerVoteScore(traineeName, weekId);
-  if(!s && peerScore === 0) return null;
+  if(!s) return null;
   var total = 0;
   EVAL_DIMS_V2.forEach(function(d){
     if(d.auto){
-      total += (s ? (s[d.id] || 0) : 0);
+      total += (s[d.id] || 0);
     }
   });
-  total += peerScore;
+  total += calcPeerVoteScore(traineeName, weekId);
   return Math.round(total * 10) / 10;
 }
 
