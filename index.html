@@ -13243,6 +13243,29 @@ function renderTraineeTasks(){
     filtered.push(r);
   });
 
+  // Overdue filter: pull in parent tasks so child hierarchy stays intact
+  if(tnQuickFilter === 'overdue'){
+    var filteredIds = {}; filtered.forEach(function(t){ filteredIds[t.id]=true; });
+    var needParent = {};
+    filtered.forEach(function(t){
+      var pid = t.parentId || '';
+      if(!pid && t._source==='plan'){ var tt = getTnTask(t.id); if(tt&&tt.parentId) pid = tt.parentId; }
+      if(pid && !filteredIds[pid]) needParent[pid] = true;
+    });
+    if(Object.keys(needParent).length > 0){
+      // Search plan tasks
+      if(typeof TN_TASKS !== 'undefined'){
+        TN_TASKS.forEach(function(pt){ if(needParent[pt.id] && !filteredIds[pt.id]){ filteredIds[pt.id]=true; pt._source='plan'; filtered.push(pt); } });
+      }
+      // Search weekly tasks
+      var wts = (tnData && tnData.wtasks) ? tnData.wtasks : [];
+      wts.forEach(function(wt){ if(needParent[wt.id] && !filteredIds[wt.id]){ filteredIds[wt.id]=true; wt._source='weekly'; filtered.push(wt); } });
+      // Search ref tasks
+      var rts = (tnData&&tnData.refTasks&&tnData.refTasks.length)?tnData.refTasks:(typeof TN_REF_TASKS!=='undefined'?TN_REF_TASKS:[]);
+      rts.forEach(function(rt){ if(needParent[rt.id] && !filteredIds[rt.id]){ filteredIds[rt.id]=true; rt._source='ref'; filtered.push(rt); } });
+    }
+  }
+
   document.getElementById('tnTaskCount').textContent = filtered.length + ' 项任务';
 
   var groups = {};
