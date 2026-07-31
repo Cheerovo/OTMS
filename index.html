@@ -15915,7 +15915,8 @@ function renderTraineeOverview(){
     var st=t.refStatus||'pending';
     if(st==='done') done++;
     else if(st==='active') active++;
-    else { pending++; var wks=t.weeks||[]; for(var ow=0;ow<wks.length;ow++){ if(wks[ow]){ if(ow<curWkIdx) overdueCount++; break; } } }
+    else pending++;
+    if(st!=='done'){ var wks=t.weeks||[]; for(var ow=0;ow<wks.length;ow++){ if(wks[ow]){ if(ow<curWkIdx) overdueCount++; break; } } }
     if(sysStats[t.sys]){ sysStats[t.sys].total++; if(st==='done') sysStats[t.sys].done++; else if(st==='active') sysStats[t.sys].active++; else sysStats[t.sys].pending++; }
   });
   var pct=total>0?Math.round(done/total*100):0;
