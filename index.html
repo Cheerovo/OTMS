@@ -12631,7 +12631,7 @@ function loadTnData(){
         saveTnData();
       }
       // Migration V4: add new seed tasks (r139+) that don't exist yet
-      if((!tnData._version || tnData._version < 4) && typeof TN_REF_TASKS !== 'undefined' && TN_REF_TASKS.length && tnData.refTasks){
+      if((!tnData._version || tnData._version < 5) && typeof TN_REF_TASKS !== 'undefined' && TN_REF_TASKS.length && tnData.refTasks){
         var existingIds4 = {};
         tnData.refTasks.forEach(function(r){ existingIds4[r.id] = true; });
         var added = false;
@@ -12641,7 +12641,7 @@ function loadTnData(){
             added = true;
           }
         });
-        tnData._version = 4;
+        tnData._version = 5;
         if(added) saveTnData();
       }
       // Always sync corrected r2/r3/r4 names/deliverables/module from seed
@@ -12657,12 +12657,12 @@ function loadTnData(){
             if(t.module !== seed.module){ t.module = seed.module; changed = true; }
           }
         });
-        if(changed){ saveTnData(); tnData._version = 4; }
+        if(changed){ saveTnData(); }
       }
       return;
     }
   }catch(e){}
-  tnData = {tasks:{}, reports:{}, feedback:[], wtasks:[], meetings:[], refTasks:(typeof TN_REF_TASKS!=='undefined'?JSON.parse(JSON.stringify(TN_REF_TASKS)):[]), _version:4};
+  tnData = {tasks:{}, reports:{}, feedback:[], wtasks:[], meetings:[], refTasks:(typeof TN_REF_TASKS!=='undefined'?JSON.parse(JSON.stringify(TN_REF_TASKS)):[]), _version:5};
   localStorage.setItem('otms_trainee_cleared_v3', '1');
 }
 
