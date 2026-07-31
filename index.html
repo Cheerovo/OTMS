@@ -12631,7 +12631,9 @@ function loadTnData(){
         saveTnData();
       }
       // Migration V4: add new seed tasks (r139+) that don't exist yet
+      console.log('[loadTnData] V4 check: _version='+tnData._version+' needV4='+(!tnData._version || tnData._version < 5)+' hasSeed='+(typeof TN_REF_TASKS !== 'undefined' && TN_REF_TASKS.length)+' hasRef='+!!tnData.refTasks+' refCount='+(tnData.refTasks?tnData.refTasks.length:0));
       if((!tnData._version || tnData._version < 5) && typeof TN_REF_TASKS !== 'undefined' && TN_REF_TASKS.length && tnData.refTasks){
+        console.log('[loadTnData] Running V4 migration, seed tasks count: '+TN_REF_TASKS.length);
         var existingIds4 = {};
         tnData.refTasks.forEach(function(r){ existingIds4[r.id] = true; });
         var added = false;
@@ -12639,10 +12641,12 @@ function loadTnData(){
           if(!existingIds4[seed.id]){
             tnData.refTasks.push(JSON.parse(JSON.stringify(seed)));
             added = true;
+            console.log('[loadTnData] V4 added: '+seed.id+' - '+seed.name.substring(0,60));
           }
         });
         tnData._version = 5;
-        if(added) saveTnData();
+        if(added){ saveTnData(); console.log('[loadTnData] V4 migration saved, new refTasks count: '+tnData.refTasks.length); }
+        else { console.log('[loadTnData] V4 migration: no new tasks to add'); }
       }
       // Always sync corrected r2/r3/r4 names/deliverables/module from seed
       if(typeof TN_REF_TASKS !== 'undefined' && tnData.refTasks){
