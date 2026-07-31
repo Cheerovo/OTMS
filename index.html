@@ -8654,7 +8654,7 @@ function initApp(){
   // 页面加载后自动备份全部系统数据（延迟 2 秒确保数据全部就绪）
   setTimeout(function(){ autoBackupSystemData(); }, 2000);
 }
-try { initApp(); } catch(e) { console.error('initApp 失败:', e.message); }
+// initApp() moved to end of script — must run after all var declarations (e.g. TN_REF_TASKS at L12296)
 
 // ===== 全系统数据备份与恢复 =====
 var BACKUP_KEY = 'otms_system_backup';
@@ -19212,7 +19212,7 @@ function filterCalendar(juris) {
   });
 }
 
-console.log('[INIT] Script loaded. TN_REF_TASKS type='+(typeof TN_REF_TASKS)+' len='+(typeof TN_REF_TASKS!=='undefined'?TN_REF_TASKS.length:'N/A')+' window type='+(typeof window.TN_REF_TASKS)+' sentinel='+window.__TN_REF_TASKS_READY);
+try { initApp(); } catch(e) { console.error('initApp 失败:', e.message); }
 
 </script>
 </body>
