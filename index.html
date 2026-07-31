@@ -2117,6 +2117,8 @@ body.tn-resizing * { pointer-events:none; }
 /* Hero stat cards */
 .tn-ov-hero { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
 .tn-ov-hero-card { flex:1; min-width:120px; text-align:center; padding:18px 14px; background:var(--card); border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+.tn-ov-hero-card.clickable { cursor:pointer; transition: box-shadow .2s, transform .2s; }
+.tn-ov-hero-card.clickable:hover { box-shadow:0 4px 16px rgba(0,0,0,0.12); transform:translateY(-2px); }
 .tn-ov-hero-val { font-size:20px; font-weight:700; line-height:1.2; }
 .tn-ov-hero-lbl { font-size:8px; color:var(--text-muted); margin-top:4px; text-transform:uppercase; letter-spacing:.5px; }
 .tn-ov-hero-sub { font-size:8px; color:var(--text-dim); margin-top:2px; }
@@ -2385,6 +2387,7 @@ body.tn-resizing * { pointer-events:none; }
           <button class="tn-chip" onclick="tnQuickFilter='mine';updateQuickFilters();renderTraineeTasks()">我的任务</button>
           <button class="tn-chip" onclick="tnQuickFilter='active';updateQuickFilters();renderTraineeTasks()">进行中</button>
           <button class="tn-chip" onclick="tnQuickFilter='week';updateQuickFilters();renderTraineeTasks()">本周任务</button>
+          <button class="tn-chip" id="tnOverdueFilterChip" style="display:none;color:#C94F66" onclick="tnQuickFilter='overdue';updateQuickFilters();renderTraineeTasks()">逾期风险</button>
           <button class="tn-chip" id="tnApprovalFilterChip" style="display:none" onclick="tnApprovalFilter=tnApprovalFilter==='pending'?'all':'pending';updateQuickFilters();renderTraineeTasks()">待审核</button>
         </div>
       </div>
@@ -13007,9 +13010,11 @@ var tnHighlightedTaskId = null;
 
 function updateQuickFilters(){
   document.querySelectorAll('#tnQuickFilters .tn-chip').forEach(function(c){
-    var labelMap = {'all':'全部','mine':'我的任务','active':'进行中','week':'本周任务','pending':'待审核'};
+    var labelMap = {'all':'全部','mine':'我的任务','active':'进行中','week':'本周任务','overdue':'逾期风险','pending':'待审核'};
     c.classList.toggle('active', c.textContent === labelMap[tnQuickFilter] || (c.id==='tnApprovalFilterChip' && tnApprovalFilter==='pending'));
   });
+  var overdueChip = document.getElementById('tnOverdueFilterChip');
+  if(overdueChip){ overdueChip.style.display = tnQuickFilter === 'overdue' ? '' : 'none'; }
   // Show/hide approval filter chip
   var chip = document.getElementById('tnApprovalFilterChip');
   if(chip){
@@ -13173,6 +13178,7 @@ function renderTraineeTasks(){
       var st = (td && td.status) ? td.status : t.status;
       if(statusFilter!=='all' && st!==statusFilter) return;
       if(tnQuickFilter === 'active' && st !== 'active') return;
+      if(tnQuickFilter === 'overdue'){ if(st==='done'||st==='active') return; var tw0=(td&&td.weeks)?td.weeks:t.weeks; if(!tw0.some(function(v,i){return v&&i<curWkIdx;})) return; }
       var tw = (td && td.weeks) ? td.weeks : t.weeks;
       if(weekIdx >= 0 && !tw[weekIdx]) return;
       if(tnQuickFilter === 'week' && !tw[curWkIdx]) return;
@@ -13196,6 +13202,7 @@ function renderTraineeTasks(){
     if(weekIdx >= 0){ var ws=w.weekStart||w.week||''; var we=w.weekEnd||w.week||ws; var wsi=parseInt(ws.slice(1)); var wei=parseInt(we.slice(1)); if(weekIdx+1<wsi||weekIdx+1>wei) return; }
     if(tnQuickFilter === 'week'){ var ws2=w.weekStart||w.week||''; var we2=w.weekEnd||w.week||ws2; var wsi2=parseInt(ws2.slice(1)); var wei2=parseInt(we2.slice(1)); if(curWkIdx+1<wsi2||curWkIdx+1>wei2) return; }
     if(tnQuickFilter === 'active' && w.status !== 'active') return;
+    if(tnQuickFilter === 'overdue'){ if(w.status==='done'||w.status==='active') return; var ww=w.weeks||[]; if(!ww.some(function(v,i){return v&&i<curWkIdx;})) return; }
     if(personFilter!=='all' && w.R !== personFilter && w.A !== personFilter && w.C !== personFilter && w.I !== personFilter && w.person !== personFilter) return;
     if(tnQuickFilter === 'mine' && currentUser && w.R !== currentUser && w.A !== currentUser && w.C !== currentUser && w.I !== currentUser && w.person !== currentUser) return;
     // Approval filtering
@@ -13220,6 +13227,7 @@ function renderTraineeTasks(){
     var st = r.refStatus || 'pending';
     if(statusFilter!=='all' && st!==statusFilter) return;
     if(tnQuickFilter === 'active' && st !== 'active') return;
+    if(tnQuickFilter === 'overdue'){ if(st==='done'||st==='active') return; var rw0=r.weeks||[]; if(!rw0.some(function(v,i){return v&&i<curWkIdx;})) return; }
     var rw = r.weeks || [];
     if(weekIdx >= 0 && !rw[weekIdx]) return;
     if(tnQuickFilter === 'week' && !rw[curWkIdx]) return;
@@ -15916,8 +15924,10 @@ function renderTraineeOverview(){
     {v:overdueCount, l:'逾期风险', c:overdueCount>0?'#C94F66':'#8BA89C', sub:'需关注'}
   ];
   var heroHtml='<div class="tn-ov-hero">';
-  heroItems.forEach(function(it){
-    heroHtml+='<div class="tn-ov-hero-card"><div class="tn-ov-hero-val" style="color:'+it.c+'">'+it.v+'</div><div class="tn-ov-hero-lbl">'+it.l+'</div>'+(it.sub?'<div class="tn-ov-hero-sub">'+it.sub+'</div>':'')+'</div>';
+  heroItems.forEach(function(it,i){
+    var isOverdue = i === 4; // 5th card = 逾期风险
+    var clickable = isOverdue && overdueCount > 0;
+    heroHtml+='<div class="tn-ov-hero-card'+(clickable?' clickable':'')+'"'+(clickable?' onclick="tnQuickFilter=\'overdue\';updateQuickFilters();switchTraineeView(\'tasks\')" title="点击查看逾期任务"':'')+'><div class="tn-ov-hero-val" style="color:'+it.c+'">'+it.v+'</div><div class="tn-ov-hero-lbl">'+it.l+'</div>'+(it.sub?'<div class="tn-ov-hero-sub">'+it.sub+'</div>':'')+'</div>';
   });
   heroHtml+='</div>';
   document.getElementById('tnOvHero').innerHTML=heroHtml;
