@@ -12663,11 +12663,13 @@ function loadTnData(){
                 console.log('[loadTnData] V5 added from seed: '+id);
               }
             });
+            tnData._version = 5;
+            saveTnData();
+            console.log('[loadTnData] V5 migration done, refTasks now: '+tnData.refTasks.length);
           } else {
-            console.log('[loadTnData] V5: seed source unavailable, skipping');
+            console.log('[loadTnData] V5: seed source unavailable, will retry next load');
+            // Don't update _version — retry on next load
           }
-          tnData._version = 5;
-          saveTnData();
         } else {
           tnData._version = 5;
           saveTnData();
