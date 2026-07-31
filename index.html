@@ -10972,7 +10972,9 @@ function toggleEvalOverview(){
   var container = document.getElementById('evalScorePanelContainer');
   var toggleLabel = evalOverviewMode ? '详情' : '概览';
   var toggleActive = evalOverviewMode ? ' active' : '';
-  var toggleBar = '<div class="eval-overview-bar"><button id="evalOverviewToggle" class="eval-overview-toggle'+toggleActive+'" onclick="toggleEvalOverview()">'+toggleLabel+'</button><span style="font-size:9px;color:var(--text-dim)">'+(evalOverviewMode ? '矩阵概览 · 点击学员名进入详情' : '逐个详情 · 点击概览横向对比')+'</span></div>';
+  var isAdmin = isGlobalAdmin(currentUser);
+  var clearBtn = isAdmin ? '<button onclick="clearWeekScores(\''+EVAL_WEEKS[evalCurrentWeek].id+'\')" style="margin-left:auto;background:none;border:1px solid var(--danger);color:var(--danger);padding:3px 10px;border-radius:4px;font-size:9px;cursor:pointer;font-family:inherit" title="清空本周所有评分和互评投票">清空'+EVAL_WEEKS[evalCurrentWeek].label+'</button>' : '';
+  var toggleBar = '<div class="eval-overview-bar"><button id="evalOverviewToggle" class="eval-overview-toggle'+toggleActive+'" onclick="toggleEvalOverview()">'+toggleLabel+'</button><span style="font-size:9px;color:var(--text-dim)">'+(evalOverviewMode ? '矩阵概览 · 点击学员名进入详情' : '逐个详情 · 点击概览横向对比')+'</span>'+clearBtn+'</div>';
   container.innerHTML = toggleBar;
   if(evalOverviewMode){
     renderScoreOverview();
@@ -11486,6 +11488,33 @@ function deletePeerVote(weekId, voterName){
   showToast('协作互评投票已删除', 'success');
 }
 
+function clearWeekScores(weekId){
+  if(!evalData) loadEvalData();
+  if(!confirm('⚠️ 确认清空 '+weekId+' 所有管培生的评分和协作互评投票？\n此操作不可撤销。')) return;
+  // Clear all eval scores for this week
+  if(evalData.scores){
+    Object.keys(evalData.scores).forEach(function(k){
+      if(k.endsWith('|'+weekId)) delete evalData.scores[k];
+    });
+  }
+  // Clear all peer votes for this week
+  if(evalData.peerVotes && evalData.peerVotes[weekId]){
+    delete evalData.peerVotes[weekId];
+  }
+  // Clear extras for this week
+  if(evalData.extras){
+    Object.keys(evalData.extras).forEach(function(k){
+      if(k.endsWith('|'+weekId)) delete evalData.extras[k];
+    });
+  }
+  saveEvalData();
+  renderEvalTraineeList();
+  renderEvalWeekTabs();
+  evalSelectedTrainee = null;
+  renderEvalScorePanel();
+  showToast(weekId+' 所有评分已清空', 'success');
+}
+
 function openMentorAssignModal(){
   if(!evalData) loadEvalData();
   var html = '<table style="width:100%;border-collapse:collapse;font-size:10px">';
@@ -11676,7 +11705,9 @@ function renderEvalScorePanel(traineeId){
   // Overview toggle bar
   var toggleLabel = evalOverviewMode ? '详情' : '概览';
   var toggleActive = evalOverviewMode ? ' active' : '';
-  var toggleBar = '<div class="eval-overview-bar"><button id="evalOverviewToggle" class="eval-overview-toggle'+toggleActive+'" onclick="toggleEvalOverview()">'+toggleLabel+'</button><span style="font-size:9px;color:var(--text-dim)">'+(evalOverviewMode ? '矩阵概览 · 点击学员名进入详情' : '逐个详情 · 点击概览横向对比')+'</span></div>';
+  var isAdmin = isGlobalAdmin(currentUser);
+  var clearBtn = isAdmin ? '<button onclick="clearWeekScores(\''+weekId+'\')" style="margin-left:auto;background:none;border:1px solid var(--danger);color:var(--danger);padding:3px 10px;border-radius:4px;font-size:9px;cursor:pointer;font-family:inherit" title="清空本周所有评分和互评投票">清空'+EVAL_WEEKS[evalCurrentWeek].label+'</button>' : '';
+  var toggleBar = '<div class="eval-overview-bar"><button id="evalOverviewToggle" class="eval-overview-toggle'+toggleActive+'" onclick="toggleEvalOverview()">'+toggleLabel+'</button><span style="font-size:9px;color:var(--text-dim)">'+(evalOverviewMode ? '矩阵概览 · 点击学员名进入详情' : '逐个详情 · 点击概览横向对比')+'</span>'+clearBtn+'</div>';
 
   if(evalOverviewMode){
     container.innerHTML = toggleBar;
