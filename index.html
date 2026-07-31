@@ -11372,8 +11372,9 @@ function renderPeerVoteForm(weekId, voterName){
   }
   var hasSubmitted = Object.keys(existing).length > 0;
   var statusNote = hasSubmitted ? '<span style="color:var(--success-text);font-size:9px;font-weight:400">（已有提交记录，可修改）</span>' : '<span style="color:var(--warning-text);font-size:9px;font-weight:400">（暂未提交）</span>';
+  var deleteBtn = hasSubmitted ? ' <button onclick="deletePeerVote(\''+weekId+'\',\''+voterName+'\')" style="background:none;border:1px solid var(--danger);color:var(--danger);padding:1px 8px;border-radius:4px;font-size:9px;cursor:pointer;font-family:inherit;margin-left:8px" title="删除当前投票记录">删除投票</button>' : '';
 
-  var html = '<div style="font-size:10px;color:var(--accent-dim);margin-bottom:12px">你的姓名：<strong>'+voterName+'</strong> '+statusNote+'</div>';
+  var html = '<div style="font-size:10px;color:var(--accent-dim);margin-bottom:12px;display:flex;align-items:center">你的姓名：<strong>'+voterName+'</strong> '+statusNote+deleteBtn+'</div>';
 
   // Count current allocations
   html += '<div style="font-size:9px;color:var(--text-muted);margin-bottom:12px;display:flex;gap:16px">';
@@ -11466,6 +11467,22 @@ function submitRankings(){
   renderEvalTraineeList();
   renderEvalWeekTabs();
   showToast('协作互评投票已提交', 'success');
+}
+
+function deletePeerVote(weekId, voterName){
+  if(!evalData || !evalData.peerVotes || !evalData.peerVotes[weekId] || !evalData.peerVotes[weekId][voterName]){
+    showToast('没有可删除的投票记录', 'warning'); return;
+  }
+  if(!confirm('确认删除 '+voterName+' 在 '+weekId+' 的协作互评投票？此操作不可撤销。')) return;
+  delete evalData.peerVotes[weekId][voterName];
+  // Clean up empty week entries
+  if(Object.keys(evalData.peerVotes[weekId]).length === 0) delete evalData.peerVotes[weekId];
+  saveEvalData();
+  closeRankingModal();
+  if(evalSelectedTrainee) renderEvalScorePanel(evalSelectedTrainee);
+  renderEvalTraineeList();
+  renderEvalWeekTabs();
+  showToast('协作互评投票已删除', 'success');
 }
 
 function openMentorAssignModal(){
