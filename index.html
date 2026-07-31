@@ -13180,7 +13180,7 @@ function renderTraineeTasks(){
       var st = (td && td.status) ? td.status : t.status;
       if(statusFilter!=='all' && st!==statusFilter) return;
       if(tnQuickFilter === 'active' && st !== 'active') return;
-      if(tnQuickFilter === 'overdue'){ if(st==='done'||st==='active') return; var tw0=(td&&td.weeks)?td.weeks:t.weeks; if(!tw0.some(function(v,i){return v&&i<curWkIdx;})) return; }
+      if(tnQuickFilter === 'overdue'){ if(st==='done') return; var tw0=(td&&td.weeks)?td.weeks:t.weeks; if(!tw0.some(function(v,i){return v&&i<curWkIdx;})) return; }
       var tw = (td && td.weeks) ? td.weeks : t.weeks;
       if(weekIdx >= 0 && !tw[weekIdx]) return;
       if(tnQuickFilter === 'week' && !tw[curWkIdx]) return;
@@ -13204,7 +13204,7 @@ function renderTraineeTasks(){
     if(weekIdx >= 0){ var ws=w.weekStart||w.week||''; var we=w.weekEnd||w.week||ws; var wsi=parseInt(ws.slice(1)); var wei=parseInt(we.slice(1)); if(weekIdx+1<wsi||weekIdx+1>wei) return; }
     if(tnQuickFilter === 'week'){ var ws2=w.weekStart||w.week||''; var we2=w.weekEnd||w.week||ws2; var wsi2=parseInt(ws2.slice(1)); var wei2=parseInt(we2.slice(1)); if(curWkIdx+1<wsi2||curWkIdx+1>wei2) return; }
     if(tnQuickFilter === 'active' && w.status !== 'active') return;
-    if(tnQuickFilter === 'overdue'){ if(w.status==='done'||w.status==='active') return; var ww=w.weeks||[]; if(!ww.some(function(v,i){return v&&i<curWkIdx;})) return; }
+    if(tnQuickFilter === 'overdue'){ if(w.status==='done') return; var ww=w.weeks||[]; if(!ww.some(function(v,i){return v&&i<curWkIdx;})) return; }
     if(personFilter!=='all' && w.R !== personFilter && w.A !== personFilter && w.C !== personFilter && w.I !== personFilter && w.person !== personFilter) return;
     if(tnQuickFilter === 'mine' && currentUser && w.R !== currentUser && w.A !== currentUser && w.C !== currentUser && w.I !== currentUser && w.person !== currentUser) return;
     // Approval filtering
@@ -13229,7 +13229,7 @@ function renderTraineeTasks(){
     var st = r.refStatus || 'pending';
     if(statusFilter!=='all' && st!==statusFilter) return;
     if(tnQuickFilter === 'active' && st !== 'active') return;
-    if(tnQuickFilter === 'overdue'){ if(st==='done'||st==='active') return; var rw0=r.weeks||[]; if(!rw0.some(function(v,i){return v&&i<curWkIdx;})) return; }
+    if(tnQuickFilter === 'overdue'){ if(st==='done') return; var rw0=r.weeks||[]; if(!rw0.some(function(v,i){return v&&i<curWkIdx;})) return; }
     var rw = r.weeks || [];
     if(weekIdx >= 0 && !rw[weekIdx]) return;
     if(tnQuickFilter === 'week' && !rw[curWkIdx]) return;
@@ -13962,10 +13962,11 @@ function renderTraineeGanttView(){
 
       // ---- Feature 2: Overdue detection ----
       var isOverdue = false;
-      if(st === 'pending' && wks){
+      if(st !== 'done' && wks){
         for(var ow = 0; ow < weekCount; ow++){
           if(wks[ow]){ isOverdue = (ow < curWkIdx); break; }
         }
+      }
       }
       var overdueClass = isOverdue ? ' overdue' : '';
 
@@ -14122,7 +14123,7 @@ function renderTraineeGantt(filtered, curWkIdx){
       var srcTagLabel = isWeekly?(t.weekStart||t.week||''):(isRefT?'R':'P');
 
       var isOverdue2 = false;
-      if(st==='pending'&&wks){ for(var ow=0;ow<weekCount;ow++){ if(wks[ow]){ isOverdue2=(ow<curWkIdx); break; } } }
+      if(st!=='done'&&wks){ for(var ow=0;ow<weekCount;ow++){ if(wks[ow]){ isOverdue2=(ow<curWkIdx); break; } } }
       var overdueClass2 = isOverdue2 ? ' overdue' : '';
 
       html += '<div class="tn-gantt-row'+(isChild?' child':'')+overdueClass2+'" data-task-id="'+t.id+'" onclick="highlightTask(\''+t.id+'\')">';
