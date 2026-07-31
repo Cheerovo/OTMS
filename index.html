@@ -13253,15 +13253,19 @@ function renderTraineeTasks(){
       if(pid && !filteredIds[pid]) needParent[pid] = true;
     });
     if(Object.keys(needParent).length > 0){
-      // Search plan tasks
+      // Search plan tasks (in TN_TASKS)
       if(typeof TN_TASKS !== 'undefined'){
         TN_TASKS.forEach(function(pt){ if(needParent[pt.id] && !filteredIds[pt.id]){ filteredIds[pt.id]=true; pt._source='plan'; filtered.push(pt); } });
       }
       // Search weekly tasks
       var wts = (tnData && tnData.wtasks) ? tnData.wtasks : [];
       wts.forEach(function(wt){ if(needParent[wt.id] && !filteredIds[wt.id]){ filteredIds[wt.id]=true; wt._source='weekly'; filtered.push(wt); } });
-      // Search ref tasks
-      var rts = (tnData&&tnData.refTasks&&tnData.refTasks.length)?tnData.refTasks:(typeof TN_REF_TASKS!=='undefined'?TN_REF_TASKS:[]);
+      // Search ref tasks (tnData first, then seed data — use _getSeedTasks to avoid scope issues)
+      var seedRts = _getSeedTasks();
+      var rts = (tnData&&tnData.refTasks&&tnData.refTasks.length)?tnData.refTasks:[];
+      var rtsById = {};
+      rts.forEach(function(rt){ rtsById[rt.id]=rt; });
+      if(seedRts){ seedRts.forEach(function(rt){ if(!rtsById[rt.id]){ rtsById[rt.id]=rt; rts.push(rt); } }); }
       rts.forEach(function(rt){ if(needParent[rt.id] && !filteredIds[rt.id]){ filteredIds[rt.id]=true; rt._source='ref'; filtered.push(rt); } });
     }
   }
