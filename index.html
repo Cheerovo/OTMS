@@ -8088,6 +8088,8 @@ function renderAttendDataView() {
   var div = document.getElementById('orgAttendData');
   if (!div) return;
 
+  try {
+
   var records = loadAttendanceRecords();
   var empList = loadEmployees();
   var empMap = {};
@@ -8303,6 +8305,11 @@ function renderAttendDataView() {
   }
 
   div.innerHTML = html;
+
+  } catch(e) {
+    div.innerHTML = '<div style="padding:20px;color:#c00;background:#fff0f0;border:1px solid #e0c0c0;border-radius:8px;margin:16px"><strong>渲染错误</strong><pre style="font-size:10px;margin-top:8px;white-space:pre-wrap">'+esc(e.message)+'\n'+esc(e.stack||'')+'</pre></div>';
+    console.error('renderAttendDataView:', e);
+  }
 }
 
 function buildLeavesTableHTML(empList, empMap) {
