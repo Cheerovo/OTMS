@@ -8888,8 +8888,7 @@ function renderAttendAnalytics() {
 
   // ---- Slicer bar ----
   html += '<div class="analytics-bar">';
-  // Time filters
-  html += '<span style="font-size:10px;color:var(--text-muted);margin-right:2px">时间</span>';
+  // Time
   html += '<select onchange="analyticsFilter.year=this.value;analyticsFilter.month=\'\';analyticsFilter.day=\'\';renderAttendAnalytics()"><option value="">全年</option>';
   years.forEach(function(y) { html += '<option value="'+y+'"'+(filter.year===y?' selected':'')+'>'+y+' 年</option>'; });
   html += '</select>';
@@ -8897,10 +8896,8 @@ function renderAttendAnalytics() {
   months.forEach(function(m) { html += '<option value="'+m+'"'+(filter.month===m?' selected':'')+'>'+m.slice(5).replace(/^0/,'')+' 月</option>'; });
   html += '</select>';
   if (filter.month) {
-    // day dropdown
     var daySet = {}, daysList = [];
     stats.filteredDates.forEach(function(d) { if (!daySet[d]) { daySet[d]=true; daysList.push(d); } });
-    // also get all days in this month from all records (not just filtered)
     var recsAll = loadAttendanceRecords();
     var allDaySet = {}, allDays = [];
     Object.keys(recsAll).sort().forEach(function(d) {
@@ -8914,21 +8911,21 @@ function renderAttendAnalytics() {
     });
     html += '</select>';
   }
-  html += '<span style="color:var(--border);margin:0 4px">|</span>';
-  // Org filters
-  html += '<span style="font-size:10px;color:var(--text-muted);margin-right:2px">组织</span>';
+  html += '<span style="width:1px;height:20px;background:var(--border);margin:0 4px;flex-shrink:0"></span>';
+  // Org
   html += '<select onchange="analyticsFilter.bu=this.value;analyticsFilter.dept=\'all\';renderAttendAnalytics()"><option value="all">全部 BU</option>';
   buList.forEach(function(b) { html += '<option value="'+esc(b)+'"'+(filter.bu===b?' selected':'')+'>'+esc(b)+'</option>'; });
   html += '</select>';
   html += '<select onchange="analyticsFilter.dept=this.value;renderAttendAnalytics()"><option value="all">全部部门</option>';
   deptList.forEach(function(d) { html += '<option value="'+esc(d)+'"'+(filter.dept===d?' selected':'')+'>'+esc(d)+'</option>'; });
   html += '</select>';
-  // Employee search
-  html += '<input type="text" list="analyticsEmpDL" placeholder="搜索员工..." value="'+(filter.empId?esc(lookupEmpNameById(filter.empId)):'')+'" onchange="var v=this.value.trim();analyticsFilter.empId=v?lookupEmpIdByName(v):\'\';renderAttendAnalytics()" onfocus="this.select()" style="width:110px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:11px;background:var(--card);color:var(--text-main);outline:none">';
+  // Person
+  html += '<span style="width:1px;height:20px;background:var(--border);margin:0 4px;flex-shrink:0"></span>';
+  html += '<input type="text" list="analyticsEmpDL" placeholder="搜索员工..." value="'+(filter.empId?esc(lookupEmpNameById(filter.empId)):'')+'" onchange="var v=this.value.trim();analyticsFilter.empId=v?lookupEmpIdByName(v):\'\';renderAttendAnalytics()" onfocus="this.select()" style="width:120px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--card);color:var(--text-main);outline:none">';
   html += '<datalist id="analyticsEmpDL">';
   empList.forEach(function(e) { html += '<option value="'+esc(e.name)+'">'; });
   html += '</datalist>';
-  // Reset
+  // Reset + count
   if (filter.month || filter.day || filter.bu !== 'all' || filter.dept !== 'all' || filter.empId) {
     html += '<button onclick="analyticsFilter={year:analyticsFilter.year,month:\'\',day:\'\',bu:\'all\',dept:\'all\',empId:\'\'};renderAttendAnalytics()" style="padding:5px 12px;font-size:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-muted);cursor:pointer">清除筛选</button>';
   }
@@ -8990,10 +8987,21 @@ function renderAttendAnalytics() {
   html += '<div class="analytics-chart-box"><div class="analytics-chart-title">星期维度异常分布</div><div class="analytics-chart-wrap"><canvas id="chartWeekday" style="max-height:240px"></canvas></div></div>';
   html += '</div>';
 
+  // Row 2.5: 个人月度趋势（仅选具体员工时显示）
+  if (filter.empId) {
+    html += '<div class="analytics-chart-grid">';
+    html += '<div class="analytics-chart-box full"><div class="analytics-chart-title">'+esc(lookupEmpNameById(filter.empId))+' 月度异常趋势</div><div class="analytics-chart-wrap"><canvas id="chartPersonal" style="max-height:240px"></canvas></div></div>';
+    html += '</div>';
+  }
+
   // Row 3: BU 对比 + 部门对比
+  var buCount = Object.keys(stats.bu).length;
+  var deptCount = Object.keys(stats.dept).length;
+  var buH = Math.max(220, buCount * 32);
+  var deptH = Math.max(220, deptCount * 32);
   html += '<div class="analytics-chart-grid">';
-  html += '<div class="analytics-chart-box"><div class="analytics-chart-title">BU 异常率对比（迟到+缺卡+请假）</div><div class="analytics-chart-wrap"><canvas id="chartBU" style="max-height:300px"></canvas></div></div>';
-  html += '<div class="analytics-chart-box"><div class="analytics-chart-title">部门异常率对比（迟到+缺卡+请假）</div><div class="analytics-chart-wrap"><canvas id="chartDept" style="max-height:300px"></canvas></div></div>';
+  html += '<div class="analytics-chart-box"><div class="analytics-chart-title">BU 异常率对比（迟到+缺卡+请假）</div><div class="analytics-chart-wrap"><canvas id="chartBU" style="height:'+buH+'px"></canvas></div></div>';
+  html += '<div class="analytics-chart-box"><div class="analytics-chart-title">部门异常率对比（迟到+缺卡+请假）</div><div class="analytics-chart-wrap"><canvas id="chartDept" style="height:'+deptH+'px"></canvas></div></div>';
   html += '</div>';
 
   // Row 4: 请假类型月度分布
@@ -9172,7 +9180,7 @@ function renderAnalyticsCharts(stats) {
         datasets: [{ data: buRates, backgroundColor: buRates.map(function(r){return r>=15?COLORS.miss:r>=8?COLORS.late:COLORS.leave;}), borderRadius: 4 }]
       },
       options: {
-        indexAxis: 'y', responsive: true,
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: { x: { max: Math.ceil(maxBu*1.2), ticks:{callback:function(v){return v+'%';},font:{size:10}}, grid:{color:'#f0f0f0'} }, y: { ticks:{font:{size:10}} } }
       }
@@ -9199,9 +9207,47 @@ function renderAnalyticsCharts(stats) {
         datasets: [{ data: deptRates, backgroundColor: deptRates.map(function(r){return r>=15?COLORS.miss:r>=8?COLORS.late:COLORS.leave;}), borderRadius: 4 }]
       },
       options: {
-        indexAxis: 'y', responsive: true,
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: { x: { max: Math.ceil(maxDept*1.2), ticks:{callback:function(v){return v+'%';},font:{size:10}}, grid:{color:'#f0f0f0'} }, y: { ticks:{font:{size:10}} } }
+      }
+    });
+  }
+
+  // ---- 个人月度异常趋势（选员工时显示）----
+  var ctxPersonal = document.getElementById('chartPersonal');
+  if (ctxPersonal) {
+    var recs = loadAttendanceRecords();
+    var allMonthsSorted = Object.keys(recs).sort().map(function(d){return d.slice(0,7);}).filter(function(v,i,a){return a.indexOf(v)===i;});
+    var pLate = [], pMiss = [], pLeave = [];
+    allMonthsSorted.forEach(function(m) {
+      var late=0, miss=0, leave=0;
+      Object.keys(recs).forEach(function(d) {
+        if (d.slice(0,7)!==m) return;
+        var dayData = recs[d];
+        if (!dayData[analyticsFilter.empId]) return;
+        var r = dayData[analyticsFilter.empId];
+        var ciR = r.cir||'', coR = r.cor||'';
+        if (/迟到|严重迟到|旷工迟到/.test(ciR)) late++;
+        if (ciR==='缺卡'||coR==='缺卡') miss++;
+        if (/年假|事假|病假|调休|婚假|产假|陪产假|育儿假|丧假|哺乳假/.test(ciR)||/年假|事假|病假|调休|婚假|产假|陪产假|育儿假|丧假|哺乳假/.test(coR)) leave++;
+      });
+      pLate.push(late); pMiss.push(miss); pLeave.push(leave);
+    });
+    analyticsChartInstances.personal = new Chart(ctxPersonal, {
+      type: 'bar',
+      data: {
+        labels: allMonthsSorted.map(function(m){return m.slice(5).replace(/^0/,'')+'月';}),
+        datasets: [
+          { label: '迟到', data: pLate, backgroundColor: 'rgba(232,155,85,0.80)' },
+          { label: '缺卡', data: pMiss, backgroundColor: 'rgba(224,105,111,0.75)' },
+          { label: '请假', data: pLeave, backgroundColor: 'rgba(151,133,171,0.75)' }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth:10, padding:12, font:{size:10}, usePointStyle:true } } },
+        scales: { x: { stacked:true, grid:{display:false}, ticks:{font:{size:10}} }, y: { stacked:true, ticks:{font:{size:10}, stepSize:1}, grid:{color:'#f0f0f0'} } }
       }
     });
   }
