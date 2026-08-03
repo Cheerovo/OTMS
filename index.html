@@ -1099,6 +1099,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .card-st-sub.ab.leave { color: #C57D48; background: #FFF8F0; border: 1px solid #FDDCB5; }
 .card-st-sub.ab.out { color: #887AB8; background: #F5F3FF; border: 1px solid #DDD6FE; }
 .card-st-sub.ab.other { color: #B85C5C; font-size: 11px; font-weight: 700; background: #FEF2F2; border: 1px solid #FECACA; }
+.card-st-half { font-size: 10px; line-height: 1.5; color: var(--text-dim); }
+.card-st-half .card-st-main { font-size: 10px; }
 .attend-card.has-ab { border-color: #FED7AA; box-shadow: 0 1px 3px rgba(212,145,94,0.08); }
 .attend-card.other { background: #FFFBFB; border-color: #FECACA; box-shadow: 0 0 0 2px rgba(202,107,107,0.1), 0 2px 8px rgba(202,107,107,0.08); }
 .attend-card.other:hover { border-color: #FCA5A5; box-shadow: 0 0 0 2px rgba(202,107,107,0.15), 0 4px 16px rgba(202,107,107,0.12); }
@@ -7263,9 +7265,11 @@ function renderAttendView(skipAutoSync) {
     var fallback = isRestDay(e.name, date) ? '休息' : '不在钉钉数据';
     var main = obj ? obj.m : fallback;
     var sub = obj ? obj.s : fallback;
-    counts[main] = (counts[main] || 0) + 1;
-    subCounts[sub] = (subCounts[sub] || 0) + 1;
-    if (main === '在岗' && sub === '外出') outOnDuty++;
+    var w = (obj && obj.half) ? 0.5 : 1;
+    counts[main] = (counts[main] || 0) + w;
+    subCounts[sub] = (subCounts[sub] || 0) + w;
+    if (obj && obj.half) { counts['在岗'] = (counts['在岗'] || 0) + 0.5; }
+    if (main === '在岗' && sub === '外出') outOnDuty += w;
   });
 
   let html = '';
@@ -7342,11 +7346,12 @@ function renderAttendView(skipAutoSync) {
         var obj = ensureObj((attData[md]||{})[e.id]);
         var main = obj ? obj.m : null;
         if (!main || main === '在岗' || main === '休息' || main === '不在钉钉数据') return;
-        monthCounts[main] = (monthCounts[main] || 0) + 1;
-        monthSubCounts[obj.s] = (monthSubCounts[obj.s] || 0) + 1;
+        var mw = (obj && obj.half) ? 0.5 : 1;
+        monthCounts[main] = (monthCounts[main] || 0) + mw;
+        monthSubCounts[obj.s] = (monthSubCounts[obj.s] || 0) + mw;
         if (!personDays[e.name]) { personDays[e.name] = {}; personDetails[e.name] = []; }
-        personDays[e.name][main] = (personDays[e.name][main] || 0) + 1;
-        personDetails[e.name].push({d:md, m:main, s:obj.s});
+        personDays[e.name][main] = (personDays[e.name][main] || 0) + mw;
+        personDetails[e.name].push({d:md, m:main, s:obj.s, half: obj.half || null});
       });
     });
     var affectedPersonCount = Object.keys(personDays).length;
@@ -7398,7 +7403,7 @@ function renderAttendView(skipAutoSync) {
           var det = detMap[md];
           var dotCls = det ? (mainCSS[det.m]||'') : 'empty';
           var restLabel = isRestDay(p.name, md) ? '休息' : '在岗';
-          var title = md + (det ? ' '+det.m+'/'+det.s : ' '+restLabel);
+          var title = md + (det ? ' '+det.m+'/'+det.s + (det.half ? '（半天）' : '') : ' '+restLabel);
           if (dotCls === 'empty') {
             html += '<span class="ms-person-dot" style="background:transparent" title="'+title+'"></span>';
           } else {
@@ -7416,7 +7421,7 @@ function renderAttendView(skipAutoSync) {
                 var subName = dd.s;
                 // 去掉请假_前缀
                 if (subName.indexOf('请假_')===0) subName = subName.slice(3);
-                subMap[subName] = (subMap[subName] || 0) + 1;
+                subMap[subName] = (subMap[subName] || 0) + (dd.half ? 0.5 : 1);
               }
             });
             var subParts = [];
@@ -7466,7 +7471,7 @@ function renderAttendView(skipAutoSync) {
     var raw = attData[date][e.id];
     var fallback = isRestDay(e.name, date) ? {m:'休息', s:'休息'} : {m:'不在钉钉数据', s:'不在钉钉数据'};
     var obj = ensureObj(raw) || fallback;
-    var main = obj.m, sub = obj.s;
+    var main = obj.m, sub = obj.s, half = obj.half;
     var dc = dotClass(main);
     var isAb = sub !== '正常';
     var subCls = 'card-st-sub' + (isAb ? ' ab '+dc : '');
@@ -7476,6 +7481,15 @@ function renderAttendView(skipAutoSync) {
     else if (dc === 'nodd') cardClass += ' nodd';
     else if (dc === 'rest') cardClass += ' rest';
     else if (isAb) cardClass += ' has-ab';
+    // half-day display: AM/PM split
+    var halfHtml = '';
+    if (half === 'AM') {
+      var otherHalf = '下午<span class="card-st-main on">在岗</span>';
+      halfHtml = '<div class="card-st-half">上午<span class="card-st-main '+dc+'">'+esc(main)+'</span>'+subHtml+' · '+otherHalf+'</div>';
+    } else if (half === 'PM') {
+      var otherHalf2 = '上午<span class="card-st-main on">在岗</span>';
+      halfHtml = '<div class="card-st-half">'+otherHalf2+' · 下午<span class="card-st-main '+dc+'">'+esc(main)+'</span>'+subHtml+'</div>';
+    }
     var scheduleHtml = '';
     var schedByDate = scheduleMap[e.name];
     var schedFlat = scheduleMap[e.name + '_flat'];
@@ -7490,11 +7504,12 @@ function renderAttendView(skipAutoSync) {
       // 排班制：只显示"排班制"标签
       scheduleHtml = '<div class="card-schedule">排班制</div>';
     }
+    var statusHtml = halfHtml || ('<div class="card-status"><span class="card-st-main '+dc+'">'+esc(main)+'</span>'+subHtml+'</div>');
     return '<div class="'+cardClass+'" id="emp-'+e.id+'">'
       + '<span class="card-dot '+dc+'"></span>'
       + '<div class="card-body">'
       + '<div class="card-name">'+esc(e.name)+'</div>'
-      + '<div class="card-status"><span class="card-st-main '+dc+'">'+esc(main)+'</span>'+subHtml+'</div>'
+      + statusHtml
       + scheduleHtml
       + '</div></div>';
   }
@@ -7522,9 +7537,11 @@ function renderAttendView(skipAutoSync) {
       var obj3 = ensureObj(attData[date][e.id]);
       var m3 = obj3 ? obj3.m : '不在钉钉数据';
       var s3 = obj3 ? obj3.s : '不在钉钉数据';
-      buCounts[m3] = (buCounts[m3] || 0) + 1;
-      buSubCounts[s3] = (buSubCounts[s3] || 0) + 1;
-      if (m3 === '在岗' && s3 === '外出') buOutOnDuty++;
+      var w3 = (obj3 && obj3.half) ? 0.5 : 1;
+      buCounts[m3] = (buCounts[m3] || 0) + w3;
+      buSubCounts[s3] = (buSubCounts[s3] || 0) + w3;
+      if (obj3 && obj3.half) { buCounts['在岗'] = (buCounts['在岗'] || 0) + 0.5; }
+      if (m3 === '在岗' && s3 === '外出') buOutOnDuty += w3;
     });
     function buOnDutyDetail(){
       var parts = [];
@@ -7607,11 +7624,12 @@ function batchSetStatus() {
 
 // ===== 批量导入考勤数据 =====
 function openBulkAttendModal(){
-  var example = '2026-07-10,张三,在岗,正常\n2026-07-10,李四,请假,年假\n2026-07-11,张三,外勤,拜访客户\n2026-07-11,李四,旷工,旷工';
+  var example = '2026-07-10,张三,在岗,正常\n2026-07-10,李四,请假,年假,AM\n2026-07-11,张三,外勤,拜访客户\n2026-07-11,李四,旷工,旷工';
   var html = '<div style="padding:8px 0"><h3 style="margin:0 0 8px">批量导入考勤</h3>';
-  html += '<p style="font-size:10px;color:var(--text-dim);margin:0 0 8px">每行一条记录，格式：<b>日期,姓名,主状态,子状态</b></p>';
+  html += '<p style="font-size:10px;color:var(--text-dim);margin:0 0 8px">每行一条记录，格式：<b>日期,姓名,主状态,子状态[,半天]</b></p>';
   html += '<p style="font-size:9px;color:var(--text-muted);margin:0 0 4px">主状态: 在岗 / 请假 / 外勤 / 旷工 / 休息</p>';
-  html += '<p style="font-size:9px;color:var(--text-muted);margin:0 0 12px">子状态: 正常 / 迟到 / 早退 / 年假 / 事假 / 病假 / 婚假 / 产假 等</p>';
+  html += '<p style="font-size:9px;color:var(--text-muted);margin:0 0 4px">子状态: 正常 / 迟到 / 早退 / 年假 / 事假 / 病假 / 婚假 / 产假 等</p>';
+  html += '<p style="font-size:9px;color:var(--text-muted);margin:0 0 12px">半天(可选): <b>AM</b>=仅上午 / <b>PM</b>=仅下午，不填=全天。如 请假+年假+AM = 上午请假下午在岗</p>';
   html += '<textarea id="bulkAttendInput" rows="12" style="width:100%;font-family:monospace;font-size:11px;padding:8px;border:1px solid var(--border);border-radius:8px;resize:vertical" placeholder="'+example+'"></textarea>';
   html += '<div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">';
   html += '<button class="btn btn-outline btn-sm" onclick="closeModal()">取消</button>';
@@ -7634,13 +7652,17 @@ function importBulkAttendance(){
     var parts = line.split(',').map(function(s){ return s.trim(); });
     if(parts.length < 4){ skipped++; return; }
     var date = parts[0], name = parts[1], mainStatus = parts[2], subStatus = parts[3];
+    var half = null;
+    if(parts.length >= 5 && (parts[4]==='AM'||parts[4]==='PM')) half = parts[4];
     if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ skipped++; return; }
     if(!validStatus[mainStatus]){ skipped++; return; }
     if(!nameMap[name]){ if(unknown.indexOf(name)===-1) unknown.push(name); skipped++; return; }
     var emp = empList.find(function(e){ return e.name === name; });
     if(!emp){ skipped++; return; }
     if(!attData[date]) attData[date] = {};
-    attData[date][emp.id] = {m: mainStatus, s: subStatus};
+    var entry = {m: mainStatus, s: subStatus};
+    if(half) entry.half = half;
+    attData[date][emp.id] = entry;
     imported++;
   });
   saveAttendance(attData);
@@ -8441,9 +8463,23 @@ function collectLocalData(){
 }
 
 function mergeEvalData(localEval, cloudEval){
-  // Deep merge evalData: merge peerVotes from both sources
+  // Deep merge evalData: merge all fields from both sources (local takes priority)
   var merged = localEval ? JSON.parse(JSON.stringify(localEval)) : {};
   if(!cloudEval) return merged;
+  // Merge scores: cloud fills gaps where local is missing
+  if(cloudEval.scores){
+    if(!merged.scores) merged.scores = {};
+    Object.keys(cloudEval.scores).forEach(function(k){
+      if(!(k in merged.scores)) merged.scores[k] = cloudEval.scores[k];
+    });
+  }
+  // Merge extras
+  if(cloudEval.extras){
+    if(!merged.extras) merged.extras = {};
+    Object.keys(cloudEval.extras).forEach(function(k){
+      if(!(k in merged.extras)) merged.extras[k] = cloudEval.extras[k];
+    });
+  }
   // Merge peerVotes: for each week, merge voters (local voter's votes take priority)
   if(cloudEval.peerVotes){
     if(!merged.peerVotes) merged.peerVotes = {};
@@ -8589,6 +8625,27 @@ async function doAutoUpload(retryCount){
       setTimeout(function(){ doAutoUpload(retryCount + 1); }, 800);
     }
   }
+}
+
+// 页面关闭前强制 flush：取消防抖立即上传，使用 fetch keepalive 确保请求不丢失
+function flushUpload(){
+  clearTimeout(_autoUploadTimer);
+  var data = collectLocalData();
+  var version = Math.floor(Date.now() / 1000);
+  // 直接调用 Supabase REST API，keepalive 确保页面关闭后请求仍能完成
+  try {
+    fetch(SUPABASE_URL + '/rest/v1/team_data?id=eq.1', {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ data: data, version: version, updated_at: new Date().toISOString() }),
+      keepalive: true
+    });
+  } catch(e) {}
 }
 
 // 自动下载：每 30 秒静默检查云端是否有新数据
@@ -8937,7 +8994,7 @@ function handleImportFile(event){
 }
 
 // 页面关闭前自动备份
-window.addEventListener('beforeunload', function(){ autoBackupSystemData(true); });
+window.addEventListener('beforeunload', function(){ autoBackupSystemData(true); flushUpload(); });
 
 // ===== Global Search =====
 function highlightMatch(text,query){
