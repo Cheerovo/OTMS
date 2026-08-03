@@ -9023,11 +9023,6 @@ function renderAttendAnalytics() {
     });
     html += '</select>';
   }
-    leaveSubKeys.forEach(function(k) {
-      html += '<option value="'+k+'"'+(filter.leaveSub===k?' selected':'')+'>'+LEAVE_SUB_MAP[k].label+'</option>';
-    });
-    html += '</select>';
-  }
   html += '<span style="width:1px;height:20px;background:var(--border);margin:0 4px;flex-shrink:0"></span>';
   // Org
   html += '<select onchange="analyticsFilter.bu=this.value;analyticsFilter.dept=\'all\';renderAttendAnalytics()"><option value="all">全部 BU</option>';
