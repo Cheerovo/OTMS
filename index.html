@@ -8981,7 +8981,7 @@ function renderAttendAnalytics() {
     html += '</div>';
   }
 
-  // Row 2: 状态分布 + 星期分布
+  // Row 2: 状态分布 + 星期分布（高度一致，左右对称）
   html += '<div class="analytics-chart-grid">';
   html += '<div class="analytics-chart-box"><div class="analytics-chart-title">考勤状态分布</div><div class="analytics-chart-wrap"><canvas id="chartPie" style="max-height:240px"></canvas></div></div>';
   html += '<div class="analytics-chart-box"><div class="analytics-chart-title">星期维度异常分布</div><div class="analytics-chart-wrap"><canvas id="chartWeekday" style="max-height:240px"></canvas></div></div>';
@@ -8994,19 +8994,19 @@ function renderAttendAnalytics() {
     html += '</div>';
   }
 
-  // Row 3: BU 对比 + 部门对比
+  // Row 3: BU 对比 + 请假类型分布（两个图表数据量接近，高度匹配）
   var buCount = Object.keys(stats.bu).length;
-  var deptCount = Object.keys(stats.dept).length;
-  var buH = Math.max(220, buCount * 32);
-  var deptH = Math.max(220, deptCount * 32);
+  var buH = Math.max(240, buCount * 32);
   html += '<div class="analytics-chart-grid">';
   html += '<div class="analytics-chart-box"><div class="analytics-chart-title">BU 异常率对比（迟到+缺卡+请假）</div><div class="analytics-chart-wrap"><canvas id="chartBU" style="height:'+buH+'px"></canvas></div></div>';
-  html += '<div class="analytics-chart-box"><div class="analytics-chart-title">部门异常率对比（迟到+缺卡+请假）</div><div class="analytics-chart-wrap"><canvas id="chartDept" style="height:'+deptH+'px"></canvas></div></div>';
+  html += '<div class="analytics-chart-box"><div class="analytics-chart-title">请假类型月度分布（天）</div><div class="analytics-chart-wrap"><canvas id="chartLeaveMonth" style="height:'+buH+'px"></canvas></div></div>';
   html += '</div>';
 
-  // Row 4: 请假类型月度分布
+  // Row 4: 部门异常率（部门数量多，独立全宽行）
+  var deptCount = Object.keys(stats.dept).length;
+  var deptH = Math.max(240, deptCount * 32);
   html += '<div class="analytics-chart-grid">';
-  html += '<div class="analytics-chart-box full"><div class="analytics-chart-title">请假类型月度分布（天）</div><div class="analytics-chart-wrap"><canvas id="chartLeaveMonth" style="max-height:260px"></canvas></div></div>';
+  html += '<div class="analytics-chart-box full"><div class="analytics-chart-title">部门异常率对比（迟到+缺卡+请假）</div><div class="analytics-chart-wrap"><canvas id="chartDept" style="height:'+deptH+'px"></canvas></div></div>';
   html += '</div>';
 
   // ---- 重点关注 ----
