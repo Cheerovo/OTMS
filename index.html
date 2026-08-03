@@ -8005,6 +8005,7 @@ function importLeavesCSV() {
     if (!file) return;
     var reader = new FileReader();
     reader.onload = function(ev) {
+      try {
       var text = ev.target.result;
       var lines = text.split(/[\n\r]+/).filter(function(l) { return l.trim(); });
       if (lines.length < 2) { showToast('CSV 文件为空', 'warning'); return; }
@@ -8068,6 +8069,7 @@ function importLeavesCSV() {
       showToast(msg, unmatchedList.length > 3 ? 'warning' : 'success');
       attendDataView = 'leaves';
       renderAttendDataView();
+      } catch(err) { showToast('导入失败: ' + (err.message || err), 'error'); console.error('importLeavesCSV:', err); }
     };
     reader.readAsText(file, 'UTF-8');
   };
@@ -8145,11 +8147,6 @@ function renderAttendDataView() {
   var buList = [], buSet = {};
   empList.forEach(function(e) { if (e.bu && !buSet[e.bu]) { buSet[e.bu] = true; buList.push(e.bu); } });
   buList.sort();
-
-  // 月份列表
-  var months = [], monthSet = {};
-  dateKeys.forEach(function(d) { var m = d.slice(0,7); if (!monthSet[m]) { monthSet[m] = true; months.push(m); } });
-  months.sort();
 
   // 状态列表
   var allStatuses = ['正常','迟到','缺卡','外勤','外出','出差','年假','病假','事假','调休','婚假','产假'];
