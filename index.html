@@ -8011,7 +8011,7 @@ function importLeavesCSV() {
 
       var headers = lines[0].split(',').map(function(h) { return h.trim().replace(/^\uFEFF/, ''); });
       var colMap = {};
-      ['姓名','统计月份','迟到次数','缺卡次数','考勤异常天数','加班小时','年假天数','调休天数','病假天数','事假天数','备注'].forEach(function(k) {
+      ['姓名','统计月份','迟到次数','缺卡次数','考勤异常天数','加班小时','年假天数','调休天数','病假天数','事假天数','备注','来源文件'].forEach(function(k) {
         var idx = headers.indexOf(k);
         if (idx >= 0) colMap[k] = idx;
       });
@@ -8031,7 +8031,13 @@ function importLeavesCSV() {
         if (!emp) { unmatchedNames[name] = true; continue; }
 
         var month = parts[colMap['统计月份']] || '';
-        if (month && month.length === 10) month = month.slice(0, 7); // "2026-01-26" → "2026-01"
+        if (month && month.length === 10) month = month.slice(0, 7);
+        // 如果统计月份为空，尝试从来源文件名提取（如 "202602汇总.xlsx" → "2026-02"）
+        if (!/^\d{4}-\d{2}$/.test(month)) {
+          var srcFile = (colMap['来源文件'] >= 0 ? parts[colMap['来源文件']] || '' : '');
+          var m = srcFile.match(/(\d{4})(\d{2})/);
+          if (m) month = m[1] + '-' + m[2];
+        }
         if (!month || !/^\d{4}-\d{2}$/.test(month)) continue;
 
         if (!leaves[month]) leaves[month] = {};
@@ -8108,10 +8114,10 @@ function renderAttendDataView() {
       '<button class="btn btn-outline" onclick="importLeavesCSV()">导入假期CSV</button>' +
       '</div>';
     return;
+  }
 
   // 从打卡明细或假期数据构建年份/月份列表
   var allDateKeys = dateKeys.length > 0 ? dateKeys : leavesMonths;
-  }
 
   if (!attendDataFilter.year && allDateKeys.length > 0) {
     attendDataFilter.year = allDateKeys[allDateKeys.length - 1].slice(0, 4);
