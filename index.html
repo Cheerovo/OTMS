@@ -1177,33 +1177,37 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .sb-leave { background: #F5EBE6; color: #8B5A3C; }
 
 /* ===== 考勤总览仪表盘 ===== */
-.analytics-bar { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; align-items:center; }
+.analytics-bar { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; align-items:center; }
 .analytics-bar select {
-  padding:6px 10px; border:1px solid var(--border); border-radius:6px;
-  font-size:11px; background:var(--card); color:var(--text-main); cursor:pointer;
+  padding:7px 28px 7px 12px; border:1px solid var(--border); border-radius:8px;
+  font-size:12px; background:var(--card); color:var(--text-main); cursor:pointer;
+  appearance:none; -webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2390A0B0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 8px center;
 }
-.analytics-bar select:focus { outline:none; border-color:var(--accent); }
-.analytics-kpi-row { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; }
+.analytics-bar select:focus { outline:none; border-color:#5FA895; box-shadow:0 0 0 3px rgba(95,168,149,0.12); }
+.analytics-kpi-row { display:flex; gap:12px; margin-bottom:28px; flex-wrap:wrap; }
 .analytics-kpi-card {
-  flex:1; min-width:120px; padding:14px 16px;
-  background:var(--card); border-radius:10px;
-  box-shadow:0 1px 3px rgba(0,0,0,0.04); text-align:center;
-  border-left:3px solid transparent; transition: border-color .2s;
+  flex:1; min-width:130px; padding:18px 20px;
+  background:var(--card); border-radius:12px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
+  text-align:left; border-top:3px solid transparent; transition: all .2s;
 }
-.analytics-kpi-card.good { border-left-color:#2D8B4A; }
-.analytics-kpi-card.warn { border-left-color:#D4872A; }
-.analytics-kpi-card.bad  { border-left-color:#C0393B; }
-.analytics-kpi-value { font-size:24px; font-weight:700; color:var(--text-main); line-height:1.2; }
-.analytics-kpi-delta { font-size:10px; color:var(--text-muted); margin-top:2px; }
-.analytics-kpi-label { font-size:10px; color:var(--text-muted); margin-top:2px; text-transform:uppercase; letter-spacing:0.5px; }
-.analytics-chart-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.analytics-kpi-card:hover { box-shadow:0 2px 4px rgba(0,0,0,0.06), 0 6px 20px rgba(0,0,0,0.04); transform:translateY(-1px); }
+.analytics-kpi-card.good { border-top-color:#5FA895; }
+.analytics-kpi-card.warn { border-top-color:#E89B55; }
+.analytics-kpi-card.bad  { border-top-color:#E0696F; }
+.analytics-kpi-value { font-size:28px; font-weight:700; color:var(--text-main); line-height:1.1; letter-spacing:-0.5px; }
+.analytics-kpi-delta { font-size:11px; color:var(--text-muted); margin-top:4px; line-height:1.4; }
+.analytics-kpi-label { font-size:11px; color:var(--text-muted); margin-top:4px; font-weight:500; letter-spacing:0.3px; }
+.analytics-chart-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
 .analytics-chart-box {
-  background:var(--card); border-radius:10px; padding:18px 16px 14px;
-  box-shadow:0 1px 3px rgba(0,0,0,0.04);
+  background:var(--card); border-radius:12px; padding:20px 20px 16px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
 }
 .analytics-chart-box.full { grid-column:1/-1; }
-.analytics-chart-title { font-size:11px; font-weight:600; color:var(--text-dim); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
-.analytics-chart-title::before { content:''; width:3px; height:14px; border-radius:2px; background:var(--accent); display:inline-block; flex-shrink:0; }
+.analytics-chart-title { font-size:12px; font-weight:600; color:var(--text-dim); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.analytics-chart-title::before { content:''; width:3px; height:16px; border-radius:3px; background:#5FA895; display:inline-block; flex-shrink:0; }
 .analytics-chart-wrap { position:relative; width:100%; }
 .analytics-chart-wrap canvas { width:100% !important; }
 .analytics-summary-row { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
@@ -1213,32 +1217,33 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 }
 .analytics-summary-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 .analytics-delta { font-size:10px; font-weight:600; margin-left:4px; white-space:nowrap; }
-.analytics-delta.up { color:#C0393B; }
-.analytics-delta.down { color:#2D8B4A; }
-.analytics-focus { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+.analytics-delta.up { color:#D4655A; }
+.analytics-delta.down { color:#4A9E8E; }
+.analytics-focus { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:2px; }
 .analytics-focus-box {
-  background:var(--card); border-radius:10px; padding:16px;
-  box-shadow:0 1px 3px rgba(0,0,0,0.04);
+  background:var(--card); border-radius:12px; padding:20px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
 }
-.analytics-focus-title { font-size:11px; font-weight:600; color:var(--text-dim); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
-.analytics-focus-title::before { content:''; width:3px; height:14px; border-radius:2px; background:#D9484B; display:inline-block; flex-shrink:0; }
-.analytics-focus-table { width:100%; font-size:11px; border-collapse:collapse; }
-.analytics-focus-table th { text-align:left; padding:6px 8px; font-size:9px; font-weight:600; color:var(--text-muted); border-bottom:1px solid var(--border); }
-.analytics-focus-table td { padding:6px 8px; border-bottom:1px solid var(--border-hair); }
-.analytics-focus-table tr:hover td { background:var(--bg); }
-.analytics-focus-table .badge-sm { display:inline-block; padding:1px 6px; border-radius:4px; font-size:10px; font-weight:600; }
-.analytics-focus-table .badge-sm.red { background:#FDEAEA; color:#C0393B; }
-.analytics-focus-table .badge-sm.orange { background:#FDF3E5; color:#D4872A; }
-.analytics-focus-bar-wrap { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-.analytics-focus-bar-label { width:90px; font-size:10px; color:var(--text-dim); text-align:right; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.analytics-focus-bar-track { flex:1; height:18px; background:var(--bg); border-radius:4px; overflow:hidden; position:relative; }
-.analytics-focus-bar-fill { height:100%; border-radius:4px; transition:width .3s; }
-.analytics-focus-bar-val { width:42px; font-size:10px; font-weight:600; color:var(--text-main); flex-shrink:0; }
+.analytics-focus-title { font-size:12px; font-weight:600; color:var(--text-dim); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+.analytics-focus-title::before { content:''; width:3px; height:16px; border-radius:3px; background:#E0696F; display:inline-block; flex-shrink:0; }
+.analytics-focus-table { width:100%; font-size:12px; border-collapse:collapse; }
+.analytics-focus-table th { text-align:left; padding:7px 10px; font-size:10px; font-weight:600; color:var(--text-muted); border-bottom:1px solid var(--border); text-transform:uppercase; letter-spacing:0.3px; }
+.analytics-focus-table td { padding:8px 10px; border-bottom:1px solid var(--border-hair); }
+.analytics-focus-table tbody tr { transition:background .15s; }
+.analytics-focus-table tbody tr:hover td { background:var(--bg); }
+.analytics-focus-table .badge-sm { display:inline-block; padding:2px 8px; border-radius:5px; font-size:10px; font-weight:600; letter-spacing:0.2px; }
+.analytics-focus-table .badge-sm.red { background:#FDF0F0; color:#D4655A; }
+.analytics-focus-table .badge-sm.orange { background:#FEF6ED; color:#D4914A; }
+.analytics-focus-bar-wrap { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.analytics-focus-bar-label { width:100px; font-size:11px; color:var(--text-dim); text-align:right; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.analytics-focus-bar-track { flex:1; height:20px; background:var(--bg); border-radius:6px; overflow:hidden; position:relative; }
+.analytics-focus-bar-fill { height:100%; border-radius:6px; transition:width .4s cubic-bezier(.4,0,.2,1); }
+.analytics-focus-bar-val { width:44px; font-size:11px; font-weight:600; color:var(--text-main); flex-shrink:0; }
 @media (max-width:768px) {
   .analytics-chart-grid { grid-template-columns:1fr; }
-  .analytics-kpi-card { min-width:90px; padding:10px 12px; }
+  .analytics-kpi-card { min-width:100px; padding:14px 16px; }
   .analytics-focus { grid-template-columns:1fr; }
-  .analytics-kpi-value { font-size:20px; }
+  .analytics-kpi-value { font-size:22px; }
 }
 
 /* 响应式 */
@@ -8969,7 +8974,7 @@ function renderAttendAnalytics() {
     } else {
       var maxRate = topDept[0].rate;
       topDept.forEach(function(d) {
-        var barColor = d.rate >= 15 ? '#D9484B' : d.rate >= 8 ? '#E8953A' : '#8B6F5C';
+        var barColor = d.rate >= 15 ? '#E0696F' : d.rate >= 8 ? '#E89B55' : '#9785AB';
         html += '<div class="analytics-focus-bar-wrap"><span class="analytics-focus-bar-label" title="'+esc(d.name)+'">'+esc(d.name)+'</span><div class="analytics-focus-bar-track"><div class="analytics-focus-bar-fill" style="width:'+(maxRate>0?Math.round(d.rate*100/maxRate):0)+'%;background:'+barColor+'"></div></div><span class="analytics-focus-bar-val">'+d.rate+'%</span></div>';
       });
     }
@@ -8985,9 +8990,10 @@ function renderAttendAnalytics() {
 function renderAnalyticsCharts(stats) {
   var dayLabels = ['周日','周一','周二','周三','周四','周五','周六'];
   var COLORS = {
-    normal: '#2D8B4A', late: '#E8953A', miss: '#D9484B',
-    leave: '#8B6F5C', out: '#4A7DA8', ot: '#7B5EA7',
-    annual: '#5B8DEF', lieu: '#8B6FDE', sick: '#E07060', personal: '#E0A050'
+    normal: '#5FA895', late: '#E89B55', miss: '#E0696F',
+    leave: '#9785AB', out: '#5F8DB8',
+    annual: '#6BA5D6', lieu: '#8D94C2', sick: '#E08078', personal: '#DBA060',
+    trend: '#4A5568'
   };
 
   // ---- 月度异常趋势 ----
@@ -9006,10 +9012,10 @@ function renderAnalyticsCharts(stats) {
       data: {
         labels: ms.map(function(m) { return m.slice(5).replace(/^0/,'')+'月'; }),
         datasets: [
-          { label: '异常率 %', data: anomalyRates, borderColor: '#D9484B', backgroundColor: 'rgba(217,72,75,0.06)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#D9484B', pointBorderColor: '#fff', pointBorderWidth: 2, borderWidth: 2.5, yAxisID: 'y', order: 0 },
-          { label: '迟到', data: lates, type: 'bar', backgroundColor: COLORS.late, yAxisID: 'y1', order: 1 },
-          { label: '缺卡', data: misses, type: 'bar', backgroundColor: COLORS.miss, yAxisID: 'y1', order: 1 },
-          { label: '请假', data: leaves, type: 'bar', backgroundColor: COLORS.leave, yAxisID: 'y1', order: 1 }
+          { label: '异常率 %', data: anomalyRates, borderColor: COLORS.trend, backgroundColor: 'rgba(74,85,104,0.05)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: COLORS.trend, pointBorderColor: '#fff', pointBorderWidth: 2, borderWidth: 2.5, yAxisID: 'y', order: 0 },
+          { label: '迟到', data: lates, type: 'bar', backgroundColor: 'rgba(232,155,85,0.75)', yAxisID: 'y1', order: 1 },
+          { label: '缺卡', data: misses, type: 'bar', backgroundColor: 'rgba(224,105,111,0.70)', yAxisID: 'y1', order: 1 },
+          { label: '请假', data: leaves, type: 'bar', backgroundColor: 'rgba(151,133,171,0.70)', yAxisID: 'y1', order: 1 }
         ]
       },
       options: {
@@ -9055,9 +9061,9 @@ function renderAnalyticsCharts(stats) {
       data: {
         labels: dayLabels,
         datasets: [
-          { label: '迟到', data: wdLate, backgroundColor: COLORS.late },
-          { label: '缺卡', data: wdMiss, backgroundColor: COLORS.miss },
-          { label: '请假', data: wdLeave, backgroundColor: COLORS.leave }
+          { label: '迟到', data: wdLate, backgroundColor: 'rgba(232,155,85,0.82)' },
+          { label: '缺卡', data: wdMiss, backgroundColor: 'rgba(224,105,111,0.78)' },
+          { label: '请假', data: wdLeave, backgroundColor: 'rgba(151,133,171,0.78)' }
         ]
       },
       options: {
@@ -9085,7 +9091,7 @@ function renderAnalyticsCharts(stats) {
       type: 'bar',
       data: {
         labels: buNames,
-        datasets: [{ data: buRates, backgroundColor: buRates.map(function(r){return r>=15?COLORS.miss:r>=8?COLORS.late:'#8B6F5C';}), borderRadius: 4 }]
+        datasets: [{ data: buRates, backgroundColor: buRates.map(function(r){return r>=15?COLORS.miss:r>=8?COLORS.late:COLORS.leave;}), borderRadius: 4 }]
       },
       options: {
         indexAxis: 'y', responsive: true,
@@ -9112,7 +9118,7 @@ function renderAnalyticsCharts(stats) {
       type: 'bar',
       data: {
         labels: deptNames,
-        datasets: [{ data: deptRates, backgroundColor: deptRates.map(function(r){return r>=15?COLORS.miss:r>=8?COLORS.late:'#8B6F5C';}), borderRadius: 4 }]
+        datasets: [{ data: deptRates, backgroundColor: deptRates.map(function(r){return r>=15?COLORS.miss:r>=8?COLORS.late:COLORS.leave;}), borderRadius: 4 }]
       },
       options: {
         indexAxis: 'y', responsive: true,
@@ -9139,10 +9145,10 @@ function renderAnalyticsCharts(stats) {
       data: {
         labels: lmKeys.map(function(m) { return m.slice(5).replace(/^0/,'')+'月'; }),
         datasets: [
-          { label: '年假', data: annualData, backgroundColor: COLORS.annual },
-          { label: '调休', data: lieuData, backgroundColor: COLORS.lieu },
-          { label: '病假', data: sickData, backgroundColor: COLORS.sick },
-          { label: '事假', data: personalData, backgroundColor: COLORS.personal }
+          { label: '年假', data: annualData, backgroundColor: 'rgba(107,165,214,0.78)' },
+          { label: '调休', data: lieuData, backgroundColor: 'rgba(141,148,194,0.78)' },
+          { label: '病假', data: sickData, backgroundColor: 'rgba(224,128,120,0.78)' },
+          { label: '事假', data: personalData, backgroundColor: 'rgba(219,160,96,0.78)' }
         ]
       },
       options: {
@@ -9188,9 +9194,9 @@ function renderAnalyticsCharts(stats) {
       data: {
         labels: dayLabels,
         datasets: [
-          { label: '迟到', data: dayLate, backgroundColor: COLORS.late },
-          { label: '缺卡', data: dayMiss, backgroundColor: COLORS.miss },
-          { label: '请假', data: dayLeave, backgroundColor: COLORS.leave }
+          { label: '迟到', data: dayLate, backgroundColor: 'rgba(232,155,85,0.80)' },
+          { label: '缺卡', data: dayMiss, backgroundColor: 'rgba(224,105,111,0.75)' },
+          { label: '请假', data: dayLeave, backgroundColor: 'rgba(151,133,171,0.75)' }
         ]
       },
       options: {
