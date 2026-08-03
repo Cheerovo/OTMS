@@ -8304,18 +8304,18 @@ function renderAttendDataView() {
   html += '<div class="attend-toolbar-left">';
 
   // 年份
-  html += '<select id="attendDataYear" onchange="attendDataFilter.year=this.value;attendDataFilter.month=\"all\";attendDataFilter.day=\"\";renderAttendDataView()">';
+  html += '<select id="attendDataYear" onchange="attendDataFilter.year=this.value;attendDataFilter.month=\'all\';attendDataFilter.day=\'\';renderAttendDataView()">';
   years.forEach(function(y) { html += '<option value="'+y+'"'+(attendDataFilter.year===y?' selected':'')+'>'+y+' 年</option>'; });
   html += '</select>';
 
   // 月份
-  html += '<select id="attendDataMonth" onchange="attendDataFilter.month=this.value;attendDataFilter.day=\"\";renderAttendDataView()">';
+  html += '<select id="attendDataMonth" onchange="attendDataFilter.month=this.value;attendDataFilter.day=\'\';renderAttendDataView()">';
   html += '<option value="all"'+(attendDataFilter.month==='all'?' selected':'')+'>全年</option>';
   months.forEach(function(m) { html += '<option value="'+m+'"'+(attendDataFilter.month===m?' selected':'')+'>'+m.slice(5).replace(/^0/,'')+' 月</option>'; });
   html += '</select>';
 
   // 日期
-  html += '<input type="date" id="attendDataDay" value="'+esc(attendDataFilter.day)+'" onchange="attendDataFilter.day=this.value;if(this.value)attendDataFilter.month=\"\";renderAttendDataView()" title="指定日期" style="width:auto;min-width:110px">';
+  html += '<input type="date" id="attendDataDay" value="'+esc(attendDataFilter.day)+'" onchange="attendDataFilter.day=this.value;if(this.value)attendDataFilter.month=\'\';renderAttendDataView()" title="指定日期" style="width:auto;min-width:110px">';
 
   // BU
   html += '<select id="attendDataBU" onchange="attendDataFilter.bu=this.value;renderAttendDataView()">';
@@ -8337,7 +8337,7 @@ function renderAttendDataView() {
 
   // 清除
   if (hasActiveFilter) {
-    html += '<button class="btn btn-outline btn-sm" onclick="attendDataFilter={year:attendDataFilter.year,month:attendDataFilter.month,day:\"\",bu:\"all\",dept:\"all\",status:\"all\",keyword:\"\"};renderAttendDataView()" style="font-size:10px">清除筛选</button>';
+    html += '<button class="btn btn-outline btn-sm" onclick="attendDataFilter={year:attendDataFilter.year,month:attendDataFilter.month,day:\'\',bu:\'all\',dept:\'all\',status:\'all\',keyword:\'\'};renderAttendDataView()" style="font-size:10px">清除筛选</button>';
   }
 
   html += '</div>'; // end toolbar-left
