@@ -8494,12 +8494,18 @@ function importGroupData(gid, data, overwrite){
     if(!(k in data)) return;
     if(k === 'otms_trainee_eval_v1'){
       try{
-        var localEval = JSON.parse(localStorage.getItem(k)||'null');
-        if(!localEval || !localEval.scores || Object.keys(localEval.scores).length === 0){
+        if(overwrite){
+          // syncFromRemote / autoCheckRemote：云端直接覆盖本地
           localStorage.setItem(k, JSON.stringify(data[k]));
         } else {
-          var merged = mergeEvalData(localEval, data[k]);
-          localStorage.setItem(k, JSON.stringify(merged));
+          // uploadGroup CAS 重试：本地优先合并，保留未上传的本地编辑
+          var localEval = JSON.parse(localStorage.getItem(k)||'null');
+          if(!localEval || !localEval.scores || Object.keys(localEval.scores).length === 0){
+            localStorage.setItem(k, JSON.stringify(data[k]));
+          } else {
+            var merged = mergeEvalData(localEval, data[k]);
+            localStorage.setItem(k, JSON.stringify(merged));
+          }
         }
       }catch(e){ localStorage.setItem(k, JSON.stringify(data[k])); }
     } else if(overwrite || localStorage.getItem(k) === null){
@@ -8537,7 +8543,7 @@ function mergeEvalData(localEval, cloudEval){
   if(cloudEval.mentors){
     if(!merged.mentors) merged.mentors = {};
     Object.keys(cloudEval.mentors).forEach(function(k){
-      if(!merged.mentors[k]) merged.mentors[k] = cloudEval.mentors[k];
+      if(!(k in merged.mentors)) merged.mentors[k] = cloudEval.mentors[k];
     });
   }
   if(cloudEval.rankings){
@@ -8559,13 +8565,11 @@ function scheduleAutoUpload(){
       var groups = Object.keys(_dirtyGroups);
       _dirtyKeys = {};
       _dirtyGroups = {};
-      // 逐组上传，各组独立 CAS，互不干扰
-      for(var gi = 0; gi < groups.length; gi++){
-        await uploadGroup(groups[gi], 0);
-      }
+      // 各组并行上传，独立 CAS，互不干扰
+      await Promise.all(groups.map(function(gid){ return uploadGroup(gid, 0); }));
     }catch(e){ console.error('自动同步异常:', e.message, e); }
     _autoUploadBusy = false;
-  }, 3000);
+  }, 1500);
 }
 
 async function uploadGroup(gid, retryCount){
@@ -8582,8 +8586,10 @@ async function uploadGroup(gid, retryCount){
       .select('version, data')
       .eq('id', groupId)
       .maybeSingle();
-    // 2. 云端更新 → 先合并到本地
+    console.log('[上传]', gid, '本地版本:', localVer, '云端版本:', cloudRow?cloudRow.version:'无');
+    // 2. 云端更新 → 合并到本地（用 {} 标记删除的 key 不会被恢复）
     if(cloudRow && cloudRow.version > localVer && cloudRow.data){
+      console.log('[上传]', gid, '云端版本更新 → 合并数据');
       importGroupData(gid, cloudRow.data, false);
       localVer = cloudRow.version;
     }
@@ -8599,25 +8605,34 @@ async function uploadGroup(gid, retryCount){
       .upsert({ id: groupId, data: data, version: newVer, updated_at: new Date().toISOString() });
     if(!error){
       localStorage.setItem(verKey, newVer);
+      console.log('[上传]', gid, '✅ upsert 成功, 新版本:', newVer);
+    } else {
+      console.error('[上传]', gid, '❌ upsert 失败:', error.message);
     }
   } else {
-    const { error } = await supabaseClient
+    const { data: updatedRow, error } = await supabaseClient
       .from('team_data')
       .update({ data: data, version: newVer, updated_at: new Date().toISOString() })
       .eq('id', groupId)
-      .eq('version', localVer);
-    if(error){ console.error('同步数据库错误('+gid+'):', error.message); return; }
-    const { data: verifyRow } = await supabaseClient
-      .from('team_data')
+      .eq('version', localVer)
       .select('version')
-      .eq('id', groupId)
       .maybeSingle();
-    if(verifyRow && verifyRow.version === newVer){
+    if(error){ console.error('[上传] '+gid+' ❌ 数据库错误:', error.message); return; }
+    if(updatedRow && updatedRow.version === newVer){
       localStorage.setItem(verKey, newVer);
+      console.log('[上传]', gid, '✅ CAS 成功, 新版本:', newVer);
     } else {
-      console.log('⚠️ CAS 冲突 ('+gid+')，重试 #'+(retryCount+1));
-      if(verifyRow) localStorage.setItem(verKey, verifyRow.version - 1);
-      setTimeout(function(){ uploadGroup(gid, retryCount + 1); }, 800);
+      console.log('[上传]', gid, '⚠️ CAS 冲突，重试 #'+(retryCount+1));
+      // 获取当前云端版本号用于重试
+      var conflictVer = updatedRow ? updatedRow.version : 0;
+      if(!conflictVer){
+        try{
+          const { data: cv } = await supabaseClient.from('team_data').select('version').eq('id', groupId).maybeSingle();
+          if(cv) conflictVer = cv.version;
+        }catch(e){}
+      }
+      if(conflictVer) localStorage.setItem(verKey, conflictVer);
+      setTimeout(function(){ uploadGroup(gid, retryCount + 1); }, 500);
     }
   }
 }
@@ -8676,7 +8691,9 @@ async function autoCheckRemote(){
         .eq('id', ug.id)
         .maybeSingle();
       if(!fullRow || !fullRow.data) continue;
-      importGroupData(ug.gid, fullRow.data, false);
+      // 跳过有本地未上传修改的组，让 uploadGroup 处理合并
+      if(_dirtyGroups[ug.gid]) continue;
+      importGroupData(ug.gid, fullRow.data, true);
       localStorage.setItem(getGroupVerKey(ug.gid), fullRow.version);
     }
     // 非侵入式提示
@@ -8698,7 +8715,6 @@ async function autoCheckRemote(){
       var gid = getGroupForKey(key);
       if(gid){
         _dirtyGroups[gid] = true;
-        _orig(getGroupVerKey(gid), String(Math.floor(Date.now() / 1000)));
       }
       scheduleAutoUpload();
     }
@@ -8787,7 +8803,9 @@ async function syncFromRemote(){
           .maybeSingle();
         if(!row || !row.data) continue;
         var localVer = parseInt(localStorage.getItem(getGroupVerKey(gid))) || 0;
+        console.log('[下载]', gid, '本地版本:', localVer, '云端版本:', row.version);
         if(row.version <= localVer) continue;
+        console.log('[下载]', gid, '✅ 发现更新 → 导入');
         importGroupData(gid, row.data, true);
         localStorage.setItem(getGroupVerKey(gid), row.version);
         updatedAny = true;
@@ -11683,8 +11701,8 @@ function deletePeerVote(weekId, voterName){
   }
   if(!confirm('确认删除 '+voterName+' 在 '+weekId+' 的协作互评投票？此操作不可撤销。')) return;
   delete evalData.peerVotes[weekId][voterName];
-  // Clean up empty week entries
-  if(Object.keys(evalData.peerVotes[weekId]).length === 0) delete evalData.peerVotes[weekId];
+  // 设为 {} 而非 delete，避免合并时被云端恢复
+  if(Object.keys(evalData.peerVotes[weekId]).length === 0) evalData.peerVotes[weekId] = {};
   saveEvalData();
   closeRankingModal();
   if(evalSelectedTrainee) renderEvalScorePanel(evalSelectedTrainee);
@@ -11696,20 +11714,20 @@ function deletePeerVote(weekId, voterName){
 function clearWeekScores(weekId){
   if(!evalData) loadEvalData();
   if(!confirm('⚠️ 确认清空 '+weekId+' 所有管培生的评分和协作互评投票？\n此操作不可撤销。')) return;
-  // Clear all eval scores for this week
+  // Clear all eval scores for this week（设为 {} 而非 delete，避免合并时被云端恢复）
   if(evalData.scores){
     Object.keys(evalData.scores).forEach(function(k){
-      if(k.endsWith('|'+weekId)) delete evalData.scores[k];
+      if(k.endsWith('|'+weekId)) evalData.scores[k] = {};
     });
   }
   // Clear all peer votes for this week
   if(evalData.peerVotes && evalData.peerVotes[weekId]){
-    delete evalData.peerVotes[weekId];
+    evalData.peerVotes[weekId] = {};
   }
   // Clear extras for this week
   if(evalData.extras){
     Object.keys(evalData.extras).forEach(function(k){
-      if(k.endsWith('|'+weekId)) delete evalData.extras[k];
+      if(k.endsWith('|'+weekId)) evalData.extras[k] = {};
     });
   }
   saveEvalData();
@@ -11761,7 +11779,7 @@ function saveMentorAssign(){
       if(sel.value){
         evalData.mentors[key] = sel.value;
       } else {
-        delete evalData.mentors[key];
+        evalData.mentors[key] = '';  // 空字符串标记未分配，避免合并时被云端恢复
       }
     }
   });
