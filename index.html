@@ -7990,7 +7990,7 @@ function importAttendCSV() {
 }
 
 // ===== 考勤数据明细表 =====
-var attendDataFilter = { month: '', bu: 'all', dept: 'all', status: 'all', keyword: '' };
+var attendDataFilter = { month: '', day: '', bu: 'all', dept: 'all', status: 'all', keyword: '' };
 
 function statusBadge(text) {
   if (!text) return '<span class="sb">-</span>';
@@ -8047,9 +8047,10 @@ function renderAttendDataView() {
   var allStatuses = ['正常','迟到','缺卡','外勤','外出','出差','年假','病假','事假','调休','婚假','产假'];
 
   // ---- 筛选 + 构建 rows ----
-  var rows = [], hasFilter = attendDataFilter.dept !== 'all' || attendDataFilter.status !== 'all' || attendDataFilter.bu !== 'all' || !!attendDataFilter.keyword;
+  var rows = [], hasFilter = attendDataFilter.day || attendDataFilter.dept !== 'all' || attendDataFilter.status !== 'all' || attendDataFilter.bu !== 'all' || !!attendDataFilter.keyword;
   dateKeys.forEach(function(date) {
     if (attendDataFilter.month && date.slice(0, 7) !== attendDataFilter.month) return;
+    if (attendDataFilter.day && date !== attendDataFilter.day) return;
     var dayData = records[date];
     Object.keys(dayData).forEach(function(empId) {
       var emp = empMap[empId];
@@ -8086,7 +8087,7 @@ function renderAttendDataView() {
     else if (r.clockOutResult && r.clockOutResult !== '正常') abnCount++;
   });
 
-  var hasActiveFilter = attendDataFilter.bu !== 'all' || attendDataFilter.dept !== 'all' || attendDataFilter.status !== 'all' || attendDataFilter.keyword;
+  var hasActiveFilter = attendDataFilter.day || attendDataFilter.bu !== 'all' || attendDataFilter.dept !== 'all' || attendDataFilter.status !== 'all' || attendDataFilter.keyword;
 
   var html = '';
 
@@ -8097,9 +8098,12 @@ function renderAttendDataView() {
   html += '<div class="attend-toolbar-left">';
 
   // 月份
-  html += '<select id="attendDataMonth" onchange="attendDataFilter.month=this.value;renderAttendDataView()">';
+  html += '<select id="attendDataMonth" onchange="attendDataFilter.month=this.value;attendDataFilter.day=\"\";renderAttendDataView()">';
   months.forEach(function(m) { html += '<option value="'+m+'"'+(attendDataFilter.month===m?' selected':'')+'>'+m.replace('-','年')+'月</option>'; });
   html += '</select>';
+
+  // 日期
+  html += '<input type="date" id="attendDataDay" value="'+esc(attendDataFilter.day)+'" onchange="attendDataFilter.day=this.value;if(this.value)attendDataFilter.month=\"\";renderAttendDataView()" title="指定日期" style="width:auto;min-width:110px">';
 
   // BU
   html += '<select id="attendDataBU" onchange="attendDataFilter.bu=this.value;renderAttendDataView()">';
@@ -8121,7 +8125,7 @@ function renderAttendDataView() {
 
   // 清除
   if (hasActiveFilter) {
-    html += '<button class="btn btn-outline btn-sm" onclick="attendDataFilter={month:attendDataFilter.month,bu:\"all\",dept:\"all\",status:\"all\",keyword:\"\"};renderAttendDataView()" style="font-size:10px">清除筛选</button>';
+    html += '<button class="btn btn-outline btn-sm" onclick="attendDataFilter={month:attendDataFilter.month,day:\"\",bu:\"all\",dept:\"all\",status:\"all\",keyword:\"\"};renderAttendDataView()" style="font-size:10px">清除筛选</button>';
   }
 
   html += '</div>'; // end toolbar-left
