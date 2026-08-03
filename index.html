@@ -7280,6 +7280,7 @@ function renderAttendView(skipAutoSync) {
   buSet.forEach(bu => html += '<option value="'+esc(bu)+'"'+(buVal===bu?' selected':'')+'>'+esc(bu)+'</option>');
   html += '</select>';
   html += '<button class="btn btn-primary btn-sm" onclick="syncFromDingTalk()">同步钉钉</button>';
+  html += '<button class="btn btn-outline btn-sm" onclick="openBulkAttendModal()" style="margin-left:6px;font-size:11px">批量导入</button>';
   html += '</div></div>';
 
   // Store for scroll access
@@ -7602,6 +7603,51 @@ function batchSetStatus() {
   empList.forEach(e => { attData[date][e.id] = {m: parts[0], s: parts[1]}; });
   saveAttendance(attData);
   renderAttendView();
+}
+
+// ===== 批量导入考勤数据 =====
+function openBulkAttendModal(){
+  var example = '2026-07-10,张三,在岗,正常\n2026-07-10,李四,请假,年假\n2026-07-11,张三,外勤,拜访客户\n2026-07-11,李四,旷工,旷工';
+  var html = '<div style="padding:8px 0"><h3 style="margin:0 0 8px">批量导入考勤</h3>';
+  html += '<p style="font-size:10px;color:var(--text-dim);margin:0 0 8px">每行一条记录，格式：<b>日期,姓名,主状态,子状态</b></p>';
+  html += '<p style="font-size:9px;color:var(--text-muted);margin:0 0 4px">主状态: 在岗 / 请假 / 外勤 / 旷工 / 休息</p>';
+  html += '<p style="font-size:9px;color:var(--text-muted);margin:0 0 12px">子状态: 正常 / 迟到 / 早退 / 年假 / 事假 / 病假 / 婚假 / 产假 等</p>';
+  html += '<textarea id="bulkAttendInput" rows="12" style="width:100%;font-family:monospace;font-size:11px;padding:8px;border:1px solid var(--border);border-radius:8px;resize:vertical" placeholder="'+example+'"></textarea>';
+  html += '<div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">';
+  html += '<button class="btn btn-outline btn-sm" onclick="closeModal()">取消</button>';
+  html += '<button class="btn btn-primary btn-sm" onclick="importBulkAttendance()">导入</button>';
+  html += '</div></div>';
+  openModal(html);
+}
+
+function importBulkAttendance(){
+  var raw = document.getElementById('bulkAttendInput').value.trim();
+  if(!raw){ showToast('请粘贴考勤数据','warning'); return; }
+  var lines = raw.split(/[\n\r]+/).filter(function(l){ return l.trim(); });
+  var validStatus = {在岗:1,请假:1,外勤:1,旷工:1,休息:1};
+  var empList = loadEmployees();
+  var nameMap = {};
+  empList.forEach(function(e){ nameMap[e.name] = true; });
+  var attData = loadAttendance();
+  var imported = 0, skipped = 0, unknown = [];
+  lines.forEach(function(line, idx){
+    var parts = line.split(',').map(function(s){ return s.trim(); });
+    if(parts.length < 4){ skipped++; return; }
+    var date = parts[0], name = parts[1], mainStatus = parts[2], subStatus = parts[3];
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ skipped++; return; }
+    if(!validStatus[mainStatus]){ skipped++; return; }
+    if(!nameMap[name]){ if(unknown.indexOf(name)===-1) unknown.push(name); skipped++; return; }
+    var emp = empList.find(function(e){ return e.name === name; });
+    if(!emp){ skipped++; return; }
+    if(!attData[date]) attData[date] = {};
+    attData[date][emp.id] = {m: mainStatus, s: subStatus};
+    imported++;
+  });
+  saveAttendance(attData);
+  if(unknown.length) showToast('未知员工: '+unknown.join(', '),'warning');
+  closeModal();
+  renderAttendView();
+  showToast('导入 '+imported+' 条'+(skipped>0?'，跳过 '+skipped+' 条':'')+'，共 '+lines.length+' 行','success');
 }
 
 // ===== DingTalk Sync =====
