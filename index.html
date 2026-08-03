@@ -7989,7 +7989,87 @@ function importAttendCSV() {
   input.click();
 }
 
+// ===== 假期数据层 =====
+function loadAttendanceLeaves() {
+  try { return JSON.parse(localStorage.getItem('attendance_leaves')||'{}'); } catch(e) { return {}; }
+}
+function saveAttendanceLeaves(data) { localStorage.setItem('attendance_leaves', JSON.stringify(data)); }
+
+// ===== 月度汇总 CSV 导入（假期 + 加班 + 迟到缺卡统计）=====
+function importLeavesCSV() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.csv';
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var text = ev.target.result;
+      var lines = text.split(/[\n\r]+/).filter(function(l) { return l.trim(); });
+      if (lines.length < 2) { showToast('CSV 文件为空', 'warning'); return; }
+
+      var headers = lines[0].split(',').map(function(h) { return h.trim().replace(/^\uFEFF/, ''); });
+      var colMap = {};
+      ['姓名','统计月份','迟到次数','缺卡次数','考勤异常天数','加班小时','年假天数','调休天数','病假天数','事假天数','备注'].forEach(function(k) {
+        var idx = headers.indexOf(k);
+        if (idx >= 0) colMap[k] = idx;
+      });
+      if (!('姓名' in colMap)) { showToast('CSV 缺少"姓名"列', 'warning'); return; }
+
+      var empList = loadEmployees(), nameToEmp = {};
+      empList.forEach(function(e) { nameToEmp[e.name] = e; });
+
+      var leaves = loadAttendanceLeaves();
+      var matched = 0, unmatchedNames = {};
+
+      for (var i = 1; i < lines.length; i++) {
+        var parts = lines[i].split(',').map(function(s) { return s.trim(); });
+        var name = parts[colMap['姓名']] || '';
+        if (!name) continue;
+        var emp = nameToEmp[name];
+        if (!emp) { unmatchedNames[name] = true; continue; }
+
+        var month = parts[colMap['统计月份']] || '';
+        if (month && month.length === 10) month = month.slice(0, 7); // "2026-01-26" → "2026-01"
+        if (!month || !/^\d{4}-\d{2}$/.test(month)) continue;
+
+        if (!leaves[month]) leaves[month] = {};
+
+        var getVal = function(key) { var v = parseFloat(parts[colMap[key]]); return isNaN(v) ? 0 : v; };
+        leaves[month][emp.id] = {
+          annual: getVal('年假天数'),
+          lieu: getVal('调休天数'),
+          sick: getVal('病假天数'),
+          personal: getVal('事假天数'),
+          late: getVal('迟到次数'),
+          miss: getVal('缺卡次数'),
+          ot: getVal('加班小时'),
+          abnormal: getVal('考勤异常天数'),
+          note: (colMap['备注'] >= 0 ? parts[colMap['备注']] || '' : ''),
+          name: emp.name, dept: emp.department || '', bu: emp.bu || ''
+        };
+        matched++;
+      }
+
+      var unmatchedList = Object.keys(unmatchedNames).sort();
+      saveAttendanceLeaves(leaves);
+      var months = Object.keys(leaves).sort();
+      var msg = '导入完成！匹配 ' + matched + ' 条，覆盖 ' + months.length + ' 个月（' + (months[0]||'') + ' ~ ' + (months[months.length-1]||'') + '）';
+      if (unmatchedList.length > 0) {
+        msg += '\n未匹配 ' + unmatchedList.length + ' 人：' + unmatchedList.slice(0, 8).join('、') + (unmatchedList.length > 8 ? '等' : '');
+      }
+      showToast(msg, unmatchedList.length > 3 ? 'warning' : 'success');
+      attendDataView = 'leaves';
+      renderAttendDataView();
+    };
+    reader.readAsText(file, 'UTF-8');
+  };
+  input.click();
+}
+
 // ===== 考勤数据明细表 =====
+var attendDataView = 'detail'; // 'detail' | 'leaves'
 var attendDataFilter = { year: '', month: '', day: '', bu: 'all', dept: 'all', status: 'all', keyword: '' };
 
 function statusBadge(text) {
@@ -8014,29 +8094,37 @@ function renderAttendDataView() {
   empList.forEach(function(e) { empMap[e.id] = e; });
 
   var dateKeys = Object.keys(records).sort();
-  if (dateKeys.length === 0) {
+  var leavesData = loadAttendanceLeaves();
+  var leavesMonths = Object.keys(leavesData).sort();
+
+  if (dateKeys.length === 0 && leavesMonths.length === 0) {
     div.innerHTML = '<div style="padding:80px 40px;text-align:center">' +
       '<div style="font-size:48px;margin-bottom:16px;opacity:0.3">📋</div>' +
-      '<p style="font-size:14px;font-weight:500;color:var(--text-dim);margin:0 0 6px">暂无考勤明细数据</p>' +
-      '<p style="font-size:11px;color:var(--text-muted);margin:0 0 24px">使用 merge_attendance.py 合并 Excel 后导入 CSV</p>' +
-      '<button class="btn btn-primary" onclick="importAttendCSV()">导入 CSV 考勤明细</button>' +
+      '<p style="font-size:14px;font-weight:500;color:var(--text-dim);margin:0 0 6px">暂无考勤数据</p>' +
+      '<p style="font-size:11px;color:var(--text-muted);margin:0 0 24px">请导入合并后的 CSV 文件</p>' +
+      '<button class="btn btn-primary" onclick="importAttendCSV()" style="margin-right:8px">导入打卡CSV</button>' +
+      '<button class="btn btn-outline" onclick="importLeavesCSV()">导入假期CSV</button>' +
       '</div>';
     return;
+
+  // 从打卡明细或假期数据构建年份/月份列表
+  var allDateKeys = dateKeys.length > 0 ? dateKeys : leavesMonths;
   }
 
-  if (!attendDataFilter.year && dateKeys.length > 0) {
-    attendDataFilter.year = dateKeys[dateKeys.length - 1].slice(0, 4);
-    attendDataFilter.month = dateKeys[dateKeys.length - 1].slice(0, 7);
+  if (!attendDataFilter.year && allDateKeys.length > 0) {
+    attendDataFilter.year = allDateKeys[allDateKeys.length - 1].slice(0, 4);
+    attendDataFilter.month = allDateKeys[allDateKeys.length - 1].slice(0, 7);
+    if (attendDataFilter.month.length > 7) attendDataFilter.month = attendDataFilter.month.slice(0, 7);
   }
 
   // 年份列表
   var years = [], yearSet = {};
-  dateKeys.forEach(function(d) { var y = d.slice(0,4); if (!yearSet[y]) { yearSet[y] = true; years.push(y); } });
+  allDateKeys.forEach(function(d) { var y = d.slice(0,4); if (!yearSet[y]) { yearSet[y] = true; years.push(y); } });
   years.sort();
 
   // 月份列表（根据选中年份过滤）
   var months = [], monthSet = {};
-  dateKeys.forEach(function(d) {
+  allDateKeys.forEach(function(d) {
     if (attendDataFilter.year && d.slice(0,4) !== attendDataFilter.year) return;
     var m = d.slice(0,7); if (!monthSet[m]) { monthSet[m] = true; months.push(m); }
   });
@@ -8152,13 +8240,30 @@ function renderAttendDataView() {
   // 右侧操作组
   html += '<div class="attend-toolbar-right">';
   html += '<input type="text" id="attendDataSearch" placeholder="搜索姓名/BU..." value="'+esc(attendDataFilter.keyword)+'" oninput="attendDataFilter.keyword=this.value;renderAttendDataView()">';
-  html += '<span class="attend-record-count">'+rows.length+' 条'+(abnCount > 0 ? ' <span style="color:var(--danger-text)">'+abnCount+' 异常</span>' : '')+'</span>';
-  html += '<button class="btn btn-outline btn-sm" onclick="importAttendCSV()" style="font-size:11px">导入 CSV</button>';
+  html += '<span class="attend-record-count">'+rows.length+' 条'+(attendDataView==='detail' && abnCount > 0 ? ' <span style="color:var(--danger-text)">'+abnCount+' 异常</span>' : '')+'</span>';
+  if (attendDataView === 'detail') {
+    html += '<button class="btn btn-outline btn-sm" onclick="importAttendCSV()" style="font-size:11px">导入打卡CSV</button>';
+  } else {
+    html += '<button class="btn btn-outline btn-sm" onclick="importLeavesCSV()" style="font-size:11px">导入假期CSV</button>';
+  }
   html += '</div>';
 
   html += '</div>'; // end toolbar
 
-  // ---- 数据表格 ----
+  // ---- 视图切换 ----
+  html += '<div style="display:flex;gap:4px;margin-bottom:16px">';
+  html += '<button class="oc-sub-tab'+(attendDataView==='detail'?' active':'')+'" onclick="attendDataView=\'detail\';renderAttendDataView()">打卡明细</button>';
+  html += '<button class="oc-sub-tab'+(attendDataView==='leaves'?' active':'')+'" onclick="attendDataView=\'leaves\';renderAttendDataView()">假期汇总</button>';
+  html += '</div>';
+
+  // ---- 假期汇总表格 ----
+  if (attendDataView === 'leaves') {
+    html += buildLeavesTableHTML(empList, empMap);
+    div.innerHTML = html;
+    return;
+  }
+
+  // ---- 数据表格（打卡明细）----
   if (rows.length === 0) {
     html += '<div style="padding:60px;text-align:center;color:var(--text-muted)">' +
       '<p style="font-size:14px;font-weight:500;margin:0">该筛选条件下无数据</p>' +
@@ -8198,6 +8303,99 @@ function renderAttendDataView() {
   }
 
   div.innerHTML = html;
+}
+
+function buildLeavesTableHTML(empList, empMap) {
+  var leaves = loadAttendanceLeaves();
+  var months = Object.keys(leaves).sort();
+  if (months.length === 0) {
+    return '<div style="padding:60px;text-align:center">' +
+      '<p style="font-size:14px;font-weight:500;color:var(--text-dim);margin:0 0 6px">暂无假期数据</p>' +
+      '<p style="font-size:11px;color:var(--text-muted);margin:0">请导入 考勤明细_月度汇总.csv</p>' +
+      '</div>';
+  }
+
+  // 筛选月份
+  var selectedMonths = months;
+  if (attendDataFilter.year) {
+    selectedMonths = selectedMonths.filter(function(m) { return m.slice(0,4) === attendDataFilter.year; });
+  }
+  if (attendDataFilter.month && attendDataFilter.month !== 'all') {
+    selectedMonths = [attendDataFilter.month];
+  }
+
+  var allRows = [];
+  selectedMonths.forEach(function(month) {
+    var monthData = leaves[month];
+    if (!monthData) return;
+    Object.keys(monthData).forEach(function(empId) {
+      var emp = empMap[empId];
+      var ld = monthData[empId];
+      if (!emp) return;
+      if (attendDataFilter.bu !== 'all' && emp.bu !== attendDataFilter.bu) return;
+      var deptD = emp.department || emp.bu || '';
+      if (attendDataFilter.dept !== 'all' && deptD !== attendDataFilter.dept) return;
+      if (attendDataFilter.keyword) {
+        var kw = attendDataFilter.keyword.toLowerCase();
+        if (emp.name.toLowerCase().indexOf(kw) < 0 && (emp.bu||'').toLowerCase().indexOf(kw) < 0) return;
+      }
+      allRows.push({
+        month: month, name: emp.name, bu: emp.bu || '', dept: deptD,
+        annual: ld.annual || 0, lieu: ld.lieu || 0, sick: ld.sick || 0, personal: ld.personal || 0,
+        late: ld.late || 0, miss: ld.miss || 0, ot: ld.ot || 0, abnormal: ld.abnormal || 0,
+        note: ld.note || ''
+      });
+    });
+  });
+
+  allRows.sort(function(a, b) {
+    if (a.month !== b.month) return a.month < b.month ? -1 : 1;
+    return a.name.localeCompare(b.name, 'zh');
+  });
+
+  if (allRows.length === 0) {
+    return '<div style="padding:40px;text-align:center;color:var(--text-muted)">该筛选条件下无数据</div>';
+  }
+
+  var html = '';
+  html += '<div style="overflow-x:auto;max-height:calc(100vh - 340px)">';
+  html += '<table class="attend-data-table">';
+  html += '<thead><tr>';
+  html += '<th>姓名</th><th>BU</th><th>部门</th><th class="th-date">月份</th>';
+  html += '<th class="th-result">年假</th><th class="th-result">调休</th><th class="th-result">病假</th><th class="th-result">事假</th>';
+  html += '<th class="th-result">迟到</th><th class="th-result">缺卡</th><th class="th-result">加班(h)</th>';
+  html += '<th class="th-note">备注</th>';
+  html += '</tr></thead><tbody>';
+
+  var prevMonth = '';
+  allRows.forEach(function(r, idx) {
+    var isNewMonth = r.month !== prevMonth;
+    prevMonth = r.month;
+    var rowClass = (idx % 2 === 1) ? ' odd' : '';
+    if (isNewMonth && idx > 0) rowClass += ' day-split';
+
+    var totalLeave = r.annual + r.lieu + r.sick + r.personal;
+    var hasLeave = totalLeave > 0;
+    var hasAbnormal = r.late > 0 || r.miss > 0 || r.abnormal > 0;
+
+    html += '<tr class="'+rowClass+'">';
+    html += '<td class="td-name">'+esc(r.name)+'</td>';
+    html += '<td class="td-meta">'+esc(r.bu)+'</td>';
+    html += '<td class="td-meta">'+esc(r.dept)+'</td>';
+    html += '<td class="td-date">'+r.month.replace('-','/')+'</td>';
+    html += '<td class="td-result">'+(r.annual > 0 ? '<span class="sb sb-leave">'+r.annual+'</span>' : '-')+'</td>';
+    html += '<td class="td-result">'+(r.lieu > 0 ? '<span class="sb sb-out">'+r.lieu+'</span>' : '-')+'</td>';
+    html += '<td class="td-result">'+(r.sick > 0 ? '<span class="sb sb-late">'+r.sick+'</span>' : '-')+'</td>';
+    html += '<td class="td-result">'+(r.personal > 0 ? '<span class="sb sb-miss">'+r.personal+'</span>' : '-')+'</td>';
+    html += '<td class="td-result">'+(r.late > 0 ? '<span class="sb sb-late">'+r.late+'</span>' : '-')+'</td>';
+    html += '<td class="td-result">'+(r.miss > 0 ? '<span class="sb sb-miss">'+r.miss+'</span>' : '-')+'</td>';
+    html += '<td class="td-result">'+(r.ot > 0 ? r.ot : '-')+'</td>';
+    html += '<td class="td-note" title="'+esc(r.note)+'">'+esc(r.note)+'</td>';
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  return html;
 }
 
 // ===== DingTalk Sync =====
@@ -9056,7 +9254,7 @@ function renderOrgAttachments() {
 
 // ===== Init =====
 // ===== Remote Data Sync (Supabase) — 按资源组拆分，独立 CAS =====
-const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','attendance_records','otms_tn_split_ratio','otms_trainee_cleared_v3'];
+const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','attendance_records','attendance_leaves','otms_tn_split_ratio','otms_trainee_cleared_v3'];
 
 // 资源分组：每组独立 Supabase 行 + 独立 version + 独立 CAS
 const SYNC_GROUPS = {
@@ -9065,7 +9263,7 @@ const SYNC_GROUPS = {
   okr:        {id: 3, keys: ['okr_data', 'okr_version', 'okr_data_version', 'okr_prefs']},
   org:        {id: 4, keys: ['okr_employees', 'okr_depts', 'okr_permissions', 'nudge_log', 'org_attachments']},
   report:     {id: 5, keys: ['rpt_data', 'rpt_version', 'rpt_group_subs', 'meeting_data', 'kpi_data']},
-  attendance: {id: 6, keys: ['okr_attendance', 'attendance_workdays', 'attendance_schedules', 'attendance_records']}
+  attendance: {id: 6, keys: ['okr_attendance', 'attendance_workdays', 'attendance_schedules', 'attendance_records', 'attendance_leaves']}
 };
 const SYNC_GROUP_LIST = Object.keys(SYNC_GROUPS);
 
