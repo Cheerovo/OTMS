@@ -7990,7 +7990,7 @@ function importAttendCSV() {
 }
 
 // ===== 考勤数据明细表 =====
-var attendDataFilter = { month: '', day: '', bu: 'all', dept: 'all', status: 'all', keyword: '' };
+var attendDataFilter = { year: '', month: '', day: '', bu: 'all', dept: 'all', status: 'all', keyword: '' };
 
 function statusBadge(text) {
   if (!text) return '<span class="sb">-</span>';
@@ -8024,11 +8024,23 @@ function renderAttendDataView() {
     return;
   }
 
-  if (!attendDataFilter.month && dateKeys.length > 0) {
+  if (!attendDataFilter.year && dateKeys.length > 0) {
+    attendDataFilter.year = dateKeys[dateKeys.length - 1].slice(0, 4);
     attendDataFilter.month = dateKeys[dateKeys.length - 1].slice(0, 7);
   }
 
-  // 收集部门列表
+  // 年份列表
+  var years = [], yearSet = {};
+  dateKeys.forEach(function(d) { var y = d.slice(0,4); if (!yearSet[y]) { yearSet[y] = true; years.push(y); } });
+  years.sort();
+
+  // 月份列表（根据选中年份过滤）
+  var months = [], monthSet = {};
+  dateKeys.forEach(function(d) {
+    if (attendDataFilter.year && d.slice(0,4) !== attendDataFilter.year) return;
+    var m = d.slice(0,7); if (!monthSet[m]) { monthSet[m] = true; months.push(m); }
+  });
+  months.sort();
   var deptList = [], deptSet = {};
   empList.forEach(function(e) { var d = e.department || e.bu || ''; if (d && !deptSet[d]) { deptSet[d] = true; deptList.push(d); } });
   deptList.sort();
@@ -8049,7 +8061,8 @@ function renderAttendDataView() {
   // ---- 筛选 + 构建 rows ----
   var rows = [], hasFilter = attendDataFilter.day || attendDataFilter.dept !== 'all' || attendDataFilter.status !== 'all' || attendDataFilter.bu !== 'all' || !!attendDataFilter.keyword;
   dateKeys.forEach(function(date) {
-    if (attendDataFilter.month && date.slice(0, 7) !== attendDataFilter.month) return;
+    if (attendDataFilter.year && date.slice(0, 4) !== attendDataFilter.year) return;
+    if (attendDataFilter.month && attendDataFilter.month !== 'all' && date.slice(0, 7) !== attendDataFilter.month) return;
     if (attendDataFilter.day && date !== attendDataFilter.day) return;
     var dayData = records[date];
     Object.keys(dayData).forEach(function(empId) {
@@ -8097,9 +8110,15 @@ function renderAttendDataView() {
   // 左侧筛选组
   html += '<div class="attend-toolbar-left">';
 
+  // 年份
+  html += '<select id="attendDataYear" onchange="attendDataFilter.year=this.value;attendDataFilter.month=\"all\";attendDataFilter.day=\"\";renderAttendDataView()">';
+  years.forEach(function(y) { html += '<option value="'+y+'"'+(attendDataFilter.year===y?' selected':'')+'>'+y+' 年</option>'; });
+  html += '</select>';
+
   // 月份
   html += '<select id="attendDataMonth" onchange="attendDataFilter.month=this.value;attendDataFilter.day=\"\";renderAttendDataView()">';
-  months.forEach(function(m) { html += '<option value="'+m+'"'+(attendDataFilter.month===m?' selected':'')+'>'+m.replace('-','年')+'月</option>'; });
+  html += '<option value="all"'+(attendDataFilter.month==='all'?' selected':'')+'>全年</option>';
+  months.forEach(function(m) { html += '<option value="'+m+'"'+(attendDataFilter.month===m?' selected':'')+'>'+m.slice(5).replace(/^0/,'')+' 月</option>'; });
   html += '</select>';
 
   // 日期
@@ -8125,7 +8144,7 @@ function renderAttendDataView() {
 
   // 清除
   if (hasActiveFilter) {
-    html += '<button class="btn btn-outline btn-sm" onclick="attendDataFilter={month:attendDataFilter.month,day:\"\",bu:\"all\",dept:\"all\",status:\"all\",keyword:\"\"};renderAttendDataView()" style="font-size:10px">清除筛选</button>';
+    html += '<button class="btn btn-outline btn-sm" onclick="attendDataFilter={year:attendDataFilter.year,month:attendDataFilter.month,day:\"\",bu:\"all\",dept:\"all\",status:\"all\",keyword:\"\"};renderAttendDataView()" style="font-size:10px">清除筛选</button>';
   }
 
   html += '</div>'; // end toolbar-left
