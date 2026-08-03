@@ -1092,6 +1092,80 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .as-rest { color: #9B9EA6; } .as-rest .stat-dot { background: #C8CCD4; }
 .attend-card.rest { opacity: 0.55; background: #F8F9FB; }
 .attend-card.rest:hover { opacity: 0.75; }
+
+/* ===== 考勤数据明细表 ===== */
+.attend-toolbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 16px; padding: 12px 14px;
+  background: var(--card); border-radius: 12px; box-shadow: var(--shadow-xs);
+}
+.attend-toolbar-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; }
+.attend-toolbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.attend-toolbar select,
+.attend-toolbar input {
+  padding: 6px 28px 6px 10px;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-size: 11px; background: var(--bg); color: var(--text);
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+  cursor: pointer; transition: border-color 0.15s;
+}
+.attend-toolbar select:hover, .attend-toolbar select:focus,
+.attend-toolbar input:hover, .attend-toolbar input:focus {
+  border-color: var(--accent); outline: none;
+}
+.attend-toolbar input { padding: 6px 10px; background-image: none; width: 130px; }
+.attend-record-count { font-size: 10px; color: var(--text-dim); white-space: nowrap; }
+
+/* 数据表格 */
+.attend-data-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  font-size: 11px; line-height: 1.5;
+}
+.attend-data-table thead { position: sticky; top: 0; z-index: 2; }
+.attend-data-table th {
+  padding: 9px 10px; text-align: left;
+  font-size: 10px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.3px;
+  background: var(--bg-surface); border-bottom: 2px solid var(--border);
+  white-space: nowrap; user-select: none;
+}
+.attend-data-table td {
+  padding: 7px 10px; border-bottom: 1px solid var(--border-subtle, #f0f0f3);
+  vertical-align: middle;
+}
+.attend-data-table tbody tr { transition: background 0.1s; }
+.attend-data-table tbody tr.odd { background: rgba(0,0,0,0.015); }
+.attend-data-table tbody tr:hover { background: rgba(74,111,165,0.06); }
+.attend-data-table tbody tr.day-split { border-top: 2px solid var(--border); }
+
+/* 单元格类型 */
+.attend-data-table .td-name { font-weight: 500; white-space: nowrap; }
+.attend-data-table .td-meta { font-size: 10px; color: var(--text-dim); white-space: nowrap; }
+.attend-data-table .td-date { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.attend-data-table .td-time { white-space: nowrap; }
+.attend-data-table .td-time code { font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace; font-size: 10.5px; background: var(--bg); padding: 2px 5px; border-radius: 4px; }
+.attend-data-table .td-result { white-space: nowrap; text-align: center; }
+.attend-data-table .td-note { font-size: 10px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-dim); }
+.attend-data-table .th-date { min-width: 56px; }
+.attend-data-table .th-time { min-width: 56px; }
+.attend-data-table .th-result { min-width: 48px; text-align: center; }
+.attend-data-table .th-note { min-width: 100px; }
+
+/* 状态标签 status badge */
+.sb { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; line-height: 1.5; white-space: nowrap; }
+.sb-ok { background: #E6F4EA; color: #1B7A38; }
+.sb-late { background: #FDE8E4; color: #C23B22; }
+.sb-miss { background: #FFF3D6; color: #B85C00; }
+.sb-out { background: #E0EEF5; color: #3D6C8B; }
+.sb-leave { background: #F5EBE6; color: #8B5A3C; }
+
+/* 响应式 */
+@media (max-width:768px) {
+  .attend-toolbar { flex-direction: column; align-items: stretch; }
+  .attend-toolbar-left, .attend-toolbar-right { flex-wrap: wrap; }
+  .attend-toolbar input { width: 100%; }
+}
 .attend-card .card-body { flex: 1; min-width: 0; }
 .attend-card .card-name { font-size: 11px; font-weight: 600; color: var(--text); letter-spacing: 0.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 1px; }
 .attend-card .card-status { font-size: 10px; font-weight: 500; white-space: nowrap; display: flex; align-items: center; gap: 2px; }
@@ -7916,7 +7990,19 @@ function importAttendCSV() {
 }
 
 // ===== 考勤数据明细表 =====
-var attendDataFilter = { month: '', bu: 'all', keyword: '' };
+var attendDataFilter = { month: '', bu: 'all', dept: 'all', status: 'all', keyword: '' };
+
+function statusBadge(text) {
+  if (!text) return '<span class="sb">-</span>';
+  var cls = {
+    '正常': 'sb-ok', '迟到': 'sb-late', '严重迟到': 'sb-late', '旷工迟到': 'sb-late',
+    '早退': 'sb-late', '缺卡': 'sb-miss',
+    '外勤': 'sb-out', '外出': 'sb-out', '出差': 'sb-out',
+    '请假': 'sb-leave', '年假': 'sb-leave', '病假': 'sb-leave', '事假': 'sb-leave',
+    '调休': 'sb-leave', '婚假': 'sb-leave', '产假': 'sb-leave', '陪产假': 'sb-leave', '育儿假': 'sb-leave',
+  };
+  return '<span class="sb '+ (cls[text]||'') +'">'+esc(text)+'</span>';
+}
 
 function renderAttendDataView() {
   var div = document.getElementById('orgAttendData');
@@ -7927,138 +8013,161 @@ function renderAttendDataView() {
   var empMap = {};
   empList.forEach(function(e) { empMap[e.id] = e; });
 
-  // 收集所有记录展开为表格行
   var dateKeys = Object.keys(records).sort();
   if (dateKeys.length === 0) {
-    div.innerHTML = '<div style="padding:60px;text-align:center">' +
-      '<p style="font-size:14px;font-weight:500;color:var(--text-dim);margin:0">暂无考勤明细数据</p>' +
-      '<p style="font-size:10px;color:var(--text-muted);margin:8px 0 20px">请先通过 merge_attendance.py 生成 CSV，再导入</p>' +
-      '<button class="btn btn-primary btn-sm" onclick="importAttendCSV()">导入 CSV 考勤明细</button>' +
+    div.innerHTML = '<div style="padding:80px 40px;text-align:center">' +
+      '<div style="font-size:48px;margin-bottom:16px;opacity:0.3">📋</div>' +
+      '<p style="font-size:14px;font-weight:500;color:var(--text-dim);margin:0 0 6px">暂无考勤明细数据</p>' +
+      '<p style="font-size:11px;color:var(--text-muted);margin:0 0 24px">使用 merge_attendance.py 合并 Excel 后导入 CSV</p>' +
+      '<button class="btn btn-primary" onclick="importAttendCSV()">导入 CSV 考勤明细</button>' +
       '</div>';
     return;
   }
 
-  // 筛选
   if (!attendDataFilter.month && dateKeys.length > 0) {
-    attendDataFilter.month = dateKeys[dateKeys.length - 1].slice(0, 7); // 默认最新月份
+    attendDataFilter.month = dateKeys[dateKeys.length - 1].slice(0, 7);
   }
 
-  var rows = [];
+  // 收集部门列表
+  var deptList = [], deptSet = {};
+  empList.forEach(function(e) { var d = e.department || e.bu || ''; if (d && !deptSet[d]) { deptSet[d] = true; deptList.push(d); } });
+  deptList.sort();
+
+  // BU 列表
+  var buList = [], buSet = {};
+  empList.forEach(function(e) { if (e.bu && !buSet[e.bu]) { buSet[e.bu] = true; buList.push(e.bu); } });
+  buList.sort();
+
+  // 月份列表
+  var months = [], monthSet = {};
+  dateKeys.forEach(function(d) { var m = d.slice(0,7); if (!monthSet[m]) { monthSet[m] = true; months.push(m); } });
+  months.sort();
+
+  // 状态列表
+  var allStatuses = ['正常','迟到','缺卡','外勤','外出','出差','年假','病假','事假','调休','婚假','产假'];
+
+  // ---- 筛选 + 构建 rows ----
+  var rows = [], hasFilter = attendDataFilter.dept !== 'all' || attendDataFilter.status !== 'all' || attendDataFilter.bu !== 'all' || !!attendDataFilter.keyword;
   dateKeys.forEach(function(date) {
     if (attendDataFilter.month && date.slice(0, 7) !== attendDataFilter.month) return;
     var dayData = records[date];
     Object.keys(dayData).forEach(function(empId) {
       var emp = empMap[empId];
       if (!emp) return;
+      var deptD = emp.department || emp.bu || '';
       if (attendDataFilter.bu !== 'all' && emp.bu !== attendDataFilter.bu) return;
+      if (attendDataFilter.dept !== 'all' && deptD !== attendDataFilter.dept) return;
       if (attendDataFilter.keyword) {
         var kw = attendDataFilter.keyword.toLowerCase();
-        if (emp.name.toLowerCase().indexOf(kw) < 0) return;
+        if (emp.name.toLowerCase().indexOf(kw) < 0 && (emp.bu||'').toLowerCase().indexOf(kw) < 0) return;
       }
       var r = dayData[empId];
+      var ciR = r.clockInResult || '', coR = r.clockOutResult || '';
+      if (attendDataFilter.status !== 'all') {
+        if (ciR !== attendDataFilter.status && coR !== attendDataFilter.status) return;
+      }
       rows.push({
-        date: date,
-        name: emp.name,
-        dept: emp.department || '',
-        bu: emp.bu || '',
-        schedule: r.schedule || '',
-        clockIn: r.clockIn || '',
-        clockInResult: r.clockInResult || '',
-        clockOut: r.clockOut || '',
-        clockOutResult: r.clockOutResult || '',
-        approval: r.approval || ''
+        date: date, name: emp.name, dept: deptD, bu: emp.bu || '',
+        schedule: r.schedule || '', clockIn: r.clockIn || '', clockInResult: ciR,
+        clockOut: r.clockOut || '', clockOutResult: coR, approval: r.approval || ''
       });
     });
   });
 
-  // 按日期+姓名排序
   rows.sort(function(a, b) {
     if (a.date !== b.date) return a.date < b.date ? -1 : 1;
     return a.name.localeCompare(b.name, 'zh');
   });
 
-  // 可用月份列表
-  var months = [];
-  var monthSet = {};
-  dateKeys.forEach(function(d) { var m = d.slice(0,7); if (!monthSet[m]) { monthSet[m] = true; months.push(m); } });
-  months.sort();
+  // 统计当前筛选下的异常
+  var abnCount = 0;
+  rows.forEach(function(r) {
+    if (r.clockInResult && r.clockInResult !== '正常') abnCount++;
+    else if (r.clockOutResult && r.clockOutResult !== '正常') abnCount++;
+  });
 
-  // BU 列表
-  var buList = [];
-  var buSet = {};
-  empList.forEach(function(e) { if (e.bu && !buSet[e.bu]) { buSet[e.bu] = true; buList.push(e.bu); } });
-  buList.sort();
-
-  var resultCSS = {
-    '正常': 'color:var(--success)',
-    '迟到': 'color:var(--danger-text)', '严重迟到': 'color:var(--danger-text)', '旷工迟到': 'color:var(--danger-text)',
-    '早退': 'color:var(--danger-text)',
-    '缺卡': 'color:var(--warning-text)',
-    '外勤': 'color:#5D8AA8', '外出': 'color:#5D8AA8', '出差': 'color:#5D8AA8',
-    '请假': 'color:#C2795C', '年假': 'color:#C2795C', '病假': 'color:#C2795C', '事假': 'color:#C2795C', '调休': 'color:#C2795C', '婚假': 'color:#C2795C','产假': 'color:#C2795C',
-  };
+  var hasActiveFilter = attendDataFilter.bu !== 'all' || attendDataFilter.dept !== 'all' || attendDataFilter.status !== 'all' || attendDataFilter.keyword;
 
   var html = '';
 
-  // 工具栏
-  html += '<div class="attend-topbar" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">';
-  html += '<select id="attendDataMonth" onchange="attendDataFilter.month=this.value;renderAttendDataView()" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs)">';
-  months.forEach(function(m) {
-    html += '<option value="'+m+'"'+(attendDataFilter.month===m?' selected':'')+'>'+m.replace('-','年')+'月</option>';
-  });
+  // ---- 工具栏 ----
+  html += '<div class="attend-toolbar">';
+
+  // 左侧筛选组
+  html += '<div class="attend-toolbar-left">';
+
+  // 月份
+  html += '<select id="attendDataMonth" onchange="attendDataFilter.month=this.value;renderAttendDataView()">';
+  months.forEach(function(m) { html += '<option value="'+m+'"'+(attendDataFilter.month===m?' selected':'')+'>'+m.replace('-','年')+'月</option>'; });
   html += '</select>';
-  html += '<select id="attendDataBU" onchange="attendDataFilter.bu=this.value;renderAttendDataView()" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs)">';
-  html += '<option value="all"'+(attendDataFilter.bu==='all'?' selected':'')+'>全部BU</option>';
-  buList.forEach(function(bu) {
-    html += '<option value="'+esc(bu)+'"'+(attendDataFilter.bu===bu?' selected':'')+'>'+esc(bu)+'</option>';
-  });
+
+  // BU
+  html += '<select id="attendDataBU" onchange="attendDataFilter.bu=this.value;renderAttendDataView()">';
+  html += '<option value="all"'+(attendDataFilter.bu==='all'?' selected':'')+'>全部 BU</option>';
+  buList.forEach(function(bu) { html += '<option value="'+esc(bu)+'"'+(attendDataFilter.bu===bu?' selected':'')+'>'+esc(bu)+'</option>'; });
   html += '</select>';
-  html += '<input type="text" id="attendDataSearch" placeholder="搜索姓名..." value="'+esc(attendDataFilter.keyword)+'" oninput="attendDataFilter.keyword=this.value;renderAttendDataView()" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs);width:120px">';
-  html += '<span style="flex:1"></span>';
-  html += '<span style="font-size:10px;color:var(--text-muted)">'+rows.length+' 条记录</span>';
-  html += '<button class="btn btn-primary btn-sm" onclick="importAttendCSV()" style="font-size:11px">导入CSV</button>';
+
+  // 部门
+  html += '<select id="attendDataDept" onchange="attendDataFilter.dept=this.value;renderAttendDataView()">';
+  html += '<option value="all"'+(attendDataFilter.dept==='all'?' selected':'')+'>全部部门</option>';
+  deptList.forEach(function(d) { html += '<option value="'+esc(d)+'"'+(attendDataFilter.dept===d?' selected':'')+'>'+esc(d)+'</option>'; });
+  html += '</select>';
+
+  // 状态
+  html += '<select id="attendDataStatus" onchange="attendDataFilter.status=this.value;renderAttendDataView()">';
+  html += '<option value="all"'+(attendDataFilter.status==='all'?' selected':'')+'>全部状态</option>';
+  allStatuses.forEach(function(s) { html += '<option value="'+s+'"'+(attendDataFilter.status===s?' selected':'')+'>'+s+'</option>'; });
+  html += '</select>';
+
+  // 清除
+  if (hasActiveFilter) {
+    html += '<button class="btn btn-outline btn-sm" onclick="attendDataFilter={month:attendDataFilter.month,bu:\"all\",dept:\"all\",status:\"all\",keyword:\"\"};renderAttendDataView()" style="font-size:10px">清除筛选</button>';
+  }
+
+  html += '</div>'; // end toolbar-left
+
+  // 右侧操作组
+  html += '<div class="attend-toolbar-right">';
+  html += '<input type="text" id="attendDataSearch" placeholder="搜索姓名/BU..." value="'+esc(attendDataFilter.keyword)+'" oninput="attendDataFilter.keyword=this.value;renderAttendDataView()">';
+  html += '<span class="attend-record-count">'+rows.length+' 条'+(abnCount > 0 ? ' <span style="color:var(--danger-text)">'+abnCount+' 异常</span>' : '')+'</span>';
+  html += '<button class="btn btn-outline btn-sm" onclick="importAttendCSV()" style="font-size:11px">导入 CSV</button>';
   html += '</div>';
 
-  // 空结果
+  html += '</div>'; // end toolbar
+
+  // ---- 数据表格 ----
   if (rows.length === 0) {
-    html += '<div class="empty" style="padding:40px;text-align:center;color:var(--text-muted)">该筛选条件下无数据</div>';
+    html += '<div style="padding:60px;text-align:center;color:var(--text-muted)">' +
+      '<p style="font-size:14px;font-weight:500;margin:0">该筛选条件下无数据</p>' +
+      (hasFilter ? '<p style="font-size:11px;margin:8px 0">尝试调整筛选条件</p>' : '') +
+      '</div>';
   } else {
-    // 数据表
     html += '<div style="overflow-x:auto;max-height:calc(100vh - 280px)">';
-    html += '<table class="attend-data-table" style="width:100%;border-collapse:collapse;font-size:11px">';
-    html += '<thead><tr style="position:sticky;top:0;background:var(--bg-surface);z-index:1">';
-    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:60px">姓名</th>';
-    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:70px">部门</th>';
-    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:70px">BU</th>';
-    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:80px">日期</th>';
-    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:70px">上班打卡</th>';
-    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:60px">上班结果</th>';
-    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:70px">下班打卡</th>';
-    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:60px">下班结果</th>';
-    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:120px">审批备注</th>';
+    html += '<table class="attend-data-table">';
+    html += '<thead><tr>';
+    html += '<th>姓名</th><th>部门</th><th>BU</th><th class="th-date">日期</th>';
+    html += '<th class="th-time">上班打卡</th><th class="th-result">上班结果</th>';
+    html += '<th class="th-time">下班打卡</th><th class="th-result">下班结果</th>';
+    html += '<th class="th-note">审批备注</th>';
     html += '</tr></thead><tbody>';
 
     var prevDate = '';
-    rows.forEach(function(r) {
-      var rowStyle = '';
-      if (r.date !== prevDate && prevDate !== '') {
-        rowStyle = 'border-top:2px solid var(--border)';
-      }
+    rows.forEach(function(r, idx) {
+      var isNewDay = r.date !== prevDate;
       prevDate = r.date;
+      var rowClass = (idx % 2 === 1) ? ' odd' : '';
+      if (isNewDay && idx > 0) rowClass += ' day-split';
 
-      var ciCSS = resultCSS[r.clockInResult] || '';
-      var coCSS = resultCSS[r.clockOutResult] || '';
-
-      html += '<tr style="'+rowStyle+'">';
-      html += '<td style="padding:6px 8px;white-space:nowrap">'+esc(r.name)+'</td>';
-      html += '<td style="padding:6px 8px;white-space:nowrap;color:var(--text-dim);font-size:10px">'+esc(r.dept)+'</td>';
-      html += '<td style="padding:6px 8px;white-space:nowrap;color:var(--text-dim);font-size:10px">'+esc(r.bu)+'</td>';
-      html += '<td style="padding:6px 8px;white-space:nowrap">'+r.date.slice(5)+'</td>';
-      html += '<td style="padding:6px 8px;white-space:nowrap;font-family:monospace">'+esc(r.clockIn)+(r.schedule?'<span style="font-size:9px;color:var(--text-muted);margin-left:4px">'+esc(r.schedule.replace(/ .*/,''))+'</span>':'')+'</td>';
-      html += '<td style="padding:6px 8px;white-space:nowrap;'+ciCSS+'">'+esc(r.clockInResult||'-')+'</td>';
-      html += '<td style="padding:6px 8px;white-space:nowrap;font-family:monospace">'+esc(r.clockOut)+'</td>';
-      html += '<td style="padding:6px 8px;white-space:nowrap;'+coCSS+'">'+esc(r.clockOutResult||'-')+'</td>';
-      html += '<td style="padding:6px 8px;font-size:10px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(r.approval)+'">'+esc(r.approval)+'</td>';
+      html += '<tr class="'+rowClass+'">';
+      html += '<td class="td-name">'+esc(r.name)+'</td>';
+      html += '<td class="td-meta">'+esc(r.dept)+'</td>';
+      html += '<td class="td-meta">'+esc(r.bu)+'</td>';
+      html += '<td class="td-date">'+r.date.slice(5)+'</td>';
+      html += '<td class="td-time">'+(r.clockIn ? '<code>'+esc(r.clockIn)+'</code>' : '-')+'</td>';
+      html += '<td class="td-result">'+statusBadge(r.clockInResult)+'</td>';
+      html += '<td class="td-time">'+(r.clockOut ? '<code>'+esc(r.clockOut)+'</code>' : '-')+'</td>';
+      html += '<td class="td-result">'+statusBadge(r.clockOutResult)+'</td>';
+      html += '<td class="td-note" title="'+esc(r.approval)+'">'+esc(r.approval)+'</td>';
       html += '</tr>';
     });
 
