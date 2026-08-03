@@ -8053,8 +8053,7 @@ function importLeavesCSV() {
           miss: getVal('缺卡次数'),
           ot: getVal('加班小时'),
           abnormal: getVal('考勤异常天数'),
-          note: (colMap['备注'] >= 0 ? parts[colMap['备注']] || '' : ''),
-          name: emp.name, dept: emp.department || '', bu: emp.bu || ''
+          note: (colMap['备注'] >= 0 ? parts[colMap['备注']] || '' : '')
         };
         matched++;
       }
