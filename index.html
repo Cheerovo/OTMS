@@ -7959,6 +7959,7 @@ function renderAttendDataView() {
       rows.push({
         date: date,
         name: emp.name,
+        dept: emp.department || '',
         bu: emp.bu || '',
         schedule: r.schedule || '',
         clockIn: r.clockIn || '',
@@ -8027,6 +8028,7 @@ function renderAttendDataView() {
     html += '<table class="attend-data-table" style="width:100%;border-collapse:collapse;font-size:11px">';
     html += '<thead><tr style="position:sticky;top:0;background:var(--bg-surface);z-index:1">';
     html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:60px">姓名</th>';
+    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:70px">部门</th>';
     html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:70px">BU</th>';
     html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:80px">日期</th>';
     html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:70px">上班打卡</th>';
@@ -8049,6 +8051,7 @@ function renderAttendDataView() {
 
       html += '<tr style="'+rowStyle+'">';
       html += '<td style="padding:6px 8px;white-space:nowrap">'+esc(r.name)+'</td>';
+      html += '<td style="padding:6px 8px;white-space:nowrap;color:var(--text-dim);font-size:10px">'+esc(r.dept)+'</td>';
       html += '<td style="padding:6px 8px;white-space:nowrap;color:var(--text-dim);font-size:10px">'+esc(r.bu)+'</td>';
       html += '<td style="padding:6px 8px;white-space:nowrap">'+r.date.slice(5)+'</td>';
       html += '<td style="padding:6px 8px;white-space:nowrap;font-family:monospace">'+esc(r.clockIn)+(r.schedule?'<span style="font-size:9px;color:var(--text-muted);margin-left:4px">'+esc(r.schedule.replace(/ .*/,''))+'</span>':'')+'</td>';
