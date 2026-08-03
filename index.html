@@ -1158,6 +1158,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-data-table .td-name { font-weight: 500; white-space: nowrap; }
 .attend-data-table .td-meta { font-size: 10px; color: var(--text-dim); white-space: nowrap; }
 .attend-data-table .td-date { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.attend-data-table .td-weekday { font-size:10px; color:var(--text-muted); margin-left:2px; }
 .attend-data-table .td-time { white-space: nowrap; }
 .attend-data-table .td-time code { font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace; font-size: 10.5px; background: var(--bg); padding: 2px 5px; border-radius: 4px; }
 .attend-data-table .td-result { white-space: nowrap; text-align: center; }
@@ -7360,6 +7361,7 @@ const ATTEND_MAIN = ['在岗','请假','外勤','旷工','加班','休息','不�
 const ATTEND_CSS = {'在岗':'as-on','请假':'as-leave','外勤':'as-out','旷工':'as-other','加班':'as-overtime','休息':'as-rest','不在钉钉数据':'as-nodd'};
 
 function getTodayStr() { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function getWeekday(dateStr) { var d=new Date(dateStr); return ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()]||''; }
 
 function loadAttendance() {
   try { return JSON.parse(localStorage.getItem('okr_attendance')||'{}'); } catch(e) { return {}; }
@@ -8393,7 +8395,7 @@ function renderAttendDataView() {
       html += '<td class="td-name">'+esc(r.name)+'</td>';
       html += '<td class="td-meta">'+esc(r.bu)+'</td>';
       html += '<td class="td-meta">'+esc(r.dept)+'</td>';
-      html += '<td class="td-date">'+r.date.slice(5)+'</td>';
+      html += '<td class="td-date">'+r.date.slice(5)+' <span class="td-weekday">'+getWeekday(r.date)+'</span></td>';
       html += '<td class="td-time">'+(r.clockIn ? '<code>'+esc(r.clockIn)+'</code>' : '-')+'</td>';
       html += '<td class="td-result">'+statusBadge(r.clockInResult)+'</td>';
       html += '<td class="td-time">'+(r.clockOut ? '<code>'+esc(r.clockOut)+'</code>' : '-')+'</td>';
