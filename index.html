@@ -11472,6 +11472,15 @@ function calcTraineeTotalScoreV2(traineeName, weekId){
   // No eval data → week not scored (peer votes alone don't count)
   var s = getEvalScore(traineeName, weekId);
   if(!s) return null;
+  // 检查评分是否为空（清空后为 {}），有任意 auto 维度有值才算有数据
+  var hasAny = false;
+  EVAL_DIMS_V2.forEach(function(d){
+    if(d.auto){
+      var v = s[d.id];
+      if(v || v === 0) hasAny = true;
+    }
+  });
+  if(!hasAny && calcPeerVoteScore(traineeName, weekId) === 0) return null;
   var total = 0;
   EVAL_DIMS_V2.forEach(function(d){
     if(d.auto){
