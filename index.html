@@ -8599,7 +8599,7 @@ function buildLeavesTableHTML(empList, empMap) {
 }
 
 // ===== 考勤总览仪表盘 =====
-var analyticsFilter = { year: '2026', month: '', day: '', bu: 'all', dept: 'all', empId: '' };
+var analyticsFilter = { year: '2026', month: '', day: '', bu: 'all', dept: 'all', empId: '', atype: 'all' };
 var analyticsChartInstances = {};
 
 function destroyAnalyticsCharts() {
@@ -8664,6 +8664,11 @@ function computeAnalytics(filter) {
       var isOut = /外勤|出差|外出/.test(ciR) || /外勤|出差|外出/.test(coR);
       var isNormal = ciR === '正常' && (coR === '正常' || coR === '' || coR === '-');
       var isOT = r.ap && /加班/.test(r.ap);
+
+      // Apply anomaly type filter: if a specific type is selected, only that type counts as anomaly
+      if (filter.atype === 'late')   { isMiss = false; isLeave = false; }
+      if (filter.atype === 'miss')   { isLate = false; isLeave = false; }
+      if (filter.atype === 'leave')  { isLate = false; isMiss = false; }
 
       if (isNormal) totalAll.normal++;
       if (isLate) totalAll.late++;
@@ -8780,10 +8785,16 @@ function computeAnalytics(filter) {
         var r = dayData[empId];
         var ciR = r.cir || '', coR = r.cor || '';
         prevTotalAll.recs++;
+        var pisLate = /迟到|严重迟到|旷工迟到/.test(ciR);
+        var pisMiss = ciR === '缺卡' || coR === '缺卡';
+        var pisLeave = /年假|事假|病假|调休|婚假|产假|陪产假|育儿假|丧假|哺乳假/.test(ciR) || /年假|事假|病假|调休|婚假|产假|陪产假|育儿假|丧假|哺乳假/.test(coR);
+        if (filter.atype === 'late')   { pisMiss = false; pisLeave = false; }
+        if (filter.atype === 'miss')   { pisLate = false; pisLeave = false; }
+        if (filter.atype === 'leave')  { pisLate = false; pisMiss = false; }
         if (ciR === '正常' && (coR === '正常' || coR === '' || coR === '-')) prevTotalAll.normal++;
-        if (/迟到|严重迟到|旷工迟到/.test(ciR)) prevTotalAll.late++;
-        if (ciR === '缺卡' || coR === '缺卡') prevTotalAll.miss++;
-        if (/年假|事假|病假|调休|婚假|产假|陪产假|育儿假|丧假|哺乳假/.test(ciR) || /年假|事假|病假|调休|婚假|产假|陪产假|育儿假|丧假|哺乳假/.test(coR)) prevTotalAll.leave++;
+        if (pisLate) prevTotalAll.late++;
+        if (pisMiss) prevTotalAll.miss++;
+        if (pisLeave) prevTotalAll.leave++;
         if (/外勤|出差|外出/.test(ciR) || /外勤|出差|外出/.test(coR)) prevTotalAll.out++;
         if (r.ap && /加班/.test(r.ap)) prevTotalAll.ot++;
       });
@@ -8848,10 +8859,7 @@ function renderAttendAnalytics() {
   // Metrics
   var t = stats.totalAll;
   var anomalyCount = t.late + t.miss + t.leave;
-  var lateRate = t.recs > 0 ? Math.round(t.late * 10000 / t.recs) / 100 : 0;
-  var missRate = t.recs > 0 ? Math.round(t.miss * 10000 / t.recs) / 100 : 0;
   var leaveTotal = stats.leaveAgg.annual + stats.leaveAgg.lieu + stats.leaveAgg.sick + stats.leaveAgg.personal;
-  var otTotal = t.ot;
   var anomalyRate = t.recs > 0 ? Math.round(anomalyCount * 1000 / t.recs) / 10 : 0;
 
   // MoM deltas (only when a specific month is selected)
@@ -8912,6 +8920,14 @@ function renderAttendAnalytics() {
     html += '</select>';
   }
   html += '<span style="width:1px;height:20px;background:var(--border);margin:0 4px;flex-shrink:0"></span>';
+  // Anomaly type
+  html += '<select onchange="analyticsFilter.atype=this.value;renderAttendAnalytics()">';
+  html += '<option value="all"'+(filter.atype==='all'?' selected':'')+'>全部异常</option>';
+  html += '<option value="late"'+(filter.atype==='late'?' selected':'')+'>仅迟到</option>';
+  html += '<option value="miss"'+(filter.atype==='miss'?' selected':'')+'>仅缺卡</option>';
+  html += '<option value="leave"'+(filter.atype==='leave'?' selected':'')+'>仅请假</option>';
+  html += '</select>';
+  html += '<span style="width:1px;height:20px;background:var(--border);margin:0 4px;flex-shrink:0"></span>';
   // Org
   html += '<select onchange="analyticsFilter.bu=this.value;analyticsFilter.dept=\'all\';renderAttendAnalytics()"><option value="all">全部 BU</option>';
   buList.forEach(function(b) { html += '<option value="'+esc(b)+'"'+(filter.bu===b?' selected':'')+'>'+esc(b)+'</option>'; });
@@ -8926,31 +8942,26 @@ function renderAttendAnalytics() {
   empList.forEach(function(e) { html += '<option value="'+esc(e.name)+'">'; });
   html += '</datalist>';
   // Reset + count
-  if (filter.month || filter.day || filter.bu !== 'all' || filter.dept !== 'all' || filter.empId) {
-    html += '<button onclick="analyticsFilter={year:analyticsFilter.year,month:\'\',day:\'\',bu:\'all\',dept:\'all\',empId:\'\'};renderAttendAnalytics()" style="padding:5px 12px;font-size:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-muted);cursor:pointer">清除筛选</button>';
+  if (filter.month || filter.day || filter.bu !== 'all' || filter.dept !== 'all' || filter.empId || filter.atype !== 'all') {
+    html += '<button onclick="analyticsFilter={year:analyticsFilter.year,month:\'\',day:\'\',bu:\'all\',dept:\'all\',empId:\'\',atype:\'all\'};renderAttendAnalytics()" style="padding:5px 12px;font-size:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-muted);cursor:pointer">清除筛选</button>';
   }
   html += '<span style="margin-left:auto;font-size:10px;color:var(--text-muted)">'+t.recs+' 条记录</span>';
   html += '</div>';
 
   // ---- KPI cards ----
+  var atypeLabel = filter.atype === 'late' ? '迟到' : filter.atype === 'miss' ? '缺卡' : filter.atype === 'leave' ? '请假' : '异常';
   html += '<div class="analytics-kpi-row">';
 
   html += '<div class="analytics-kpi-card'+(anomalyRate<=5?' good':anomalyRate<=10?' warn':' bad')+'">';
-  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot"></span>异常人次'+deltaIntStr(anomalyCount, p?p.late+p.miss+p.leave:null)+'</div>';
+  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot"></span>'+atypeLabel+'人次'+deltaIntStr(anomalyCount, p?p.late+p.miss+p.leave:null)+'</div>';
   html += '<div class="analytics-kpi-value">'+anomalyCount+'<span class="analytics-kpi-unit">次</span></div>';
   html += '<div class="analytics-kpi-sub">迟到 '+t.late+' &middot; 缺卡 '+t.miss+' &middot; 请假 '+t.leave+'</div>';
   html += '</div>';
 
-  html += '<div class="analytics-kpi-card'+(lateRate<=2?' good':lateRate<=5?' warn':' bad')+'">';
-  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot"></span>迟到率'+deltaRateStr(lateRate, p?p.recs:null, p?p.late:null)+'</div>';
-  html += '<div class="analytics-kpi-value">'+lateRate+'<span class="analytics-kpi-unit">%</span></div>';
-  html += '<div class="analytics-kpi-sub">'+t.late+' 人次</div>';
-  html += '</div>';
-
-  html += '<div class="analytics-kpi-card'+(missRate<=1?' good':missRate<=3?' warn':' bad')+'">';
-  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot"></span>缺卡率'+deltaRateStr(missRate, p?p.recs:null, p?p.miss:null)+'</div>';
-  html += '<div class="analytics-kpi-value">'+missRate+'<span class="analytics-kpi-unit">%</span></div>';
-  html += '<div class="analytics-kpi-sub">'+t.miss+' 人次</div>';
+  html += '<div class="analytics-kpi-card'+(anomalyRate<=5?' good':anomalyRate<=10?' warn':' bad')+'">';
+  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot"></span>'+atypeLabel+'率'+deltaRateStr(anomalyRate, p?p.recs:null, p?p.late+p.miss+p.leave:null)+'</div>';
+  html += '<div class="analytics-kpi-value">'+anomalyRate+'<span class="analytics-kpi-unit">%</span></div>';
+  html += '<div class="analytics-kpi-sub">'+t.recs+' 条打卡记录</div>';
   html += '</div>';
 
   var prevLeave = pl ? pl.annual+pl.lieu+pl.sick+pl.personal : null;
@@ -8958,61 +8969,6 @@ function renderAttendAnalytics() {
   html += '<div class="analytics-kpi-label">请假天数'+deltaStr(leaveTotal, prevLeave)+'</div>';
   html += '<div class="analytics-kpi-value">'+leaveTotal.toFixed(1)+'<span class="analytics-kpi-unit">天</span></div>';
   html += '<div class="analytics-kpi-sub">年假 '+stats.leaveAgg.annual.toFixed(1)+' &middot; 调休 '+stats.leaveAgg.lieu.toFixed(1)+' &middot; 病假 '+stats.leaveAgg.sick.toFixed(1)+' &middot; 事假 '+stats.leaveAgg.personal.toFixed(1)+'</div>';
-  html += '</div>';
-
-  html += '<div class="analytics-kpi-card">';
-  html += '<div class="analytics-kpi-label">加班人次'+deltaIntStr(otTotal, p?p.ot:null)+'</div>';
-  html += '<div class="analytics-kpi-value">'+otTotal+'<span class="analytics-kpi-unit">次</span></div>';
-  html += '<div class="analytics-kpi-sub">审批备注含"加班"关键字</div>';
-  html += '</div>';
-
-  html += '</div>';
-
-  // ---- 异常构成：迟到 / 缺卡 / 请假 独立细分 ----
-  // compute per-category peak info from stats
-  var peakWeekdayLate = 0, peakWeekdayMiss = 0, peakWeekdayLeave = 0;
-  var peakWdLateN = 0, peakWdMissN = 0, peakWdLeaveN = 0;
-  for (var wd2 = 0; wd2 < 7; wd2++) {
-    if (stats.weekday[wd2].late > peakWdLateN) { peakWdLateN = stats.weekday[wd2].late; peakWeekdayLate = wd2; }
-    if (stats.weekday[wd2].miss > peakWdMissN) { peakWdMissN = stats.weekday[wd2].miss; peakWeekdayMiss = wd2; }
-    if (stats.weekday[wd2].leave > peakWdLeaveN) { peakWdLeaveN = stats.weekday[wd2].leave; peakWeekdayLeave = wd2; }
-  }
-  var peakMonthLate = '', peakMonthMiss = '', peakMonthLeave = '';
-  var peakMLateN = 0, peakMMissN = 0, peakMLeaveN = 0;
-  Object.keys(stats.monthly).forEach(function(m) {
-    var ms = stats.monthly[m];
-    if (ms.late > peakMLateN) { peakMLateN = ms.late; peakMonthLate = m; }
-    if (ms.miss > peakMMissN) { peakMMissN = ms.miss; peakMonthMiss = m; }
-    if (ms.leave > peakMLeaveN) { peakMLeaveN = ms.leave; peakMonthLeave = m; }
-  });
-  var peakDeptLate = '', peakDeptMiss = '', peakDeptLeave = '';
-  var peakDLateN = 0, peakDMissN = 0, peakDLeaveN = 0;
-  Object.keys(stats.dept).forEach(function(d) {
-    var ds = stats.dept[d];
-    if (ds.late > peakDLateN) { peakDLateN = ds.late; peakDeptLate = d; }
-    if (ds.miss > peakDMissN) { peakDMissN = ds.miss; peakDeptMiss = d; }
-    if (ds.leave > peakDLeaveN) { peakDLeaveN = ds.leave; peakDeptLeave = d; }
-  });
-  var wdNames = ['周日','周一','周二','周三','周四','周五','周六'];
-
-  html += '<div class="analytics-kpi-row">';
-
-  html += '<div class="analytics-kpi-card">';
-  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot" style="display:inline-block;background:#E89B55"></span>迟到</div>';
-  html += '<div class="analytics-kpi-value">'+t.late+'<span class="analytics-kpi-unit">次</span></div>';
-  html += '<div class="analytics-kpi-sub">高峰: '+wdNames[peakWeekdayLate]+' &middot; '+(peakMonthLate?peakMonthLate.slice(5).replace(/^0/,'')+'月':'')+' &middot; '+(peakDeptLate||'')+'</div>';
-  html += '</div>';
-
-  html += '<div class="analytics-kpi-card">';
-  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot" style="display:inline-block;background:#E0696F"></span>缺卡</div>';
-  html += '<div class="analytics-kpi-value">'+t.miss+'<span class="analytics-kpi-unit">次</span></div>';
-  html += '<div class="analytics-kpi-sub">高峰: '+wdNames[peakWeekdayMiss]+' &middot; '+(peakMonthMiss?peakMonthMiss.slice(5).replace(/^0/,'')+'月':'')+' &middot; '+(peakDeptMiss||'')+'</div>';
-  html += '</div>';
-
-  html += '<div class="analytics-kpi-card">';
-  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot" style="display:inline-block;background:#9785AB"></span>请假</div>';
-  html += '<div class="analytics-kpi-value">'+t.leave+'<span class="analytics-kpi-unit">次</span></div>';
-  html += '<div class="analytics-kpi-sub">高峰: '+wdNames[peakWeekdayLeave]+' &middot; '+(peakMonthLeave?peakMonthLeave.slice(5).replace(/^0/,'')+'月':'')+' &middot; '+(peakDeptLeave||'')+'</div>';
   html += '</div>';
 
   html += '</div>';
