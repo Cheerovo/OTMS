@@ -11425,9 +11425,13 @@ function calcTotalScore(scores, weekId){
   if(!scores) return null;
   var dims = weekId ? getActiveDims(weekId) : EVAL_DIMS;
   var total = 0;
+  var hasAny = false;
   dims.forEach(function(d){
-    total += (scores[d.id] || 0);
+    var v = scores[d.id];
+    if(v || v === 0) hasAny = true;
+    total += (v || 0);
   });
+  if(!hasAny) return null;
   return Math.round(total * 10) / 10;
 }
 
