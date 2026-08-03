@@ -8519,8 +8519,13 @@ function importDataToLocal(data){
     if(k==='otms_trainee_eval_v1'){
       try{
         var localEval = JSON.parse(localStorage.getItem(k)||'null');
-        var merged = mergeEvalData(localEval, data[k]);
-        localStorage.setItem(k, JSON.stringify(merged));
+        // 本地无评分数据（如无痕浏览器）：直接使用云端完整数据，不经过合并
+        if(!localEval || !localEval.scores || Object.keys(localEval.scores).length === 0){
+          localStorage.setItem(k, JSON.stringify(data[k]));
+        } else {
+          var merged = mergeEvalData(localEval, data[k]);
+          localStorage.setItem(k, JSON.stringify(merged));
+        }
       }catch(e){ localStorage.setItem(k, JSON.stringify(data[k])); }
     } else {
       localStorage.setItem(k, typeof data[k]==='string'?data[k]:JSON.stringify(data[k]));
@@ -8564,9 +8569,13 @@ async function doAutoUpload(retryCount){
         if(k[0]==='_' || k==='okr_users') return;
         if(k==='otms_trainee_eval_v1'){
           try{
-            var localEval = JSON.parse(localStorage.getItem(k)||'null');
-            var merged = mergeEvalData(localEval, cloudRow.data[k]);
-            localStorage.setItem(k, JSON.stringify(merged));
+            var localEval2 = JSON.parse(localStorage.getItem(k)||'null');
+            if(!localEval2 || !localEval2.scores || Object.keys(localEval2.scores).length === 0){
+              localStorage.setItem(k, JSON.stringify(cloudRow.data[k]));
+            } else {
+              var merged2 = mergeEvalData(localEval2, cloudRow.data[k]);
+              localStorage.setItem(k, JSON.stringify(merged2));
+            }
           }catch(e){ localStorage.setItem(k, JSON.stringify(cloudRow.data[k])); }
         } else if(localStorage.getItem(k) === null){
           localStorage.setItem(k, typeof cloudRow.data[k]==='string' ? cloudRow.data[k] : JSON.stringify(cloudRow.data[k]));
