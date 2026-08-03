@@ -1212,9 +1212,32 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
   border-radius:6px; font-size:11px; background:var(--bg);
 }
 .analytics-summary-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.analytics-delta { font-size:10px; font-weight:600; margin-left:4px; white-space:nowrap; }
+.analytics-delta.up { color:#C0393B; }
+.analytics-delta.down { color:#2D8B4A; }
+.analytics-focus { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+.analytics-focus-box {
+  background:var(--card); border-radius:10px; padding:16px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.analytics-focus-title { font-size:11px; font-weight:600; color:var(--text-dim); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+.analytics-focus-title::before { content:''; width:3px; height:14px; border-radius:2px; background:#D9484B; display:inline-block; flex-shrink:0; }
+.analytics-focus-table { width:100%; font-size:11px; border-collapse:collapse; }
+.analytics-focus-table th { text-align:left; padding:6px 8px; font-size:9px; font-weight:600; color:var(--text-muted); border-bottom:1px solid var(--border); }
+.analytics-focus-table td { padding:6px 8px; border-bottom:1px solid var(--border-hair); }
+.analytics-focus-table tr:hover td { background:var(--bg); }
+.analytics-focus-table .badge-sm { display:inline-block; padding:1px 6px; border-radius:4px; font-size:10px; font-weight:600; }
+.analytics-focus-table .badge-sm.red { background:#FDEAEA; color:#C0393B; }
+.analytics-focus-table .badge-sm.orange { background:#FDF3E5; color:#D4872A; }
+.analytics-focus-bar-wrap { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.analytics-focus-bar-label { width:90px; font-size:10px; color:var(--text-dim); text-align:right; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.analytics-focus-bar-track { flex:1; height:18px; background:var(--bg); border-radius:4px; overflow:hidden; position:relative; }
+.analytics-focus-bar-fill { height:100%; border-radius:4px; transition:width .3s; }
+.analytics-focus-bar-val { width:42px; font-size:10px; font-weight:600; color:var(--text-main); flex-shrink:0; }
 @media (max-width:768px) {
   .analytics-chart-grid { grid-template-columns:1fr; }
   .analytics-kpi-card { min-width:90px; padding:10px 12px; }
+  .analytics-focus { grid-template-columns:1fr; }
   .analytics-kpi-value { font-size:20px; }
 }
 
@@ -8701,10 +8724,52 @@ function computeAnalytics(filter) {
     });
   });
 
+  // Prev-month comparison (when a specific month is selected)
+  var prevTotalAll = null, prevLeaveAgg = null;
+  if (filter.month) {
+    var py = parseInt(filter.month.slice(0,4)), pm = parseInt(filter.month.slice(5,7)) - 1;
+    if (pm === 0) { pm = 12; py--; }
+    var prevKey = py + '-' + (pm < 10 ? '0' : '') + pm;
+    var prevDates = dateKeys.filter(function(d) { return d.slice(0,7) === prevKey; });
+    prevTotalAll = { recs:0, normal:0, late:0, miss:0, leave:0, out:0, ot:0 };
+    prevDates.forEach(function(date) {
+      var dayData = records[date];
+      Object.keys(dayData).forEach(function(empId) {
+        var emp = empMap[empId]; if (!emp) return;
+        if (filter.bu !== 'all' && emp.bu !== filter.bu) return;
+        if (filter.dept !== 'all' && (emp.department || emp.bu || '') !== filter.dept) return;
+        var r = dayData[empId];
+        var ciR = r.cir || '', coR = r.cor || '';
+        prevTotalAll.recs++;
+        if (ciR === '正常' && (coR === '正常' || coR === '' || coR === '-')) prevTotalAll.normal++;
+        if (/迟到|严重迟到|旷工迟到/.test(ciR)) prevTotalAll.late++;
+        if (ciR === '缺卡' || coR === '缺卡') prevTotalAll.miss++;
+        if (/年假|事假|病假|调休|婚假|产假|陪产假|育儿假|丧假|哺乳假/.test(ciR) || /年假|事假|病假|调休|婚假|产假|陪产假|育儿假|丧假|哺乳假/.test(coR)) prevTotalAll.leave++;
+        if (/外勤|出差|外出/.test(ciR) || /外勤|出差|外出/.test(coR)) prevTotalAll.out++;
+        if (r.ap && /加班/.test(r.ap)) prevTotalAll.ot++;
+      });
+    });
+    prevLeaveAgg = { annual:0, lieu:0, sick:0, personal:0 };
+    Object.keys(leavesData).forEach(function(m) {
+      if (m !== prevKey) return;
+      Object.keys(leavesData[m]).forEach(function(eid) {
+        var emp = empMap[eid]; if (!emp) return;
+        if (filter.bu !== 'all' && emp.bu !== filter.bu) return;
+        if (filter.dept !== 'all' && (emp.department || emp.bu || '') !== filter.dept) return;
+        var ld = leavesData[m][eid];
+        prevLeaveAgg.annual += (ld.a || 0);
+        prevLeaveAgg.lieu += (ld.l || 0);
+        prevLeaveAgg.sick += (ld.s || 0);
+        prevLeaveAgg.personal += (ld.p || 0);
+      });
+    });
+  }
+
   return {
     filteredDates: filteredDates, totalAll: totalAll, monthly: monthlyStats,
     weekday: weekdayStats, bu: buStats, dept: deptStats,
-    leaveAgg: leaveAgg, monthlyLeave: monthlyLeave
+    leaveAgg: leaveAgg, monthlyLeave: monthlyLeave,
+    empStats: empStats, prevTotalAll: prevTotalAll, prevLeaveAgg: prevLeaveAgg
   };
 }
 
@@ -8730,6 +8795,8 @@ function renderAttendAnalytics() {
 
   var stats = computeAnalytics(filter);
   var empList = loadEmployees();
+  var empMap = {};
+  empList.forEach(function(e) { empMap[e.id] = e; });
 
   // Build filter options
   var recs = loadAttendanceRecords();
@@ -8751,11 +8818,42 @@ function renderAttendAnalytics() {
 
   // Metrics
   var t = stats.totalAll;
-  var attendRate = t.recs > 0 ? Math.round(t.normal * 1000 / t.recs) / 10 : 0;
+  var anomalyCount = t.late + t.miss + t.leave;
   var lateRate = t.recs > 0 ? Math.round(t.late * 10000 / t.recs) / 100 : 0;
   var missRate = t.recs > 0 ? Math.round(t.miss * 10000 / t.recs) / 100 : 0;
   var leaveTotal = stats.leaveAgg.annual + stats.leaveAgg.lieu + stats.leaveAgg.sick + stats.leaveAgg.personal;
   var otTotal = t.ot;
+  var anomalyRate = t.recs > 0 ? Math.round(anomalyCount * 1000 / t.recs) / 10 : 0;
+
+  // MoM deltas (only when a specific month is selected)
+  function deltaStr(cur, prev) {
+    if (prev === null || prev === undefined) return '';
+    var diff = cur - prev;
+    if (diff === 0) return '<span class="analytics-delta" style="color:var(--text-muted)">→0</span>';
+    var cls = diff > 0 ? 'up' : 'down';
+    var arrow = diff > 0 ? '↑' : '↓';
+    return '<span class="analytics-delta '+cls+'">'+arrow+Math.abs(diff).toFixed(1)+'</span>';
+  }
+  function deltaRateStr(curRate, prevRecs, prevCount) {
+    if (prevRecs === null || prevRecs === 0) return '';
+    var prevRate = Math.round(prevCount * 10000 / prevRecs) / 100;
+    var diff = Math.round((curRate - prevRate) * 10) / 10;
+    if (diff === 0) return '<span class="analytics-delta" style="color:var(--text-muted)">→0</span>';
+    var cls = diff > 0 ? 'up' : 'down';
+    var arrow = diff > 0 ? '↑' : '↓';
+    return '<span class="analytics-delta '+cls+'">'+arrow+Math.abs(diff).toFixed(1)+'pp</span>';
+  }
+  function deltaIntStr(cur, prev) {
+    if (prev === null || prev === undefined) return '';
+    var diff = cur - prev;
+    if (diff === 0) return '<span class="analytics-delta" style="color:var(--text-muted)">→0</span>';
+    var cls = diff > 0 ? 'up' : 'down';
+    var arrow = diff > 0 ? '↑' : '↓';
+    return '<span class="analytics-delta '+cls+'">'+arrow+Math.abs(diff)+'</span>';
+  }
+
+  var p = stats.prevTotalAll;
+  var pl = stats.prevLeaveAgg;
 
   var html = '';
 
@@ -8782,11 +8880,12 @@ function renderAttendAnalytics() {
 
   // ---- KPI cards ----
   html += '<div class="analytics-kpi-row">';
-  html += '<div class="analytics-kpi-card'+(attendRate>=95?' good':attendRate>=85?' warn':' bad')+'"><div class="analytics-kpi-value">'+attendRate+'%</div><div class="analytics-kpi-label">出勤率</div></div>';
-  html += '<div class="analytics-kpi-card'+(lateRate<=2?' good':lateRate<=5?' warn':' bad')+'"><div class="analytics-kpi-value">'+lateRate+'%</div><div class="analytics-kpi-label">迟到率</div><div class="analytics-kpi-delta">'+t.late+' 人次</div></div>';
-  html += '<div class="analytics-kpi-card'+(missRate<=1?' good':missRate<=3?' warn':' bad')+'"><div class="analytics-kpi-value">'+missRate+'%</div><div class="analytics-kpi-label">缺卡率</div><div class="analytics-kpi-delta">'+t.miss+' 人次</div></div>';
-  html += '<div class="analytics-kpi-card"><div class="analytics-kpi-value">'+leaveTotal.toFixed(1)+'</div><div class="analytics-kpi-label">请假天数</div><div class="analytics-kpi-delta">年'+stats.leaveAgg.annual.toFixed(1)+' 调'+stats.leaveAgg.lieu.toFixed(1)+' 病'+stats.leaveAgg.sick.toFixed(1)+' 事'+stats.leaveAgg.personal.toFixed(1)+'</div></div>';
-  html += '<div class="analytics-kpi-card"><div class="analytics-kpi-value">'+otTotal+'</div><div class="analytics-kpi-label">加班人次</div></div>';
+  html += '<div class="analytics-kpi-card'+(anomalyRate<=5?' good':anomalyRate<=10?' warn':' bad')+'"><div class="analytics-kpi-value">'+anomalyCount+'<span style="font-size:13px;font-weight:400;color:var(--text-muted)"> 次</span></div><div class="analytics-kpi-label">异常人次'+deltaIntStr(anomalyCount, p?p.late+p.miss+p.leave:null)+'</div><div class="analytics-kpi-delta">迟到 '+t.late+' · 缺卡 '+t.miss+' · 请假 '+t.leave+'</div></div>';
+  html += '<div class="analytics-kpi-card'+(lateRate<=2?' good':lateRate<=5?' warn':' bad')+'"><div class="analytics-kpi-value">'+lateRate+'%</div><div class="analytics-kpi-label">迟到率'+deltaRateStr(lateRate, p?p.recs:null, p?p.late:null)+'</div><div class="analytics-kpi-delta">'+t.late+' 人次</div></div>';
+  html += '<div class="analytics-kpi-card'+(missRate<=1?' good':missRate<=3?' warn':' bad')+'"><div class="analytics-kpi-value">'+missRate+'%</div><div class="analytics-kpi-label">缺卡率'+deltaRateStr(missRate, p?p.recs:null, p?p.miss:null)+'</div><div class="analytics-kpi-delta">'+t.miss+' 人次</div></div>';
+  var prevLeave = pl ? pl.annual+pl.lieu+pl.sick+pl.personal : null;
+  html += '<div class="analytics-kpi-card"><div class="analytics-kpi-value">'+leaveTotal.toFixed(1)+'<span style="font-size:13px;font-weight:400;color:var(--text-muted)"> 天</span></div><div class="analytics-kpi-label">请假天数'+deltaStr(leaveTotal, prevLeave)+'</div><div class="analytics-kpi-delta">年'+stats.leaveAgg.annual.toFixed(1)+' 调'+stats.leaveAgg.lieu.toFixed(1)+' 病'+stats.leaveAgg.sick.toFixed(1)+' 事'+stats.leaveAgg.personal.toFixed(1)+'</div></div>';
+  html += '<div class="analytics-kpi-card"><div class="analytics-kpi-value">'+otTotal+'</div><div class="analytics-kpi-label">加班人次'+deltaIntStr(otTotal, p?p.ot:null)+'</div><div class="analytics-kpi-delta">审批备注含"加班"关键字</div></div>';
   html += '</div>';
 
   // ---- Charts ----
@@ -8803,14 +8902,74 @@ function renderAttendAnalytics() {
 
   // Row 3: BU 对比 + 部门对比
   html += '<div class="analytics-chart-grid">';
-  html += '<div class="analytics-chart-box"><div class="analytics-chart-title">BU 出勤率对比</div><div class="analytics-chart-wrap"><canvas id="chartBU" style="max-height:300px"></canvas></div></div>';
-  html += '<div class="analytics-chart-box"><div class="analytics-chart-title">部门出勤率对比</div><div class="analytics-chart-wrap"><canvas id="chartDept" style="max-height:300px"></canvas></div></div>';
+  html += '<div class="analytics-chart-box"><div class="analytics-chart-title">BU 异常率对比（迟到+缺卡+请假）</div><div class="analytics-chart-wrap"><canvas id="chartBU" style="max-height:300px"></canvas></div></div>';
+  html += '<div class="analytics-chart-box"><div class="analytics-chart-title">部门异常率对比（迟到+缺卡+请假）</div><div class="analytics-chart-wrap"><canvas id="chartDept" style="max-height:300px"></canvas></div></div>';
   html += '</div>';
 
   // Row 4: 请假类型月度分布
   html += '<div class="analytics-chart-grid">';
   html += '<div class="analytics-chart-box full"><div class="analytics-chart-title">请假类型月度分布（天）</div><div class="analytics-chart-wrap"><canvas id="chartLeaveMonth" style="max-height:260px"></canvas></div></div>';
   html += '</div>';
+
+  // ---- 重点关注 ----
+  // Build top anomaly employees list
+  var empAnomList = [];
+  Object.keys(stats.empStats).forEach(function(eid) {
+    var emp = empMap[eid]; if (!emp) return;
+    if (filter.bu !== 'all' && emp.bu !== filter.bu) return;
+    if (filter.dept !== 'all' && (emp.department || emp.bu || '') !== filter.dept) return;
+    var es = stats.empStats[eid];
+    var anom = es.late + es.miss + es.leave;
+    if (anom > 0) empAnomList.push({ name: emp.name, bu: emp.bu || '', dept: emp.department || emp.bu || '', late: es.late, miss: es.miss, leave: es.leave, anom: anom, total: es.total });
+  });
+  empAnomList.sort(function(a,b) { return b.anom - a.anom; });
+  var topEmp = empAnomList.slice(0, 5);
+
+  // Build dept anomaly rate list
+  var deptAnomList = [];
+  Object.keys(stats.dept).forEach(function(d) {
+    var ds = stats.dept[d];
+    var anom = ds.late + ds.miss + ds.leave;
+    var rate = ds.total > 0 ? Math.round(anom * 1000 / ds.total) / 10 : 0;
+    if (ds.total > 0) deptAnomList.push({ name: d, rate: rate, anom: anom, total: ds.total, late: ds.late, miss: ds.miss, leave: ds.leave });
+  });
+  deptAnomList.sort(function(a,b) { return b.rate - a.rate; });
+  var topDept = deptAnomList.slice(0, 6);
+
+  if (topEmp.length > 0 || topDept.length > 0) {
+    html += '<div class="analytics-focus">';
+
+    // Employee TOP5
+    html += '<div class="analytics-focus-box">';
+    html += '<div class="analytics-focus-title">异常 TOP5 员工</div>';
+    if (topEmp.length === 0) {
+      html += '<div style="font-size:10px;color:var(--text-muted);padding:12px 0">暂无异常数据</div>';
+    } else {
+      html += '<table class="analytics-focus-table"><thead><tr><th>姓名</th><th>部门</th><th>迟到</th><th>缺卡</th><th>请假</th><th>异常合计</th></tr></thead><tbody>';
+      topEmp.forEach(function(e) {
+        var badge = e.anom >= 8 ? '<span class="badge-sm red">高</span>' : e.anom >= 4 ? '<span class="badge-sm orange">中</span>' : '';
+        html += '<tr><td><strong>'+esc(e.name)+'</strong></td><td style="color:var(--text-muted);font-size:10px">'+esc(e.dept)+'</td><td>'+(e.late||'-')+'</td><td>'+(e.miss||'-')+'</td><td>'+(e.leave||'-')+'</td><td>'+badge+' '+e.anom+'</td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+    html += '</div>';
+
+    // Dept anomaly rate TOP6
+    html += '<div class="analytics-focus-box">';
+    html += '<div class="analytics-focus-title">部门异常率 TOP6</div>';
+    if (topDept.length === 0) {
+      html += '<div style="font-size:10px;color:var(--text-muted);padding:12px 0">暂无数据</div>';
+    } else {
+      var maxRate = topDept[0].rate;
+      topDept.forEach(function(d) {
+        var barColor = d.rate >= 15 ? '#D9484B' : d.rate >= 8 ? '#E8953A' : '#8B6F5C';
+        html += '<div class="analytics-focus-bar-wrap"><span class="analytics-focus-bar-label" title="'+esc(d.name)+'">'+esc(d.name)+'</span><div class="analytics-focus-bar-track"><div class="analytics-focus-bar-fill" style="width:'+(maxRate>0?Math.round(d.rate*100/maxRate):0)+'%;background:'+barColor+'"></div></div><span class="analytics-focus-bar-val">'+d.rate+'%</span></div>';
+      });
+    }
+    html += '</div>';
+
+    html += '</div>';
+  }
 
   div.innerHTML = html;
   setTimeout(function() { renderAnalyticsCharts(stats); }, 50);
@@ -8896,54 +9055,56 @@ function renderAnalyticsCharts(stats) {
     });
   }
 
-  // ---- BU 对比 ----
+  // ---- BU 异常率对比 ----
   var ctxBU = document.getElementById('chartBU');
   if (ctxBU) {
     var buNames = Object.keys(stats.bu).sort(function(a,b) {
-      var ra = stats.bu[a].total>0?stats.bu[a].normal/stats.bu[a].total:0;
-      var rb = stats.bu[b].total>0?stats.bu[b].normal/stats.bu[b].total:0;
-      return ra - rb;
+      var ra = stats.bu[a].total>0?(stats.bu[a].late+stats.bu[a].miss+stats.bu[a].leave)/stats.bu[a].total:0;
+      var rb = stats.bu[b].total>0?(stats.bu[b].late+stats.bu[b].miss+stats.bu[b].leave)/stats.bu[b].total:0;
+      return rb - ra;
     });
     var buRates = buNames.map(function(bu) {
       var bs = stats.bu[bu];
-      return bs.total>0?Math.round(bs.normal*1000/bs.total)/10:0;
+      return bs.total>0?Math.round((bs.late+bs.miss+bs.leave)*1000/bs.total)/10:0;
     });
+    var maxBu = Math.max.apply(null, buRates.concat([10]));
     analyticsChartInstances.bu = new Chart(ctxBU, {
       type: 'bar',
       data: {
         labels: buNames,
-        datasets: [{ data: buRates, backgroundColor: buRates.map(function(r){return r>=95?COLORS.normal:r>=85?COLORS.late:COLORS.miss;}), borderRadius: 4 }]
+        datasets: [{ data: buRates, backgroundColor: buRates.map(function(r){return r>=15?COLORS.miss:r>=8?COLORS.late:'#8B6F5C';}), borderRadius: 4 }]
       },
       options: {
         indexAxis: 'y', responsive: true,
         plugins: { legend: { display: false } },
-        scales: { x: { min:80, max:100, ticks:{callback:function(v){return v+'%';},font:{size:10}}, grid:{color:'#f0f0f0'} }, y: { ticks:{font:{size:10}} } }
+        scales: { x: { max: Math.ceil(maxBu*1.2), ticks:{callback:function(v){return v+'%';},font:{size:10}}, grid:{color:'#f0f0f0'} }, y: { ticks:{font:{size:10}} } }
       }
     });
   }
 
-  // ---- 部门对比 ----
+  // ---- 部门异常率对比 ----
   var ctxDept = document.getElementById('chartDept');
   if (ctxDept) {
     var deptNames = Object.keys(stats.dept).sort(function(a,b) {
-      var ra = stats.dept[a].total>0?stats.dept[a].normal/stats.dept[a].total:0;
-      var rb = stats.dept[b].total>0?stats.dept[b].normal/stats.dept[b].total:0;
-      return ra - rb;
+      var ra = stats.dept[a].total>0?(stats.dept[a].late+stats.dept[a].miss+stats.dept[a].leave)/stats.dept[a].total:0;
+      var rb = stats.dept[b].total>0?(stats.dept[b].late+stats.dept[b].miss+stats.dept[b].leave)/stats.dept[b].total:0;
+      return rb - ra;
     });
     var deptRates = deptNames.map(function(d) {
       var ds = stats.dept[d];
-      return ds.total>0?Math.round(ds.normal*1000/ds.total)/10:0;
+      return ds.total>0?Math.round((ds.late+ds.miss+ds.leave)*1000/ds.total)/10:0;
     });
+    var maxDept = Math.max.apply(null, deptRates.concat([10]));
     analyticsChartInstances.dept = new Chart(ctxDept, {
       type: 'bar',
       data: {
         labels: deptNames,
-        datasets: [{ data: deptRates, backgroundColor: deptRates.map(function(r){return r>=95?COLORS.normal:r>=85?COLORS.late:COLORS.miss;}), borderRadius: 4 }]
+        datasets: [{ data: deptRates, backgroundColor: deptRates.map(function(r){return r>=15?COLORS.miss:r>=8?COLORS.late:'#8B6F5C';}), borderRadius: 4 }]
       },
       options: {
         indexAxis: 'y', responsive: true,
         plugins: { legend: { display: false } },
-        scales: { x: { min:80, max:100, ticks:{callback:function(v){return v+'%';},font:{size:10}}, grid:{color:'#f0f0f0'} }, y: { ticks:{font:{size:10}} } }
+        scales: { x: { max: Math.ceil(maxDept*1.2), ticks:{callback:function(v){return v+'%';},font:{size:10}}, grid:{color:'#f0f0f0'} }, y: { ticks:{font:{size:10}} } }
       }
     });
   }
