@@ -8443,63 +8443,103 @@ function renderOrgAttachments() {
 
 
 // ===== Init =====
-// ===== Remote Data Sync (Supabase) =====
-const LOCAL_DATA_VER_KEY = 'okr_sync_version';
+// ===== Remote Data Sync (Supabase) — 按资源组拆分，独立 CAS =====
 const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','otms_tn_split_ratio','otms_trainee_cleared_v3'];
+
+// 资源分组：每组独立 Supabase 行 + 独立 version + 独立 CAS
+const SYNC_GROUPS = {
+  eval:       {id: 1, keys: ['otms_trainee_eval_v1']},
+  trainee:    {id: 2, keys: ['otms_trainee_data_v1', 'otms_trainee_cleared_v3', 'otms_tn_split_ratio']},
+  okr:        {id: 3, keys: ['okr_data', 'okr_version', 'okr_data_version', 'okr_prefs']},
+  org:        {id: 4, keys: ['okr_employees', 'okr_depts', 'okr_permissions', 'nudge_log', 'org_attachments']},
+  report:     {id: 5, keys: ['rpt_data', 'rpt_version', 'rpt_group_subs', 'meeting_data', 'kpi_data']},
+  attendance: {id: 6, keys: ['okr_attendance', 'attendance_workdays', 'attendance_schedules']}
+};
+const SYNC_GROUP_LIST = Object.keys(SYNC_GROUPS);
+
+// key → groupId 反向索引
+var _keyToGroup = {};
+SYNC_GROUP_LIST.forEach(function(gid){ SYNC_GROUPS[gid].keys.forEach(function(k){ _keyToGroup[k] = gid; }); });
+function getGroupForKey(key){ return _keyToGroup[key] || null; }
+function getGroupVerKey(gid){ return 'okr_sync_v_' + gid; }
 
 let _isImporting = false;
 let _autoUploadTimer = null;
 let _autoUploadBusy = false;
+var _dirtyKeys = {};     // 记录防抖期间变更的 key
+var _dirtyGroups = {};   // 记录防抖期间受影响的组
 
-function collectLocalData(){
+function collectGroupData(gid){
   var data = {};
-  DATA_KEYS.forEach(function(k){
+  SYNC_GROUPS[gid].keys.forEach(function(k){
     var v = localStorage.getItem(k);
-    if(v !== null){
-      try{data[k] = JSON.parse(v);}catch(e){data[k] = v;}
-    }
+    if(v !== null){ try{data[k] = JSON.parse(v);}catch(e){data[k] = v;} }
   });
   return data;
 }
 
+function collectAllData(){
+  var data = {};
+  DATA_KEYS.forEach(function(k){
+    var v = localStorage.getItem(k);
+    if(v !== null){ try{data[k] = JSON.parse(v);}catch(e){data[k] = v;} }
+  });
+  return data;
+}
+
+// 按组导入数据。overwrite=true（syncFromRemote）时非 eval 数据云端覆盖本地
+function importGroupData(gid, data, overwrite){
+  _isImporting = true;
+  SYNC_GROUPS[gid].keys.forEach(function(k){
+    if(!(k in data)) return;
+    if(k === 'otms_trainee_eval_v1'){
+      try{
+        var localEval = JSON.parse(localStorage.getItem(k)||'null');
+        if(!localEval || !localEval.scores || Object.keys(localEval.scores).length === 0){
+          localStorage.setItem(k, JSON.stringify(data[k]));
+        } else {
+          var merged = mergeEvalData(localEval, data[k]);
+          localStorage.setItem(k, JSON.stringify(merged));
+        }
+      }catch(e){ localStorage.setItem(k, JSON.stringify(data[k])); }
+    } else if(overwrite || localStorage.getItem(k) === null){
+      localStorage.setItem(k, typeof data[k]==='string' ? data[k] : JSON.stringify(data[k]));
+    }
+  });
+  _isImporting = false;
+}
+
 function mergeEvalData(localEval, cloudEval){
-  // Deep merge evalData: merge all fields from both sources (local takes priority)
+  // Deep merge evalData: all fields, local takes priority
   var merged = localEval ? JSON.parse(JSON.stringify(localEval)) : {};
   if(!cloudEval) return merged;
-  // Merge scores: cloud fills gaps where local is missing
   if(cloudEval.scores){
     if(!merged.scores) merged.scores = {};
     Object.keys(cloudEval.scores).forEach(function(k){
       if(!(k in merged.scores)) merged.scores[k] = cloudEval.scores[k];
     });
   }
-  // Merge extras
   if(cloudEval.extras){
     if(!merged.extras) merged.extras = {};
     Object.keys(cloudEval.extras).forEach(function(k){
       if(!(k in merged.extras)) merged.extras[k] = cloudEval.extras[k];
     });
   }
-  // Merge peerVotes: for each week, merge voters (local voter's votes take priority)
   if(cloudEval.peerVotes){
     if(!merged.peerVotes) merged.peerVotes = {};
     Object.keys(cloudEval.peerVotes).forEach(function(wk){
       if(!merged.peerVotes[wk]) merged.peerVotes[wk] = {};
       Object.keys(cloudEval.peerVotes[wk]).forEach(function(voter){
-        if(!merged.peerVotes[wk][voter]){
-          merged.peerVotes[wk][voter] = cloudEval.peerVotes[wk][voter];
-        }
+        if(!merged.peerVotes[wk][voter]) merged.peerVotes[wk][voter] = cloudEval.peerVotes[wk][voter];
       });
     });
   }
-  // Merge mentors: fill missing weeks
   if(cloudEval.mentors){
     if(!merged.mentors) merged.mentors = {};
     Object.keys(cloudEval.mentors).forEach(function(k){
       if(!merged.mentors[k]) merged.mentors[k] = cloudEval.mentors[k];
     });
   }
-  // Merge rankings
   if(cloudEval.rankings){
     if(!merged.rankings) merged.rankings = {};
     Object.keys(cloudEval.rankings).forEach(function(k){
@@ -8509,251 +8549,297 @@ function mergeEvalData(localEval, cloudEval){
   return merged;
 }
 
-function importDataToLocal(data){
-  _isImporting = true;
-  var imported = 0;
-  Object.keys(data).forEach(function(k){
-    if(k[0]==='_') return;
-    if(k==='okr_users') return; // 密码不同步，防止云端数据覆盖本地
-    // 管培生打分数据：深度合并 peerVotes/mentors/rankings，避免多人互评互相覆盖
-    if(k==='otms_trainee_eval_v1'){
-      try{
-        var localEval = JSON.parse(localStorage.getItem(k)||'null');
-        // 本地无评分数据（如无痕浏览器）：直接使用云端完整数据，不经过合并
-        if(!localEval || !localEval.scores || Object.keys(localEval.scores).length === 0){
-          localStorage.setItem(k, JSON.stringify(data[k]));
-        } else {
-          var merged = mergeEvalData(localEval, data[k]);
-          localStorage.setItem(k, JSON.stringify(merged));
-        }
-      }catch(e){ localStorage.setItem(k, JSON.stringify(data[k])); }
-    } else {
-      localStorage.setItem(k, typeof data[k]==='string'?data[k]:JSON.stringify(data[k]));
-    }
-    imported++;
-  });
-  _isImporting = false;
-  return imported;
-}
-
-// 自动上传：数据变更后 3 秒防抖，使用乐观锁（CAS）防止并发覆盖
+// ===== 自动上传（按组 CAS）=====
 function scheduleAutoUpload(){
-  if (_isImporting || _autoUploadBusy) return;
+  if(_isImporting || _autoUploadBusy) return;
   clearTimeout(_autoUploadTimer);
   _autoUploadTimer = setTimeout(async function(){
     _autoUploadBusy = true;
     try{
-      await doAutoUpload(0);
+      var groups = Object.keys(_dirtyGroups);
+      _dirtyKeys = {};
+      _dirtyGroups = {};
+      // 逐组上传，各组独立 CAS，互不干扰
+      for(var gi = 0; gi < groups.length; gi++){
+        await uploadGroup(groups[gi], 0);
+      }
     }catch(e){ console.error('自动同步异常:', e.message, e); }
     _autoUploadBusy = false;
   }, 3000);
 }
 
-async function doAutoUpload(retryCount){
-  if(retryCount >= 3){ console.log('⚠️ 同步重试已达上限，放弃本次上传'); return; }
+async function uploadGroup(gid, retryCount){
+  if(retryCount >= 3){ console.log('⚠️ '+gid+' 同步重试已达上限，放弃本次上传'); return; }
+  var verKey = getGroupVerKey(gid);
+  var groupId = SYNC_GROUPS[gid].id;
+  var localVer = parseInt(localStorage.getItem(verKey)) || 0;
 
-  var localVer = parseInt(localStorage.getItem(LOCAL_DATA_VER_KEY)) || 0;
-
-  // 1. 拉取云端最新版本
+  // 1. 拉取该组的云端版本
   var cloudVer = 0;
   try{
     const { data: cloudRow } = await supabaseClient
       .from('team_data')
       .select('version, data')
-      .eq('id', 1)
+      .eq('id', groupId)
       .maybeSingle();
-    // 2. 如果云端版本更新，先合并到本地
+    // 2. 云端更新 → 先合并到本地
     if(cloudRow && cloudRow.version > localVer && cloudRow.data){
-      _isImporting = true;
-      Object.keys(cloudRow.data).forEach(function(k){
-        if(k[0]==='_' || k==='okr_users') return;
-        if(k==='otms_trainee_eval_v1'){
-          try{
-            var localEval2 = JSON.parse(localStorage.getItem(k)||'null');
-            if(!localEval2 || !localEval2.scores || Object.keys(localEval2.scores).length === 0){
-              localStorage.setItem(k, JSON.stringify(cloudRow.data[k]));
-            } else {
-              var merged2 = mergeEvalData(localEval2, cloudRow.data[k]);
-              localStorage.setItem(k, JSON.stringify(merged2));
-            }
-          }catch(e){ localStorage.setItem(k, JSON.stringify(cloudRow.data[k])); }
-        } else if(localStorage.getItem(k) === null){
-          localStorage.setItem(k, typeof cloudRow.data[k]==='string' ? cloudRow.data[k] : JSON.stringify(cloudRow.data[k]));
-        }
-      });
-      _isImporting = false;
+      importGroupData(gid, cloudRow.data, false);
       localVer = cloudRow.version;
-      console.log('📥 上传前已合并云端 v'+localVer+' 的新数据');
     }
     cloudVer = cloudRow ? cloudRow.version : 0;
-  }catch(e){ console.log('上传前检查云端版本失败:', e.message); }
+  }catch(e){ console.log('上传前检查云端版本失败('+gid+'):', e.message); }
 
-  // 3. 乐观锁上传：用 expectedVersion 做 CAS
-  var data = collectLocalData();
-  var newVersion = Math.floor(Date.now() / 1000);
-  var expectedVer = localVer;
-
+  // 3. CAS 上传
+  var data = collectGroupData(gid);
+  var newVer = Math.floor(Date.now() / 1000);
   if(cloudVer === 0){
-    // 首次上传，使用 upsert 创建行
     const { error } = await supabaseClient
       .from('team_data')
-      .upsert({ id: 1, data: data, version: newVersion, updated_at: new Date().toISOString() });
+      .upsert({ id: groupId, data: data, version: newVer, updated_at: new Date().toISOString() });
     if(!error){
-      localStorage.setItem(LOCAL_DATA_VER_KEY, newVersion);
-      console.log('🔄 已初始化云端 v'+newVersion);
+      localStorage.setItem(verKey, newVer);
     }
   } else {
-    // CAS 更新：仅当 version 匹配时才写入，防止并发覆盖
     const { error } = await supabaseClient
       .from('team_data')
-      .update({ data: data, version: newVersion, updated_at: new Date().toISOString() })
-      .eq('id', 1)
-      .eq('version', expectedVer);
-
-    if(error){
-      console.error('自动同步数据库错误:', error.message, error);
-      return;
-    }
-
-    // 验证写入是否成功（可能被他人抢先更新）
+      .update({ data: data, version: newVer, updated_at: new Date().toISOString() })
+      .eq('id', groupId)
+      .eq('version', localVer);
+    if(error){ console.error('同步数据库错误('+gid+'):', error.message); return; }
     const { data: verifyRow } = await supabaseClient
       .from('team_data')
       .select('version')
-      .eq('id', 1)
+      .eq('id', groupId)
       .maybeSingle();
-
-    if(verifyRow && verifyRow.version === newVersion){
-      // 写入成功
-      localStorage.setItem(LOCAL_DATA_VER_KEY, newVersion);
-      console.log('🔄 已自动同步到云端 v'+newVersion);
+    if(verifyRow && verifyRow.version === newVer){
+      localStorage.setItem(verKey, newVer);
     } else {
-      // 版本冲突：他人已更新，合并后重试
-      console.log('⚠️ CAS 冲突 (expected v'+expectedVer+', cloud v'+(verifyRow?verifyRow.version:'?')+')，重试 #'+(retryCount+1));
-      // 降低 localVer 以触发下次合并
-      if(verifyRow) localStorage.setItem(LOCAL_DATA_VER_KEY, verifyRow.version - 1);
-      setTimeout(function(){ doAutoUpload(retryCount + 1); }, 800);
+      console.log('⚠️ CAS 冲突 ('+gid+')，重试 #'+(retryCount+1));
+      if(verifyRow) localStorage.setItem(verKey, verifyRow.version - 1);
+      setTimeout(function(){ uploadGroup(gid, retryCount + 1); }, 800);
     }
   }
 }
 
-// 页面关闭前强制 flush：取消防抖立即上传，使用 fetch keepalive 确保请求不丢失
+// ===== 页面关闭前 flush =====
 function flushUpload(){
   clearTimeout(_autoUploadTimer);
-  var data = collectLocalData();
-  var version = Math.floor(Date.now() / 1000);
-  // 直接调用 Supabase REST API，keepalive 确保页面关闭后请求仍能完成
-  try {
-    fetch(SUPABASE_URL + '/rest/v1/team_data?id=eq.1', {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({ data: data, version: version, updated_at: new Date().toISOString() }),
-      keepalive: true
-    });
-  } catch(e) {}
+  var groups = Object.keys(_dirtyGroups);
+  _dirtyKeys = {};
+  _dirtyGroups = {};
+  groups.forEach(function(gid){
+    var groupId = SYNC_GROUPS[gid].id;
+    var data = collectGroupData(gid);
+    var ver = Math.floor(Date.now() / 1000);
+    try {
+      fetch(SUPABASE_URL + '/rest/v1/team_data?id=eq.' + groupId, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ data: data, version: ver, updated_at: new Date().toISOString() }),
+        keepalive: true
+      });
+    } catch(e) {}
+  });
 }
 
-// 自动下载：每 30 秒静默检查云端是否有新数据
+// ===== 自动下载：每 30 秒检查所有组的云端更新 =====
 async function autoCheckRemote(){
   try{
-    const { data: row, error } = await supabaseClient
+    // 一次查询拉取所有组的 version
+    const { data: rows, error } = await supabaseClient
       .from('team_data')
-      .select('version')
-      .eq('id', 1)
-      .maybeSingle();
-    if(error || !row) return;
-    const remoteVer = row.version || 0;
-    const localVer = parseInt(localStorage.getItem(LOCAL_DATA_VER_KEY)) || 0;
-    if(remoteVer <= localVer) return;
+      .select('id, version')
+      .in('id', [1,2,3,4,5,6]);
+    if(error || !rows || !rows.length) return;
 
-    // 有新数据，静默同步
-    const { data: fullRow } = await supabaseClient
-      .from('team_data')
-      .select('data, version')
-      .eq('id', 1)
-      .maybeSingle();
-    if(!fullRow) return;
-    importDataToLocal(fullRow.data);
-    localStorage.setItem(LOCAL_DATA_VER_KEY, fullRow.version);
-    console.log('🔄 已从云端同步 v'+fullRow.version+'，刷新页面生效');
+    var updatedGroups = [];
+    rows.forEach(function(row){
+      var gid = SYNC_GROUP_LIST.find(function(g){ return SYNC_GROUPS[g].id === row.id; });
+      if(!gid) return;
+      var localVer = parseInt(localStorage.getItem(getGroupVerKey(gid))) || 0;
+      if(row.version > localVer){ updatedGroups.push({gid: gid, id: row.id}); }
+    });
+    if(updatedGroups.length === 0) return;
+
+    // 只下载有更新的组
+    for(var i = 0; i < updatedGroups.length; i++){
+      var ug = updatedGroups[i];
+      const { data: fullRow } = await supabaseClient
+        .from('team_data')
+        .select('data, version')
+        .eq('id', ug.id)
+        .maybeSingle();
+      if(!fullRow || !fullRow.data) continue;
+      importGroupData(ug.gid, fullRow.data, false);
+      localStorage.setItem(getGroupVerKey(ug.gid), fullRow.version);
+    }
     // 非侵入式提示
     var toast = document.createElement('div');
     toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#4caf50;color:#fff;padding:10px 20px;border-radius:8px;z-index:99999;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,0.2);animation:fadeInOut 4s forwards;';
-    toast.textContent = '☁️ 云端数据已更新，刷新页面查看最新内容';
+    toast.textContent = '☁️ 云端数据已更新（'+updatedGroups.length+'组），刷新页面查看最新内容';
     document.body.appendChild(toast);
     setTimeout(function(){ toast.remove(); }, 4000);
   }catch(e){ /* silent */ }
 }
 
-// 劫持 localStorage.setItem，数据变更自动触发上传 + 防止被云端旧数据覆盖
+// ===== localStorage 劫持：记录 dirtyKeys + 仅 bump 对应组的 version =====
 (function(){
   var _orig = localStorage.setItem.bind(localStorage);
   localStorage.setItem = function(key, value){
     _orig(key, value);
     if(!_isImporting && DATA_KEYS.indexOf(key) !== -1){
-      // 立即抬高本地版本号，确保 syncFromRemote / autoCheckRemote 不会用旧云端数据覆盖
-      _orig(LOCAL_DATA_VER_KEY, String(Math.floor(Date.now() / 1000)));
+      _dirtyKeys[key] = true;
+      var gid = getGroupForKey(key);
+      if(gid){
+        _dirtyGroups[gid] = true;
+        _orig(getGroupVerKey(gid), String(Math.floor(Date.now() / 1000)));
+      }
       scheduleAutoUpload();
     }
   };
 })();
 
-// 启动自动同步：每 30 秒检查一次云端更新
 setInterval(autoCheckRemote, 30000);
 
+// ===== 数据迁移：旧单行格式 → 新多行格式 =====
+async function migrateToMultiRow(oldRow){
+  if(!oldRow || !oldRow.data) return;
+  console.log('🔄 检测到旧格式数据，开始迁移到多行...');
+  for(var gi = 0; gi < SYNC_GROUP_LIST.length; gi++){
+    var gid = SYNC_GROUP_LIST[gi];
+    var gdata = {};
+    SYNC_GROUPS[gid].keys.forEach(function(k){
+      if(k in oldRow.data){ gdata[k] = oldRow.data[k]; }
+    });
+    if(Object.keys(gdata).length === 0) continue;
+    var ver = Math.floor(Date.now() / 1000);
+    try{
+      const { error } = await supabaseClient
+        .from('team_data')
+        .upsert({ id: SYNC_GROUPS[gid].id, data: gdata, version: ver, updated_at: new Date().toISOString() });
+      if(!error){
+        localStorage.setItem(getGroupVerKey(gid), ver);
+        console.log('  迁移 '+gid+' → id='+SYNC_GROUPS[gid].id+' ('+Object.keys(gdata).length+' keys)');
+      }
+    }catch(e){ console.log('  迁移 '+gid+' 失败:', e.message); }
+  }
+  console.log('✅ 迁移完成');
+}
+
+// ===== 页面加载时同步 =====
 async function syncFromRemote(){
   try{
-    const { data: row, error } = await supabaseClient
+    // 先查新格式是否存在
+    const { data: newRows, error: err1 } = await supabaseClient
       .from('team_data')
-      .select('data, version')
-      .eq('id', 1)
-      .maybeSingle();
+      .select('id')
+      .in('id', [1,2,3,4,5,6]);
+    if(err1) throw err1;
+    var hasNew = newRows && newRows.length > 0;
 
-    if(error) throw error;
-    if(!row) return console.log('云端暂无数据，使用本地数据');
+    if(!hasNew){
+      // 检查旧格式（id=1 的 JSON blob）
+      const { data: oldRow, error: err2 } = await supabaseClient
+        .from('team_data')
+        .select('data, version')
+        .eq('id', 1)
+        .maybeSingle();
+      if(err2) throw err2;
+      // 旧格式的特征：data 字段是一个包含多个 DATA_KEYS 的 JSON blob
+      if(oldRow && oldRow.data && typeof oldRow.data === 'object' && !oldRow.data.eval){
+        // 旧格式：data 是一级 key-value map（如 {okr_data: ..., okr_employees: ...}）
+        // 新格式：data 已经按组拆分（如 eval 组只有 {otms_trainee_eval_v1: ...}）
+        var isOldFormat = false;
+        var allGroupKeys = [];
+        SYNC_GROUP_LIST.forEach(function(g){ allGroupKeys = allGroupKeys.concat(SYNC_GROUPS[g].keys); });
+        var dataKeys = Object.keys(oldRow.data).filter(function(k){ return k[0] !== '_'; });
+        // 如果 data 里包含多个不同组的 key，就是旧格式
+        var foundGroups = {};
+        dataKeys.forEach(function(k){ var g = getGroupForKey(k); if(g) foundGroups[g] = true; });
+        isOldFormat = Object.keys(foundGroups).length >= 2;
+        if(isOldFormat){
+          await migrateToMultiRow(oldRow);
+          hasNew = true;
+        }
+      } else if(oldRow && oldRow.data){
+        // 可能是新格式的某一行（只有一组 keys），不算旧格式
+        hasNew = true;
+      }
+      if(!hasNew) return console.log('云端暂无数据，使用本地数据');
+    }
 
-    const remoteVer = row.version || 0;
-    const localVer = parseInt(localStorage.getItem(LOCAL_DATA_VER_KEY)) || 0;
-    if(remoteVer <= localVer) return console.log('本地数据已是最新 (v'+localVer+' >= v'+remoteVer+')');
-
-    var imported = importDataToLocal(row.data);
-    localStorage.setItem(LOCAL_DATA_VER_KEY, remoteVer);
-    console.log('已从 Supabase 云端同步 v'+remoteVer+'，导入 '+imported+' 个数据项。刷新页面生效。');
-    alert('数据已更新至 v'+remoteVer+'，即将刷新页面。');
-    location.reload();
+    // 检查所有组的版本，有更新的就下载
+    var updatedAny = false;
+    for(var gi = 0; gi < SYNC_GROUP_LIST.length; gi++){
+      var gid = SYNC_GROUP_LIST[gi];
+      var groupId = SYNC_GROUPS[gid].id;
+      try{
+        const { data: row } = await supabaseClient
+          .from('team_data')
+          .select('data, version')
+          .eq('id', groupId)
+          .maybeSingle();
+        if(!row || !row.data) continue;
+        var localVer = parseInt(localStorage.getItem(getGroupVerKey(gid))) || 0;
+        if(row.version <= localVer) continue;
+        importGroupData(gid, row.data, true);
+        localStorage.setItem(getGroupVerKey(gid), row.version);
+        updatedAny = true;
+      }catch(e){}
+    }
+    if(updatedAny){
+      console.log('已从云端同步最新数据，刷新页面生效');
+      alert('数据已更新，即将刷新页面。');
+      location.reload();
+    }
   }catch(e){
     console.log('Supabase 同步失败，使用本地数据:', e.message);
   }
 }
 
+// ===== 手动导出全部数据 =====
 async function exportAllData(){
-  var data = collectLocalData();
+  var groups = SYNC_GROUP_LIST;
+  var successCount = 0;
+  var failCount = 0;
   var version = Math.floor(Date.now() / 1000);
 
-  try{
-    const { error } = await supabaseClient
-      .from('team_data')
-      .upsert({ id: 1, data: data, version: version, updated_at: new Date().toISOString() });
+  for(var gi = 0; gi < groups.length; gi++){
+    var gid = groups[gi];
+    var data = collectGroupData(gid);
+    try{
+      const { error } = await supabaseClient
+        .from('team_data')
+        .upsert({ id: SYNC_GROUPS[gid].id, data: data, version: version, updated_at: new Date().toISOString() });
+      if(error) throw error;
+      localStorage.setItem(getGroupVerKey(gid), version);
+      successCount++;
+    }catch(e){
+      failCount++;
+      console.log(gid+' 导出失败:', e.message);
+    }
+  }
 
-    if(error) throw error;
-
-    localStorage.setItem(LOCAL_DATA_VER_KEY, version);
-    alert('✅ 数据已同步到云端！(v'+version+')\n\n其他团队成员刷新页面即可获取最新数据，\n无需再手动复制 data.json 文件。');
-  }catch(e){
-    console.log('Supabase 上传失败，回退到文件导出:', e.message);
-    data._version = version;
-    data._updated = new Date().toISOString();
-    var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  if(failCount === 0){
+    alert('✅ 数据已同步到云端！\n\n' + successCount + ' 组数据已更新 (v'+version+')\n其他团队成员刷新页面即可获取最新数据。');
+  } else {
+    // 部分失败，回退到文件导出
+    var allData = collectAllData();
+    allData._version = version;
+    allData._updated = new Date().toISOString();
+    var blob = new Blob([JSON.stringify(allData, null, 2)], {type: 'application/json'});
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'data.json';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
-    alert('⚠️ 云端同步失败，已导出为 data.json 文件。\n错误: '+e.message);
+    alert('⚠️ '+failCount+'/'+groups.length+' 组同步失败（已导出文件备份）。\n请检查网络或稍后重试。');
   }
 }
 
