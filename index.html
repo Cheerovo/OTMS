@@ -7362,6 +7362,55 @@ function loadAttendanceRecords() {
 }
 function saveAttendanceRecords(data) { localStorage.setItem('attendance_records', JSON.stringify(data)); }
 
+// ---- 旧格式 → 新格式迁移（短键名压缩） ----
+function migrateAttendanceRecords(data) {
+  var migrated = false;
+  Object.keys(data).forEach(function(date) {
+    Object.keys(data[date]).forEach(function(empId) {
+      var r = data[date][empId];
+      if ('clockIn' in r) {
+        r.ci = r.clockIn; delete r.clockIn;
+        r.cir = r.clockInResult; delete r.clockInResult;
+        r.co = r.clockOut; delete r.clockOut;
+        r.cor = r.clockOutResult; delete r.clockOutResult;
+        r.sc = r.schedule; delete r.schedule;
+        r.ap = r.approval; delete r.approval;
+        r.src = r.source; delete r.source;
+        migrated = true;
+      }
+    });
+  });
+  return migrated;
+}
+function migrateAttendanceLeaves(data) {
+  var migrated = false;
+  Object.keys(data).forEach(function(month) {
+    Object.keys(data[month]).forEach(function(empId) {
+      var ld = data[month][empId];
+      if ('annual' in ld) {
+        ld.a = ld.annual; delete ld.annual;
+        ld.l = ld.lieu; delete ld.lieu;
+        ld.s = ld.sick; delete ld.sick;
+        ld.p = ld.personal; delete ld.personal;
+        ld.lt = ld.late; delete ld.late;
+        ld.ms = ld.miss; delete ld.miss;
+        ld.ab = ld.abnormal; delete ld.abnormal;
+        ld.n = ld.note; delete ld.note;
+        delete ld.name; delete ld.dept; delete ld.bu;
+        migrated = true;
+      }
+    });
+  });
+  return migrated;
+}
+// 页面加载时自动迁移旧数据
+(function() {
+  var recs = loadAttendanceRecords();
+  if (migrateAttendanceRecords(recs)) saveAttendanceRecords(recs);
+  var leaves = loadAttendanceLeaves();
+  if (migrateAttendanceLeaves(leaves)) saveAttendanceLeaves(leaves);
+})();
+
 // ---- 从打卡明细自动生成 okr_attendance 状态 ----
 function generateAttendStatusFromRecords(records, empList) {
   var nameToId = {};
@@ -7375,13 +7424,13 @@ function generateAttendStatusFromRecords(records, empList) {
     if (!attData[date]) attData[date] = {};
     Object.keys(records[date]).forEach(function(empId) {
       var rec = records[date][empId];
-      var ci = rec.clockInResult || '';
-      var co = rec.clockOutResult || '';
-      var approval = rec.approval || '';
+      var ci = rec.cir || '';
+      var co = rec.cor || '';
+      var approval = rec.ap || '';
       var m = '在岗', s = '正常';
 
       // 全天无打卡记录 → 休息或不在钉钉数据
-      if (!rec.clockIn && !rec.clockOut && !approval) {
+      if (!rec.ci && !rec.co && !approval) {
         return; // skip, already default
       }
 
@@ -7950,13 +7999,13 @@ function importAttendCSV() {
         if (!emp) { unmatchedNames[name] = true; continue; }
 
         if (!records[date]) records[date] = {};
-        var rec = { clockIn: '', clockInResult: '', clockOut: '', clockOutResult: '', schedule: '', approval: '', source: file.name };
-        if ('班次' in colMap) rec.schedule = parts[colMap['班次']] || '';
-        if ('上班打卡' in colMap) rec.clockIn = parts[colMap['上班打卡']] || '';
-        if ('上班结果' in colMap) rec.clockInResult = parts[colMap['上班结果']] || '';
-        if ('下班打卡' in colMap) rec.clockOut = parts[colMap['下班打卡']] || '';
-        if ('下班结果' in colMap) rec.clockOutResult = parts[colMap['下班结果']] || '';
-        if ('审批备注' in colMap) rec.approval = parts[colMap['审批备注']] || '';
+        var rec = { ci: '', cir: '', co: '', cor: '', sc: '', ap: '', src: file.name };
+        if ('班次' in colMap) rec.sc = parts[colMap['班次']] || '';
+        if ('上班打卡' in colMap) rec.ci = parts[colMap['上班打卡']] || '';
+        if ('上班结果' in colMap) rec.cir = parts[colMap['上班结果']] || '';
+        if ('下班打卡' in colMap) rec.co = parts[colMap['下班打卡']] || '';
+        if ('下班结果' in colMap) rec.cor = parts[colMap['下班结果']] || '';
+        if ('审批备注' in colMap) rec.ap = parts[colMap['审批备注']] || '';
 
         records[date][emp.id] = rec;
         matched++;
@@ -8045,15 +8094,15 @@ function importLeavesCSV() {
 
         var getVal = function(key) { var v = parseFloat(parts[colMap[key]]); return isNaN(v) ? 0 : v; };
         leaves[month][emp.id] = {
-          annual: getVal('年假天数'),
-          lieu: getVal('调休天数'),
-          sick: getVal('病假天数'),
-          personal: getVal('事假天数'),
-          late: getVal('迟到次数'),
-          miss: getVal('缺卡次数'),
+          a: getVal('年假天数'),
+          l: getVal('调休天数'),
+          s: getVal('病假天数'),
+          p: getVal('事假天数'),
+          lt: getVal('迟到次数'),
+          ms: getVal('缺卡次数'),
           ot: getVal('加班小时'),
-          abnormal: getVal('考勤异常天数'),
-          note: (colMap['备注'] >= 0 ? parts[colMap['备注']] || '' : '')
+          ab: getVal('考勤异常天数'),
+          n: (colMap['备注'] >= 0 ? parts[colMap['备注']] || '' : '')
         };
         matched++;
       }
@@ -8168,14 +8217,14 @@ function renderAttendDataView() {
         if (emp.name.toLowerCase().indexOf(kw) < 0 && (emp.bu||'').toLowerCase().indexOf(kw) < 0) return;
       }
       var r = dayData[empId];
-      var ciR = r.clockInResult || '', coR = r.clockOutResult || '';
+      var ciR = r.cir || '', coR = r.cor || '';
       if (attendDataFilter.status !== 'all') {
         if (ciR !== attendDataFilter.status && coR !== attendDataFilter.status) return;
       }
       rows.push({
         date: date, name: emp.name, dept: deptD, bu: emp.bu || '',
-        schedule: r.schedule || '', clockIn: r.clockIn || '', clockInResult: ciR,
-        clockOut: r.clockOut || '', clockOutResult: coR, approval: r.approval || ''
+        schedule: r.sc || '', clockIn: r.ci || '', clockInResult: ciR,
+        clockOut: r.co || '', clockOutResult: coR, approval: r.ap || ''
       });
     });
   });
@@ -8350,9 +8399,9 @@ function buildLeavesTableHTML(empList, empMap) {
       }
       allRows.push({
         month: month, name: emp.name, bu: emp.bu || '', dept: deptD,
-        annual: ld.annual || 0, lieu: ld.lieu || 0, sick: ld.sick || 0, personal: ld.personal || 0,
-        late: ld.late || 0, miss: ld.miss || 0, ot: ld.ot || 0, abnormal: ld.abnormal || 0,
-        note: ld.note || ''
+        annual: ld.a || 0, lieu: ld.l || 0, sick: ld.s || 0, personal: ld.p || 0,
+        late: ld.lt || 0, miss: ld.ms || 0, ot: ld.ot || 0, abnormal: ld.ab || 0,
+        note: ld.n || ''
       });
     });
   });
