@@ -8968,6 +8968,55 @@ function renderAttendAnalytics() {
 
   html += '</div>';
 
+  // ---- 异常构成：迟到 / 缺卡 / 请假 独立细分 ----
+  // compute per-category peak info from stats
+  var peakWeekdayLate = 0, peakWeekdayMiss = 0, peakWeekdayLeave = 0;
+  var peakWdLateN = 0, peakWdMissN = 0, peakWdLeaveN = 0;
+  for (var wd2 = 0; wd2 < 7; wd2++) {
+    if (stats.weekday[wd2].late > peakWdLateN) { peakWdLateN = stats.weekday[wd2].late; peakWeekdayLate = wd2; }
+    if (stats.weekday[wd2].miss > peakWdMissN) { peakWdMissN = stats.weekday[wd2].miss; peakWeekdayMiss = wd2; }
+    if (stats.weekday[wd2].leave > peakWdLeaveN) { peakWdLeaveN = stats.weekday[wd2].leave; peakWeekdayLeave = wd2; }
+  }
+  var peakMonthLate = '', peakMonthMiss = '', peakMonthLeave = '';
+  var peakMLateN = 0, peakMMissN = 0, peakMLeaveN = 0;
+  Object.keys(stats.monthly).forEach(function(m) {
+    var ms = stats.monthly[m];
+    if (ms.late > peakMLateN) { peakMLateN = ms.late; peakMonthLate = m; }
+    if (ms.miss > peakMMissN) { peakMMissN = ms.miss; peakMonthMiss = m; }
+    if (ms.leave > peakMLeaveN) { peakMLeaveN = ms.leave; peakMonthLeave = m; }
+  });
+  var peakDeptLate = '', peakDeptMiss = '', peakDeptLeave = '';
+  var peakDLateN = 0, peakDMissN = 0, peakDLeaveN = 0;
+  Object.keys(stats.dept).forEach(function(d) {
+    var ds = stats.dept[d];
+    if (ds.late > peakDLateN) { peakDLateN = ds.late; peakDeptLate = d; }
+    if (ds.miss > peakDMissN) { peakDMissN = ds.miss; peakDeptMiss = d; }
+    if (ds.leave > peakDLeaveN) { peakDLeaveN = ds.leave; peakDeptLeave = d; }
+  });
+  var wdNames = ['周日','周一','周二','周三','周四','周五','周六'];
+
+  html += '<div class="analytics-kpi-row">';
+
+  html += '<div class="analytics-kpi-card">';
+  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot" style="display:inline-block;background:#E89B55"></span>迟到</div>';
+  html += '<div class="analytics-kpi-value">'+t.late+'<span class="analytics-kpi-unit">次</span></div>';
+  html += '<div class="analytics-kpi-sub">高峰: '+wdNames[peakWeekdayLate]+' &middot; '+(peakMonthLate?peakMonthLate.slice(5).replace(/^0/,'')+'月':'')+' &middot; '+(peakDeptLate||'')+'</div>';
+  html += '</div>';
+
+  html += '<div class="analytics-kpi-card">';
+  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot" style="display:inline-block;background:#E0696F"></span>缺卡</div>';
+  html += '<div class="analytics-kpi-value">'+t.miss+'<span class="analytics-kpi-unit">次</span></div>';
+  html += '<div class="analytics-kpi-sub">高峰: '+wdNames[peakWeekdayMiss]+' &middot; '+(peakMonthMiss?peakMonthMiss.slice(5).replace(/^0/,'')+'月':'')+' &middot; '+(peakDeptMiss||'')+'</div>';
+  html += '</div>';
+
+  html += '<div class="analytics-kpi-card">';
+  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot" style="display:inline-block;background:#9785AB"></span>请假</div>';
+  html += '<div class="analytics-kpi-value">'+t.leave+'<span class="analytics-kpi-unit">次</span></div>';
+  html += '<div class="analytics-kpi-sub">高峰: '+wdNames[peakWeekdayLeave]+' &middot; '+(peakMonthLeave?peakMonthLeave.slice(5).replace(/^0/,'')+'月':'')+' &middot; '+(peakDeptLeave||'')+'</div>';
+  html += '</div>';
+
+  html += '</div>';
+
   // ---- Charts ----
   // Row 1: 异常率月度趋势
   html += '<div class="analytics-chart-grid">';
