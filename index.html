@@ -3056,7 +3056,7 @@ body.tn-resizing * { pointer-events:none; }
     <button class="oc-sub-tab active" onclick="switchOrgSubView('tree',this)">树状架构图</button>
     <button class="oc-sub-tab" onclick="switchOrgSubView('edit',this)">员工花名册</button>
     <button class="oc-sub-tab" onclick="switchOrgSubView('func',this)">职能分工</button>
-    <button class="oc-sub-tab" onclick="switchOrgSubView('attend',this)">在岗状态</button>
+    <button class="oc-sub-tab" onclick="switchOrgSubView('attend',this)">考勤管理</button>
     <button class="oc-sub-tab" onclick="switchOrgSubView('hrmanual',this)">HR Manual</button>
   </div>
   <div id="orgTreeView"></div>
@@ -3460,16 +3460,23 @@ function canViewModule(user,mod){
   return false;
 }
 function canViewSubTab(user,mod,st){
-  if(!user||!mod||!st)return false;
-  if(isGlobalAdmin(user))return true;
+  if(!mod||!st)return false;
+  if(user && isGlobalAdmin(user))return true;
   var key=mod+'_'+st;
   var p=loadPerms();
-  if(p.exceptions&&p.exceptions[user]&&p.exceptions[user].subtabs&&p.exceptions[user].subtabs[key]!==undefined){
+  if(user && p.exceptions&&p.exceptions[user]&&p.exceptions[user].subtabs&&p.exceptions[user].subtabs[key]!==undefined){
     var v=p.exceptions[user].subtabs[key];if(v==='visible')return true;if(v==='hidden')return false;}
-  var role=getUserRole(user);
-  if(role&&p.roles[role]&&p.roles[role].subtabs&&p.roles[role].subtabs[key]!==undefined){
-    var rv=p.roles[role].subtabs[key];if(rv==='visible')return true;if(rv==='hidden')return false;}
-  if(mod==='org'||mod==='vision')return !!user;
+  if(user){var role=getUserRole(user);
+    if(role&&p.roles[role]&&p.roles[role].subtabs&&p.roles[role].subtabs[key]!==undefined){
+      var rv=p.roles[role].subtabs[key];if(rv==='visible')return true;if(rv==='hidden')return false;}}
+  if(mod==='org'||mod==='vision'){
+    if(user)return true;
+    // unauthenticated: visible unless ALL roles explicitly hide this subtab
+    var roles=Object.keys(p.roles||{});
+    if(roles.length===0)return true;
+    return !roles.every(function(r){return p.roles[r].subtabs&&p.roles[r].subtabs[key]==='hidden';});
+  }
+  if(!user)return false;
   return canViewModule(user,mod);
 }
 function assignUserRole(uid,role){var p=loadPerms();p.userRoles[uid]=role;if(p.exceptions&&p.exceptions[uid])delete p.exceptions[uid];savePerms(p);}
@@ -4949,7 +4956,7 @@ function switchTab(tab) {
   function setNewBtn(show){const id=btnIds[tab];if(id)document.getElementById(id).style.display=show?'':'none';}
   setNewBtn(!(tab==='workspace'||(tab==='org'&&!isAdmin)));
   if (tab==='workspace') { renderWorkspace(); }
-  else if (tab==='vision') { renderVision(); }
+  else if (tab==='vision') { renderVision(); switchVisionSubView(visionSubView, null); }
   else if (tab==='okr') {
     if(!currentUser){pendingTab=tab;showPermBlock('tabOKR','暂无权限访问OKR目标','请先登录后查看');setNewBtn(false);return;}
     hidePermBlock('tabOKR');
@@ -7214,6 +7221,7 @@ function downloadEmpTemplate(){
 // --- Sub-View Switching ---
 let orgSubView = 'tree';
 let funcSubView = 'backend'; // 'backend' | 'bu'
+let attendSubView = 'status'; // 'overview' | 'status' | 'data'
 
 function switchOrgSubView(view, tab) {
   if ((view==='func'||view==='attend')&&!currentUser){pendingTab='org';showPermBlock('tabORG','暂无权限访问此页面','请先登录后查看');return;}
@@ -7228,8 +7236,21 @@ function switchOrgSubView(view, tab) {
   document.getElementById('orgHRManualView').style.display = view === 'hrmanual' ? '' : 'none';
   if (view === 'tree') renderOrgChart();
   else if (view === 'func') { if (funcSubView === 'backend') renderOrgFuncView(); else renderBUFuncView(); }
-  else if (view === 'attend') renderAttendView();
+  else if (view === 'attend') switchAttendSubView(attendSubView, null);
   else renderEmployeeTable();
+}
+
+function switchAttendSubView(sub, tab) {
+  attendSubView = sub;
+  if (!document.getElementById('orgAttendStatus')) {
+    renderAttendView();
+    return;
+  }
+  document.querySelectorAll('.attend-sub-tab').forEach(function(t){ t.classList.remove('active'); });
+  if(tab) tab.classList.add('active');
+  document.getElementById('orgAttendOverview').style.display = sub === 'overview' ? '' : 'none';
+  document.getElementById('orgAttendStatus').style.display = sub === 'status' ? '' : 'none';
+  document.getElementById('orgAttendData').style.display = sub === 'data' ? '' : 'none';
 }
 
 function switchFuncSubView(sub, tab) {
@@ -7313,6 +7334,21 @@ function renderAttendView(skipAutoSync) {
   });
 
   let html = '';
+
+  // Pill sub-tabs
+  html += '<div class="oc-sub-tabs" style="margin-bottom:16px">';
+  html += '<button class="oc-sub-tab attend-sub-tab'+(attendSubView==='overview'?' active':'')+'" onclick="switchAttendSubView(\'overview\',this)">考勤总览</button>';
+  html += '<button class="oc-sub-tab attend-sub-tab'+(attendSubView==='status'?' active':'')+'" onclick="switchAttendSubView(\'status\',this)">在岗状态</button>';
+  html += '<button class="oc-sub-tab attend-sub-tab'+(attendSubView==='data'?' active':'')+'" onclick="switchAttendSubView(\'data\',this)">考勤数据</button>';
+  html += '</div>';
+
+  // Overview placeholder
+  html += '<div id="orgAttendOverview" style="display:'+(attendSubView==='overview'?'':'none')+'">';
+  html += '<div class="empty" style="padding:80px;text-align:center"><p style="font-size:14px;font-weight:500;color:var(--text-dim)">考勤总览</p><p style="font-size:10px;color:var(--text-muted);margin-top:8px">功能开发中</p></div>';
+  html += '</div>';
+
+  // Status view (current attend view)
+  html += '<div id="orgAttendStatus" style="display:'+(attendSubView==='status'?'':'none')+'">';
 
   // Top bar: date + BU filter + sync
   html += '<div class="attend-topbar">';
@@ -7625,6 +7661,13 @@ function renderAttendView(skipAutoSync) {
     list.forEach(e => html += renderCard(e));
     html += '</div></div>';
   });
+
+  html += '</div>'; // close #orgAttendStatus
+
+  // Data placeholder
+  html += '<div id="orgAttendData" style="display:'+(attendSubView==='data'?'':'none')+'">';
+  html += '<div class="empty" style="padding:80px;text-align:center"><p style="font-size:14px;font-weight:500;color:var(--text-dim)">考勤数据</p><p style="font-size:10px;color:var(--text-muted);margin-top:8px">功能开发中</p></div>';
+  html += '</div>';
 
   div.innerHTML = html;
   } catch(e) {
@@ -9023,7 +9066,7 @@ var SIDEBAR_MENU = [
     {sub:'tree', label:'树状架构图'},
     {sub:'edit', label:'员工花名册'},
     {sub:'func', label:'职能分工'},
-    {sub:'attend', label:'员工考勤'},
+    {sub:'attend', label:'考勤管理'},
     {sub:'hrmanual', label:'HR Manual'}
   ]},
   {tab:'company', label:'公司管理', icon:'company', title:'管理公司法律实体、证照、分管与合同用印', children:[
@@ -9543,6 +9586,28 @@ function switchVisionSubView(view, tab) {
   try { activateSidebarSubItem('vision', view); } catch(e) {}
   document.querySelectorAll('#tabVision .oc-sub-tab').forEach(t => t.classList.remove('active'));
   if (tab) tab.classList.add('active');
+
+  // Permission check
+  if (!canViewSubTab(currentUser, 'vision', view)) {
+    document.getElementById('visionStrategyView').style.display = 'none';
+    document.getElementById('visionTraineeView').style.display = 'none';
+    document.getElementById('visionBackendView').style.display = 'none';
+    var main = document.querySelector('#tabVision .main');
+    if (main) {
+      var oldBlock = main.querySelector('.vision-perm-block');
+      if (oldBlock) oldBlock.remove();
+      var block = document.createElement('div');
+      block.className = 'vision-perm-block';
+      var msg = currentUser ? '暂无权限查看此内容，请联系管理员开通访问权限' : '请先登录后查看此内容';
+      block.innerHTML = '<div class="empty"><p>访问受限</p><p style="font-size:9px">'+msg+'</p></div>';
+      main.appendChild(block);
+    }
+    return;
+  }
+  // Remove perm block if user now has access
+  var pb = document.querySelector('#tabVision .vision-perm-block');
+  if (pb) pb.remove();
+
   document.getElementById('visionStrategyView').style.display = (view === 'strategy' ? '' : 'none');
   document.getElementById('visionTraineeView').style.display = (view === 'trainee' ? '' : 'none');
   document.getElementById('visionBackendView').style.display = (view === 'backend' ? '' : 'none');
