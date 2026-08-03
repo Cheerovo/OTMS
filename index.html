@@ -8145,7 +8145,7 @@ function renderAttendDataView() {
     html += '<div style="overflow-x:auto;max-height:calc(100vh - 280px)">';
     html += '<table class="attend-data-table">';
     html += '<thead><tr>';
-    html += '<th>姓名</th><th>部门</th><th>BU</th><th class="th-date">日期</th>';
+    html += '<th>姓名</th><th>BU</th><th>部门</th><th class="th-date">日期</th>';
     html += '<th class="th-time">上班打卡</th><th class="th-result">上班结果</th>';
     html += '<th class="th-time">下班打卡</th><th class="th-result">下班结果</th>';
     html += '<th class="th-note">审批备注</th>';
@@ -8160,8 +8160,8 @@ function renderAttendDataView() {
 
       html += '<tr class="'+rowClass+'">';
       html += '<td class="td-name">'+esc(r.name)+'</td>';
-      html += '<td class="td-meta">'+esc(r.dept)+'</td>';
       html += '<td class="td-meta">'+esc(r.bu)+'</td>';
+      html += '<td class="td-meta">'+esc(r.dept)+'</td>';
       html += '<td class="td-date">'+r.date.slice(5)+'</td>';
       html += '<td class="td-time">'+(r.clockIn ? '<code>'+esc(r.clockIn)+'</code>' : '-')+'</td>';
       html += '<td class="td-result">'+statusBadge(r.clockInResult)+'</td>';
