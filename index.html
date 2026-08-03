@@ -1188,18 +1188,37 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .analytics-bar select:focus { outline:none; border-color:#5FA895; box-shadow:0 0 0 3px rgba(95,168,149,0.12); }
 .analytics-kpi-row { display:flex; gap:12px; margin-bottom:28px; flex-wrap:wrap; }
 .analytics-kpi-card {
-  flex:1; min-width:130px; padding:18px 20px;
-  background:var(--card); border-radius:12px;
-  box-shadow:0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
-  text-align:left; border-top:3px solid transparent; transition: all .2s;
+  flex:1; min-width:130px; padding:20px 24px 18px;
+  background:var(--card); border-radius:12px; text-align:center;
+  box-shadow:0 1px 3px rgba(0,0,0,0.05);
+  transition: box-shadow .2s, transform .2s;
 }
-.analytics-kpi-card:hover { box-shadow:0 2px 4px rgba(0,0,0,0.06), 0 6px 20px rgba(0,0,0,0.04); transform:translateY(-1px); }
-.analytics-kpi-card.good { border-top-color:#5FA895; }
-.analytics-kpi-card.warn { border-top-color:#E89B55; }
-.analytics-kpi-card.bad  { border-top-color:#E0696F; }
-.analytics-kpi-value { font-size:28px; font-weight:700; color:var(--text-main); line-height:1.1; letter-spacing:-0.5px; }
-.analytics-kpi-delta { font-size:11px; color:var(--text-muted); margin-top:4px; line-height:1.4; }
-.analytics-kpi-label { font-size:11px; color:var(--text-muted); margin-top:4px; font-weight:500; letter-spacing:0.3px; }
+.analytics-kpi-card:hover {
+  box-shadow:0 4px 20px rgba(0,0,0,0.08);
+  transform:translateY(-2px);
+}
+.analytics-kpi-label {
+  font-size:11px; color:var(--text-muted); font-weight:500;
+  margin-bottom:6px; display:flex; align-items:center;
+  justify-content:center; gap:5px;
+}
+.analytics-kpi-dot {
+  width:8px; height:8px; border-radius:50%; flex-shrink:0;
+  display:none;
+}
+.analytics-kpi-card.good .analytics-kpi-dot { display:inline-block; background:#5FA895; }
+.analytics-kpi-card.warn .analytics-kpi-dot { display:inline-block; background:#E89B55; }
+.analytics-kpi-card.bad  .analytics-kpi-dot { display:inline-block; background:#E0696F; }
+.analytics-kpi-value {
+  font-size:32px; font-weight:700; color:var(--text-main);
+  line-height:1.15; letter-spacing:-0.5px;
+}
+.analytics-kpi-unit {
+  font-size:14px; font-weight:400; color:var(--text-muted); margin-left:2px;
+}
+.analytics-kpi-sub {
+  font-size:10px; color:var(--text-muted); margin-top:5px; line-height:1.4;
+}
 .analytics-chart-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
 .analytics-chart-box {
   background:var(--card); border-radius:12px; padding:20px 20px 16px;
@@ -8885,12 +8904,38 @@ function renderAttendAnalytics() {
 
   // ---- KPI cards ----
   html += '<div class="analytics-kpi-row">';
-  html += '<div class="analytics-kpi-card'+(anomalyRate<=5?' good':anomalyRate<=10?' warn':' bad')+'"><div class="analytics-kpi-value">'+anomalyCount+'<span style="font-size:13px;font-weight:400;color:var(--text-muted)"> 次</span></div><div class="analytics-kpi-label">异常人次'+deltaIntStr(anomalyCount, p?p.late+p.miss+p.leave:null)+'</div><div class="analytics-kpi-delta">迟到 '+t.late+' · 缺卡 '+t.miss+' · 请假 '+t.leave+'</div></div>';
-  html += '<div class="analytics-kpi-card'+(lateRate<=2?' good':lateRate<=5?' warn':' bad')+'"><div class="analytics-kpi-value">'+lateRate+'%</div><div class="analytics-kpi-label">迟到率'+deltaRateStr(lateRate, p?p.recs:null, p?p.late:null)+'</div><div class="analytics-kpi-delta">'+t.late+' 人次</div></div>';
-  html += '<div class="analytics-kpi-card'+(missRate<=1?' good':missRate<=3?' warn':' bad')+'"><div class="analytics-kpi-value">'+missRate+'%</div><div class="analytics-kpi-label">缺卡率'+deltaRateStr(missRate, p?p.recs:null, p?p.miss:null)+'</div><div class="analytics-kpi-delta">'+t.miss+' 人次</div></div>';
+
+  html += '<div class="analytics-kpi-card'+(anomalyRate<=5?' good':anomalyRate<=10?' warn':' bad')+'">';
+  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot"></span>异常人次'+deltaIntStr(anomalyCount, p?p.late+p.miss+p.leave:null)+'</div>';
+  html += '<div class="analytics-kpi-value">'+anomalyCount+'<span class="analytics-kpi-unit">次</span></div>';
+  html += '<div class="analytics-kpi-sub">迟到 '+t.late+' &middot; 缺卡 '+t.miss+' &middot; 请假 '+t.leave+'</div>';
+  html += '</div>';
+
+  html += '<div class="analytics-kpi-card'+(lateRate<=2?' good':lateRate<=5?' warn':' bad')+'">';
+  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot"></span>迟到率'+deltaRateStr(lateRate, p?p.recs:null, p?p.late:null)+'</div>';
+  html += '<div class="analytics-kpi-value">'+lateRate+'<span class="analytics-kpi-unit">%</span></div>';
+  html += '<div class="analytics-kpi-sub">'+t.late+' 人次</div>';
+  html += '</div>';
+
+  html += '<div class="analytics-kpi-card'+(missRate<=1?' good':missRate<=3?' warn':' bad')+'">';
+  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot"></span>缺卡率'+deltaRateStr(missRate, p?p.recs:null, p?p.miss:null)+'</div>';
+  html += '<div class="analytics-kpi-value">'+missRate+'<span class="analytics-kpi-unit">%</span></div>';
+  html += '<div class="analytics-kpi-sub">'+t.miss+' 人次</div>';
+  html += '</div>';
+
   var prevLeave = pl ? pl.annual+pl.lieu+pl.sick+pl.personal : null;
-  html += '<div class="analytics-kpi-card"><div class="analytics-kpi-value">'+leaveTotal.toFixed(1)+'<span style="font-size:13px;font-weight:400;color:var(--text-muted)"> 天</span></div><div class="analytics-kpi-label">请假天数'+deltaStr(leaveTotal, prevLeave)+'</div><div class="analytics-kpi-delta">年'+stats.leaveAgg.annual.toFixed(1)+' 调'+stats.leaveAgg.lieu.toFixed(1)+' 病'+stats.leaveAgg.sick.toFixed(1)+' 事'+stats.leaveAgg.personal.toFixed(1)+'</div></div>';
-  html += '<div class="analytics-kpi-card"><div class="analytics-kpi-value">'+otTotal+'</div><div class="analytics-kpi-label">加班人次'+deltaIntStr(otTotal, p?p.ot:null)+'</div><div class="analytics-kpi-delta">审批备注含"加班"关键字</div></div>';
+  html += '<div class="analytics-kpi-card">';
+  html += '<div class="analytics-kpi-label">请假天数'+deltaStr(leaveTotal, prevLeave)+'</div>';
+  html += '<div class="analytics-kpi-value">'+leaveTotal.toFixed(1)+'<span class="analytics-kpi-unit">天</span></div>';
+  html += '<div class="analytics-kpi-sub">年假 '+stats.leaveAgg.annual.toFixed(1)+' &middot; 调休 '+stats.leaveAgg.lieu.toFixed(1)+' &middot; 病假 '+stats.leaveAgg.sick.toFixed(1)+' &middot; 事假 '+stats.leaveAgg.personal.toFixed(1)+'</div>';
+  html += '</div>';
+
+  html += '<div class="analytics-kpi-card">';
+  html += '<div class="analytics-kpi-label">加班人次'+deltaIntStr(otTotal, p?p.ot:null)+'</div>';
+  html += '<div class="analytics-kpi-value">'+otTotal+'<span class="analytics-kpi-unit">次</span></div>';
+  html += '<div class="analytics-kpi-sub">审批备注含"加班"关键字</div>';
+  html += '</div>';
+
   html += '</div>';
 
   // ---- Charts ----
