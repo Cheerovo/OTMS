@@ -1094,6 +1094,21 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .attend-card.rest:hover { opacity: 0.75; }
 
 /* ===== 考勤数据明细表 ===== */
+.unmatched-banner {
+  display:flex; align-items:flex-start; gap:8px;
+  padding:10px 14px; margin-bottom:12px;
+  background:#fff8e1; border:1px solid #ffe0a0; border-radius:8px;
+  font-size:12px; line-height:1.6;
+}
+.unmatched-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
+.unmatched-text { flex:1; color:var(--text-main); word-break:break-all; }
+.unmatched-hint { color:var(--text-muted); font-size:11px; white-space:nowrap; }
+.unmatched-dismiss {
+  flex-shrink:0; background:none; border:none; font-size:16px;
+  color:var(--text-muted); cursor:pointer; padding:0 4px; line-height:1;
+}
+.unmatched-dismiss:hover { color:var(--danger-text); }
+
 .attend-toolbar {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   margin-bottom: 16px; padding: 12px 14px;
@@ -8014,6 +8029,7 @@ function importAttendCSV() {
 
       var unmatchedList = Object.keys(unmatchedNames).sort();
       saveAttendanceRecords(records);
+      if (unmatchedList.length > 0) addUnmatched('records', unmatchedList);
 
       // 自动生成 okr_attendance 状态
       var genResult = generateAttendStatusFromRecords(records, empList);
@@ -8043,6 +8059,23 @@ function loadAttendanceLeaves() {
   try { return JSON.parse(localStorage.getItem('attendance_leaves')||'{}'); } catch(e) { return {}; }
 }
 function saveAttendanceLeaves(data) { localStorage.setItem('attendance_leaves', JSON.stringify(data)); }
+
+function loadUnmatched() {
+  try { return JSON.parse(localStorage.getItem('attendance_unmatched')||'{}'); } catch(e) { return {}; }
+}
+function saveUnmatched(data) { localStorage.setItem('attendance_unmatched', JSON.stringify(data)); }
+function addUnmatched(type, names) {
+  var data = loadUnmatched();
+  if (!data[type]) data[type] = {};
+  names.forEach(function(n) { data[type][n] = true; });
+  saveUnmatched(data);
+}
+function clearUnmatched(type) {
+  var data = loadUnmatched();
+  delete data[type];
+  saveUnmatched(data);
+  renderAttendDataView();
+}
 
 // ===== 月度汇总 CSV 导入（假期 + 加班 + 迟到缺卡统计）=====
 function importLeavesCSV() {
@@ -8109,6 +8142,7 @@ function importLeavesCSV() {
 
       var unmatchedList = Object.keys(unmatchedNames).sort();
       saveAttendanceLeaves(leaves);
+      if (unmatchedList.length > 0) addUnmatched('leaves', unmatchedList);
       var months = Object.keys(leaves).sort();
       var msg = '导入完成！匹配 ' + matched + ' 条，覆盖 ' + months.length + ' 个月（' + (months[0]||'') + ' ~ ' + (months[months.length-1]||'') + '）';
       if (unmatchedList.length > 0) {
@@ -8244,6 +8278,22 @@ function renderAttendDataView() {
   var hasActiveFilter = attendDataFilter.day || attendDataFilter.bu !== 'all' || attendDataFilter.dept !== 'all' || attendDataFilter.status !== 'all' || attendDataFilter.keyword;
 
   var html = '';
+
+  // ---- 未匹配名单 ----
+  var unmatched = loadUnmatched();
+  var unmatchedKeys = Object.keys(unmatched);
+  if (unmatchedKeys.length > 0) {
+    unmatchedKeys.forEach(function(type) {
+      var names = Object.keys(unmatched[type]).sort();
+      var label = type === 'records' ? '打卡明细' : '假期汇总';
+      html += '<div class="unmatched-banner">';
+      html += '<span class="unmatched-icon">⚠</span>';
+      html += '<span class="unmatched-text"><strong>'+label+' 未匹配 '+names.length+' 人：</strong>'+names.join('、')+'</span>';
+      html += '<span class="unmatched-hint">（未匹配的数据未导入，请检查花名册姓名是否一致）</span>';
+      html += '<button class="unmatched-dismiss" onclick="clearUnmatched(\''+type+'\')" title="清除">&times;</button>';
+      html += '</div>';
+    });
+  }
 
   // ---- 工具栏 ----
   html += '<div class="attend-toolbar">';
@@ -9312,7 +9362,7 @@ function renderOrgAttachments() {
 
 // ===== Init =====
 // ===== Remote Data Sync (Supabase) — 按资源组拆分，独立 CAS =====
-const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','attendance_records','attendance_leaves','otms_tn_split_ratio','otms_trainee_cleared_v3'];
+const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','attendance_records','attendance_leaves','attendance_unmatched','otms_tn_split_ratio','otms_trainee_cleared_v3'];
 
 // 资源分组：每组独立 Supabase 行 + 独立 version + 独立 CAS
 const SYNC_GROUPS = {
@@ -9321,7 +9371,7 @@ const SYNC_GROUPS = {
   okr:        {id: 3, keys: ['okr_data', 'okr_version', 'okr_data_version', 'okr_prefs']},
   org:        {id: 4, keys: ['okr_employees', 'okr_depts', 'okr_permissions', 'nudge_log', 'org_attachments']},
   report:     {id: 5, keys: ['rpt_data', 'rpt_version', 'rpt_group_subs', 'meeting_data', 'kpi_data']},
-  attendance: {id: 6, keys: ['okr_attendance', 'attendance_workdays', 'attendance_schedules', 'attendance_records', 'attendance_leaves']}
+  attendance: {id: 6, keys: ['okr_attendance', 'attendance_workdays', 'attendance_schedules', 'attendance_records', 'attendance_leaves', 'attendance_unmatched']}
 };
 const SYNC_GROUP_LIST = Object.keys(SYNC_GROUPS);
 
