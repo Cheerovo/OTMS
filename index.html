@@ -8695,6 +8695,15 @@ async function autoCheckRemote(){
       if(_dirtyGroups[ug.gid]) continue;
       importGroupData(ug.gid, fullRow.data, true);
       localStorage.setItem(getGroupVerKey(ug.gid), fullRow.version);
+      // eval 组更新后刷新内存缓存和 UI，无需刷新页面
+      if(ug.gid === 'eval' && typeof loadEvalData === 'function'){
+        try {
+          loadEvalData();
+          if(typeof renderEvalTraineeList === 'function') renderEvalTraineeList();
+          if(typeof renderEvalWeekTabs === 'function') renderEvalWeekTabs();
+          if(typeof renderEvalScorePanel === 'function' && typeof evalSelectedTrainee !== 'undefined' && evalSelectedTrainee) renderEvalScorePanel(evalSelectedTrainee);
+        }catch(e){}
+      }
     }
     // 非侵入式提示
     var toast = document.createElement('div');
