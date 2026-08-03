@@ -7243,14 +7243,17 @@ function switchOrgSubView(view, tab) {
 function switchAttendSubView(sub, tab) {
   attendSubView = sub;
   if (!document.getElementById('orgAttendStatus')) {
-    renderAttendView();
-    return;
+    renderAttendView(); // creates all sub-containers with current attendSubView
   }
   document.querySelectorAll('.attend-sub-tab').forEach(function(t){ t.classList.remove('active'); });
   if(tab) tab.classList.add('active');
-  document.getElementById('orgAttendOverview').style.display = sub === 'overview' ? '' : 'none';
-  document.getElementById('orgAttendStatus').style.display = sub === 'status' ? '' : 'none';
-  document.getElementById('orgAttendData').style.display = sub === 'data' ? '' : 'none';
+  var overview = document.getElementById('orgAttendOverview');
+  var status = document.getElementById('orgAttendStatus');
+  var data = document.getElementById('orgAttendData');
+  if (overview) overview.style.display = sub === 'overview' ? '' : 'none';
+  if (status) status.style.display = sub === 'status' ? '' : 'none';
+  if (data) data.style.display = sub === 'data' ? '' : 'none';
+  if (sub === 'data') renderAttendDataView();
 }
 
 function switchFuncSubView(sub, tab) {
@@ -7279,6 +7282,77 @@ function loadWorkDays() {
 }
 function loadSchedules() {
   try { return JSON.parse(localStorage.getItem('attendance_schedules')||'{}'); } catch(e) { return {}; }
+}
+function loadAttendanceRecords() {
+  try { return JSON.parse(localStorage.getItem('attendance_records')||'{}'); } catch(e) { return {}; }
+}
+function saveAttendanceRecords(data) { localStorage.setItem('attendance_records', JSON.stringify(data)); }
+
+// ---- 从打卡明细自动生成 okr_attendance 状态 ----
+function generateAttendStatusFromRecords(records, empList) {
+  var nameToId = {};
+  empList.forEach(function(e) { nameToId[e.name] = e.id; });
+
+  var attData = loadAttendance();
+  var generated = 0;
+  var skipped = 0;
+
+  Object.keys(records).forEach(function(date) {
+    if (!attData[date]) attData[date] = {};
+    Object.keys(records[date]).forEach(function(empId) {
+      var rec = records[date][empId];
+      var ci = rec.clockInResult || '';
+      var co = rec.clockOutResult || '';
+      var approval = rec.approval || '';
+      var m = '在岗', s = '正常';
+
+      // 全天无打卡记录 → 休息或不在钉钉数据
+      if (!rec.clockIn && !rec.clockOut && !approval) {
+        return; // skip, already default
+      }
+
+      // 审批备注优先判断（覆盖打卡结果）
+      if (/请假|年假|事假|病假|调休|婚假|产假|陪产假|育儿假|丧假|哺乳假/.test(approval)) {
+        m = '请假';
+        var lm = approval.match(/年假|事假|病假|调休|婚假|产假|陪产假|育儿假|丧假|哺乳假/);
+        s = lm ? lm[0] : '请假';
+      } else if (/出差|外勤/.test(approval)) {
+        m = '外勤'; s = '出差';
+      } else if (/外出/.test(approval)) {
+        m = '外勤'; s = '外出';
+      } else if (/加班/.test(approval)) {
+        m = '加班'; s = '加班';
+      }
+      // 打卡结果判断（审批备注无特殊标记时）
+      else if (/请假|年假|事假|病假|调休|婚假|产假|陪产假|育儿假|丧假|哺乳假/.test(ci)) {
+        m = '请假'; s = ci;
+      } else if (ci === '外勤' || co === '外勤') {
+        m = '外勤'; s = '外勤';
+      } else if (ci === '外出' || co === '外出') {
+        m = '外勤'; s = '外出';
+      } else if (ci === '出差' || co === '出差') {
+        m = '外勤'; s = '出差';
+      } else if (ci === '缺卡' && co === '缺卡') {
+        m = '旷工'; s = '缺卡';
+      } else if (ci === '缺卡') {
+        m = '在岗'; s = '上班缺卡';
+      } else if (co === '缺卡') {
+        m = '在岗'; s = '下班缺卡';
+      } else if (ci === '迟到' || ci === '严重迟到' || ci === '旷工迟到') {
+        m = '在岗'; s = '迟到';
+      } else if (co === '早退') {
+        m = '在岗'; s = '早退';
+      } else if (ci === '正常' && co === '正常') {
+        m = '在岗'; s = '正常';
+      }
+
+      attData[date][empId] = {m: m, s: s};
+      generated++;
+    });
+  });
+
+  saveAttendance(attData);
+  return { generated: generated, skipped: skipped };
 }
 
 function renderAttendView(skipAutoSync) {
@@ -7664,12 +7738,13 @@ function renderAttendView(skipAutoSync) {
 
   html += '</div>'; // close #orgAttendStatus
 
-  // Data placeholder
+  // Data view (lazy-rendered when tab clicked)
   html += '<div id="orgAttendData" style="display:'+(attendSubView==='data'?'':'none')+'">';
-  html += '<div class="empty" style="padding:80px;text-align:center"><p style="font-size:14px;font-weight:500;color:var(--text-dim)">考勤数据</p><p style="font-size:10px;color:var(--text-muted);margin-top:8px">功能开发中</p></div>';
+  html += '<div style="padding:40px;text-align:center;color:var(--text-muted)">加载中...</div>';
   html += '</div>';
 
   div.innerHTML = html;
+  if (attendSubView === 'data') setTimeout(function(){ renderAttendDataView(); }, 0);
   } catch(e) {
     div.innerHTML = '<div style="padding:20px;color:#c00;background:#fff0f0;border:1px solid #c00;border-radius:8px;margin:16px;"><strong>渲染错误:</strong> ' + (e.message || e) + '<br><pre style="font-size:10px;margin-top:8px;white-space:pre-wrap;">' + (e.stack || '') + '</pre></div>';
     console.error('renderAttendView error:', e);
@@ -7753,6 +7828,241 @@ function importBulkAttendance(){
   closeModal();
   renderAttendView();
   showToast('导入 '+imported+' 条'+(skipped>0?'，跳过 '+skipped+' 条':'')+'，共 '+lines.length+' 行','success');
+}
+
+// ===== CSV 考勤明细导入 =====
+function importAttendCSV() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.csv';
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var text = ev.target.result;
+      var lines = text.split(/[\n\r]+/).filter(function(l) { return l.trim(); });
+      if (lines.length < 2) { showToast('CSV 文件为空或只有表头', 'warning'); return; }
+
+      // 解析表头
+      var headers = lines[0].split(',').map(function(h) { return h.trim().replace(/^\uFEFF/, ''); });
+      var colMap = {};
+      var needed = ['姓名','日期','班次','上班打卡','上班结果','下班打卡','下班结果','审批备注'];
+      needed.forEach(function(k) {
+        var idx = headers.indexOf(k);
+        if (idx >= 0) colMap[k] = idx;
+      });
+      if (!('姓名' in colMap) || !('日期' in colMap)) {
+        showToast('CSV 表头缺少"姓名"或"日期"列，请确认文件格式', 'warning'); return;
+      }
+
+      var empList = loadEmployees();
+      var nameToEmp = {};
+      empList.forEach(function(e) { nameToEmp[e.name] = e; });
+
+      var records = loadAttendanceRecords();
+      var matched = 0, unmatchedNames = {};
+      var parseErrors = 0;
+      var dateCounts = {};
+
+      for (var i = 1; i < lines.length; i++) {
+        var parts = lines[i].split(',').map(function(s) { return s.trim(); });
+        var name = parts[colMap['姓名']] || '';
+        var date = parts[colMap['日期']] || '';
+        if (!name || !date) { parseErrors++; continue; }
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { parseErrors++; continue; }
+
+        var emp = nameToEmp[name];
+        if (!emp) { unmatchedNames[name] = true; continue; }
+
+        if (!records[date]) records[date] = {};
+        var rec = { clockIn: '', clockInResult: '', clockOut: '', clockOutResult: '', schedule: '', approval: '', source: file.name };
+        if ('班次' in colMap) rec.schedule = parts[colMap['班次']] || '';
+        if ('上班打卡' in colMap) rec.clockIn = parts[colMap['上班打卡']] || '';
+        if ('上班结果' in colMap) rec.clockInResult = parts[colMap['上班结果']] || '';
+        if ('下班打卡' in colMap) rec.clockOut = parts[colMap['下班打卡']] || '';
+        if ('下班结果' in colMap) rec.clockOutResult = parts[colMap['下班结果']] || '';
+        if ('审批备注' in colMap) rec.approval = parts[colMap['审批备注']] || '';
+
+        records[date][emp.id] = rec;
+        matched++;
+        dateCounts[date] = (dateCounts[date] || 0) + 1;
+      }
+
+      var unmatchedList = Object.keys(unmatchedNames).sort();
+      saveAttendanceRecords(records);
+
+      // 自动生成 okr_attendance 状态
+      var genResult = generateAttendStatusFromRecords(records, empList);
+
+      // 显示结果
+      var dates = Object.keys(dateCounts).sort();
+      var msg = '导入完成！匹配 ' + matched + ' 条记录，覆盖 ' + dates.length + ' 天（' + (dates[0]||'') + ' ~ ' + (dates[dates.length-1]||'') + '）';
+      if (unmatchedList.length > 0) {
+        msg += '\n未匹配 ' + unmatchedList.length + ' 人：' + unmatchedList.slice(0, 10).join('、') + (unmatchedList.length > 10 ? '等' : '');
+        showToast(msg, unmatchedList.length > 5 ? 'warning' : 'success');
+      } else {
+        showToast(msg, 'success');
+      }
+
+      renderAttendDataView();
+      // 刷新在岗状态页
+      var statusDiv = document.getElementById('orgAttendStatus');
+      if (statusDiv) { statusDiv.removeAttribute('id'); } // 强制下次重建
+    };
+    reader.readAsText(file, 'UTF-8');
+  };
+  input.click();
+}
+
+// ===== 考勤数据明细表 =====
+var attendDataFilter = { month: '', bu: 'all', keyword: '' };
+
+function renderAttendDataView() {
+  var div = document.getElementById('orgAttendData');
+  if (!div) return;
+
+  var records = loadAttendanceRecords();
+  var empList = loadEmployees();
+  var empMap = {};
+  empList.forEach(function(e) { empMap[e.id] = e; });
+
+  // 收集所有记录展开为表格行
+  var dateKeys = Object.keys(records).sort();
+  if (dateKeys.length === 0) {
+    div.innerHTML = '<div style="padding:60px;text-align:center">' +
+      '<p style="font-size:14px;font-weight:500;color:var(--text-dim);margin:0">暂无考勤明细数据</p>' +
+      '<p style="font-size:10px;color:var(--text-muted);margin:8px 0 20px">请先通过 merge_attendance.py 生成 CSV，再导入</p>' +
+      '<button class="btn btn-primary btn-sm" onclick="importAttendCSV()">导入 CSV 考勤明细</button>' +
+      '</div>';
+    return;
+  }
+
+  // 筛选
+  if (!attendDataFilter.month && dateKeys.length > 0) {
+    attendDataFilter.month = dateKeys[dateKeys.length - 1].slice(0, 7); // 默认最新月份
+  }
+
+  var rows = [];
+  dateKeys.forEach(function(date) {
+    if (attendDataFilter.month && date.slice(0, 7) !== attendDataFilter.month) return;
+    var dayData = records[date];
+    Object.keys(dayData).forEach(function(empId) {
+      var emp = empMap[empId];
+      if (!emp) return;
+      if (attendDataFilter.bu !== 'all' && emp.bu !== attendDataFilter.bu) return;
+      if (attendDataFilter.keyword) {
+        var kw = attendDataFilter.keyword.toLowerCase();
+        if (emp.name.toLowerCase().indexOf(kw) < 0) return;
+      }
+      var r = dayData[empId];
+      rows.push({
+        date: date,
+        name: emp.name,
+        bu: emp.bu || '',
+        schedule: r.schedule || '',
+        clockIn: r.clockIn || '',
+        clockInResult: r.clockInResult || '',
+        clockOut: r.clockOut || '',
+        clockOutResult: r.clockOutResult || '',
+        approval: r.approval || ''
+      });
+    });
+  });
+
+  // 按日期+姓名排序
+  rows.sort(function(a, b) {
+    if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+    return a.name.localeCompare(b.name, 'zh');
+  });
+
+  // 可用月份列表
+  var months = [];
+  var monthSet = {};
+  dateKeys.forEach(function(d) { var m = d.slice(0,7); if (!monthSet[m]) { monthSet[m] = true; months.push(m); } });
+  months.sort();
+
+  // BU 列表
+  var buList = [];
+  var buSet = {};
+  empList.forEach(function(e) { if (e.bu && !buSet[e.bu]) { buSet[e.bu] = true; buList.push(e.bu); } });
+  buList.sort();
+
+  var resultCSS = {
+    '正常': 'color:var(--success)',
+    '迟到': 'color:var(--danger-text)', '严重迟到': 'color:var(--danger-text)', '旷工迟到': 'color:var(--danger-text)',
+    '早退': 'color:var(--danger-text)',
+    '缺卡': 'color:var(--warning-text)',
+    '外勤': 'color:#5D8AA8', '外出': 'color:#5D8AA8', '出差': 'color:#5D8AA8',
+    '请假': 'color:#C2795C', '年假': 'color:#C2795C', '病假': 'color:#C2795C', '事假': 'color:#C2795C', '调休': 'color:#C2795C', '婚假': 'color:#C2795C','产假': 'color:#C2795C',
+  };
+
+  var html = '';
+
+  // 工具栏
+  html += '<div class="attend-topbar" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">';
+  html += '<select id="attendDataMonth" onchange="attendDataFilter.month=this.value;renderAttendDataView()" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs)">';
+  months.forEach(function(m) {
+    html += '<option value="'+m+'"'+(attendDataFilter.month===m?' selected':'')+'>'+m.replace('-','年')+'月</option>';
+  });
+  html += '</select>';
+  html += '<select id="attendDataBU" onchange="attendDataFilter.bu=this.value;renderAttendDataView()" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs)">';
+  html += '<option value="all"'+(attendDataFilter.bu==='all'?' selected':'')+'>全部BU</option>';
+  buList.forEach(function(bu) {
+    html += '<option value="'+esc(bu)+'"'+(attendDataFilter.bu===bu?' selected':'')+'>'+esc(bu)+'</option>';
+  });
+  html += '</select>';
+  html += '<input type="text" id="attendDataSearch" placeholder="搜索姓名..." value="'+esc(attendDataFilter.keyword)+'" oninput="attendDataFilter.keyword=this.value;renderAttendDataView()" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs);width:120px">';
+  html += '<span style="flex:1"></span>';
+  html += '<span style="font-size:10px;color:var(--text-muted)">'+rows.length+' 条记录</span>';
+  html += '<button class="btn btn-primary btn-sm" onclick="importAttendCSV()" style="font-size:11px">导入CSV</button>';
+  html += '</div>';
+
+  // 空结果
+  if (rows.length === 0) {
+    html += '<div class="empty" style="padding:40px;text-align:center;color:var(--text-muted)">该筛选条件下无数据</div>';
+  } else {
+    // 数据表
+    html += '<div style="overflow-x:auto;max-height:calc(100vh - 280px)">';
+    html += '<table class="attend-data-table" style="width:100%;border-collapse:collapse;font-size:11px">';
+    html += '<thead><tr style="position:sticky;top:0;background:var(--bg-surface);z-index:1">';
+    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:60px">姓名</th>';
+    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:70px">BU</th>';
+    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:80px">日期</th>';
+    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:70px">上班打卡</th>';
+    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:60px">上班结果</th>';
+    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:70px">下班打卡</th>';
+    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:60px">下班结果</th>';
+    html += '<th style="padding:8px;text-align:left;border-bottom:2px solid var(--border);min-width:120px">审批备注</th>';
+    html += '</tr></thead><tbody>';
+
+    var prevDate = '';
+    rows.forEach(function(r) {
+      var rowStyle = '';
+      if (r.date !== prevDate && prevDate !== '') {
+        rowStyle = 'border-top:2px solid var(--border)';
+      }
+      prevDate = r.date;
+
+      var ciCSS = resultCSS[r.clockInResult] || '';
+      var coCSS = resultCSS[r.clockOutResult] || '';
+
+      html += '<tr style="'+rowStyle+'">';
+      html += '<td style="padding:6px 8px;white-space:nowrap">'+esc(r.name)+'</td>';
+      html += '<td style="padding:6px 8px;white-space:nowrap;color:var(--text-dim);font-size:10px">'+esc(r.bu)+'</td>';
+      html += '<td style="padding:6px 8px;white-space:nowrap">'+r.date.slice(5)+'</td>';
+      html += '<td style="padding:6px 8px;white-space:nowrap;font-family:monospace">'+esc(r.clockIn)+(r.schedule?'<span style="font-size:9px;color:var(--text-muted);margin-left:4px">'+esc(r.schedule.replace(/ .*/,''))+'</span>':'')+'</td>';
+      html += '<td style="padding:6px 8px;white-space:nowrap;'+ciCSS+'">'+esc(r.clockInResult||'-')+'</td>';
+      html += '<td style="padding:6px 8px;white-space:nowrap;font-family:monospace">'+esc(r.clockOut)+'</td>';
+      html += '<td style="padding:6px 8px;white-space:nowrap;'+coCSS+'">'+esc(r.clockOutResult||'-')+'</td>';
+      html += '<td style="padding:6px 8px;font-size:10px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(r.approval)+'">'+esc(r.approval)+'</td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+  }
+
+  div.innerHTML = html;
 }
 
 // ===== DingTalk Sync =====
@@ -8611,7 +8921,7 @@ function renderOrgAttachments() {
 
 // ===== Init =====
 // ===== Remote Data Sync (Supabase) — 按资源组拆分，独立 CAS =====
-const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','otms_tn_split_ratio','otms_trainee_cleared_v3'];
+const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','attendance_records','otms_tn_split_ratio','otms_trainee_cleared_v3'];
 
 // 资源分组：每组独立 Supabase 行 + 独立 version + 独立 CAS
 const SYNC_GROUPS = {
@@ -8620,7 +8930,7 @@ const SYNC_GROUPS = {
   okr:        {id: 3, keys: ['okr_data', 'okr_version', 'okr_data_version', 'okr_prefs']},
   org:        {id: 4, keys: ['okr_employees', 'okr_depts', 'okr_permissions', 'nudge_log', 'org_attachments']},
   report:     {id: 5, keys: ['rpt_data', 'rpt_version', 'rpt_group_subs', 'meeting_data', 'kpi_data']},
-  attendance: {id: 6, keys: ['okr_attendance', 'attendance_workdays', 'attendance_schedules']}
+  attendance: {id: 6, keys: ['okr_attendance', 'attendance_workdays', 'attendance_schedules', 'attendance_records']}
 };
 const SYNC_GROUP_LIST = Object.keys(SYNC_GROUPS);
 
