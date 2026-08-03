@@ -8889,10 +8889,17 @@ function renderAttendAnalytics() {
   html += '</div>';
 
   // ---- Charts ----
-  // Row 1: 出勤率趋势 + 状态分布
+  // Row 1: 异常率月度趋势
   html += '<div class="analytics-chart-grid">';
-  html += '<div class="analytics-chart-box full"><div class="analytics-chart-title">月度考勤趋势</div><div class="analytics-chart-wrap"><canvas id="chartTrend" style="max-height:280px"></canvas></div></div>';
+  html += '<div class="analytics-chart-box full"><div class="analytics-chart-title">月度异常趋势（迟到率 + 缺卡率 + 请假率）</div><div class="analytics-chart-wrap"><canvas id="chartTrend" style="max-height:280px"></canvas></div></div>';
   html += '</div>';
+
+  // Row 1.5: 当月每日异常分布（仅选具体月份时显示）
+  if (filter.month) {
+    html += '<div class="analytics-chart-grid">';
+    html += '<div class="analytics-chart-box full"><div class="analytics-chart-title">'+filter.month.slice(5).replace(/^0/,'')+'月每日异常分布（迟到+缺卡+请假）</div><div class="analytics-chart-wrap"><canvas id="chartDaily" style="max-height:220px"></canvas></div></div>';
+    html += '</div>';
+  }
 
   // Row 2: 状态分布 + 星期分布
   html += '<div class="analytics-chart-grid">';
@@ -8983,29 +8990,35 @@ function renderAnalyticsCharts(stats) {
     annual: '#5B8DEF', lieu: '#8B6FDE', sick: '#E07060', personal: '#E0A050'
   };
 
-  // ---- 月度考勤趋势 ----
+  // ---- 月度异常趋势 ----
   var ctxTrend = document.getElementById('chartTrend');
   if (ctxTrend) {
     var ms = Object.keys(stats.monthly).sort();
-    var rates = ms.map(function(m) { var v=stats.monthly[m]; return v.total>0?Math.round(v.normal*1000/v.total)/10:0; });
+    var anomalyRates = ms.map(function(m) {
+      var v = stats.monthly[m];
+      return v.total>0 ? Math.round((v.late+v.miss+v.leave)*1000/v.total)/10 : 0;
+    });
     var lates = ms.map(function(m) { return stats.monthly[m].late; });
     var misses = ms.map(function(m) { return stats.monthly[m].miss; });
+    var leaves = ms.map(function(m) { return stats.monthly[m].leave; });
     analyticsChartInstances.trend = new Chart(ctxTrend, {
       type: 'line',
       data: {
         labels: ms.map(function(m) { return m.slice(5).replace(/^0/,'')+'月'; }),
         datasets: [
-          { label: '出勤率 %', data: rates, borderColor: COLORS.normal, backgroundColor: 'rgba(45,139,74,0.08)', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: COLORS.normal, yAxisID: 'y', order: 0 },
-          { label: '迟到', data: lates, type: 'bar', backgroundColor: 'rgba(232,149,58,0.5)', yAxisID: 'y1', order: 1 },
-          { label: '缺卡', data: misses, type: 'bar', backgroundColor: 'rgba(217,72,75,0.45)', yAxisID: 'y1', order: 1 }
+          { label: '异常率 %', data: anomalyRates, borderColor: '#D9484B', backgroundColor: 'rgba(217,72,75,0.06)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#D9484B', pointBorderColor: '#fff', pointBorderWidth: 2, borderWidth: 2.5, yAxisID: 'y', order: 0 },
+          { label: '迟到', data: lates, type: 'bar', backgroundColor: COLORS.late, yAxisID: 'y1', order: 1 },
+          { label: '缺卡', data: misses, type: 'bar', backgroundColor: COLORS.miss, yAxisID: 'y1', order: 1 },
+          { label: '请假', data: leaves, type: 'bar', backgroundColor: COLORS.leave, yAxisID: 'y1', order: 1 }
         ]
       },
       options: {
         responsive: true, interaction: { intersect: false, mode: 'index' },
         plugins: { legend: { position: 'bottom', labels: { boxWidth:10, padding:16, font:{size:10}, usePointStyle:true } } },
         scales: {
-          y: { type:'linear', position:'left', min:80, max:100, ticks:{callback:function(v){return v+'%';},font:{size:10}}, grid:{color:'#f0f0f0'} },
-          y1: { type:'linear', position:'right', grid:{drawOnChartArea:false}, ticks:{font:{size:10}} }
+          y: { type:'linear', position:'left', ticks:{callback:function(v){return v+'%';},font:{size:10}}, grid:{color:'#f0f0f0'}, title:{display:true, text:'异常率', font:{size:10}, color:'var(--text-muted)'} },
+          y1: { type:'linear', position:'right', stacked:true, grid:{drawOnChartArea:false}, ticks:{font:{size:10}}, title:{display:true, text:'人次', font:{size:10}, color:'var(--text-muted)'} },
+          x: { stacked:true, grid:{display:false}, ticks:{font:{size:10}} }
         }
       }
     });
@@ -9136,6 +9149,54 @@ function renderAnalyticsCharts(stats) {
         responsive: true,
         plugins: { legend: { position: 'bottom', labels: { boxWidth:10, padding:12, font:{size:10}, usePointStyle:true } } },
         scales: { x: { stacked:true, grid:{display:false}, ticks:{font:{size:10}} }, y: { stacked:true, ticks:{callback:function(v){return v+'天';},font:{size:10}}, grid:{color:'#f0f0f0'} } }
+      }
+    });
+  }
+
+  // ---- 当月每日异常分布 ----
+  var ctxDaily = document.getElementById('chartDaily');
+  if (ctxDaily) {
+    // Compute daily late/miss/leave from filtered dates
+    var dailyMap = {};
+    stats.filteredDates.forEach(function(date) {
+      dailyMap[date] = { late:0, miss:0, leave:0 };
+    });
+    // Recompute from records (we need the raw data again)
+    var records = loadAttendanceRecords();
+    var empList = loadEmployees();
+    var empMap2 = {};
+    empList.forEach(function(e) { empMap2[e.id] = e; });
+    stats.filteredDates.forEach(function(date) {
+      var dayData = records[date];
+      if (!dayData) return;
+      Object.keys(dayData).forEach(function(empId) {
+        var emp = empMap2[empId]; if (!emp) return;
+        var r = dayData[empId];
+        var ciR = r.cir || '', coR = r.cor || '';
+        if (/迟到|严重迟到|旷工迟到/.test(ciR)) dailyMap[date].late++;
+        if (ciR === '缺卡' || coR === '缺卡') dailyMap[date].miss++;
+        if (/年假|事假|病假|调休|婚假|产假|陪产假|育儿假|丧假|哺乳假/.test(ciR) || /年假|事假|病假|调休|婚假|产假|陪产假|育儿假|丧假|哺乳假/.test(coR)) dailyMap[date].leave++;
+      });
+    });
+    var dayDates = Object.keys(dailyMap).sort();
+    var dayLabels = dayDates.map(function(d) { return d.slice(8).replace(/^0/,'')+'日'; });
+    var dayLate = dayDates.map(function(d) { return dailyMap[d].late; });
+    var dayMiss = dayDates.map(function(d) { return dailyMap[d].miss; });
+    var dayLeave = dayDates.map(function(d) { return dailyMap[d].leave; });
+    analyticsChartInstances.daily = new Chart(ctxDaily, {
+      type: 'bar',
+      data: {
+        labels: dayLabels,
+        datasets: [
+          { label: '迟到', data: dayLate, backgroundColor: COLORS.late },
+          { label: '缺卡', data: dayMiss, backgroundColor: COLORS.miss },
+          { label: '请假', data: dayLeave, backgroundColor: COLORS.leave }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth:10, padding:12, font:{size:10}, usePointStyle:true } } },
+        scales: { x: { stacked:true, grid:{display:false}, ticks:{font:{size:9}, maxRotation:0} }, y: { stacked:true, ticks:{font:{size:10}, stepSize:1}, grid:{color:'#f0f0f0'} } }
       }
     });
   }
