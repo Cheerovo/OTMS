@@ -11132,10 +11132,8 @@ function importGroupData(gid, data, overwrite){
     if(k === 'otms_trainee_eval_v1'){
       try{
         if(overwrite){
-          // syncFromRemote / autoCheckRemote：云端直接覆盖本地
           localStorage.setItem(k, JSON.stringify(data[k]));
         } else {
-          // uploadGroup CAS 重试：本地优先合并，保留未上传的本地编辑
           var localEval = JSON.parse(localStorage.getItem(k)||'null');
           if(!localEval || !localEval.scores || Object.keys(localEval.scores).length === 0){
             localStorage.setItem(k, JSON.stringify(data[k]));
@@ -11145,6 +11143,39 @@ function importGroupData(gid, data, overwrite){
           }
         }
       }catch(e){ localStorage.setItem(k, JSON.stringify(data[k])); }
+    } else if (!overwrite && (k === 'okr_employees' || k === 'okr_depts' || k === 'okr_permissions' || k === 'nudge_log' || k === 'org_attachments')) {
+      // uploadGroup 前合并：本地优先，云端补缺（避免覆盖未上传的本地编辑）
+      try {
+        var localData = JSON.parse(localStorage.getItem(k) || 'null');
+        var cloudData = data[k];
+        if (!localData) {
+          localStorage.setItem(k, JSON.stringify(cloudData));
+        } else if (k === 'okr_employees' && Array.isArray(localData) && Array.isArray(cloudData)) {
+          // 数组合并：本地同ID覆盖云端，云端新增保留
+          var merged = [];
+          var cloudById = {};
+          cloudData.forEach(function(e) { if (e && e.id) cloudById[e.id] = e; });
+          var localIds = {};
+          localData.forEach(function(e) { if (e && e.id) { localIds[e.id] = true; merged.push(e); } });
+          cloudData.forEach(function(e) { if (e && e.id && !localIds[e.id]) merged.push(e); });
+          localStorage.setItem(k, JSON.stringify(merged));
+        } else if (k === 'okr_depts' && Array.isArray(localData) && Array.isArray(cloudData)) {
+          var mergedDepts = [];
+          var cloudDeptNames = {};
+          cloudData.forEach(function(d) { if (d && d.name) cloudDeptNames[d.name] = d; });
+          var localDeptNames = {};
+          localData.forEach(function(d) { if (d && d.name) { localDeptNames[d.name] = true; mergedDepts.push(d); } });
+          cloudData.forEach(function(d) { if (d && d.name && !localDeptNames[d.name]) mergedDepts.push(d); });
+          localStorage.setItem(k, JSON.stringify(mergedDepts));
+        } else if (typeof localData === 'object' && typeof cloudData === 'object' && !Array.isArray(localData)) {
+          // 对象合并：本地字段优先，云端补缺
+          var mergedObj = JSON.parse(JSON.stringify(cloudData));
+          Object.keys(localData).forEach(function(key) { mergedObj[key] = localData[key]; });
+          localStorage.setItem(k, JSON.stringify(mergedObj));
+        } else {
+          localStorage.setItem(k, JSON.stringify(cloudData));
+        }
+      } catch(e) { localStorage.setItem(k, JSON.stringify(data[k])); }
     } else {
       localStorage.setItem(k, typeof data[k]==='string' ? data[k] : JSON.stringify(data[k]));
     }
@@ -11193,19 +11224,24 @@ function mergeEvalData(localEval, cloudEval){
 }
 
 // ===== 自动上传（按组 CAS）=====
+var _pendingUpload = false;
 function scheduleAutoUpload(){
-  if(_isImporting || _autoUploadBusy) return;
+  if(_isImporting) return;
+  if(_autoUploadBusy){ _pendingUpload = true; return; }
   clearTimeout(_autoUploadTimer);
   _autoUploadTimer = setTimeout(async function(){
     _autoUploadBusy = true;
+    _pendingUpload = false;
     try{
       var groups = Object.keys(_dirtyGroups);
+      // 上传成功后清除 dirty 标记，失败则保留供下次重试
+      await Promise.all(groups.map(function(gid){ return uploadGroup(gid, 0); }));
       _dirtyKeys = {};
       _dirtyGroups = {};
-      // 各组并行上传，独立 CAS，互不干扰
-      await Promise.all(groups.map(function(gid){ return uploadGroup(gid, 0); }));
     }catch(e){ console.error('自动同步异常:', e.message, e); }
     _autoUploadBusy = false;
+    // 上传期间有新的本地编辑 → 立即触发下一轮上传
+    if(_pendingUpload){ _pendingUpload = false; scheduleAutoUpload(); }
   }, 1500);
 }
 
