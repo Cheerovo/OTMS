@@ -8769,8 +8769,10 @@ function buildLeavesTableHTML(empList, empMap) {
 }
 
 // ===== 考勤总览仪表盘 =====
-var analyticsFilter = { year: '2026', month: '', day: '', bu: 'all', dept: 'all', empId: '', atype: 'all', leaveSub: '', lateSub: '', outSub: '' };
+var analyticsFilter = { year: '2026', month: '', day: '', bu: 'all', dept: 'all', empId: '', atype: 'all', leaveSub: '', lateSub: '', outSub: '', workdayOnly: false };
 var analyticsChartInstances = {};
+var _analyticsCache = null;
+var _analyticsCacheKey = '';
 
 // 请假子类型映射：code → {label, regex, leafKey}
 // leafKey 对应 attendance_leaves 中的字段: a=年假, l=调休, s=病假, p=事假, null=无天数数据
@@ -8805,6 +8807,8 @@ function destroyAnalyticsCharts() {
   Object.keys(analyticsChartInstances).forEach(function(k) {
     if (analyticsChartInstances[k]) { analyticsChartInstances[k].destroy(); analyticsChartInstances[k] = null; }
   });
+  _analyticsCache = null;
+  _analyticsCacheKey = '';
 }
 
 function lookupEmpIdByName(name) {
@@ -8820,11 +8824,36 @@ function lookupEmpNameById(id) {
 }
 
 function computeAnalytics(filter) {
+  // 内存缓存：同一筛选条件30秒内不重复计算
+  var cacheKey = JSON.stringify(filter);
+  if (_analyticsCache && _analyticsCacheKey === cacheKey && (Date.now() - _analyticsCache._ts < 30000)) {
+    return _analyticsCache;
+  }
+
   var records = loadAttendanceRecords();
   var leavesData = loadAttendanceLeaves();
   var empList = loadEmployees();
+  var workDaysMap = loadWorkDays();
+  var scheduleMap = loadSchedules();
   var empMap = {};
   empList.forEach(function(e) { empMap[e.id] = e; });
+
+  // 构建员工名字 → 休息日判断
+  function isEmpRestDay(name, dateStr) {
+    var wd = workDaysMap[name];
+    if (!wd || wd.length === 0) {
+      // 无排班配置：检查是否有 schedule（排班制），都没有则默认周末双休
+      var schedFlat = scheduleMap[name + '_flat'];
+      var schedByDate = scheduleMap[name];
+      if (schedFlat || (schedByDate && typeof schedByDate === 'object' && Object.keys(schedByDate).length > 0)) {
+        return false; // 有排班制，不按周末判断
+      }
+      var dayNum = new Date(dateStr + 'T00:00:00+08:00').getDay();
+      return dayNum === 0 || dayNum === 6; // 默认周末双休
+    }
+    var dayNum2 = new Date(dateStr + 'T00:00:00+08:00').getDay();
+    return !wd.includes(dayNum2);
+  }
 
   var dateKeys = Object.keys(records).sort();
   var filteredDates = dateKeys.filter(function(d) {
@@ -8852,6 +8881,8 @@ function computeAnalytics(filter) {
       if (filter.empId && empId !== filter.empId) return;
       if (filter.bu !== 'all' && emp.bu !== filter.bu) return;
       if (filter.dept !== 'all' && (emp.department || emp.bu || '') !== filter.dept) return;
+      // 仅统计工作日：排除休息日
+      if (filter.workdayOnly && isEmpRestDay(emp.name, date)) return;
 
       var r = dayData[empId];
       var ciR = r.cir || '', coR = r.cor || '';
@@ -9006,6 +9037,7 @@ function computeAnalytics(filter) {
         if (filter.empId && empId !== filter.empId) return;
         if (filter.bu !== 'all' && emp.bu !== filter.bu) return;
         if (filter.dept !== 'all' && (emp.department || emp.bu || '') !== filter.dept) return;
+        if (filter.workdayOnly && isEmpRestDay(emp.name, date)) return;
         var r = dayData[empId];
         var ciR = r.cir || '', coR = r.cor || '';
         prevTotalAll.recs++;
@@ -9050,12 +9082,16 @@ function computeAnalytics(filter) {
     });
   }
 
-  return {
+  var result = {
     filteredDates: filteredDates, totalAll: totalAll, monthly: monthlyStats,
     weekday: weekdayStats, bu: buStats, dept: deptStats,
     leaveAgg: leaveAgg, monthlyLeave: monthlyLeave,
     empStats: empStats, prevTotalAll: prevTotalAll, prevLeaveAgg: prevLeaveAgg
   };
+  result._ts = Date.now();
+  _analyticsCache = result;
+  _analyticsCacheKey = cacheKey;
+  return result;
 }
 
 function saveAnalyticsFilter() {
@@ -9074,6 +9110,7 @@ function restoreAnalyticsFilter() {
         analyticsFilter.dept = f.dept || 'all';
         analyticsFilter.empId = f.empId || '';
         analyticsFilter.atype = f.atype || 'all';
+        analyticsFilter.workdayOnly = f.workdayOnly || false;
         analyticsFilter.leaveSub = f.leaveSub || '';
         analyticsFilter.lateSub = f.lateSub || '';
         analyticsFilter.outSub = f.outSub || '';
@@ -9220,9 +9257,10 @@ function renderAttendAnalytics() {
   html += '<datalist id="analyticsEmpDL">';
   empList.forEach(function(e) { html += '<option value="'+esc(e.name)+'">'; });
   html += '</datalist>';
-  if (filter.month || filter.day || filter.bu !== 'all' || filter.dept !== 'all' || filter.empId || filter.atype !== 'all' || filter.leaveSub || filter.lateSub || filter.outSub) {
-    html += '<button onclick="analyticsFilter={year:analyticsFilter.year,month:\'\',day:\'\',bu:\'all\',dept:\'all\',empId:\'\',atype:\'all\',leaveSub:\'\',lateSub:\'\',outSub:\'\'};saveAnalyticsFilter();renderAttendAnalytics()" style="padding:5px 12px;font-size:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-muted);cursor:pointer">清除筛选</button>';
+  if (filter.month || filter.day || filter.bu !== 'all' || filter.dept !== 'all' || filter.empId || filter.atype !== 'all' || filter.leaveSub || filter.lateSub || filter.outSub || filter.workdayOnly) {
+    html += '<button onclick="analyticsFilter={year:analyticsFilter.year,month:\'\',day:\'\',bu:\'all\',dept:\'all\',empId:\'\',atype:\'all\',leaveSub:\'\',lateSub:\'\',outSub:\'\',workdayOnly:false};saveAnalyticsFilter();renderAttendAnalytics()" style="padding:5px 12px;font-size:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-muted);cursor:pointer">清除筛选</button>';
   }
+  html += '<label style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--text-muted);cursor:pointer;white-space:nowrap;margin-left:4px"><input type="checkbox" onchange="analyticsFilter.workdayOnly=this.checked;saveAnalyticsFilter();renderAttendAnalytics()"'+ (filter.workdayOnly?' checked':'') +' style="width:14px;height:14px;cursor:pointer">仅工作日</label>';
   html += '<span style="margin-left:auto;font-size:10px;color:var(--text-muted)">'+t.recs+' 条记录</span>';
   html += '</div>';
 
@@ -9259,6 +9297,36 @@ function renderAttendAnalytics() {
     else if (filter.atype === 'leave') prevShowCount = p.leave;
     else prevShowCount = p.late + p.miss + p.leave + p.absent;
   }
+  // 人均请假天数计算
+  var leavePeopleMap = {}; // {leafKey: set-of-eids}
+  Object.keys(leavesData).forEach(function(month) {
+    if (filter.year && month.slice(0,4) !== filter.year) return;
+    if (filter.month && month !== filter.month) return;
+    Object.keys(leavesData[month]).forEach(function(eid) {
+      var emp = empMap[eid]; if (!emp) return;
+      if (filter.bu !== 'all' && emp.bu !== filter.bu) return;
+      if (filter.dept !== 'all' && (emp.department || emp.bu || '') !== filter.dept) return;
+      var ld = leavesData[month][eid];
+      ['a','l','s','p'].forEach(function(lk) {
+        if ((ld[lk] || 0) > 0) {
+          if (!leavePeopleMap[lk]) leavePeopleMap[lk] = {};
+          leavePeopleMap[lk][eid] = true;
+        }
+      });
+    });
+  });
+  function leavePerCapita(leafKey, totalDays) {
+    var count = leavePeopleMap[leafKey] ? Object.keys(leavePeopleMap[leafKey]).length : 0;
+    if (count === 0) return '';
+    return '人均 '+(totalDays/count).toFixed(1)+' 天 / '+count+' 人使用';
+  }
+  // 总请假使用人数
+  var leaveAllPeople = {};
+  Object.keys(leavePeopleMap).forEach(function(lk) {
+    Object.keys(leavePeopleMap[lk]).forEach(function(eid) { leaveAllPeople[eid] = true; });
+  });
+  var leaveAllCount = Object.keys(leaveAllPeople).length;
+
   // Leave sub-type days: from leavesData or null (for types without days)
   var leaveSubDays = 0;
   var leaveSubDaysPrev = null;
@@ -9279,7 +9347,17 @@ function renderAttendAnalytics() {
   else if (filter.atype === 'absent') showSub = '上下班均缺卡（旷工）';
   else showSub = t.recs+' 条打卡记录';
 
+  // 出勤率
+  var normalRate = t.recs > 0 ? Math.round(t.normal * 10000 / t.recs) / 100 : 0;
+
   html += '<div class="analytics-kpi-row">';
+
+  // Card 0: 出勤率
+  html += '<div class="analytics-kpi-card'+(normalRate>=95?' good':normalRate>=90?' warn':' bad')+'">';
+  html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot" style="background:#5FA895"></span>出勤率'+deltaRateStr(normalRate, p?p.recs:null, p?p.normal:null)+'</div>';
+  html += '<div class="analytics-kpi-value">'+normalRate.toFixed(1)+'<span class="analytics-kpi-unit">%</span></div>';
+  html += '<div class="analytics-kpi-sub">正常打卡 '+t.normal+' / '+t.recs+' 条</div>';
+  html += '</div>';
 
   // Card 1: 人次
   html += '<div class="analytics-kpi-card'+(showRate<=5?' good':showRate<=10?' warn':' bad')+'">';
@@ -9291,10 +9369,11 @@ function renderAttendAnalytics() {
   // Card 2: 请假天数 (for leaveSub with leafKey) or 率
   if (hasLeaveSub && leaveSubHasDays) {
     var prevLeaveSub = leaveSubDaysPrev || null;
+    var perCapitaStr = leavePerCapita(leaveSubInfo.leafKey, leaveSubDays);
     html += '<div class="analytics-kpi-card">';
     html += '<div class="analytics-kpi-label">'+leaveSubInfo.label+'天数'+deltaStr(leaveSubDays, prevLeaveSub)+'</div>';
     html += '<div class="analytics-kpi-value">'+leaveSubDays.toFixed(1)+'<span class="analytics-kpi-unit">天</span></div>';
-    html += '<div class="analytics-kpi-sub">来自月度汇总数据</div>';
+    html += '<div class="analytics-kpi-sub">'+(perCapitaStr || '来自月度汇总数据')+'</div>';
     html += '</div>';
   } else if (filter.atype !== 'ot') {
     html += '<div class="analytics-kpi-card'+(showRate<=5?' good':showRate<=10?' warn':' bad')+'">';
@@ -9318,14 +9397,14 @@ function renderAttendAnalytics() {
     html += '<div class="analytics-kpi-card">';
     html += '<div class="analytics-kpi-label">请假天数'+deltaStr(leaveTotal, prevLeave)+'</div>';
     html += '<div class="analytics-kpi-value">'+leaveTotal.toFixed(1)+'<span class="analytics-kpi-unit">天</span></div>';
-    html += '<div class="analytics-kpi-sub">年假 '+stats.leaveAgg.annual.toFixed(1)+' &middot; 调休 '+stats.leaveAgg.lieu.toFixed(1)+' &middot; 病假 '+stats.leaveAgg.sick.toFixed(1)+' &middot; 事假 '+stats.leaveAgg.personal.toFixed(1)+'</div>';
+    html += '<div class="analytics-kpi-sub">年假 '+stats.leaveAgg.annual.toFixed(1)+' &middot; 调休 '+stats.leaveAgg.lieu.toFixed(1)+' &middot; 病假 '+stats.leaveAgg.sick.toFixed(1)+' &middot; 事假 '+stats.leaveAgg.personal.toFixed(1)+(leaveAllCount>0?' · 人均 '+(leaveTotal/leaveAllCount).toFixed(1)+' 天 / '+leaveAllCount+' 人': '')+'</div>';
     html += '</div>';
   }
 
   html += '</div>';
 
   // 月度考勤总览（仅在全量视图显示）
-  if (!filter.month && !filter.day && !filter.empId && filter.atype === 'all' && !filter.leaveSub && !filter.lateSub && !filter.outSub) {
+  if (!filter.day && !filter.empId && filter.atype === 'all' && !filter.leaveSub && !filter.lateSub && !filter.outSub) {
     html += '<div class="analytics-chart-grid"><div class="analytics-chart-box full"><div class="analytics-chart-title">月度考勤总览</div><div class="analytics-chart-wrap"><div class="mo-headcount-row" id="moHeadcountRow"></div></div></div></div>';
   }
 
@@ -9417,7 +9496,7 @@ function renderAttendAnalytics() {
     } else {
       anom = es.late + es.miss + es.leave + es.absent;
     }
-    if (anom > 0) empAnomList.push({ name: emp.name, bu: emp.bu || '', dept: emp.department || emp.bu || '', late: es.late, miss: es.miss, leave: es.leave, out: es.out, ot: es.ot, anom: anom, total: es.total });
+    if (anom > 0) empAnomList.push({ eid: eid, name: emp.name, bu: emp.bu || '', dept: emp.department || emp.bu || '', late: es.late, miss: es.miss, leave: es.leave, out: es.out, ot: es.ot, anom: anom, total: es.total });
   });
   empAnomList.sort(function(a,b) { return b.anom - a.anom; });
   var topEmp = empAnomList.slice(0, 5);
@@ -9457,14 +9536,14 @@ function renderAttendAnalytics() {
     } else if (isSingleType) {
       html += '<table class="analytics-focus-table"><thead><tr><th>姓名</th><th>部门</th><th>'+focusLabel+'人次</th></tr></thead><tbody>';
       topEmp.forEach(function(e) {
-        html += '<tr><td><strong>'+esc(e.name)+'</strong></td><td style="color:var(--text-muted);font-size:10px">'+esc(e.dept)+'</td><td>'+e.anom+'</td></tr>';
+        html += '<tr><td><strong style="cursor:pointer;color:var(--accent)" onclick="analyticsFilter.empId=\''+esc(e.eid)+'\';saveAnalyticsFilter();renderAttendAnalytics()" title="点击查看该员工数据">'+esc(e.name)+'</strong></td><td style="color:var(--text-muted);font-size:10px">'+esc(e.dept)+'</td><td>'+e.anom+'</td></tr>';
       });
       html += '</tbody></table>';
     } else {
       html += '<table class="analytics-focus-table"><thead><tr><th>姓名</th><th>部门</th><th>迟到</th><th>缺卡</th><th>请假</th><th>'+focusLabel+'合计</th></tr></thead><tbody>';
       topEmp.forEach(function(e) {
         var badge = e.anom >= 8 ? '<span class="badge-sm red">高</span>' : e.anom >= 4 ? '<span class="badge-sm orange">中</span>' : '';
-        html += '<tr><td><strong>'+esc(e.name)+'</strong></td><td style="color:var(--text-muted);font-size:10px">'+esc(e.dept)+'</td><td>'+(e.late||'-')+'</td><td>'+(e.miss||'-')+'</td><td>'+(e.leave||'-')+'</td><td>'+badge+' '+e.anom+'</td></tr>';
+        html += '<tr><td><strong style="cursor:pointer;color:var(--accent)" onclick="analyticsFilter.empId=\''+esc(e.eid)+'\';saveAnalyticsFilter();renderAttendAnalytics()" title="点击查看该员工数据">'+esc(e.name)+'</strong></td><td style="color:var(--text-muted);font-size:10px">'+esc(e.dept)+'</td><td>'+(e.late||'-')+'</td><td>'+(e.miss||'-')+'</td><td>'+(e.leave||'-')+'</td><td>'+badge+' '+e.anom+'</td></tr>';
       });
       html += '</tbody></table>';
     }
@@ -9733,7 +9812,20 @@ function renderAnalyticsCharts(stats) {
       return bs.total>0 ? Math.round((bs.late+bs.miss+bs.leave+bs.absent)*1000/bs.total)/10 : 0;
     });
     var maxBu = Math.max.apply(null, buRates.concat([10]));
+    var avgBu = buRates.length > 0 ? buRates.reduce(function(a,b){return a+b;},0) / buRates.length : 0;
     var buColor = atype==='out'?COLORS.out:atype==='ot'?COLORS.late:atype==='leave'?COLORS.leave:atype==='absent'?COLORS.absent:atype==='late'?COLORS.late:null;
+    var buAvgPlugin = {
+      id: 'buAvgLine',
+      afterDraw: function(chart) {
+        var c = chart.ctx, xS = chart.scales.x, yS = chart.scales.y;
+        var x = xS.getPixelForValue(avgBu);
+        c.save(); c.beginPath(); c.setLineDash([4, 3]); c.strokeStyle = '#e74c3c'; c.lineWidth = 1.5;
+        c.moveTo(x, yS.top); c.lineTo(x, yS.bottom); c.stroke(); c.setLineDash([]);
+        c.fillStyle = '#e74c3c'; c.font = '10px Inter, sans-serif';
+        c.fillText('均值 '+avgBu.toFixed(1)+'%', Math.min(x+4, chart.width-70), yS.top+12);
+        c.restore();
+      }
+    };
     analyticsChartInstances.bu = new Chart(ctxBU, {
       type: 'bar',
       data: {
@@ -9744,7 +9836,8 @@ function renderAnalyticsCharts(stats) {
         indexAxis: 'y', responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return ctx.parsed.x.toFixed(1)+'%'; } } } },
         scales: { x: { max: Math.ceil(maxBu*1.2), ticks:{callback:function(v){return v.toFixed(1)+'%';},font:{size:10}}, grid:{color:'#f0f0f0'} }, y: { ticks:{font:{size:10}} } }
-      }
+      },
+      plugins: [buAvgPlugin]
     });
   }
 
@@ -9784,7 +9877,20 @@ function renderAnalyticsCharts(stats) {
       return ds.total>0 ? Math.round((ds.late+ds.miss+ds.leave+ds.absent)*1000/ds.total)/10 : 0;
     });
     var maxDept = Math.max.apply(null, deptRates.concat([10]));
+    var avgDept = deptRates.length > 0 ? deptRates.reduce(function(a,b){return a+b;},0) / deptRates.length : 0;
     var deptColor = atype==='out'?COLORS.out:atype==='ot'?COLORS.late:atype==='leave'?COLORS.leave:atype==='absent'?COLORS.absent:atype==='late'?COLORS.late:null;
+    var deptAvgPlugin = {
+      id: 'deptAvgLine',
+      afterDraw: function(chart) {
+        var c = chart.ctx, xS = chart.scales.x, yS = chart.scales.y;
+        var y = yS.getPixelForValue(avgDept);
+        c.save(); c.beginPath(); c.setLineDash([4, 3]); c.strokeStyle = '#e74c3c'; c.lineWidth = 1.5;
+        c.moveTo(xS.left, y); c.lineTo(xS.right, y); c.stroke(); c.setLineDash([]);
+        c.fillStyle = '#e74c3c'; c.font = '10px Inter, sans-serif';
+        c.fillText('均值 '+avgDept.toFixed(1)+'%', xS.right-80, y-6);
+        c.restore();
+      }
+    };
     analyticsChartInstances.dept = new Chart(ctxDept, {
       type: 'bar',
       data: {
@@ -9798,7 +9904,8 @@ function renderAnalyticsCharts(stats) {
           x: { ticks: { maxRotation: 45, font: { size: 9 } }, grid: { color: '#f0f0f0' } },
           y: { max: Math.ceil(maxDept*1.2), ticks: { callback: function(v) { return v.toFixed(1) + '%'; }, font: { size: 10 } }, grid: { color: '#f0f0f0' } }
         }
-      }
+      },
+      plugins: [deptAvgPlugin]
     });
   }
 
