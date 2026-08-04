@@ -10090,7 +10090,7 @@ async function syncFromDingTalk() {
     var skipped = 0;
     var dateCount = 0;
 
-    // 同步所有日期（而非仅当天）
+    // 只更新钉钉数据中实际有状态的记录，不删除、不覆盖已有数据
     var allDates = new Set();
     (dd.users || []).forEach(function(u) { Object.keys(u.statusByDate||{}).forEach(function(d){ allDates.add(d); }); });
     allDates.forEach(function(d) {
@@ -10098,10 +10098,10 @@ async function syncFromDingTalk() {
       if (!attData[d]) attData[d] = {};
       empList.forEach(function(e) {
         var ddUser = ddMap[e.name];
-        if (!ddUser) { attData[d][e.id] = {m:'不在钉钉数据', s:'不在钉钉数据'}; skipped++; return; }
+        if (!ddUser) return; // 不在钉钉数据中，保留现有记录
         var raw = (ddUser.statusByDate && ddUser.statusByDate[d]);
-        if (!raw) { delete attData[d][e.id]; return; }
-        if (typeof raw === 'string') { raw = {m:'在岗', s: raw}; }
+        if (!raw) return; // 该日期无钉钉数据，保留现有记录
+        if (typeof raw === 'string') raw = {m:'在岗', s: raw};
         attData[d][e.id] = raw;
         synced++;
       });
