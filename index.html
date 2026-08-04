@@ -8212,7 +8212,15 @@ function importAttendCSV() {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { parseErrors++; continue; }
 
         var emp = nameToEmp[name];
-        if (!emp) { unmatchedNames[name] = true; continue; }
+        var empId;
+        if (emp) {
+          empId = emp.id;
+          matched++;
+        } else {
+          // 不在花名册的人也导入，用名字生成临时ID
+          empId = 'name_' + name;
+          unmatchedNames[name] = true;
+        }
 
         if (!records[date]) records[date] = {};
         var rec = { ci: '', cir: '', co: '', cor: '', sc: '', ap: '', src: file.name };
@@ -8223,8 +8231,7 @@ function importAttendCSV() {
         if ('下班结果' in colMap) rec.cor = parts[colMap['下班结果']] || '';
         if ('审批备注' in colMap) rec.ap = parts[colMap['审批备注']] || '';
 
-        records[date][emp.id] = rec;
-        matched++;
+        records[date][empId] = rec;
         dateCounts[date] = (dateCounts[date] || 0) + 1;
       }
 
@@ -8237,9 +8244,10 @@ function importAttendCSV() {
 
       // 显示结果
       var dates = Object.keys(dateCounts).sort();
-      var msg = '导入完成！匹配 ' + matched + ' 条记录，覆盖 ' + dates.length + ' 天（' + (dates[0]||'') + ' ~ ' + (dates[dates.length-1]||'') + '）';
+      var totalRecords = matched + Object.keys(unmatchedNames).length;
+      var msg = '导入完成！共 ' + totalRecords + ' 条记录（匹配 ' + matched + ' 人），覆盖 ' + dates.length + ' 天（' + (dates[0]||'') + ' ~ ' + (dates[dates.length-1]||'') + '）';
       if (unmatchedList.length > 0) {
-        msg += '\n未匹配 ' + unmatchedList.length + ' 人：' + unmatchedList.slice(0, 10).join('、') + (unmatchedList.length > 10 ? '等' : '');
+        msg += '\n未匹配 ' + unmatchedList.length + ' 人（已用临时ID导入）：' + unmatchedList.slice(0, 10).join('、') + (unmatchedList.length > 10 ? '等' : '');
         showToast(msg, unmatchedList.length > 5 ? 'warning' : 'success');
       } else {
         showToast(msg, 'success');
