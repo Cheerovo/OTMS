@@ -11074,7 +11074,7 @@ function importGroupData(gid, data, overwrite){
           }
         }
       }catch(e){ localStorage.setItem(k, JSON.stringify(data[k])); }
-    } else if(overwrite || localStorage.getItem(k) === null){
+    } else {
       localStorage.setItem(k, typeof data[k]==='string' ? data[k] : JSON.stringify(data[k]));
     }
   });
