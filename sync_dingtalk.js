@@ -4,6 +4,7 @@ const path = require('path');
 
 const CONFIG_FILE = path.join(__dirname, 'dingtalk_config.json');
 const DATA_FILE = path.join(__dirname, 'dingtalk_data.json');
+const GROUP_CACHE_FILE = path.join(__dirname, 'dingtalk_group_cache.json');
 
 // 本地日期格式化（避免 toISOString 的 UTC 偏移问题）
 function toLocalDate(ts) {
@@ -513,11 +514,38 @@ async function main() {
     return;
   }
 
-  // 获取考勤组配置 → 每人工作日
+  // 获取考勤组配置 → 每人工作日（24h 缓存，人员分组极少变动）
   console.log('[4] 获取考勤组配置...');
-  const workDaysByUser = {}; // userId → [dayNum, ...]  (0=Sun, 1=Mon, ..., 6=Sat)
-  const groupCache = new Map();
-  const userGroupMap = {}; // userId → {group_id, name}
+  var workDaysByUser = {}; // userId → [dayNum, ...]  (0=Sun, 1=Mon, ..., 6=Sat)
+  var groupCache = new Map();
+  var userGroupMap = {}; // userId → {group_id, name}
+  var classTimeMap = {};    // shift_id → "09:00-18:00"
+  var shiftNameMap = {};   // shift_id → "A" / "晚班"
+  var userSchedule = {};
+
+  // 尝试读24h缓存
+  var groupCacheLoaded = false;
+  try {
+    if (fs.existsSync(GROUP_CACHE_FILE)) {
+      var gcData = JSON.parse(fs.readFileSync(GROUP_CACHE_FILE, 'utf8'));
+      var gcAge = Date.now() - gcData.ts;
+      if (gcAge < 24 * 60 * 60 * 1000 && gcData.userGroupMap && gcData.classTimeMap) {
+        userGroupMap = gcData.userGroupMap;
+        workDaysByUser = gcData.workDaysByUser || {};
+        userSchedule = gcData.userSchedule || {};
+        classTimeMap = gcData.classTimeMap;
+        shiftNameMap = gcData.shiftNameMap || {};
+        // 重建 groupCache Map
+        if (gcData.groupCache) {
+          gcData.groupCache.forEach(function(v){ groupCache.set(v[0], v[1]); });
+        }
+        groupCacheLoaded = true;
+        console.log('  ✅ 使用缓存（' + Math.round(gcAge / 3600000) + ' 小时前）');
+      }
+    }
+  } catch(e) {}
+
+  if (!groupCacheLoaded) {
   for (let i = 0; i < allUsers.length; i++) {
     const u = allUsers[i];
     try {
@@ -568,8 +596,8 @@ async function main() {
   }
   console.log('  查询班次详情: ' + allShiftIds.size + ' 个班次...');
 
-  var classTimeMap = {};    // shift_id → "09:00-18:00"
-  var shiftNameMap = {};   // shift_id → "A" / "晚班"
+  classTimeMap = {};    // shift_id → "09:00-18:00"
+  shiftNameMap = {};   // shift_id → "A" / "晚班"
   for (const sid of allShiftIds) {
     try {
       const shiftRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/attendance/shift/query', { access_token: token }, { shift_id: sid, op_user_id: allUsers[0].userid });
@@ -594,7 +622,7 @@ async function main() {
   console.log('  ✅ 班次时间: ' + Object.keys(classTimeMap).length + ' 个');
 
   // 根据考勤组配置推断每人工作日（仅用于休息日过滤） + 班制时间（所有人）
-  var userSchedule = {}; // userId → "A 09:00-18:00"
+  userSchedule = {}; // userId → "A 09:00-18:00"
   let fixedCount = 0, turnCount = 0, noneCount = 0;
   for (const [userId, grp] of Object.entries(userGroupMap)) {
     const cfg = groupCache.get(grp.group_id);
@@ -643,6 +671,21 @@ async function main() {
   console.log('  ✅ 工作日配置: FIXED=' + fixedCount + '人 TURN=' + turnCount + '人 NONE=' + noneCount + '人');
   var scheduleCount = Object.keys(userSchedule).length;
   console.log('  ✅ 班制时间: ' + scheduleCount + '人');
+
+    // 保存24h缓存
+    try {
+      var gcSave = {
+        ts: Date.now(),
+        userGroupMap: userGroupMap,
+        workDaysByUser: workDaysByUser,
+        userSchedule: userSchedule,
+        classTimeMap: classTimeMap,
+        shiftNameMap: shiftNameMap,
+        groupCache: Array.from(groupCache.entries())
+      };
+      fs.writeFileSync(GROUP_CACHE_FILE, JSON.stringify(gcSave));
+    } catch(e) {}
+  } // if (!groupCacheLoaded)
 
   // 考勤只能拉最近7天（API硬限制）
   const today = new Date();
@@ -708,9 +751,9 @@ async function main() {
   var sbdCount = Object.keys(userScheduleByDate).length;
   console.log('  ✅ 每日排班: ' + sbdCount + '人');
 
-  // 请假OA审批拉最近95天（分段请求避免超限，留5天余量防止边界遗漏）
+  // OA审批拉最近7天（与考勤打卡范围一致，覆盖打卡数据即可，节省API额度）
   const leaveDateFrom = new Date(today);
-  leaveDateFrom.setDate(leaveDateFrom.getDate() - 95);
+  leaveDateFrom.setDate(leaveDateFrom.getDate() - 7);
   const leaveDateFromStr = toLocalDate(leaveDateFrom.getTime());
   const leaveDateToStr = dates[dates.length - 1];
 
