@@ -7660,8 +7660,14 @@ function renderAttendView(skipAutoSync) {
   buSet.sort((a,b) => { let oA=BU_ORDER.indexOf(a), oB=BU_ORDER.indexOf(b); if(oA===-1)oA=99; if(oB===-1)oB=99; return oA-oB; });
   const buFilter = document.getElementById('attendBUFilter');
   const buVal = buFilter ? buFilter.value : 'all';
+  const nameFilter = document.getElementById('attendNameSearch');
+  const nameVal = nameFilter ? nameFilter.value.trim().toLowerCase() : '';
   let filtered = empList;
   if (buVal !== 'all') filtered = empList.filter(e => e.bu === buVal);
+  if (nameVal) filtered = filtered.filter(e => e.name.toLowerCase().indexOf(nameVal) !== -1);
+
+  // 保存搜索值以便重新渲染时恢复
+  window._attendNameSearchVal = nameVal;
 
   let counts = {};
   let subCounts = {};
@@ -7708,6 +7714,7 @@ function renderAttendView(skipAutoSync) {
   html += '<span class="date-label">'+date+'</span>';
   html += '<input type="date" id="attendDateInput" value="'+date+'" onchange="renderAttendView()">';
   html += '<div class="topbar-right">';
+  html += '<input type="text" id="attendNameSearch" placeholder="搜索姓名..." oninput="renderAttendView()" value="'+esc(window._attendNameSearchVal||'')+'" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs);width:120px">';
   html += '<select id="attendBUFilter" onchange="renderAttendView()" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs)">';
   html += '<option value="all">全部BU</option>';
   buSet.forEach(bu => html += '<option value="'+esc(bu)+'"'+(buVal===bu?' selected':'')+'>'+esc(bu)+'</option>');
