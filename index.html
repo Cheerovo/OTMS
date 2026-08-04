@@ -14074,6 +14074,11 @@ function computeMonthlyOverview() {
   }
 
   // 对比相邻月份，找出入职/离职人员
+  function toName(eid) {
+    if (empNameMap[eid]) return empNameMap[eid];
+    if (typeof eid === 'string' && eid.indexOf('name_') === 0) return eid.slice(5);
+    return eid;
+  }
   for (var mi = 0; mi < months.length; mi++) {
     var joined = [], left = [];
     var curSet = monthSets[mi];
@@ -14082,11 +14087,11 @@ function computeMonthlyOverview() {
     if (mi > 0) {
       var prevSet = monthSets[mi - 1];
       for (var j = 0; j < curIds.length; j++) {
-        if (!prevSet[curIds[j]]) joined.push(empNameMap[curIds[j]] || curIds[j]);
+        if (!prevSet[curIds[j]]) joined.push(toName(curIds[j]));
       }
       var prevIds = Object.keys(prevSet);
       for (var k = 0; k < prevIds.length; k++) {
-        if (!curSet[prevIds[k]]) left.push(empNameMap[prevIds[k]] || prevIds[k]);
+        if (!curSet[prevIds[k]]) left.push(toName(prevIds[k]));
       }
     }
 
