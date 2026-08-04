@@ -8079,7 +8079,9 @@ function renderAttendView(skipAutoSync) {
   html += '<div style="padding:40px;text-align:center;color:var(--text-muted)">加载中...</div>';
   html += '</div>';
 
+  var wasFocused = document.activeElement && document.activeElement.id === 'attendNameSearch';
   div.innerHTML = html;
+  if (wasFocused) { var sf = document.getElementById('attendNameSearch'); if (sf) { sf.focus(); sf.setSelectionRange(sf.value.length, sf.value.length); } }
   if (attendSubView === 'data') setTimeout(function(){ renderAttendDataView(); }, 0);
   if (attendSubView === 'analytics') setTimeout(function(){ renderAttendAnalytics(); }, 0);
   } catch(e) {
