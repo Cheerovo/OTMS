@@ -9148,7 +9148,7 @@ function renderAttendAnalytics() {
   } else if (filter.atype !== 'ot') {
     html += '<div class="analytics-kpi-card'+(showRate<=5?' good':showRate<=10?' warn':' bad')+'">';
     html += '<div class="analytics-kpi-label"><span class="analytics-kpi-dot"></span>'+atypeLabel+'率'+deltaRateStr(showRate, p?p.recs:null, p?filter.atype==='out'?p.out:filter.atype==='absent'?p.absent:filter.atype==='late'?p.late:filter.atype==='miss'?p.miss:filter.atype==='leave'?p.leave:p.late+p.miss+p.leave+p.absent:null)+'</div>';
-    html += '<div class="analytics-kpi-value">'+showRate+'<span class="analytics-kpi-unit">%</span></div>';
+    html += '<div class="analytics-kpi-value">'+showRate.toFixed(1)+'<span class="analytics-kpi-unit">%</span></div>';
     html += '<div class="analytics-kpi-sub">'+t.recs+' 条打卡记录</div>';
     html += '</div>';
   }
@@ -9159,7 +9159,7 @@ function renderAttendAnalytics() {
     var normalRate = t.recs>0?Math.round(t.normal*1000/t.recs)/10:0;
     html += '<div class="analytics-kpi-card">';
     html += '<div class="analytics-kpi-label">总出勤率</div>';
-    html += '<div class="analytics-kpi-value">'+normalRate+'<span class="analytics-kpi-unit">%</span></div>';
+    html += '<div class="analytics-kpi-value">'+normalRate.toFixed(1)+'<span class="analytics-kpi-unit">%</span></div>';
     html += '<div class="analytics-kpi-sub">'+t.recs+' 条打卡记录</div>';
     html += '</div>';
   } else {
@@ -9323,7 +9323,7 @@ function renderAttendAnalytics() {
       var maxRate = topDept[0].rate;
       topDept.forEach(function(d) {
         var barClass = d.rate >= 15 ? 'high' : d.rate >= 8 ? 'mid' : 'low';
-        html += '<div class="analytics-focus-bar-wrap"><span class="analytics-focus-bar-label" title="'+esc(d.name)+'">'+esc(d.name)+'</span><div class="analytics-focus-bar-track"><div class="analytics-focus-bar-fill '+barClass+'" style="width:'+(maxRate>0?Math.round(d.rate*100/maxRate):0)+'%"></div></div><span class="analytics-focus-bar-val '+barClass+'">'+d.rate+'%</span></div>';
+        html += '<div class="analytics-focus-bar-wrap"><span class="analytics-focus-bar-label" title="'+esc(d.name)+'">'+esc(d.name)+'</span><div class="analytics-focus-bar-track"><div class="analytics-focus-bar-fill '+barClass+'" style="width:'+(maxRate>0?Math.round(d.rate*100/maxRate):0)+'%"></div></div><span class="analytics-focus-bar-val '+barClass+'">'+d.rate.toFixed(1)+'%</span></div>';
       });
     }
     html += '</div>';
@@ -9437,7 +9437,7 @@ function renderAnalyticsCharts(stats) {
       },
       options: {
         responsive: true, interaction: { intersect: false, mode: 'index' },
-        plugins: { legend: { position: 'bottom', labels: { boxWidth:10, padding:16, font:{size:10}, usePointStyle:true } } },
+        plugins: { legend: { position: 'bottom', labels: { boxWidth:10, padding:16, font:{size:10}, usePointStyle:true } }, tooltip: { callbacks: { label: function(ctx) { var v = ctx.parsed.y; var l = ctx.dataset.label || ''; return l.includes('%')||l.includes('率') ? l+': '+v.toFixed(1)+'%' : l+': '+v; } } } },
         scales: trendScales
       }
     });
@@ -9586,7 +9586,7 @@ function renderAnalyticsCharts(stats) {
       },
       options: {
         indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return ctx.parsed.x.toFixed(1)+'%'; } } } },
         scales: { x: { max: Math.ceil(maxBu*1.2), ticks:{callback:function(v){return v+'%';},font:{size:10}}, grid:{color:'#f0f0f0'} }, y: { ticks:{font:{size:10}} } }
       }
     });
@@ -9637,7 +9637,7 @@ function renderAnalyticsCharts(stats) {
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return ctx.parsed.y.toFixed(1)+'%'; } } } },
         scales: {
           x: { ticks: { maxRotation: 45, font: { size: 9 } }, grid: { color: '#f0f0f0' } },
           y: { max: Math.ceil(maxDept*1.2), ticks: { callback: function(v) { return v + '%'; }, font: { size: 10 } }, grid: { color: '#f0f0f0' } }
