@@ -6677,6 +6677,12 @@ function saveDepts(d){ try{ localStorage.okr_depts=JSON.stringify(d) }catch(e){}
 
 let empList = loadEmployees();
 let deptList = loadDepts();
+// 从云端同步后刷新内存变量，避免 reload 页面
+function refreshGlobals(){
+  empList = loadEmployees();
+  deptList = loadDepts();
+  users = loadUsers();
+}
 
 // --- Migration from old department-tree data ---
 function migrateOldOrgData(){
@@ -11095,7 +11101,10 @@ async function migrateToMultiRow(oldRow){
 }
 
 // ===== 页面加载时同步 =====
-async function syncFromRemote(){
+// opts.noReload: 首次加载时不刷新页面，改为返回 true 让调用方重新初始化内存变量
+async function syncFromRemote(opts){
+  opts = opts || {};
+  var updatedAny = false;
   try{
     // 先查新格式是否存在
     const { data: newRows, error: err1 } = await supabaseClient
@@ -11113,15 +11122,11 @@ async function syncFromRemote(){
         .eq('id', 1)
         .maybeSingle();
       if(err2) throw err2;
-      // 旧格式的特征：data 字段是一个包含多个 DATA_KEYS 的 JSON blob
       if(oldRow && oldRow.data && typeof oldRow.data === 'object' && !oldRow.data.eval){
-        // 旧格式：data 是一级 key-value map（如 {okr_data: ..., okr_employees: ...}）
-        // 新格式：data 已经按组拆分（如 eval 组只有 {otms_trainee_eval_v1: ...}）
         var isOldFormat = false;
         var allGroupKeys = [];
         SYNC_GROUP_LIST.forEach(function(g){ allGroupKeys = allGroupKeys.concat(SYNC_GROUPS[g].keys); });
         var dataKeys = Object.keys(oldRow.data).filter(function(k){ return k[0] !== '_'; });
-        // 如果 data 里包含多个不同组的 key，就是旧格式
         var foundGroups = {};
         dataKeys.forEach(function(k){ var g = getGroupForKey(k); if(g) foundGroups[g] = true; });
         isOldFormat = Object.keys(foundGroups).length >= 2;
@@ -11130,14 +11135,12 @@ async function syncFromRemote(){
           hasNew = true;
         }
       } else if(oldRow && oldRow.data){
-        // 可能是新格式的某一行（只有一组 keys），不算旧格式
         hasNew = true;
       }
-      if(!hasNew) return console.log('云端暂无数据，使用本地数据');
+      if(!hasNew) { console.log('云端暂无数据，使用本地数据'); return false; }
     }
 
     // 检查所有组的版本，有更新的就下载
-    var updatedAny = false;
     for(var gi = 0; gi < SYNC_GROUP_LIST.length; gi++){
       var gid = SYNC_GROUP_LIST[gi];
       var groupId = SYNC_GROUPS[gid].id;
@@ -11158,13 +11161,19 @@ async function syncFromRemote(){
       }catch(e){}
     }
     if(updatedAny){
-      console.log('已从云端同步最新数据，刷新页面生效');
+      console.log('已从云端同步最新数据');
+      if(opts.noReload){
+        // 首次加载：不刷新页面，调用方重新初始化内存数据后直接渲染
+        return true;
+      }
+      // 运行时自动检查更新 → 需要刷新页面
       alert('数据已更新，即将刷新页面。');
       location.reload();
     }
   }catch(e){
     console.log('Supabase 同步失败，使用本地数据:', e.message);
   }
+  return false;
 }
 
 // ===== 手动导出全部数据 =====
@@ -11405,17 +11414,30 @@ function activateSidebarSub(tab, sub){
 function _escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function _escAttr(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function initApp(){
-  renderSidebar();
-  restoreOkrFilters();
-  syncFromRemote();
-  // 恢复上次停留的标签页，默认进入工作台
-  var lastTab = safeSessionGet('okr_last_tab');
-  var homeTab = lastTab || (currentUser ? getPref('homeTab','workspace') : 'workspace');
-  switchTab(homeTab);
-  updateBellBadge();
-  // 页面加载后自动备份全部系统数据（延迟 2 秒确保数据全部就绪）
-  setTimeout(function(){ autoBackupSystemData(); }, 2000);
+var _initRunning = false;
+async function initApp(){
+  if(_initRunning){ console.log('initApp 已在运行，跳过重复调用'); return; }
+  _initRunning = true;
+  try{
+    renderSidebar();
+    restoreOkrFilters();
+    // 等待云端数据下载完成，无痕模式/新设备首次打开也能拿到数据
+    var synced = await syncFromRemote({noReload: true});
+    if(synced){
+      // 云端有数据 → 刷新内存变量，避免空数据渲染
+      refreshGlobals();
+      console.log('已从云端加载数据，直接渲染无需刷新');
+    }
+    // 恢复上次停留的标签页，默认进入工作台
+    var lastTab = safeSessionGet('okr_last_tab');
+    var homeTab = lastTab || (currentUser ? getPref('homeTab','workspace') : 'workspace');
+    switchTab(homeTab);
+    updateBellBadge();
+    // 页面加载后自动备份全部系统数据（延迟 2 秒确保数据全部就绪）
+    setTimeout(function(){ autoBackupSystemData(); }, 2000);
+  }finally{
+    _initRunning = false;
+  }
 }
 // initApp() moved to end of script — must run after all var declarations (e.g. TN_REF_TASKS at L12296)
 
@@ -22121,7 +22143,7 @@ function filterCalendar(juris) {
   });
 }
 
-try { initApp(); } catch(e) { console.error('initApp 失败:', e.message); }
+initApp().catch(function(e){ console.error('initApp 失败:', e.message); });
 
 </script>
 </body>
