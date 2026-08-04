@@ -1571,16 +1571,39 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .ws-report-meta { font-size:9px; color:var(--danger-text); flex-shrink:0; }
 @media(max-width:768px){ .ws-cols{flex-direction:column;} .ws-stats{flex-wrap:wrap;gap:6px;} .ws-stat-item{min-width:calc(33.3% - 4px);flex:none;} .ws-today-overview{grid-template-columns:repeat(2,1fr);} }
 
-/* 考勤月度概览表（考勤总览页） */
-.ao-monthly-table { width:100%; border-collapse:collapse; font-size:11px; margin-top:8px; }
-.ao-monthly-table th { padding:6px 10px; text-align:center; border-bottom:1px solid var(--border); font-size:10px; font-weight:500; color:var(--text-dim); white-space:nowrap; }
-.ao-monthly-table th:first-child { text-align:left; }
-.ao-monthly-table td { padding:6px 10px; text-align:center; border-bottom:1px solid var(--border-light); white-space:nowrap; }
-.ao-monthly-table td:first-child { text-align:left; font-weight:500; }
-.ao-monthly-table tbody tr { transition:background .15s; }
-.ao-monthly-table tbody tr:hover { background:var(--bg-surface-hover); }
-.ao-monthly-table tbody tr:last-child td { border-bottom:none; }
-@media(max-width:768px){ .ao-monthly-table { font-size:10px; } .ao-monthly-table th,.ao-monthly-table td { padding:4px 6px; } }
+/* 考勤月度看板（考勤总览页） */
+.ao-insight-bar { display:flex; align-items:center; gap:8px; padding:10px 16px; background:var(--bg-surface); border-radius:8px; font-size:12px; color:var(--text-dim); margin-bottom:14px; flex-wrap:wrap; }
+.ao-insight-icon { font-size:16px; flex-shrink:0; }
+.ao-card-row { display:grid; grid-template-columns:repeat(7,1fr); gap:10px; margin-bottom:20px; }
+.ao-month-card { background:var(--card); border-radius:10px; padding:14px 12px 12px; box-shadow:var(--shadow-card); transition:all .2s; cursor:default; border-top:3px solid transparent; position:relative; }
+.ao-month-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-card-hover); }
+.ao-month-card.ao-card-good { border-top-color:#5FA895; }
+.ao-month-card.ao-card-warn { border-top-color:#E89B55; }
+.ao-month-card.ao-card-bad { border-top-color:#E0696F; }
+.ao-card-month { font-size:13px; font-weight:700; color:var(--text); margin-bottom:8px; display:flex; align-items:center; gap:4px; }
+.ao-card-badge { font-size:8px; padding:1px 5px; border-radius:3px; font-weight:500; }
+.ao-card-badge.best { background:rgba(95,168,149,.15); color:#5FA895; }
+.ao-card-badge.low { background:rgba(224,105,111,.12); color:#E0696F; }
+.ao-card-count { font-size:22px; font-weight:700; color:var(--text); line-height:1; margin-bottom:2px; }
+.ao-card-unit { font-size:11px; font-weight:400; color:var(--text-muted); margin-left:2px; }
+.ao-card-rate-row { display:flex; align-items:baseline; gap:6px; margin:6px 0 4px; }
+.ao-card-rate { font-size:16px; font-weight:700; }
+.ao-card-rate.good { color:#5FA895; }
+.ao-card-rate.warn { color:#E89B55; }
+.ao-card-rate.bad { color:#E0696F; }
+.ao-rate-bar { height:3px; background:var(--bg); border-radius:2px; margin-bottom:8px; overflow:hidden; }
+.ao-rate-fill { height:100%; border-radius:2px; transition:width .6s ease; }
+.ao-card-anomalies { display:flex; flex-wrap:wrap; gap:3px; margin-bottom:6px; min-height:20px; }
+.ao-anom { font-size:9px; padding:1px 5px; border-radius:3px; white-space:nowrap; }
+.ao-anom.late { background:rgba(232,155,85,.12); color:#C57D48; }
+.ao-anom.miss { background:rgba(90,111,160,.1); color:#6A7FA0; }
+.ao-anom.absent { background:rgba(224,105,111,.1); color:#B85C5C; }
+.ao-anom.leave { background:rgba(136,122,184,.1); color:#7A6AA0; }
+.ao-anom.nodd { background:rgba(181,176,170,.12); color:#9A9490; }
+.ao-anom.clean { color:#5FA895; }
+.ao-card-src { font-size:9px; color:var(--text-muted); text-align:right; }
+@media(max-width:1200px){ .ao-card-row { grid-template-columns:repeat(4,1fr); } }
+@media(max-width:768px){ .ao-card-row { grid-template-columns:repeat(2,1fr); } .ao-month-card { padding:10px 8px; } .ao-card-count { font-size:18px; } }
 
 /* 问候摘要 */
 .ws-hero-summary { font-size:11px; color:var(--text-dim); padding:0 0 14px; line-height:1.5; }
@@ -9262,7 +9285,7 @@ function renderAttendAnalytics() {
 
   // 月度考勤概览表（仅在全量视图显示，非个人/非特定筛选）
   if (!filter.month && !filter.day && !filter.empId && filter.atype === 'all' && !filter.leaveSub && !filter.lateSub && !filter.outSub) {
-    html += buildAttendMonthlyOverview();
+    html += buildAttendMonthlyDashboard();
   }
 
   // ---- Charts ----
@@ -13886,24 +13909,28 @@ function renderWorkspace(){
 
 }
 
-// ===== 考勤月度概览（考勤总览页） =====
-function buildAttendMonthlyOverview() {
+// ===== 考勤月度看板（考勤总览页） =====
+function buildAttendMonthlyDashboard() {
   var att = null;
   try { att = JSON.parse(localStorage.getItem('okr_attendance') || '{}'); } catch(e) { att = {}; }
   var recs = null;
   try { recs = JSON.parse(localStorage.getItem('attendance_records') || '{}'); } catch(e) { recs = {}; }
+  var leavesData = null;
+  try { leavesData = JSON.parse(localStorage.getItem('attendance_leaves') || '{}'); } catch(e) { leavesData = {}; }
 
   var months = ['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06','2026-07'];
-  var rows = [];
+  var cards = [];
+  var bestRate = 0, worstRate = 100;
 
   for (var mi = 0; mi < months.length; mi++) {
     var month = months[mi];
     var csvSet = {};
     var activeSet = {};
     var noddSet = {};
-    var ciLate = 0, ciMiss = 0;
+    var ciLate = 0, ciAbsent = 0, missOnly = 0;
     var totalRecs = 0;
 
+    // CSV coverage
     for (var d in recs) {
       if (d.slice(0, 7) !== month) continue;
       var recMap = recs[d];
@@ -13913,6 +13940,7 @@ function buildAttendMonthlyOverview() {
       }
     }
 
+    // Attendance status stats
     for (var d in att) {
       if (d.slice(0, 7) !== month) continue;
       var empMap = att[d];
@@ -13923,60 +13951,124 @@ function buildAttendMonthlyOverview() {
         totalRecs++;
         var ci = obj.ci || '';
         var co = obj.co || '';
+        var m = obj.m || '';
         if (ci && ci !== '--') {
           activeSet[eid] = true;
           if (ci === '迟到' || ci === '严重迟到') ciLate++;
-          else if (ci === '缺卡') ciMiss++;
+          if (m === '旷工') ciAbsent++;
+          else if (ci === '缺卡' || co === '缺卡') missOnly++;
         } else {
           noddSet[eid] = true;
         }
-        if (co === '缺卡' && ci !== '缺卡') ciMiss++;
+      }
+    }
+
+    // Leave days from attendance_leaves
+    var leaveDays = 0;
+    var leaveMonth = leavesData[month];
+    if (leaveMonth) {
+      for (var ename in leaveMonth) {
+        if (!leaveMonth.hasOwnProperty(ename)) continue;
+        var lr = leaveMonth[ename];
+        leaveDays += (lr.a || 0) + (lr.l || 0) + (lr.s || 0) + (lr.p || 0);
       }
     }
 
     var csvCount = Object.keys(csvSet).length;
     var activeCount = Object.keys(activeSet).length;
     var noddCount = Object.keys(noddSet).length;
-    var normalCount = totalRecs - ciLate - ciMiss;
+    var normalCount = totalRecs - ciLate - missOnly - ciAbsent;
+    if (normalCount < 0) normalCount = 0;
     var normalRate = totalRecs > 0 ? Math.round(normalCount * 1000 / totalRecs) / 10 : 0;
+    if (normalRate > bestRate) bestRate = normalRate;
+    if (normalRate < worstRate) worstRate = normalRate;
     var rateClass = normalRate >= 95 ? 'good' : normalRate >= 90 ? 'warn' : 'bad';
-    var srcLabel = csvCount > 0 ? 'CSV' : '--';
-    if (activeCount > csvCount) srcLabel += '+' + (activeCount - csvCount);
+    var srcLabel = csvCount > 0 ? 'CSV' : '钉钉';
+    var dtExtra = activeCount - csvCount;
+    if (dtExtra > 0) srcLabel += ' +' + dtExtra;
 
-    rows.push({
+    cards.push({
       month: month.slice(5).replace(/^0/, '') + '月',
+      monthKey: month,
       active: activeCount,
-      csv: csvCount,
       nodd: noddCount,
       rate: normalRate,
       rateClass: rateClass,
       late: ciLate,
-      miss: ciMiss,
-      src: srcLabel
+      miss: missOnly,
+      absent: ciAbsent,
+      leaveDays: leaveDays,
+      src: srcLabel,
+      csvOnly: dtExtra === 0
     });
   }
 
-  if (rows.length === 0) return '';
+  if (cards.length === 0) return '';
 
-  var h = '<div class="analytics-chart-box full" style="margin-bottom:16px">';
-  h += '<div class="analytics-chart-title">月度考勤概览（2026年 1-7月）</div>';
-  h += '<table class="ao-monthly-table"><thead><tr>';
-  h += '<th>月份</th><th>参与人数</th><th>正常出勤率</th><th>迟到</th><th>缺卡</th><th>数据来源</th>';
-  h += '</tr></thead><tbody>';
+  // Find trend arrow: compare last 3 months vs first 3 months
+  var recentAvg = (cards[4].rate + cards[5].rate + cards[6].rate) / 3;
+  var earlyAvg = (cards[0].rate + cards[1].rate + cards[2].rate) / 3;
+  var trendIcon = recentAvg >= earlyAvg ? '↗' : '↘';
+  var trendLabel = recentAvg >= earlyAvg ? '向好' : '下降';
+  var trendColor = recentAvg >= earlyAvg ? '#5FA895' : '#E0696F';
 
-  for (var i = 0; i < rows.length; i++) {
-    var r = rows[i];
-    h += '<tr>';
-    h += '<td>' + r.month + '</td>';
-    h += '<td><span style="font-weight:600">' + r.active + '人</span>' + (r.nodd > 0 ? ' <span style="font-size:9px;color:var(--text-muted)">+' + r.nodd + '无数据</span>' : '') + '</td>';
-    h += '<td><span style="font-weight:500;color:' + (r.rateClass === 'good' ? '#5FA895' : r.rateClass === 'warn' ? '#E89B55' : '#E0696F') + '">' + r.rate.toFixed(1) + '%</span></td>';
-    h += '<td>' + (r.late > 0 ? r.late + '次' : '--') + '</td>';
-    h += '<td>' + (r.miss > 0 ? r.miss + '次' : '--') + '</td>';
-    h += '<td><span style="font-size:9px;color:var(--text-muted)">' + r.src + '</span></td>';
-    h += '</tr>';
+  // Build summary insight
+  var totalActive = 0, totalNodd = 0;
+  cards.forEach(function(c) { totalActive += c.active; totalNodd += c.nodd; });
+  var avgActive = Math.round(totalActive / cards.length);
+  var avgRate = (cards.reduce(function(s,c){return s+c.rate;},0) / cards.length);
+  var bestMonth = cards.reduce(function(a,b){return a.rate>b.rate?a:b;});
+  var worstMonth = cards.reduce(function(a,b){return a.rate<b.rate?a:b;});
+
+  var h = '';
+
+  // Summary insight bar
+  h += '<div class="ao-insight-bar">';
+  h += '<span class="ao-insight-icon">📊</span>';
+  h += '<span>1-7月月均 <b>' + avgActive + '人</b>打卡，正常出勤率 <b>' + avgRate.toFixed(1) + '%</b></span>';
+  h += '<span style="margin-left:4px;color:' + trendColor + ';font-size:11px">' + trendIcon + ' ' + trendLabel + '</span>';
+  h += '<span style="color:var(--text-muted);font-size:10px">｜最佳 ' + bestMonth.month + ' ' + bestMonth.rate.toFixed(1) + '%</span>';
+  if (worstMonth.month !== bestMonth.month) {
+    h += '<span style="color:var(--text-muted);font-size:10px">｜' + worstMonth.month + '偏低 ' + worstMonth.rate.toFixed(1) + '%</span>';
   }
+  h += '</div>';
 
-  h += '</tbody></table></div>';
+  // Month cards
+  h += '<div class="ao-card-row">';
+  for (var i = 0; i < cards.length; i++) {
+    var c = cards[i];
+    var barW = Math.round(c.rate);
+    var barColor = c.rateClass === 'good' ? '#5FA895' : c.rateClass === 'warn' ? '#E89B55' : '#E0696F';
+    var isMax = c.rate === bestRate;
+    var isMin = c.rate === worstRate && c.rate < bestRate;
+
+    h += '<div class="ao-month-card ao-card-' + c.rateClass + '">';
+    // Month header
+    h += '<div class="ao-card-month">' + c.month;
+    if (isMax) h += ' <span class="ao-card-badge best">最佳</span>';
+    if (isMin) h += ' <span class="ao-card-badge low">偏低</span>';
+    h += '</div>';
+    // Headcount
+    h += '<div class="ao-card-count">' + c.active + '<span class="ao-card-unit">人打卡</span></div>';
+    // Normal rate with mini bar
+    h += '<div class="ao-card-rate-row"><span class="ao-card-rate ' + c.rateClass + '">' + c.rate.toFixed(1) + '%</span><span style="font-size:9px;color:var(--text-muted)">正常</span></div>';
+    h += '<div class="ao-rate-bar"><div class="ao-rate-fill" style="width:' + barW + '%;background:' + barColor + '"></div></div>';
+    // Anomaly breakdown
+    h += '<div class="ao-card-anomalies">';
+    var parts = [];
+    if (c.late > 0) parts.push('<span class="ao-anom late">迟' + c.late + '</span>');
+    if (c.miss > 0) parts.push('<span class="ao-anom miss">缺' + c.miss + '</span>');
+    if (c.absent > 0) parts.push('<span class="ao-anom absent">旷' + c.absent + '</span>');
+    if (c.leaveDays > 0) parts.push('<span class="ao-anom leave">假' + c.leaveDays.toFixed(1) + '天</span>');
+    if (c.nodd > 0) parts.push('<span class="ao-anom nodd">' + c.nodd + '人无数据</span>');
+    h += parts.length > 0 ? parts.join('') : '<span class="ao-anom clean">无异常</span>';
+    h += '</div>';
+    // Source
+    h += '<div class="ao-card-src">' + c.src + '</div>';
+    h += '</div>';
+  }
+  h += '</div>';
+
   return h;
 }
 
