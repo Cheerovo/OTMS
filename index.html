@@ -10887,6 +10887,8 @@ function collectGroupData(gid){
     var v = localStorage.getItem(k);
     if(v !== null){ try{data[k] = JSON.parse(v);}catch(e){data[k] = v;} }
   });
+  // 上传前补全 okr_attendance 的 ci/co，防止旧格式数据覆盖已修复的云端数据
+  if(data.okr_attendance) normalizeAttendanceCiCo(data.okr_attendance);
   return data;
 }
 
@@ -10897,6 +10899,32 @@ function collectAllData(){
     if(v !== null){ try{data[k] = JSON.parse(v);}catch(e){data[k] = v;} }
   });
   return data;
+}
+
+// 补全 okr_attendance 的 ci/co（防旧格式覆盖）
+function normalizeAttendanceCiCo(att){
+  for (var date in att){
+    var empMap = att[date];
+    for (var empId in empMap){
+      var obj = empMap[empId];
+      if (!obj || typeof obj !== 'object' || (obj.ci && obj.co)) continue;
+      if (obj.m === '在岗' && obj.s === '正常')        { obj.ci='正常'; obj.co='正常'; }
+      else if (obj.m === '在岗' && obj.s === '迟到')    { obj.ci='迟到'; obj.co='正常'; }
+      else if (obj.m === '在岗' && obj.s === '早退')    { obj.ci='正常'; obj.co='早退'; }
+      else if (obj.m === '在岗' && obj.s === '严重迟到') { obj.ci='严重迟到'; obj.co='正常'; }
+      else if (obj.m === '在岗' && obj.s === '迟到+早退') { obj.ci='迟到'; obj.co='早退'; }
+      else if (obj.m === '在岗' && obj.s === '上班缺卡') { obj.ci='缺卡'; obj.co='正常'; }
+      else if (obj.m === '在岗' && obj.s === '下班缺卡') { obj.ci='正常'; obj.co='缺卡'; }
+      else if (obj.m === '在岗' && obj.s === '上班缺卡+早退') { obj.ci='缺卡'; obj.co='早退'; }
+      else if (obj.m === '在岗' && obj.s === '自由工时') { obj.ci='自由工时'; obj.co='自由工时'; }
+      else if (obj.m === '旷工') { obj.ci='缺卡'; obj.co='缺卡'; }
+      else if (obj.m === '请假') { obj.ci='请假_'+obj.s; obj.co='请假_'+obj.s; }
+      else if (obj.m === '外勤') { obj.ci=obj.s; obj.co=obj.s; }
+      else if (obj.m === '加班') { obj.ci='加班'; obj.co='加班'; }
+      else if (obj.m === '休息') { obj.ci='休息'; obj.co='休息'; }
+      else { obj.ci='正常'; obj.co='正常'; }
+    }
+  }
 }
 
 // 按组导入数据。overwrite=true（syncFromRemote）时非 eval 数据云端覆盖本地
