@@ -11414,11 +11414,13 @@ function activateSidebarSub(tab, sub){
 function _escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function _escAttr(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-var _initRunning = false;
+var _initPromise = null;
 async function initApp(){
-  if(_initRunning){ console.log('initApp 已在运行，跳过重复调用'); return; }
-  _initRunning = true;
-  try{
+  // 如果已有正在运行的 init，等它完成后再跑一次
+  if(_initPromise){
+    try{ await _initPromise; }catch(e){}
+  }
+  _initPromise = (async function(){
     renderSidebar();
     restoreOkrFilters();
     // 等待云端数据下载完成，无痕模式/新设备首次打开也能拿到数据
@@ -11435,9 +11437,8 @@ async function initApp(){
     updateBellBadge();
     // 页面加载后自动备份全部系统数据（延迟 2 秒确保数据全部就绪）
     setTimeout(function(){ autoBackupSystemData(); }, 2000);
-  }finally{
-    _initRunning = false;
-  }
+  })();
+  try{ await _initPromise; }catch(e){}
 }
 // initApp() moved to end of script — must run after all var declarations (e.g. TN_REF_TASKS at L12296)
 
