@@ -11211,10 +11211,12 @@ function flushUpload(){
   _dirtyGroups = {};
   groups.forEach(function(gid){
     var groupId = SYNC_GROUPS[gid].id;
+    var verKey = getGroupVerKey(gid);
+    var localVer = parseInt(localStorage.getItem(verKey)) || 0;
     var data = collectGroupData(gid);
     var ver = Math.floor(Date.now() / 1000);
     try {
-      fetch(SUPABASE_URL + '/rest/v1/team_data?id=eq.' + groupId, {
+      fetch(SUPABASE_URL + '/rest/v1/team_data?version=eq.' + localVer + '&id=eq.' + groupId, {
         method: 'PATCH',
         headers: {
           'apikey': SUPABASE_ANON_KEY,
