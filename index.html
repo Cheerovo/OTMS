@@ -11052,14 +11052,14 @@ function renderOrgAttachments() {
 
 // ===== Init =====
 // ===== Remote Data Sync (Supabase) — 按资源组拆分，独立 CAS =====
-const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','attendance_records','attendance_leaves','attendance_unmatched','otms_tn_split_ratio','otms_trainee_cleared_v3'];
+const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','attendance_records','attendance_leaves','attendance_unmatched','otms_tn_split_ratio','otms_trainee_cleared_v3','okr_users'];
 
 // 资源分组：每组独立 Supabase 行 + 独立 version + 独立 CAS
 const SYNC_GROUPS = {
   eval:       {id: 1, keys: ['otms_trainee_eval_v1']},
   trainee:    {id: 2, keys: ['otms_trainee_data_v1', 'otms_trainee_cleared_v3', 'otms_tn_split_ratio']},
   okr:        {id: 3, keys: ['okr_data', 'okr_version', 'okr_data_version', 'okr_prefs']},
-  org:        {id: 4, keys: ['okr_employees', 'okr_depts', 'okr_permissions', 'nudge_log', 'org_attachments']},
+  org:        {id: 4, keys: ['okr_employees', 'okr_depts', 'okr_permissions', 'nudge_log', 'org_attachments', 'okr_users']},
   report:     {id: 5, keys: ['rpt_data', 'rpt_version', 'rpt_group_subs', 'meeting_data', 'kpi_data']},
   attendance: {id: 6, keys: ['okr_attendance', 'attendance_workdays', 'attendance_schedules', 'attendance_records', 'attendance_leaves', 'attendance_unmatched']}
 };
