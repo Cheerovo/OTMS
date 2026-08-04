@@ -13988,13 +13988,13 @@ function computeMonthlyOverview() {
 
   for (var mi = 0; mi < months.length; mi++) {
     var month = months[mi];
-    var csvSet = {}, activeSet = {};
+    var csvSet = {}, activeSet = {}, allSet = {};
     var ciLate = 0, ciEarly = 0, ciAbsent = 0, missOnly = 0, totalRecs = 0;
 
     for (var d in recs) {
       if (d.slice(0, 7) !== month) continue;
       var recMap = recs[d];
-      for (var eid in recMap) { if (recMap.hasOwnProperty(eid)) csvSet[eid] = true; }
+      for (var eid in recMap) { if (recMap.hasOwnProperty(eid)) { csvSet[eid] = true; allSet[eid] = true; } }
     }
 
     for (var d in att) {
@@ -14004,6 +14004,7 @@ function computeMonthlyOverview() {
         if (!empMap.hasOwnProperty(eid)) continue;
         var obj = empMap[eid];
         if (!obj || typeof obj !== 'object') continue;
+        allSet[eid] = true;
         var ci = obj.ci || '';
         var co = obj.co || '';
         var m = obj.m || '';
@@ -14028,9 +14029,7 @@ function computeMonthlyOverview() {
       }
     }
 
-    var csvCount = Object.keys(csvSet).length;
-    var activeCount = Object.keys(activeSet).length;
-    var headcount = csvCount || activeCount; // 优先用CSV源人数，更完整
+    var headcount = Object.keys(allSet).length; // 两个数据源并集，包含离职但月内有记录的人
     var normalCount = totalRecs - ciLate - ciEarly - missOnly - ciAbsent;
     if (normalCount < 0) normalCount = 0;
     var normalRate = totalRecs > 0 ? Math.round(normalCount * 1000 / totalRecs) / 10 : 0;
@@ -14040,8 +14039,7 @@ function computeMonthlyOverview() {
       active: headcount,
       rate: normalRate,
       late: ciLate, early: ciEarly, miss: missOnly, absent: ciAbsent,
-      leaveDays: leaveDays,
-      csvCount: csvCount
+      leaveDays: leaveDays
     });
   }
   return result;
