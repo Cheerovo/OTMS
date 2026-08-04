@@ -10052,19 +10052,15 @@ async function syncFromDingTalkSilent(date, attData, empList) {
     (dd.users || []).forEach(function(u) { ddMap[u.name] = u; if (u.workDays) wdMap[u.name] = u.workDays; if (u.scheduleByDate) schedMap[u.name] = u.scheduleByDate; if (u.schedule) schedMap[u.name+'_flat'] = u.schedule; });
     localStorage.setItem('attendance_workdays', JSON.stringify(wdMap));
     localStorage.setItem('attendance_schedules', JSON.stringify(schedMap));
-    // 同步所有日期（而非仅当天）
-    var allDates = new Set();
-    (dd.users || []).forEach(function(u) { Object.keys(u.statusByDate||{}).forEach(function(d){ allDates.add(d); }); });
-    allDates.forEach(function(d) {
-      if (!attData[d]) attData[d] = {};
-      empList.forEach(function(e) {
-        var ddUser = ddMap[e.name];
-        if (!ddUser) { attData[d][e.id] = {m:'不在钉钉数据', s:'不在钉钉数据'}; return; }
-        var raw = (ddUser.statusByDate && ddUser.statusByDate[d]);
-        if (!raw) { delete attData[d][e.id]; return; }
-        if (typeof raw === 'string') { raw = {m:'在岗', s: raw}; }
-        attData[d][e.id] = raw;
-      });
+    // 只在查看今天时用钉钉数据刷新今天的在岗状态（不覆盖历史数据）
+    if (!attData[date]) attData[date] = {};
+    empList.forEach(function(e) {
+      var ddUser = ddMap[e.name];
+      if (!ddUser) return;
+      var raw = (ddUser.statusByDate && ddUser.statusByDate[date]);
+      if (!raw) return;
+      if (typeof raw === 'string') raw = {m:'在岗', s: raw};
+      attData[date][e.id] = raw;
     });
     saveAttendance(attData);
     renderAttendView(true);
