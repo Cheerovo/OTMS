@@ -7925,6 +7925,7 @@ function renderAttendView(skipAutoSync) {
     else if (obj.m === '外勤') { obj.ci=obj.s; obj.co=obj.s; }
     else if (obj.m === '加班') { obj.ci='加班'; obj.co='加班'; }
     else if (obj.m === '休息') { obj.ci='休息'; obj.co='休息'; }
+    else if (obj.m === '不在钉钉数据') { obj.ci='--'; obj.co='--'; }
     else { obj.ci='正常'; obj.co='正常'; }
   }
 
@@ -10922,6 +10923,7 @@ function normalizeAttendanceCiCo(att){
       else if (obj.m === '外勤') { obj.ci=obj.s; obj.co=obj.s; }
       else if (obj.m === '加班') { obj.ci='加班'; obj.co='加班'; }
       else if (obj.m === '休息') { obj.ci='休息'; obj.co='休息'; }
+      else if (obj.m === '不在钉钉数据') { obj.ci='--'; obj.co='--'; }
       else { obj.ci='正常'; obj.co='正常'; }
     }
   }
