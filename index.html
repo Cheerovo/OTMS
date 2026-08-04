@@ -7714,7 +7714,7 @@ function renderAttendView(skipAutoSync) {
   html += '<span class="date-label">'+date+'</span>';
   html += '<input type="date" id="attendDateInput" value="'+date+'" onchange="renderAttendView()">';
   html += '<div class="topbar-right">';
-  html += '<input type="text" id="attendNameSearch" placeholder="搜索姓名..." oninput="renderAttendView()" value="'+esc(window._attendNameSearchVal||'')+'" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs);width:120px">';
+  html += '<input type="text" id="attendNameSearch" placeholder="搜索姓名..." value="'+esc(window._attendNameSearchVal||'')+'" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs);width:120px">';
   html += '<select id="attendBUFilter" onchange="renderAttendView()" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs)">';
   html += '<option value="all">全部BU</option>';
   buSet.forEach(bu => html += '<option value="'+esc(bu)+'"'+(buVal===bu?' selected':'')+'>'+esc(bu)+'</option>');
@@ -8081,7 +8081,15 @@ function renderAttendView(skipAutoSync) {
 
   var wasFocused = document.activeElement && document.activeElement.id === 'attendNameSearch';
   div.innerHTML = html;
-  if (wasFocused) { var sf = document.getElementById('attendNameSearch'); if (sf) { sf.focus(); sf.setSelectionRange(sf.value.length, sf.value.length); } }
+  // 搜索框防抖：避免每次按键都重渲染
+  var searchInput = document.getElementById('attendNameSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      clearTimeout(window._attendSearchTimer);
+      window._attendSearchTimer = setTimeout(function(){ renderAttendView(); }, 250);
+    });
+    if (wasFocused) { searchInput.focus(); searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length); }
+  }
   if (attendSubView === 'data') setTimeout(function(){ renderAttendDataView(); }, 0);
   if (attendSubView === 'analytics') setTimeout(function(){ renderAttendAnalytics(); }, 0);
   } catch(e) {
