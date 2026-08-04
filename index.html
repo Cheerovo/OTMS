@@ -11226,9 +11226,10 @@ function mergeEvalData(localEval, cloudEval){
 // ===== 自动上传（按组 CAS）=====
 var _pendingUpload = false;
 function scheduleAutoUpload(){
-  if(_isImporting) return;
-  if(_autoUploadBusy){ _pendingUpload = true; return; }
+  if(_isImporting) { console.log('[同步] 跳过（正在导入数据）'); return; }
+  if(_autoUploadBusy){ _pendingUpload = true; console.log('[同步] 排队等待（上传中）'); return; }
   clearTimeout(_autoUploadTimer);
+  console.log('[同步] 已调度上传，1.5s后执行, 待上传组:', Object.keys(_dirtyGroups).join(','));
   _autoUploadTimer = setTimeout(async function(){
     _autoUploadBusy = true;
     _pendingUpload = false;
@@ -11397,6 +11398,7 @@ async function autoCheckRemote(){
     if(!_isImporting && DATA_KEYS.indexOf(key) !== -1){
       _dirtyKeys[key] = true;
       var gid = getGroupForKey(key);
+      console.log('[同步] 检测到数据变更:', key, '→ 组:', gid || '(无)');
       if(gid){
         _dirtyGroups[gid] = true;
       }
@@ -11406,6 +11408,34 @@ async function autoCheckRemote(){
 })();
 
 setInterval(autoCheckRemote, 30000);
+
+// ===== 推送本地未同步数据到云端（修复旧版 property-assignment 数据未上传）=====
+async function pushUnsynchronizedGroups(){
+  console.log('[启动同步] 检查未同步的本地数据...');
+  for(var gi = 0; gi < SYNC_GROUP_LIST.length; gi++){
+    var gid = SYNC_GROUP_LIST[gi];
+    var verKey = getGroupVerKey(gid);
+    var localVer = parseInt(localStorage.getItem(verKey)) || 0;
+    var hasData = SYNC_GROUPS[gid].keys.some(function(k){ return localStorage.getItem(k) !== null; });
+    if(!hasData) continue;
+    console.log('[启动同步]', gid, '本地版本:', localVer, '有数据:', hasData);
+    if(localVer === 0){
+      console.log('[启动同步]', gid, '🔼 发现未同步数据，上传中...');
+      await uploadGroup(gid, 0);
+    }
+  }
+  console.log('[启动同步] 完成');
+}
+// 手动触发全量同步（浏览器控制台调用: forceSyncAll()）
+window.forceSyncAll = async function(){
+  console.log('[手动同步] 开始全量上传...');
+  for(var gi = 0; gi < SYNC_GROUP_LIST.length; gi++){
+    var gid = SYNC_GROUP_LIST[gi];
+    console.log('[手动同步] 上传组:', gid);
+    await uploadGroup(gid, 0);
+  }
+  console.log('[手动同步] 完成');
+};
 
 // ===== 数据迁移：旧单行格式 → 新多行格式 =====
 async function migrateToMultiRow(oldRow){
@@ -11755,6 +11785,8 @@ async function initApp(){
   _initPromise = (async function(){
     renderSidebar();
     restoreOkrFilters();
+    // 推送本地未同步数据到云端（修复旧版数据未上传问题）
+    await pushUnsynchronizedGroups();
     // 等待云端数据下载完成，无痕模式/新设备首次打开也能拿到数据
     var synced = await syncFromRemote({noReload: true});
     if(synced){
