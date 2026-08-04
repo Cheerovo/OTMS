@@ -10019,7 +10019,8 @@ function renderAnalyticsCharts(stats) {
     var hcRow = document.getElementById('moHeadcountRow');
     if (hcRow) {
       hcRow.innerHTML = dashData.map(function(d){
-        return '<div class="mo-hc-card"><div class="mo-hc-month">'+d.month+'</div><div class="mo-hc-num">'+d.active+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">人</span></div></div>';
+        var note = d.departed > 0 ? '<div style="font-size:9px;color:var(--text-muted);margin-top:1px">含'+d.departed+'人已离职</div>' : '';
+        return '<div class="mo-hc-card"><div class="mo-hc-month">'+d.month+'</div><div class="mo-hc-num">'+d.active+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">人</span></div>'+note+'</div>';
       }).join('');
     }
     var dashLabels = dashData.map(function(d){return d.month;});
@@ -14030,6 +14031,7 @@ function computeMonthlyOverview() {
     }
 
     var headcount = Object.keys(allSet).length; // 两个数据源并集，包含离职但月内有记录的人
+    var departed = headcount - Object.keys(csvSet).length;
     var normalCount = totalRecs - ciLate - ciEarly - missOnly - ciAbsent;
     if (normalCount < 0) normalCount = 0;
     var normalRate = totalRecs > 0 ? Math.round(normalCount * 1000 / totalRecs) / 10 : 0;
@@ -14037,6 +14039,7 @@ function computeMonthlyOverview() {
     result.push({
       month: month.slice(5).replace(/^0/, '') + '月',
       active: headcount,
+      departed: departed,
       rate: normalRate,
       late: ciLate, early: ciEarly, miss: missOnly, absent: ciAbsent,
       leaveDays: leaveDays
