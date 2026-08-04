@@ -3625,7 +3625,7 @@ function migrateOldPerms(oldData){
   });
   return p;
 }
-function savePerms(p){try{localStorage.okr_permissions=JSON.stringify(p);}catch(e){}}
+function savePerms(p){try{localStorage.setItem('okr_permissions',JSON.stringify(p));}catch(e){}}
 function isGlobalAdmin(user){var u=users[user];return u&&u.role==='admin';}
 function isMentor(user){
   if(!user) return false;
@@ -3750,7 +3750,7 @@ function loadUsers(){
   }catch(e){}
   return base;
 }
-function saveUsers(d){try{localStorage.okr_users=JSON.stringify(d)}catch(e){}}
+function saveUsers(d){try{localStorage.setItem('okr_users',JSON.stringify(d));}catch(e){}}
 function safeSessionGet(k){try{return sessionStorage.getItem(k)}catch(e){return null}}
 function safeSessionSet(k,v){try{sessionStorage.setItem(k,v)}catch(e){}}
 function safeSessionRemove(k){try{sessionStorage.removeItem(k)}catch(e){}}
@@ -3803,7 +3803,7 @@ document.addEventListener('click',function(e){
   }
 });
 function loadPrefs(){try{return JSON.parse(localStorage.okr_prefs)||{};}catch(e){return{};}}
-function savePrefs(p){try{localStorage.okr_prefs=JSON.stringify(p);}catch(e){}}
+function savePrefs(p){try{localStorage.setItem('okr_prefs',JSON.stringify(p));}catch(e){}}
 function getPref(key,def){var p=loadPrefs();var u=currentUser;if(!u)return def;var up=p[u]||{};return up[key]!==undefined?up[key]:def;}
 function setPref(key,val){var p=loadPrefs();var u=currentUser;if(!u)return;if(!p[u])p[u]={};p[u][key]=val;savePrefs(p);}
 
@@ -4445,7 +4445,7 @@ const QUARTERS = ['2026Q1','2026Q2','2026Q3','2026Q4'];
 function defaultOKRs() { const n=Date.now(); return [];}
 
 function loadNudgeLog(){try{return JSON.parse(localStorage.nudge_log)||[]}catch(e){return[]}}
-function saveNudgeLog(d){try{localStorage.nudge_log=JSON.stringify(d.slice(-50))}catch(e){}}
+function saveNudgeLog(d){try{localStorage.setItem('nudge_log',JSON.stringify(d.slice(-50)));}catch(e){}}
 let nudgeLog=loadNudgeLog();
 function loadOKRs(){try{const ver=localStorage.okr_version;if(ver==='7'){try{var data=JSON.parse(localStorage.okr_data)||defaultOKRs();migrateRaciToArray(data);return data;}catch(e){return defaultOKRs();}}}catch(e){}return defaultOKRs();}
 // ---- ONE-TIME: clear all OKR data ----
@@ -4454,7 +4454,7 @@ function loadOKRs(){try{const ver=localStorage.okr_version;if(ver==='7'){try{var
 (function(){if(!localStorage.getItem('_oplog_cleared_20260720')){try{var d=JSON.parse(localStorage.okr_data||'[]');d.forEach(function(o){o.checkins=[];o.krs.forEach(function(k){k.log=[];});});localStorage.setItem('okr_data',JSON.stringify(d));}catch(e){}try{var m=JSON.parse(localStorage.meeting_data||'[]');m.forEach(function(mt){mt.minutesLog=[];});localStorage.setItem('meeting_data',JSON.stringify(m));}catch(e){}try{var r=JSON.parse(localStorage.rpt_data||'[]');r.forEach(function(rp){rp.subs={};});localStorage.setItem('rpt_data',JSON.stringify(r));}catch(e){}localStorage.setItem('nudge_log','[]');localStorage.setItem('_oplog_cleared_20260720','1');}})();
 function migrateRaciToArray(data){data.forEach(function(o){if(!o.raci)return;['R','A','C','I'].forEach(function(r){if(typeof o.raci[r]==='string'){o.raci[r]=o.raci[r]?o.raci[r].split(/[,，、\s]+/).filter(Boolean):[];}});});}
 function parseRaciInput(id){var el=document.getElementById(id);if(!el)return[];return el.value.split(/[,，、\s]+/).filter(Boolean);}
-function saveOKRs(d){try{localStorage.okr_data=JSON.stringify(d);localStorage.okr_version='7'}catch(e){alert('存储空间不足，请清理旧数据或导出备份后重试。\n错误：'+e.message);throw e}}
+function saveOKRs(d){try{localStorage.setItem('okr_data',JSON.stringify(d));localStorage.setItem('okr_version','7');}catch(e){alert('存储空间不足，请清理旧数据或导出备份后重试。\n错误：'+e.message);throw e}}
 let okrs = loadOKRs();
 let okrView = 'cards';
 
@@ -4489,7 +4489,7 @@ function defaultKPIs(){return[
 ];}
 
 function loadKPIs(){try{return JSON.parse(localStorage.kpi_data)||defaultKPIs()}catch(e){return defaultKPIs()}}
-function saveKPIs(d){try{localStorage.kpi_data=JSON.stringify(d)}catch(e){alert('存储空间不足，请清理旧数据后重试。\n错误：'+e.message);throw e}}
+function saveKPIs(d){try{localStorage.setItem('kpi_data',JSON.stringify(d));}catch(e){alert('存储空间不足，请清理旧数据后重试。\n错误：'+e.message);throw e}}
 let kpis = loadKPIs();
 
 
@@ -4528,7 +4528,7 @@ function defaultReports(){return[
   {id:'r12',name:'Closes版合并的P&L表（开弈投资系）',desc:'向工作会议提交开弈投资系年度Closes版合并P&L',freq:'yearly',deadlineDay:15,deadlineMonth:1,owner:'芦智蔚',companies:'开弈投资系',subs:{}}
 ];}
 function loadReports(){try{if(localStorage.rpt_version!=='6')return defaultReports();try{return JSON.parse(localStorage.rpt_data)||defaultReports()}catch(e){return defaultReports()}}catch(e){return defaultReports()}}
-function saveReports(d){try{localStorage.rpt_data=JSON.stringify(d);localStorage.rpt_version='6'}catch(e){alert('存储空间不足，请清理旧数据后重试。\n错误：'+e.message);throw e}}
+function saveReports(d){try{localStorage.setItem('rpt_data',JSON.stringify(d));localStorage.setItem('rpt_version','6');}catch(e){alert('存储空间不足，请清理旧数据后重试。\n错误：'+e.message);throw e}}
 let reports = loadReports();
 let rptView = 'monthly';
 
@@ -4867,7 +4867,7 @@ async function deleteFile(rptId,key,fileIndex){
 
 // ===== Group File Upload / Download =====
 function loadGroupSubs(){try{return JSON.parse(localStorage.rpt_group_subs)||{}}catch(e){return{}}}
-function saveGroupSubs(d){try{localStorage.rpt_group_subs=JSON.stringify(d)}catch(e){}}
+function saveGroupSubs(d){try{localStorage.setItem('rpt_group_subs',JSON.stringify(d));}catch(e){}}
 function getGroupSub(groupName,key){
   const gs=loadGroupSubs();
   return gs[key]||null;
@@ -6686,9 +6686,9 @@ document.addEventListener('keydown',function(e){
 // ===== Org Management =====
 // --- Employee data layer ---
 function loadEmployees(){ try{ return JSON.parse(localStorage.okr_employees)||[] }catch(e){return[]} }
-function saveEmployees(d){ try{ localStorage.okr_employees=JSON.stringify(d) }catch(e){} }
+function saveEmployees(d){ try{ localStorage.setItem('okr_employees',JSON.stringify(d)); }catch(e){} }
 function loadDepts(){ try{ return JSON.parse(localStorage.okr_depts)||[] }catch(e){return[]} }
-function saveDepts(d){ try{ localStorage.okr_depts=JSON.stringify(d) }catch(e){} }
+function saveDepts(d){ try{ localStorage.setItem('okr_depts',JSON.stringify(d)); }catch(e){} }
 
 let empList = loadEmployees();
 let deptList = loadDepts();
