@@ -14018,13 +14018,13 @@ function computeMonthlyOverview() {
 
   for (var mi = 0; mi < months.length; mi++) {
     var month = months[mi];
-    var csvSet = {}, activeSet = {}, allSet = {};
+    var csvSet = {}, activeSet = {};
     var ciLate = 0, ciEarly = 0, ciAbsent = 0, missOnly = 0, totalRecs = 0;
 
     for (var d in recs) {
       if (d.slice(0, 7) !== month) continue;
       var recMap = recs[d];
-      for (var eid in recMap) { if (recMap.hasOwnProperty(eid)) { csvSet[eid] = true; allSet[eid] = true; } }
+      for (var eid in recMap) { if (recMap.hasOwnProperty(eid)) csvSet[eid] = true; }
     }
 
     for (var d in att) {
@@ -14034,7 +14034,6 @@ function computeMonthlyOverview() {
         if (!empMap.hasOwnProperty(eid)) continue;
         var obj = empMap[eid];
         if (!obj || typeof obj !== 'object') continue;
-        allSet[eid] = true;
         var ci = obj.ci || '';
         var co = obj.co || '';
         var m = obj.m || '';
@@ -14058,8 +14057,7 @@ function computeMonthlyOverview() {
       }
     }
 
-    var headcount = Object.keys(allSet).length;
-    var departed = headcount - Object.keys(csvSet).length;
+    var headcount = Object.keys(csvSet).length;
     var normalCount = totalRecs - ciLate - ciEarly - missOnly - ciAbsent;
     if (normalCount < 0) normalCount = 0;
     var normalRate = totalRecs > 0 ? Math.round(normalCount * 1000 / totalRecs) / 10 : 0;
@@ -14069,7 +14067,6 @@ function computeMonthlyOverview() {
     result.push({
       month: month.slice(5).replace(/^0/, '') + '月',
       active: headcount,
-      departed: departed,
       rate: normalRate,
       late: ciLate, early: ciEarly, miss: missOnly, absent: ciAbsent,
       leaveDays: leaveDays
