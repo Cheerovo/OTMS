@@ -14019,13 +14019,14 @@ function computeMonthlyOverview() {
 
     var csvCount = Object.keys(csvSet).length;
     var activeCount = Object.keys(activeSet).length;
+    var headcount = csvCount || activeCount; // 优先用CSV源人数，更完整
     var normalCount = totalRecs - ciLate - ciEarly - missOnly - ciAbsent;
     if (normalCount < 0) normalCount = 0;
     var normalRate = totalRecs > 0 ? Math.round(normalCount * 1000 / totalRecs) / 10 : 0;
 
     result.push({
       month: month.slice(5).replace(/^0/, '') + '月',
-      active: activeCount,
+      active: headcount,
       rate: normalRate,
       late: ciLate, early: ciEarly, miss: missOnly, absent: ciAbsent,
       leaveDays: leaveDays,
