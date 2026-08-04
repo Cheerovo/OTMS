@@ -1571,26 +1571,16 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .ws-report-meta { font-size:9px; color:var(--danger-text); flex-shrink:0; }
 @media(max-width:768px){ .ws-cols{flex-direction:column;} .ws-stats{flex-wrap:wrap;gap:6px;} .ws-stat-item{min-width:calc(33.3% - 4px);flex:none;} .ws-today-overview{grid-template-columns:repeat(2,1fr);} }
 
-/* 考勤月度概览 */
-.ws-attend-overview { margin-bottom:24px; }
-.ws-attend-overview .ws-ao-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.ws-ao-title { font-size:13px; font-weight:600; color:var(--text); display:flex; align-items:center; gap:8px; }
-.ws-ao-title::before { content:''; width:3px; height:16px; border-radius:3px; background:#5FA895; display:inline-block; }
-.ws-ao-table { width:100%; border-collapse:collapse; font-size:11px; background:var(--card); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-card); }
-.ws-ao-table th { padding:8px 12px; text-align:center; border-bottom:1px solid var(--border); background:var(--bg-surface); font-size:10px; font-weight:500; color:var(--text-dim); white-space:nowrap; }
-.ws-ao-table th:first-child { text-align:left; padding-left:20px; }
-.ws-ao-table td { padding:8px 12px; text-align:center; border-bottom:1px solid var(--border-light); white-space:nowrap; }
-.ws-ao-table td:first-child { text-align:left; padding-left:20px; font-weight:500; }
-.ws-ao-table tbody tr { transition:background .15s; cursor:default; }
-.ws-ao-table tbody tr:hover { background:var(--bg-surface-hover); }
-.ws-ao-table tbody tr:last-child td { border-bottom:none; }
-.ws-ao-count { font-weight:600; }
-.ws-ao-rate { font-weight:500; }
-.ws-ao-rate.good { color:#5FA895; }
-.ws-ao-rate.warn { color:#E89B55; }
-.ws-ao-rate.bad { color:#E0696F; }
-.ws-ao-src { font-size:9px; color:var(--text-muted); }
-.ws-ao-empty { text-align:center; padding:20px; color:var(--text-muted); font-size:11px; }
+/* 考勤月度概览表（考勤总览页） */
+.ao-monthly-table { width:100%; border-collapse:collapse; font-size:11px; margin-top:8px; }
+.ao-monthly-table th { padding:6px 10px; text-align:center; border-bottom:1px solid var(--border); font-size:10px; font-weight:500; color:var(--text-dim); white-space:nowrap; }
+.ao-monthly-table th:first-child { text-align:left; }
+.ao-monthly-table td { padding:6px 10px; text-align:center; border-bottom:1px solid var(--border-light); white-space:nowrap; }
+.ao-monthly-table td:first-child { text-align:left; font-weight:500; }
+.ao-monthly-table tbody tr { transition:background .15s; }
+.ao-monthly-table tbody tr:hover { background:var(--bg-surface-hover); }
+.ao-monthly-table tbody tr:last-child td { border-bottom:none; }
+@media(max-width:768px){ .ao-monthly-table { font-size:10px; } .ao-monthly-table th,.ao-monthly-table td { padding:4px 6px; } }
 
 /* 问候摘要 */
 .ws-hero-summary { font-size:11px; color:var(--text-dim); padding:0 0 14px; line-height:1.5; }
@@ -3091,7 +3081,6 @@ body.tn-resizing * { pointer-events:none; }
       <div class="ws-stat-card" onclick="document.getElementById('wsTodoSection').scrollIntoView({behavior:'smooth'})"><div class="sc-icon c3"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="sc-body"><div class="ws-stat-val" id="wsStatOverdue">0</div><div class="ws-stat-lbl">超期/紧急</div><div class="ws-stat-sub" id="wsStatOverdueSub"></div></div></div>
       <div class="ws-stat-card" onclick="document.getElementById('wsProgressSection').scrollIntoView({behavior:'smooth'})"><div class="sc-icon c4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="6" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="14"/></svg></div><div class="sc-body"><div class="ws-stat-val" id="wsStatProgress">0%</div><div class="ws-stat-lbl">工作进度</div><div class="ws-progress-mini"><div class="ws-progress-mini-fill" id="wsStatProgressBar"></div></div></div></div>
     </div>
-    <div class="ws-attend-overview" id="wsAttendOverview"></div>
     <div class="ws-cols">
       <div class="ws-col">
         <div class="ws-module-hd">工作待办</div>
@@ -9271,6 +9260,11 @@ function renderAttendAnalytics() {
 
   html += '</div>';
 
+  // 月度考勤概览表（仅在全量视图显示，非个人/非特定筛选）
+  if (!filter.month && !filter.day && !filter.empId && filter.atype === 'all' && !filter.leaveSub && !filter.lateSub && !filter.outSub) {
+    html += buildAttendMonthlyOverview();
+  }
+
   // ---- Charts ----
   // Row 1: 月度趋势
   var trendTitle;
@@ -13890,16 +13884,10 @@ function renderWorkspace(){
     });
   }catch(e){}
 
-  // 考勤月度概览
-  renderWSAttendOverview();
-
 }
 
-// ===== 考勤月度概览（工作台） =====
-function renderWSAttendOverview() {
-  var container = document.getElementById('wsAttendOverview');
-  if (!container) return;
-
+// ===== 考勤月度概览（考勤总览页） =====
+function buildAttendMonthlyOverview() {
   var att = null;
   try { att = JSON.parse(localStorage.getItem('okr_attendance') || '{}'); } catch(e) { att = {}; }
   var recs = null;
@@ -13913,20 +13901,18 @@ function renderWSAttendOverview() {
     var csvSet = {};
     var activeSet = {};
     var noddSet = {};
-    var ciLate = 0, ciMiss = 0, ciEarly = 0;
+    var ciLate = 0, ciMiss = 0;
     var totalRecs = 0;
 
-    // Count from attendance_records (CSV source)
     for (var d in recs) {
       if (d.slice(0, 7) !== month) continue;
-      var empMap = recs[d];
-      for (var eid in empMap) {
-        if (!empMap.hasOwnProperty(eid)) continue;
+      var recMap = recs[d];
+      for (var eid in recMap) {
+        if (!recMap.hasOwnProperty(eid)) continue;
         csvSet[eid] = true;
       }
     }
 
-    // Count from okr_attendance
     for (var d in att) {
       if (d.slice(0, 7) !== month) continue;
       var empMap = att[d];
@@ -13944,15 +13930,14 @@ function renderWSAttendOverview() {
         } else {
           noddSet[eid] = true;
         }
-        if (co === '早退') ciEarly++;
-        else if (co === '缺卡' && ci !== '缺卡') ciMiss++;
+        if (co === '缺卡' && ci !== '缺卡') ciMiss++;
       }
     }
 
     var csvCount = Object.keys(csvSet).length;
     var activeCount = Object.keys(activeSet).length;
     var noddCount = Object.keys(noddSet).length;
-    var normalCount = totalRecs - ciLate - ciMiss - ciEarly;
+    var normalCount = totalRecs - ciLate - ciMiss;
     var normalRate = totalRecs > 0 ? Math.round(normalCount * 1000 / totalRecs) / 10 : 0;
     var rateClass = normalRate >= 95 ? 'good' : normalRate >= 90 ? 'warn' : 'bad';
     var srcLabel = csvCount > 0 ? 'CSV' : '--';
@@ -13971,29 +13956,28 @@ function renderWSAttendOverview() {
     });
   }
 
-  var html = '<div class="ws-ao-header"><div class="ws-ao-title">月度考勤概览</div><span style="font-size:10px;color:var(--text-muted)">2026年 1-7月</span></div>';
-  html += '<table class="ws-ao-table"><thead><tr>';
-  html += '<th>月份</th><th>参与人数</th><th>正常出勤率</th><th>迟到</th><th>缺卡</th><th>数据来源</th>';
-  html += '</tr></thead><tbody>';
+  if (rows.length === 0) return '';
 
-  if (rows.length === 0) {
-    html += '<tr><td colspan="6" class="ws-ao-empty">暂无考勤数据<br><span style="font-size:10px">请先在在岗状态页面同步数据</span></td></tr>';
-  } else {
-    for (var i = 0; i < rows.length; i++) {
-      var r = rows[i];
-      html += '<tr>';
-      html += '<td>' + r.month + '</td>';
-      html += '<td><span class="ws-ao-count">' + r.active + '人</span>' + (r.nodd > 0 ? ' <span style="font-size:9px;color:var(--text-muted)">+'+r.nodd+'无数据</span>' : '') + '</td>';
-      html += '<td><span class="ws-ao-rate ' + r.rateClass + '">' + r.rate.toFixed(1) + '%</span></td>';
-      html += '<td>' + (r.late > 0 ? r.late + '次' : '--') + '</td>';
-      html += '<td>' + (r.miss > 0 ? r.miss + '次' : '--') + '</td>';
-      html += '<td><span class="ws-ao-src">' + r.src + '</span></td>';
-      html += '</tr>';
-    }
+  var h = '<div class="analytics-chart-box full" style="margin-bottom:16px">';
+  h += '<div class="analytics-chart-title">月度考勤概览（2026年 1-7月）</div>';
+  h += '<table class="ao-monthly-table"><thead><tr>';
+  h += '<th>月份</th><th>参与人数</th><th>正常出勤率</th><th>迟到</th><th>缺卡</th><th>数据来源</th>';
+  h += '</tr></thead><tbody>';
+
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    h += '<tr>';
+    h += '<td>' + r.month + '</td>';
+    h += '<td><span style="font-weight:600">' + r.active + '人</span>' + (r.nodd > 0 ? ' <span style="font-size:9px;color:var(--text-muted)">+' + r.nodd + '无数据</span>' : '') + '</td>';
+    h += '<td><span style="font-weight:500;color:' + (r.rateClass === 'good' ? '#5FA895' : r.rateClass === 'warn' ? '#E89B55' : '#E0696F') + '">' + r.rate.toFixed(1) + '%</span></td>';
+    h += '<td>' + (r.late > 0 ? r.late + '次' : '--') + '</td>';
+    h += '<td>' + (r.miss > 0 ? r.miss + '次' : '--') + '</td>';
+    h += '<td><span style="font-size:9px;color:var(--text-muted)">' + r.src + '</span></td>';
+    h += '</tr>';
   }
 
-  html += '</tbody></table>';
-  container.innerHTML = html;
+  h += '</tbody></table></div>';
+  return h;
 }
 
 // ===== TRAINEE EVALUATION SYSTEM =====
