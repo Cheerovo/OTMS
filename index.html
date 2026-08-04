@@ -10019,8 +10019,10 @@ function renderAnalyticsCharts(stats) {
     var hcRow = document.getElementById('moHeadcountRow');
     if (hcRow) {
       hcRow.innerHTML = dashData.map(function(d){
-        var note = d.departed > 0 ? '<div style="font-size:9px;color:var(--text-muted);margin-top:1px">含'+d.departed+'人已离职</div>' : '';
-        return '<div class="mo-hc-card"><div class="mo-hc-month">'+d.month+'</div><div class="mo-hc-num">'+d.active+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">人</span></div>'+note+'</div>';
+        var notes = [];
+        if (d.joined.length > 0) notes.push('<div style="font-size:9px;color:#5FA895;margin-top:2px;line-height:1.3">入职: '+d.joined.join('、')+'</div>');
+        if (d.left.length > 0) notes.push('<div style="font-size:9px;color:#C57D48;margin-top:1px;line-height:1.3">离职: '+d.left.join('、')+'</div>');
+        return '<div class="mo-hc-card"><div class="mo-hc-month">'+d.month+'</div><div class="mo-hc-num">'+d.active+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">人</span></div>'+notes.join('')+'</div>';
       }).join('');
     }
     var dashLabels = dashData.map(function(d){return d.month;});
@@ -13984,8 +13986,18 @@ function computeMonthlyOverview() {
   var leavesData = null;
   try { leavesData = JSON.parse(localStorage.getItem('attendance_leaves') || '{}'); } catch(e) { leavesData = {}; }
 
+  // 员工 ID → 姓名映射
+  var empNameMap = {};
+  try {
+    var employees = JSON.parse(localStorage.getItem('okr_employees') || '[]');
+    for (var i = 0; i < employees.length; i++) {
+      empNameMap[employees[i].id] = employees[i].name;
+    }
+  } catch(e) {}
+
   var months = ['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06','2026-07'];
   var result = [];
+  var monthSets = []; // 暂存每个月的 allSet 用于对比
 
   for (var mi = 0; mi < months.length; mi++) {
     var month = months[mi];
@@ -14009,10 +14021,9 @@ function computeMonthlyOverview() {
         var ci = obj.ci || '';
         var co = obj.co || '';
         var m = obj.m || '';
-        if (!ci || ci === '--') continue; // 排除不参与考勤的人
+        if (!ci || ci === '--') continue;
         totalRecs++;
         activeSet[eid] = true;
-        // 按优先级归类：旷工 > 迟到 > 早退 > 缺卡 > 正常（每条记录只归一类）
         if (m === '旷工') { ciAbsent++; }
         else if (ci === '迟到' || ci === '严重迟到') { ciLate++; }
         else if (co === '早退') { ciEarly++; }
@@ -14030,11 +14041,13 @@ function computeMonthlyOverview() {
       }
     }
 
-    var headcount = Object.keys(allSet).length; // 两个数据源并集，包含离职但月内有记录的人
+    var headcount = Object.keys(allSet).length;
     var departed = headcount - Object.keys(csvSet).length;
     var normalCount = totalRecs - ciLate - ciEarly - missOnly - ciAbsent;
     if (normalCount < 0) normalCount = 0;
     var normalRate = totalRecs > 0 ? Math.round(normalCount * 1000 / totalRecs) / 10 : 0;
+
+    monthSets.push(allSet);
 
     result.push({
       month: month.slice(5).replace(/^0/, '') + '月',
@@ -14045,6 +14058,28 @@ function computeMonthlyOverview() {
       leaveDays: leaveDays
     });
   }
+
+  // 对比相邻月份，找出入职/离职人员
+  for (var mi = 0; mi < months.length; mi++) {
+    var joined = [], left = [];
+    var curSet = monthSets[mi];
+    var curIds = Object.keys(curSet);
+
+    if (mi > 0) {
+      var prevSet = monthSets[mi - 1];
+      for (var j = 0; j < curIds.length; j++) {
+        if (!prevSet[curIds[j]]) joined.push(empNameMap[curIds[j]] || curIds[j]);
+      }
+      var prevIds = Object.keys(prevSet);
+      for (var k = 0; k < prevIds.length; k++) {
+        if (!curSet[prevIds[k]]) left.push(empNameMap[prevIds[k]] || prevIds[k]);
+      }
+    }
+
+    result[mi].joined = joined;
+    result[mi].left = left;
+  }
+
   return result;
 }
 
