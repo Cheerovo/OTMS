@@ -10015,6 +10015,7 @@ function renderAnalyticsCharts(stats) {
     var dashHeadcounts = dashData.map(function(d){return d.active;});
     var dashRates = dashData.map(function(d){return d.rate;});
     var dashLates = dashData.map(function(d){return d.late;});
+    var dashEarlies = dashData.map(function(d){return d.early;});
     var dashMisses = dashData.map(function(d){return d.miss;});
     var dashAbsents = dashData.map(function(d){return d.absent;});
 
@@ -10061,6 +10062,7 @@ function renderAnalyticsCharts(stats) {
                 var i = ctx[0].dataIndex;
                 var parts = [];
                 if (dashLates[i] > 0) parts.push('迟到 ' + dashLates[i] + '次');
+                if (dashEarlies[i] > 0) parts.push('早退 ' + dashEarlies[i] + '次');
                 if (dashMisses[i] > 0) parts.push('缺卡 ' + dashMisses[i] + '次');
                 if (dashAbsents[i] > 0) parts.push('旷工 ' + dashAbsents[i] + '次');
                 return parts.length > 0 ? parts : null;
@@ -13976,7 +13978,7 @@ function computeMonthlyOverview() {
   for (var mi = 0; mi < months.length; mi++) {
     var month = months[mi];
     var csvSet = {}, activeSet = {};
-    var ciLate = 0, ciAbsent = 0, missOnly = 0, totalRecs = 0;
+    var ciLate = 0, ciEarly = 0, ciAbsent = 0, missOnly = 0, totalRecs = 0;
 
     for (var d in recs) {
       if (d.slice(0, 7) !== month) continue;
@@ -13997,9 +13999,11 @@ function computeMonthlyOverview() {
         if (!ci || ci === '--') continue; // 排除不参与考勤的人
         totalRecs++;
         activeSet[eid] = true;
-        if (ci === '迟到' || ci === '严重迟到') ciLate++;
-        if (m === '旷工') ciAbsent++;
-        else if (ci === '缺卡' || co === '缺卡') missOnly++;
+        // 按优先级归类：旷工 > 迟到 > 早退 > 缺卡 > 正常（每条记录只归一类）
+        if (m === '旷工') { ciAbsent++; }
+        else if (ci === '迟到' || ci === '严重迟到') { ciLate++; }
+        else if (co === '早退') { ciEarly++; }
+        else if (ci === '缺卡' || co === '缺卡') { missOnly++; }
       }
     }
 
@@ -14015,7 +14019,7 @@ function computeMonthlyOverview() {
 
     var csvCount = Object.keys(csvSet).length;
     var activeCount = Object.keys(activeSet).length;
-    var normalCount = totalRecs - ciLate - missOnly - ciAbsent;
+    var normalCount = totalRecs - ciLate - ciEarly - missOnly - ciAbsent;
     if (normalCount < 0) normalCount = 0;
     var normalRate = totalRecs > 0 ? Math.round(normalCount * 1000 / totalRecs) / 10 : 0;
 
@@ -14023,7 +14027,7 @@ function computeMonthlyOverview() {
       month: month.slice(5).replace(/^0/, '') + '月',
       active: activeCount,
       rate: normalRate,
-      late: ciLate, miss: missOnly, absent: ciAbsent,
+      late: ciLate, early: ciEarly, miss: missOnly, absent: ciAbsent,
       leaveDays: leaveDays,
       csvCount: csvCount
     });
