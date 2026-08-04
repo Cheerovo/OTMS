@@ -1101,7 +1101,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
   font-size:12px; line-height:1.6;
 }
 .unmatched-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
-.unmatched-text { flex:1; color:var(--text-main); word-break:break-all; }
+.unmatched-text { flex:1; color:var(--text); word-break:break-all; }
 .unmatched-hint { color:var(--text-muted); font-size:11px; white-space:nowrap; }
 .unmatched-dismiss {
   flex-shrink:0; background:none; border:none; font-size:16px;
@@ -1180,11 +1180,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .analytics-bar { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; align-items:center; }
 .analytics-bar select {
   padding:7px 28px 7px 12px; border:1px solid var(--border); border-radius:8px;
-  font-size:12px; background:var(--card); color:var(--text-main); cursor:pointer;
+  font-size:12px; background:var(--card); color:var(--text); cursor:pointer;
   appearance:none; -webkit-appearance:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2390A0B0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:no-repeat; background-position:right 8px center;
 }
+
 .analytics-bar select:focus { outline:none; border-color:#5FA895; box-shadow:0 0 0 3px rgba(95,168,149,0.12); }
 .analytics-kpi-row { display:flex; gap:12px; margin-bottom:28px; flex-wrap:wrap; }
 .analytics-kpi-card {
@@ -1210,7 +1211,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .analytics-kpi-card.warn .analytics-kpi-dot { display:inline-block; background:#E89B55; }
 .analytics-kpi-card.bad  .analytics-kpi-dot { display:inline-block; background:#E0696F; }
 .analytics-kpi-value {
-  font-size:32px; font-weight:700; color:var(--text-main);
+  font-size:32px; font-weight:700; color:#8D8883;
   line-height:1.15; letter-spacing:-0.5px;
 }
 .analytics-kpi-unit {
@@ -1223,12 +1224,21 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .analytics-chart-box {
   background:var(--card); border-radius:12px; padding:20px 20px 16px;
   box-shadow:0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
+  transition: box-shadow .25s, transform .25s;
+}
+.analytics-chart-box:hover {
+  box-shadow:0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.06);
+  transform:translateY(-1px);
 }
 .analytics-chart-box.full { grid-column:1/-1; }
 .analytics-chart-title { font-size:12px; font-weight:600; color:var(--text-dim); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
 .analytics-chart-title::before { content:''; width:3px; height:16px; border-radius:3px; background:#5FA895; display:inline-block; flex-shrink:0; }
 .analytics-chart-wrap { position:relative; width:100%; }
 .analytics-chart-wrap canvas { width:100% !important; }
+/* Empty state */
+.analytics-empty { text-align:center; padding:32px 20px; color:var(--text-muted); }
+.analytics-empty svg { display:block; margin:0 auto 12px; opacity:.35; }
+.analytics-empty p { font-size:12px; }
 .analytics-summary-row { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
 .analytics-summary-item {
   display:flex; align-items:center; gap:6px; padding:6px 10px;
@@ -1242,14 +1252,17 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .analytics-focus-box {
   background:var(--card); border-radius:12px; padding:20px;
   box-shadow:0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
+  border-left:3px solid var(--border);
 }
 .analytics-focus-title { font-size:12px; font-weight:600; color:var(--text-dim); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
-.analytics-focus-title::before { content:''; width:3px; height:16px; border-radius:3px; background:#E0696F; display:inline-block; flex-shrink:0; }
+.analytics-focus-title::before { content:''; width:3px; height:16px; border-radius:3px; background:var(--accent); display:inline-block; flex-shrink:0; }
 .analytics-focus-table { width:100%; font-size:12px; border-collapse:collapse; }
 .analytics-focus-table th { text-align:left; padding:7px 10px; font-size:10px; font-weight:600; color:var(--text-muted); border-bottom:1px solid var(--border); text-transform:uppercase; letter-spacing:0.3px; }
 .analytics-focus-table td { padding:8px 10px; border-bottom:1px solid var(--border-hair); }
 .analytics-focus-table tbody tr { transition:background .15s; }
 .analytics-focus-table tbody tr:hover td { background:var(--bg); }
+.analytics-focus-table tbody tr td:first-child strong { color:var(--accent); }
+.analytics-focus-table tbody tr td:last-child { font-weight:600; color:var(--accent); }
 .analytics-focus-table .badge-sm { display:inline-block; padding:2px 8px; border-radius:5px; font-size:10px; font-weight:600; letter-spacing:0.2px; }
 .analytics-focus-table .badge-sm.red { background:#FDF0F0; color:#D4655A; }
 .analytics-focus-table .badge-sm.orange { background:#FEF6ED; color:#D4914A; }
@@ -1257,12 +1270,18 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .analytics-focus-bar-label { width:100px; font-size:11px; color:var(--text-dim); text-align:right; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .analytics-focus-bar-track { flex:1; height:20px; background:var(--bg); border-radius:6px; overflow:hidden; position:relative; }
 .analytics-focus-bar-fill { height:100%; border-radius:6px; transition:width .4s cubic-bezier(.4,0,.2,1); }
-.analytics-focus-bar-val { width:44px; font-size:11px; font-weight:600; color:var(--text-main); flex-shrink:0; }
+.analytics-focus-bar-fill.high { background:#E0696F; }
+.analytics-focus-bar-fill.mid { background:#E89B55; }
+.analytics-focus-bar-fill.low { background:#9785AB; }
+.analytics-focus-bar-val { width:44px; font-size:11px; font-weight:600; color:var(--accent); flex-shrink:0; }
 @media (max-width:768px) {
   .analytics-chart-grid { grid-template-columns:1fr; }
   .analytics-kpi-card { min-width:100px; padding:14px 16px; }
-  .analytics-focus { grid-template-columns:1fr; }
   .analytics-kpi-value { font-size:22px; }
+  .analytics-focus { grid-template-columns:1fr; }
+  .analytics-chart-box { padding:14px 14px 12px; }
+  .analytics-chart-wrap canvas { max-height:200px !important; }
+  .analytics-bar select { font-size:11px; padding:6px 22px 6px 8px; }
 }
 
 /* 响应式 */
@@ -7434,7 +7453,7 @@ function switchAttendSubView(sub, tab) {
   if (data) data.style.display = sub === 'data' ? '' : 'none';
   if (analytics) analytics.style.display = sub === 'analytics' ? '' : 'none';
   if (sub === 'data') renderAttendDataView();
-  if (sub === 'analytics') renderAttendAnalytics();
+  if (sub === 'analytics') { restoreAnalyticsFilter(); renderAttendAnalytics(); }
 }
 
 function switchFuncSubView(sub, tab) {
@@ -8888,6 +8907,32 @@ function computeAnalytics(filter) {
   };
 }
 
+function saveAnalyticsFilter() {
+  try { sessionStorage.setItem('analyticsFilter', JSON.stringify(analyticsFilter)); } catch(e) {}
+}
+function restoreAnalyticsFilter() {
+  try {
+    var saved = sessionStorage.getItem('analyticsFilter');
+    if (saved) {
+      var f = JSON.parse(saved);
+      if (f && typeof f === 'object') {
+        analyticsFilter.year = f.year || '2026';
+        analyticsFilter.month = f.month || '';
+        analyticsFilter.day = f.day || '';
+        analyticsFilter.bu = f.bu || 'all';
+        analyticsFilter.dept = f.dept || 'all';
+        analyticsFilter.empId = f.empId || '';
+        analyticsFilter.atype = f.atype || 'all';
+        analyticsFilter.leaveSub = f.leaveSub || '';
+        analyticsFilter.lateSub = f.lateSub || '';
+        analyticsFilter.outSub = f.outSub || '';
+        return true;
+      }
+    }
+  } catch(e) {}
+  return false;
+}
+
 function renderAttendAnalytics() {
   var div = document.getElementById('orgAttendAnalytics');
   if (!div) return;
@@ -8962,31 +9007,20 @@ function renderAttendAnalytics() {
   // ---- Slicer bar ----
   html += '<div class="analytics-bar">';
   // Time
-  html += '<select onchange="analyticsFilter.year=this.value;analyticsFilter.month=\'\';analyticsFilter.day=\'\';renderAttendAnalytics()"><option value="">全年</option>';
+  html += '<select onchange="analyticsFilter.year=this.value;analyticsFilter.month=\'\';analyticsFilter.day=\'\';saveAnalyticsFilter();renderAttendAnalytics()"><option value="">全年</option>';
   years.forEach(function(y) { html += '<option value="'+y+'"'+(filter.year===y?' selected':'')+'>'+y+' 年</option>'; });
   html += '</select>';
-  html += '<select onchange="analyticsFilter.month=this.value;analyticsFilter.day=\'\';renderAttendAnalytics()"><option value="">全月</option>';
+  html += '<select onchange="analyticsFilter.month=this.value;analyticsFilter.day=\'\';saveAnalyticsFilter();renderAttendAnalytics()"><option value="">全月</option>';
   months.forEach(function(m) { html += '<option value="'+m+'"'+(filter.month===m?' selected':'')+'>'+m.slice(5).replace(/^0/,'')+' 月</option>'; });
   html += '</select>';
-  if (filter.month) {
-    var daySet = {}, daysList = [];
-    stats.filteredDates.forEach(function(d) { if (!daySet[d]) { daySet[d]=true; daysList.push(d); } });
-    var recsAll = loadAttendanceRecords();
-    var allDaySet = {}, allDays = [];
-    Object.keys(recsAll).sort().forEach(function(d) {
-      if (d.slice(0,7) === filter.month && !allDaySet[d]) { allDaySet[d]=true; allDays.push(d); }
-    });
-    var displayDays = allDays.length > daysList.length ? allDays : daysList;
-    html += '<select onchange="analyticsFilter.day=this.value;renderAttendAnalytics()"><option value="">全部日期</option>';
-    displayDays.forEach(function(d) {
-      var wd = ['周日','周一','周二','周三','周四','周五','周六'][new Date(d+'T00:00:00').getDay()];
-      html += '<option value="'+d+'"'+(filter.day===d?' selected':'')+'>'+d.slice(8).replace(/^0/,'')+'日 '+wd+'</option>';
-    });
-    html += '</select>';
+  // Day — native date picker
+  html += '<input type="date" value="'+(filter.day||'')+'" onchange="analyticsFilter.day=this.value;saveAnalyticsFilter();renderAttendAnalytics()" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--card);color:var(--text);outline:none;width:140px">';
+  if (filter.day) {
+    html += '<button onclick="analyticsFilter.day=\'\';saveAnalyticsFilter();renderAttendAnalytics()" style="padding:5px 8px;font-size:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-muted);cursor:pointer;line-height:1">&times;</button>';
   }
   html += '<span style="width:1px;height:20px;background:var(--border);margin:0 4px;flex-shrink:0"></span>';
   // Status type filter
-  html += '<select onchange="var v=this.value;analyticsFilter.atype=v;if(v!==\'leave\')analyticsFilter.leaveSub=\'\';if(v!==\'late\')analyticsFilter.lateSub=\'\';if(v!==\'out\')analyticsFilter.outSub=\'\';renderAttendAnalytics()">';
+  html += '<select onchange="var v=this.value;analyticsFilter.atype=v;if(v!==\'leave\')analyticsFilter.leaveSub=\'\';if(v!==\'late\')analyticsFilter.lateSub=\'\';if(v!==\'out\')analyticsFilter.outSub=\'\';saveAnalyticsFilter();renderAttendAnalytics()">';
   html += '<option value="all"'+(filter.atype==='all'?' selected':'')+'>全部类型</option>';
   html += '<option value="late"'+(filter.atype==='late'?' selected':'')+'>迟到</option>';
   html += '<option value="miss"'+(filter.atype==='miss'?' selected':'')+'>缺卡</option>';
@@ -8997,7 +9031,7 @@ function renderAttendAnalytics() {
   html += '</select>';
   // Leave sub-type dropdown
   if (filter.atype === 'leave') {
-    html += '<select onchange="analyticsFilter.leaveSub=this.value;renderAttendAnalytics()" style="margin-left:2px">';
+    html += '<select onchange="analyticsFilter.leaveSub=this.value;saveAnalyticsFilter();renderAttendAnalytics()" style="margin-left:2px">';
     html += '<option value=""'+(!filter.leaveSub?' selected':'')+'>全部请假类型</option>';
     var leaveSubKeys = ['annual','personal','sick','lieu','marriage','maternity','paternity','childcare','funeral','nursing'];
     leaveSubKeys.forEach(function(k) {
@@ -9007,7 +9041,7 @@ function renderAttendAnalytics() {
   }
   // Late sub-type dropdown
   if (filter.atype === 'late') {
-    html += '<select onchange="analyticsFilter.lateSub=this.value;renderAttendAnalytics()" style="margin-left:2px">';
+    html += '<select onchange="analyticsFilter.lateSub=this.value;saveAnalyticsFilter();renderAttendAnalytics()" style="margin-left:2px">';
     html += '<option value=""'+(!filter.lateSub?' selected':'')+'>全部迟到类型</option>';
     Object.keys(LATE_SUB_MAP).forEach(function(k) {
       html += '<option value="'+k+'"'+(filter.lateSub===k?' selected':'')+'>'+LATE_SUB_MAP[k].label+'</option>';
@@ -9016,7 +9050,7 @@ function renderAttendAnalytics() {
   }
   // Out sub-type dropdown
   if (filter.atype === 'out') {
-    html += '<select onchange="analyticsFilter.outSub=this.value;renderAttendAnalytics()" style="margin-left:2px">';
+    html += '<select onchange="analyticsFilter.outSub=this.value;saveAnalyticsFilter();renderAttendAnalytics()" style="margin-left:2px">';
     html += '<option value=""'+(!filter.outSub?' selected':'')+'>全部外出类型</option>';
     Object.keys(OUT_SUB_MAP).forEach(function(k) {
       html += '<option value="'+k+'"'+(filter.outSub===k?' selected':'')+'>'+OUT_SUB_MAP[k].label+'</option>';
@@ -9024,22 +9058,19 @@ function renderAttendAnalytics() {
     html += '</select>';
   }
   html += '<span style="width:1px;height:20px;background:var(--border);margin:0 4px;flex-shrink:0"></span>';
-  // Org
-  html += '<select onchange="analyticsFilter.bu=this.value;analyticsFilter.dept=\'all\';renderAttendAnalytics()"><option value="all">全部 BU</option>';
+  html += '<select onchange="analyticsFilter.bu=this.value;analyticsFilter.dept=\'all\';saveAnalyticsFilter();renderAttendAnalytics()"><option value="all">全部 BU</option>';
   buList.forEach(function(b) { html += '<option value="'+esc(b)+'"'+(filter.bu===b?' selected':'')+'>'+esc(b)+'</option>'; });
   html += '</select>';
-  html += '<select onchange="analyticsFilter.dept=this.value;renderAttendAnalytics()"><option value="all">全部部门</option>';
+  html += '<select onchange="analyticsFilter.dept=this.value;saveAnalyticsFilter();renderAttendAnalytics()"><option value="all">全部部门</option>';
   deptList.forEach(function(d) { html += '<option value="'+esc(d)+'"'+(filter.dept===d?' selected':'')+'>'+esc(d)+'</option>'; });
   html += '</select>';
-  // Person
   html += '<span style="width:1px;height:20px;background:var(--border);margin:0 4px;flex-shrink:0"></span>';
-  html += '<input type="text" list="analyticsEmpDL" placeholder="搜索员工..." value="'+(filter.empId?esc(lookupEmpNameById(filter.empId)):'')+'" onchange="var v=this.value.trim();analyticsFilter.empId=v?lookupEmpIdByName(v):\'\';renderAttendAnalytics()" onfocus="this.select()" style="width:120px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--card);color:var(--text-main);outline:none">';
+  html += '<input type="text" list="analyticsEmpDL" placeholder="搜索员工..." value="'+(filter.empId?esc(lookupEmpNameById(filter.empId)):'')+'" onchange="var v=this.value.trim();analyticsFilter.empId=v?lookupEmpIdByName(v):\'\';saveAnalyticsFilter();renderAttendAnalytics()" onfocus="this.select()" style="width:120px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--card);color:var(--text);outline:none">';
   html += '<datalist id="analyticsEmpDL">';
   empList.forEach(function(e) { html += '<option value="'+esc(e.name)+'">'; });
   html += '</datalist>';
-  // Reset + count
   if (filter.month || filter.day || filter.bu !== 'all' || filter.dept !== 'all' || filter.empId || filter.atype !== 'all' || filter.leaveSub || filter.lateSub || filter.outSub) {
-    html += '<button onclick="analyticsFilter={year:analyticsFilter.year,month:\'\',day:\'\',bu:\'all\',dept:\'all\',empId:\'\',atype:\'all\',leaveSub:\'\',lateSub:\'\',outSub:\'\'};renderAttendAnalytics()" style="padding:5px 12px;font-size:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-muted);cursor:pointer">清除筛选</button>';
+    html += '<button onclick="analyticsFilter={year:analyticsFilter.year,month:\'\',day:\'\',bu:\'all\',dept:\'all\',empId:\'\',atype:\'all\',leaveSub:\'\',lateSub:\'\',outSub:\'\'};saveAnalyticsFilter();renderAttendAnalytics()" style="padding:5px 12px;font-size:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-muted);cursor:pointer">清除筛选</button>';
   }
   html += '<span style="margin-left:auto;font-size:10px;color:var(--text-muted)">'+t.recs+' 条记录</span>';
   html += '</div>';
@@ -9200,10 +9231,8 @@ function renderAttendAnalytics() {
 
   // Row 4: 部门对比（部门数量多，独立全宽行）
   var deptChartLabel = filter.atype==='out'?'外出/外勤':filter.atype==='ot'?'加班':filter.atype==='all'?'迟到+缺卡+请假':atypeLabel;
-  var deptCount = Object.keys(stats.dept).length;
-  var deptH = Math.max(240, deptCount * 32);
   html += '<div class="analytics-chart-grid">';
-  html += '<div class="analytics-chart-box full"><div class="analytics-chart-title">部门'+deptChartLabel+'率对比</div><div class="analytics-chart-wrap"><canvas id="chartDept" style="height:'+deptH+'px"></canvas></div></div>';
+  html += '<div class="analytics-chart-box full"><div class="analytics-chart-title">部门'+deptChartLabel+'率对比</div><div class="analytics-chart-wrap"><canvas id="chartDept" style="height:300px"></canvas></div></div>';
   html += '</div>';
 
   // ---- 重点关注 ----
@@ -9262,13 +9291,13 @@ function renderAttendAnalytics() {
   var topDept = deptAnomList.slice(0, 6);
 
   if (topEmp.length > 0 || topDept.length > 0) {
-    html += '<div class="analytics-focus">';
+    html += '<div class="analytics-focus" id="analyticsFocus">';
 
     // Employee TOP5
     html += '<div class="analytics-focus-box">';
     html += '<div class="analytics-focus-title">'+focusLabel+' TOP5 员工</div>';
     if (topEmp.length === 0) {
-      html += '<div style="font-size:10px;color:var(--text-muted);padding:12px 0">暂无数据</div>';
+      html += '<div class="analytics-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><p>暂无匹配数据</p></div>';
     } else if (isSingleType) {
       html += '<table class="analytics-focus-table"><thead><tr><th>姓名</th><th>部门</th><th>'+focusLabel+'人次</th></tr></thead><tbody>';
       topEmp.forEach(function(e) {
@@ -9289,12 +9318,12 @@ function renderAttendAnalytics() {
     html += '<div class="analytics-focus-box">';
     html += '<div class="analytics-focus-title">部门'+focusLabel+'率 TOP6</div>';
     if (topDept.length === 0) {
-      html += '<div style="font-size:10px;color:var(--text-muted);padding:12px 0">暂无数据</div>';
+      html += '<div class="analytics-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><p>暂无匹配数据</p></div>';
     } else {
       var maxRate = topDept[0].rate;
       topDept.forEach(function(d) {
-        var barColor = d.rate >= 15 ? '#E0696F' : d.rate >= 8 ? '#E89B55' : '#9785AB';
-        html += '<div class="analytics-focus-bar-wrap"><span class="analytics-focus-bar-label" title="'+esc(d.name)+'">'+esc(d.name)+'</span><div class="analytics-focus-bar-track"><div class="analytics-focus-bar-fill" style="width:'+(maxRate>0?Math.round(d.rate*100/maxRate):0)+'%;background:'+barColor+'"></div></div><span class="analytics-focus-bar-val">'+d.rate+'%</span></div>';
+        var barClass = d.rate >= 15 ? 'high' : d.rate >= 8 ? 'mid' : 'low';
+        html += '<div class="analytics-focus-bar-wrap"><span class="analytics-focus-bar-label" title="'+esc(d.name)+'">'+esc(d.name)+'</span><div class="analytics-focus-bar-track"><div class="analytics-focus-bar-fill '+barClass+'" style="width:'+(maxRate>0?Math.round(d.rate*100/maxRate):0)+'%"></div></div><span class="analytics-focus-bar-val '+barClass+'">'+d.rate+'%</span></div>';
       });
     }
     html += '</div>';
@@ -9607,9 +9636,12 @@ function renderAnalyticsCharts(stats) {
         datasets: [{ data: deptRates, backgroundColor: deptColor || deptRates.map(function(r){return r>=15?COLORS.miss:r>=8?COLORS.late:COLORS.leave;}), borderRadius: 4 }]
       },
       options: {
-        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false } },
-        scales: { x: { max: Math.ceil(maxDept*1.2), ticks:{callback:function(v){return v+'%';},font:{size:10}}, grid:{color:'#f0f0f0'} }, y: { ticks:{font:{size:10}} } }
+        scales: {
+          x: { ticks: { maxRotation: 45, font: { size: 9 } }, grid: { color: '#f0f0f0' } },
+          y: { max: Math.ceil(maxDept*1.2), ticks: { callback: function(v) { return v + '%'; }, font: { size: 10 } }, grid: { color: '#f0f0f0' } }
+        }
       }
     });
   }
