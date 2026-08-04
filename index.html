@@ -1292,7 +1292,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 }
 .attend-card .card-body { flex: 1; min-width: 0; }
 .attend-card .card-name { font-size: 11px; font-weight: 600; color: var(--text); letter-spacing: 0.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 1px; }
-.attend-card .card-status { font-size: 10px; font-weight: 500; white-space: nowrap; display: flex; align-items: center; gap: 2px; }
+.attend-card .card-status { font-size: 10px; font-weight: 500; white-space: nowrap; display: flex; flex-direction: column; gap: 1px; }
 .attend-card .card-schedule { font-size: 9px; font-weight: 300; color: var(--text-muted); margin-top: 1px; }
 .bu-shift-link { font-size: 10px; color: var(--accent); text-decoration: underline; cursor: pointer; position: relative; display: inline-flex; align-items: center; white-space: nowrap; }
 .bu-shift-tip { display: none; position: absolute; top: 100%; left: 0; z-index: 1000; background: #fff; border: 1px solid #d0d5dd; border-radius: 8px; padding: 10px 14px; font-size: 10px; line-height: 1.7; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.25); color: #333; font-weight: 400; text-decoration: none; margin-top: 6px; }
@@ -1312,6 +1312,16 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .card-st-sub.ab.other { color: #B85C5C; font-size: 11px; font-weight: 700; background: #FEF2F2; border: 1px solid #FECACA; }
 .card-st-half { font-size: 10px; line-height: 1.5; color: var(--text-dim); }
 .card-st-half .card-st-main { font-size: 10px; }
+.card-st-row { display: flex; align-items: center; gap: 4px; font-size: 10px; line-height: 1.6; }
+.card-st-label { color: var(--text-muted); font-size: 9px; min-width: 24px; flex-shrink: 0; }
+.card-st-val { font-weight: 600; }
+.card-st-val.on { color: #7A8FA8; }
+.card-st-val.leave { color: #C57D48; }
+.card-st-val.out { color: #887AB8; }
+.card-st-val.other { color: #B85C5C; }
+.card-st-val.nodd { color: #B5B0AA; }
+.card-st-val.overtime { color: #C49B5E; }
+.card-st-val.rest { color: #B5B0AA; }
 .attend-card.has-ab { border-color: #FED7AA; box-shadow: 0 1px 3px rgba(212,145,94,0.08); }
 .attend-card.other { background: #FFFBFB; border-color: #FECACA; box-shadow: 0 0 0 2px rgba(202,107,107,0.1), 0 2px 8px rgba(202,107,107,0.08); }
 .attend-card.other:hover { border-color: #FCA5A5; box-shadow: 0 0 0 2px rgba(202,107,107,0.15), 0 4px 16px rgba(202,107,107,0.12); }
@@ -7602,7 +7612,9 @@ function generateAttendStatusFromRecords(records, empList) {
         m = '在岗'; s = '正常';
       }
 
-      attData[date][empId] = {m: m, s: s};
+      var ciVal = ci || '正常', coVal = co || '正常';
+      if (ciVal === '旷工迟到') ciVal = '严重迟到';
+      attData[date][empId] = {m: m, s: s, ci: ciVal, co: coVal};
       generated++;
     });
   });
@@ -7648,11 +7660,13 @@ function renderAttendView(skipAutoSync) {
 
   let counts = {};
   let subCounts = {};
+  let ciCoStats = {};
   let outOnDuty = 0; // 在岗/外出人数
   ATTEND_MAIN.forEach(s => counts[s] = 0);
   function ensureObj(st) { if (!st) return null; if (typeof st === 'string') { if (st==='在岗') return {m:'在岗',s:'正常'}; if (st==='迟到') return {m:'在岗',s:'迟到'}; if (st==='早退') return {m:'在岗',s:'早退'}; if (st.indexOf('请假')===0) return {m:'请假',s:st}; if (st==='出差'||st==='外出公干') return {m:'外勤',s:st}; if (st==='休息') return {m:'休息',s:'休息'}; if (st==='不在钉钉数据') return {m:'不在钉钉数据',s:st}; return {m:'在岗',s:st}; } return st; }
   filtered.forEach(e => {
     var obj = ensureObj(attData[date][e.id]);
+    ensureCiCo(obj);
     var fallback = isRestDay(e.name, date) ? '休息' : '不在钉钉数据';
     var main = obj ? obj.m : fallback;
     var sub = obj ? obj.s : fallback;
@@ -7661,6 +7675,15 @@ function renderAttendView(skipAutoSync) {
     subCounts[sub] = (subCounts[sub] || 0) + w;
     if (obj && obj.half) { counts['在岗'] = (counts['在岗'] || 0) + 0.5; }
     if (main === '在岗' && sub === '外出') outOnDuty += w;
+    // ci/co 早晚打卡统计
+    if (obj && obj.ci) {
+      if (obj.ci === '迟到' || obj.ci === '严重迟到') ciCoStats.ci_late = (ciCoStats.ci_late || 0) + w;
+      if (obj.ci === '缺卡') ciCoStats.ci_miss = (ciCoStats.ci_miss || 0) + w;
+    }
+    if (obj && obj.co) {
+      if (obj.co === '早退') ciCoStats.co_early = (ciCoStats.co_early || 0) + w;
+      if (obj.co === '缺卡') ciCoStats.co_miss = (ciCoStats.co_miss || 0) + w;
+    }
   });
 
   let html = '';
@@ -7709,12 +7732,13 @@ function renderAttendView(skipAutoSync) {
     }
   };
 
-  // Build sub-breakdown for 在岗
+  // Build sub-breakdown for 在岗 (using ci/co stats)
   function buildOnDutyDetail() {
     var parts = [];
-    ['迟到','早退','自由工时'].forEach(function(ss){
-      if (subCounts[ss] > 0) parts.push(ss+' <strong>'+subCounts[ss]+'</strong>');
-    });
+    if (ciCoStats.ci_late > 0) parts.push('迟到 <strong>'+ciCoStats.ci_late+'</strong>');
+    if (ciCoStats.co_early > 0) parts.push('早退 <strong>'+ciCoStats.co_early+'</strong>');
+    if (ciCoStats.ci_miss > 0) parts.push('上班缺卡 <strong>'+ciCoStats.ci_miss+'</strong>');
+    if (ciCoStats.co_miss > 0) parts.push('下班缺卡 <strong>'+ciCoStats.co_miss+'</strong>');
     return parts.length ? '（'+parts.join(' · ')+'）' : '';
   }
   var onDutyDetail = buildOnDutyDetail();
@@ -7868,15 +7892,51 @@ function renderAttendView(skipAutoSync) {
     if (main === '不在钉钉数据') return 'nodd'; return 'other';
   }
 
+  // ci/co 样式 & 标签工具
+  function ciCoClass(v) {
+    if (!v || v==='--') return 'nodd';
+    if (v.indexOf('请假_')===0) return 'leave';
+    if (v==='迟到'||v==='严重迟到'||v==='早退') return 'other';
+    if (v==='缺卡') return 'nodd';
+    if (v==='出差'||v==='外出') return 'out';
+    if (v==='加班') return 'overtime';
+    if (v==='休息') return 'rest';
+    return 'on';
+  }
+  function ciCoLabel(v) {
+    if (!v || v==='--') return '--';
+    if (v.indexOf('请假_')===0) return v.slice(3);
+    return v;
+  }
+  // 旧格式兼容：缺失 ci/co 时从 m/s 推导
+  function ensureCiCo(obj) {
+    if (!obj || obj.ci || obj.co) return;
+    if (obj.m === '在岗' && obj.s === '正常')        { obj.ci='正常'; obj.co='正常'; }
+    else if (obj.m === '在岗' && obj.s === '迟到')    { obj.ci='迟到'; obj.co='正常'; }
+    else if (obj.m === '在岗' && obj.s === '早退')    { obj.ci='正常'; obj.co='早退'; }
+    else if (obj.m === '在岗' && obj.s === '严重迟到') { obj.ci='严重迟到'; obj.co='正常'; }
+    else if (obj.m === '在岗' && obj.s === '迟到+早退') { obj.ci='迟到'; obj.co='早退'; }
+    else if (obj.m === '在岗' && obj.s === '上班缺卡') { obj.ci='缺卡'; obj.co='正常'; }
+    else if (obj.m === '在岗' && obj.s === '下班缺卡') { obj.ci='正常'; obj.co='缺卡'; }
+    else if (obj.m === '在岗' && obj.s === '上班缺卡+早退') { obj.ci='缺卡'; obj.co='早退'; }
+    else if (obj.m === '在岗' && obj.s === '自由工时') { obj.ci='自由工时'; obj.co='自由工时'; }
+    else if (obj.m === '旷工') { obj.ci='缺卡'; obj.co='缺卡'; }
+    else if (obj.m === '请假') { obj.ci='请假_'+obj.s; obj.co='请假_'+obj.s; }
+    else if (obj.m === '外勤') { obj.ci=obj.s; obj.co=obj.s; }
+    else if (obj.m === '加班') { obj.ci='加班'; obj.co='加班'; }
+    else if (obj.m === '休息') { obj.ci='休息'; obj.co='休息'; }
+    else { obj.ci='正常'; obj.co='正常'; }
+  }
+
   function renderCard(e) {
     var raw = attData[date][e.id];
-    var fallback = isRestDay(e.name, date) ? {m:'休息', s:'休息'} : {m:'不在钉钉数据', s:'不在钉钉数据'};
+    var fallback = isRestDay(e.name, date) ? {m:'休息', s:'休息', ci:'休息', co:'休息'} : {m:'不在钉钉数据', s:'不在钉钉数据', ci:'--', co:'--'};
     var obj = ensureObj(raw) || fallback;
+    ensureCiCo(obj);
     var main = obj.m, sub = obj.s, half = obj.half;
+    var ci = obj.ci, co = obj.co;
     var dc = dotClass(main);
-    var isAb = sub !== '正常';
-    var subCls = 'card-st-sub' + (isAb ? ' ab '+dc : '');
-    var subHtml = (main === sub) ? '' : '<span class="card-st-sep">·</span><span class="'+subCls+'">'+esc(sub)+'</span>';
+    var isAb = (ci !== '正常' && ci !== '--' && ci.indexOf('请假_')!==0) || (co !== '正常' && co !== '--' && co.indexOf('请假_')!==0);
     var cardClass = 'attend-card';
     if (dc === 'other') cardClass += ' other';
     else if (dc === 'nodd') cardClass += ' nodd';
@@ -7885,27 +7945,27 @@ function renderAttendView(skipAutoSync) {
     // half-day display: AM/PM split
     var halfHtml = '';
     if (half === 'AM') {
-      var otherHalf = '下午<span class="card-st-main on">在岗</span>';
-      halfHtml = '<div class="card-st-half">上午<span class="card-st-main '+dc+'">'+esc(main)+'</span>'+subHtml+' · '+otherHalf+'</div>';
+      var otherHalf = '下班<span class="card-st-val on">正常</span>';
+      halfHtml = '<div class="card-st-half">上班<span class="card-st-val '+ciCoClass(ci)+'">'+ciCoLabel(ci)+'</span> · '+otherHalf+'</div>';
     } else if (half === 'PM') {
-      var otherHalf2 = '上午<span class="card-st-main on">在岗</span>';
-      halfHtml = '<div class="card-st-half">'+otherHalf2+' · 下午<span class="card-st-main '+dc+'">'+esc(main)+'</span>'+subHtml+'</div>';
+      var otherHalf2 = '上班<span class="card-st-val on">正常</span>';
+      halfHtml = '<div class="card-st-half">'+otherHalf2+' · 下班<span class="card-st-val '+ciCoClass(co)+'">'+ciCoLabel(co)+'</span></div>';
     }
     var scheduleHtml = '';
     var schedByDate = scheduleMap[e.name];
     var schedFlat = scheduleMap[e.name + '_flat'];
     if (schedByDate && typeof schedByDate === 'object') {
-      // 固定班制：有当日排班就显示
       var sched = schedByDate[date] || '';
       if (sched) {
         sched = sched.replace(/^[\u4e00-\u9fa5][^\s]*\s*/, '');
         scheduleHtml = '<div class="card-schedule">'+esc(sched)+'</div>';
       }
     } else if (schedFlat && e.name !== '王雷') {
-      // 排班制：只显示"排班制"标签
       scheduleHtml = '<div class="card-schedule">排班制</div>';
     }
-    var statusHtml = halfHtml || ('<div class="card-status"><span class="card-st-main '+dc+'">'+esc(main)+'</span>'+subHtml+'</div>');
+    var twoLineHtml = '<div class="card-st-row"><span class="card-st-label">上班</span><span class="card-st-val '+ciCoClass(ci)+'">'+ciCoLabel(ci)+'</span></div>'
+      + '<div class="card-st-row"><span class="card-st-label">下班</span><span class="card-st-val '+ciCoClass(co)+'">'+ciCoLabel(co)+'</span></div>';
+    var statusHtml = halfHtml || ('<div class="card-status">'+twoLineHtml+'</div>');
     return '<div class="'+cardClass+'" id="emp-'+e.id+'">'
       + '<span class="card-dot '+dc+'"></span>'
       + '<div class="card-body">'
@@ -7931,24 +7991,33 @@ function renderAttendView(skipAutoSync) {
     if (!list || !list.length) return;
     // Per-BU summary
     var buCounts = {};
-    var buSubCounts = {};
+    var buCiCoStats = {};
     var buOutOnDuty = 0;
     ATTEND_MAIN.forEach(function(s){ buCounts[s] = 0; });
     list.forEach(function(e){
       var obj3 = ensureObj(attData[date][e.id]);
+      ensureCiCo(obj3);
       var m3 = obj3 ? obj3.m : '不在钉钉数据';
       var s3 = obj3 ? obj3.s : '不在钉钉数据';
       var w3 = (obj3 && obj3.half) ? 0.5 : 1;
       buCounts[m3] = (buCounts[m3] || 0) + w3;
-      buSubCounts[s3] = (buSubCounts[s3] || 0) + w3;
       if (obj3 && obj3.half) { buCounts['在岗'] = (buCounts['在岗'] || 0) + 0.5; }
       if (m3 === '在岗' && s3 === '外出') buOutOnDuty += w3;
+      if (obj3 && obj3.ci) {
+        if (obj3.ci === '迟到' || obj3.ci === '严重迟到') buCiCoStats.ci_late = (buCiCoStats.ci_late || 0) + w3;
+        if (obj3.ci === '缺卡') buCiCoStats.ci_miss = (buCiCoStats.ci_miss || 0) + w3;
+      }
+      if (obj3 && obj3.co) {
+        if (obj3.co === '早退') buCiCoStats.co_early = (buCiCoStats.co_early || 0) + w3;
+        if (obj3.co === '缺卡') buCiCoStats.co_miss = (buCiCoStats.co_miss || 0) + w3;
+      }
     });
     function buOnDutyDetail(){
       var parts = [];
-      ['迟到','早退','自由工时'].forEach(function(ss){
-        if (buSubCounts[ss] > 0) parts.push(ss+' <strong>'+buSubCounts[ss]+'</strong>');
-      });
+      if (buCiCoStats.ci_late > 0) parts.push('迟到 <strong>'+buCiCoStats.ci_late+'</strong>');
+      if (buCiCoStats.co_early > 0) parts.push('早退 <strong>'+buCiCoStats.co_early+'</strong>');
+      if (buCiCoStats.ci_miss > 0) parts.push('上班缺卡 <strong>'+buCiCoStats.ci_miss+'</strong>');
+      if (buCiCoStats.co_miss > 0) parts.push('下班缺卡 <strong>'+buCiCoStats.co_miss+'</strong>');
       return parts.length ? '（'+parts.join(' · ')+'）' : '';
     }
     var buODD = buOnDutyDetail();

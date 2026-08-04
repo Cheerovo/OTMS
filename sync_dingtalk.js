@@ -97,19 +97,34 @@ function dedupUsers(users) {
   });
 }
 
-// 考勤状态映射: timeResult → {m:主状态, s:具体状态}
-const ATTEND_STATUS_MAP = {
-  'Normal': {m:'在岗', s:'正常'},
-  'Late': {m:'在岗', s:'迟到'},
-  'Early': {m:'在岗', s:'早退'},
-  'Free': {m:'在岗', s:'自由工时'},
-  'Absenteeism': {m:'旷工', s:'旷工'},
-  'NotSigned': {m:'旷工', s:'缺卡'},
-  'SeriousLate': {m:'旷工', s:'严重迟到'},
-  'BusinessTravel': {m:'外勤', s:'出差'},
-  'Out': {m:'外勤', s:'外出'},
+// 早晚打卡结果映射: timeResult → ci/co 短标签
+const ON_DUTY_MAP = {
+  'Normal': '正常', 'Late': '迟到', 'SeriousLate': '严重迟到',
+  'NotSigned': '缺卡', 'Absenteeism': '缺卡',
+  'BusinessTravel': '出差', 'Out': '外出', 'Free': '自由工时'
 };
-const DEFAULT_STATUS = {m:'在岗', s:'正常'};
+const OFF_DUTY_MAP = {
+  'Normal': '正常', 'Early': '早退',
+  'NotSigned': '缺卡', 'Absenteeism': '缺卡',
+  'BusinessTravel': '出差', 'Out': '外出', 'Free': '自由工时'
+};
+
+// 从早晚打卡结果推导主状态（兼容旧格式 {m, s}）
+function deriveStatus(ci, co) {
+  if (ci === '缺卡' && co === '缺卡')   return {m:'旷工', s:'缺卡'};
+  if (ci === '缺卡' && co === '正常')   return {m:'在岗', s:'上班缺卡'};
+  if (ci === '正常' && co === '缺卡')   return {m:'在岗', s:'下班缺卡'};
+  if (ci === '缺卡' && co === '早退')   return {m:'在岗', s:'上班缺卡+早退'};
+  if ((ci === '迟到' || ci === '严重迟到') && co === '早退') return {m:'在岗', s:ci + '+早退'};
+  if (ci === '迟到' || ci === '严重迟到') return {m:'在岗', s:ci};
+  if (co === '早退')                    return {m:'在岗', s:'早退'};
+  if (ci === '出差' || co === '出差')   return {m:'外勤', s:'出差'};
+  if (ci === '外出' || co === '外出')   return {m:'外勤', s:'外出'};
+  if (ci === '自由工时' || co === '自由工时') return {m:'在岗', s:'自由工时'};
+  return {m:'在岗', s:'正常'};
+}
+
+const DEFAULT_STATUS = {m:'在岗', s:'正常', ci:'正常', co:'正常'};
 
 // 获取OA请假审批记录，覆盖考勤数据
 // 自动分段请求，每段30天，避免API时间范围超限
@@ -785,12 +800,32 @@ async function main() {
       date = String(rawDate || '').slice(0, 10);
     }
     if (!statusMap[name]) statusMap[name] = {};
-    statusMap[name][date] = ATTEND_STATUS_MAP[r.timeResult] || DEFAULT_STATUS;
+    // 按 checkType 分别记录早晚打卡结果
+    var entry = statusMap[name][date];
+    if (!entry || !entry._fromRecords) {
+      entry = {_fromRecords: true}; statusMap[name][date] = entry;
+    }
+    if (r.checkType === 'OnDuty') {
+      entry.ci = ON_DUTY_MAP[r.timeResult] || '正常';
+    } else if (r.checkType === 'OffDuty') {
+      entry.co = OFF_DUTY_MAP[r.timeResult] || '正常';
+    }
     // 按userId+date分组
     var key = userId + '_' + date;
     if (!recordsByUserDate[key]) recordsByUserDate[key] = [];
     recordsByUserDate[key].push(r);
   });
+  // 从早晚打卡推导主状态 + 补全缺少的打卡
+  for (const [name, dateMap] of Object.entries(statusMap)) {
+    for (const [date, entry] of Object.entries(dateMap)) {
+      if (!entry._fromRecords) continue;
+      delete entry._fromRecords;
+      if (!entry.ci) entry.ci = '缺卡';
+      if (!entry.co) entry.co = '缺卡';
+      var ds = deriveStatus(entry.ci, entry.co);
+      entry.m = ds.m; entry.s = ds.s;
+    }
+  }
   console.log('  ✅ 考勤记录覆盖 ' + Object.keys(statusMap).length + ' 人');
 
   // 排班制用户：用实际打卡时间匹配对应班次
@@ -907,7 +942,8 @@ async function main() {
         var dayNum = new Date(date + 'T00:00:00+08:00').getDay(); // 0=Sun
         if (!wdList.includes(dayNum)) { leaveSkipRest++; continue; }
       }
-      statusMap[name][date] = st;
+      var leaveLabel = st.s;
+      statusMap[name][date] = {m:'请假', s:leaveLabel, ci:'请假_'+leaveLabel, co:'请假_'+leaveLabel};
       leaveOverlayCount++;
     }
   }
@@ -926,9 +962,9 @@ async function main() {
       // 有外出审批单：如果当天早晚正常打卡→在岗/外出；缺卡→外勤/外出
       var cur = statusMap[name][date];
       if (cur && cur.m === '在岗') {
-        statusMap[name][date] = {m:'在岗', s:'外出'};
+        cur.s = '外出';
       } else {
-        statusMap[name][date] = {m:'外勤', s:'外出'};
+        statusMap[name][date] = {m:'外勤', s:'外出', ci:'外出', co:'外出'};
       }
       outOverlayCount++;
     }
@@ -948,7 +984,7 @@ async function main() {
       // 出差：如果当天没有其他异常状态，标记为外勤/出差
       var cur = statusMap[name][date];
       if (!cur || cur.m === '在岗' || cur.m === '休息') {
-        statusMap[name][date] = st;
+        statusMap[name][date] = {m:st.m, s:st.s, ci:'出差', co:'出差'};
         travelOverlayCount++;
       }
     }
@@ -968,7 +1004,7 @@ async function main() {
       // 加班：只覆盖休息日（工作日已有正常打卡状态）
       var cur = statusMap[name][date];
       if (!cur || cur.m === '休息') {
-        statusMap[name][date] = st;
+        statusMap[name][date] = {m:st.m, s:st.s, ci:'加班', co:'加班'};
         overtimeOverlayCount++;
       }
     }
