@@ -10017,7 +10017,6 @@ function renderAnalyticsCharts(stats) {
     var dashLates = dashData.map(function(d){return d.late;});
     var dashMisses = dashData.map(function(d){return d.miss;});
     var dashAbsents = dashData.map(function(d){return d.absent;});
-    var dashNodd = dashData.map(function(d){return d.nodd;});
 
     var dashBarColors = dashRates.map(function(r){
       return r >= 95 ? 'rgba(95,168,149,0.7)' : r >= 90 ? 'rgba(232,155,85,0.7)' : 'rgba(224,105,111,0.7)';
@@ -10064,7 +10063,6 @@ function renderAnalyticsCharts(stats) {
                 if (dashLates[i] > 0) parts.push('迟到 ' + dashLates[i] + '次');
                 if (dashMisses[i] > 0) parts.push('缺卡 ' + dashMisses[i] + '次');
                 if (dashAbsents[i] > 0) parts.push('旷工 ' + dashAbsents[i] + '次');
-                if (dashNodd[i] > 0) parts.push(dashNodd[i] + '人无数据');
                 return parts.length > 0 ? parts : null;
               }
             }
@@ -13977,7 +13975,7 @@ function computeMonthlyOverview() {
 
   for (var mi = 0; mi < months.length; mi++) {
     var month = months[mi];
-    var csvSet = {}, activeSet = {}, noddSet = {};
+    var csvSet = {}, activeSet = {};
     var ciLate = 0, ciAbsent = 0, missOnly = 0, totalRecs = 0;
 
     for (var d in recs) {
@@ -13993,16 +13991,15 @@ function computeMonthlyOverview() {
         if (!empMap.hasOwnProperty(eid)) continue;
         var obj = empMap[eid];
         if (!obj || typeof obj !== 'object') continue;
-        totalRecs++;
         var ci = obj.ci || '';
         var co = obj.co || '';
         var m = obj.m || '';
-        if (ci && ci !== '--') {
-          activeSet[eid] = true;
-          if (ci === '迟到' || ci === '严重迟到') ciLate++;
-          if (m === '旷工') ciAbsent++;
-          else if (ci === '缺卡' || co === '缺卡') missOnly++;
-        } else { noddSet[eid] = true; }
+        if (!ci || ci === '--') continue; // 排除不参与考勤的人
+        totalRecs++;
+        activeSet[eid] = true;
+        if (ci === '迟到' || ci === '严重迟到') ciLate++;
+        if (m === '旷工') ciAbsent++;
+        else if (ci === '缺卡' || co === '缺卡') missOnly++;
       }
     }
 
@@ -14018,14 +14015,13 @@ function computeMonthlyOverview() {
 
     var csvCount = Object.keys(csvSet).length;
     var activeCount = Object.keys(activeSet).length;
-    var noddCount = Object.keys(noddSet).length;
     var normalCount = totalRecs - ciLate - missOnly - ciAbsent;
     if (normalCount < 0) normalCount = 0;
     var normalRate = totalRecs > 0 ? Math.round(normalCount * 1000 / totalRecs) / 10 : 0;
 
     result.push({
       month: month.slice(5).replace(/^0/, '') + '月',
-      active: activeCount, nodd: noddCount,
+      active: activeCount,
       rate: normalRate,
       late: ciLate, miss: missOnly, absent: ciAbsent,
       leaveDays: leaveDays,
