@@ -7628,6 +7628,27 @@ function generateAttendStatusFromRecords(records, empList) {
   return { generated: generated, skipped: skipped };
 }
 
+function applyAttendNameFilter() {
+  var input = document.getElementById('attendNameSearch');
+  var val = input ? input.value.trim().toLowerCase() : '';
+  window._attendNameSearchVal = val;
+  // 直接切换卡片显隐，不重建 DOM
+  document.querySelectorAll('.attend-card').forEach(function(card) {
+    var nameEl = card.querySelector('.card-name');
+    if (!nameEl) return;
+    var name = nameEl.textContent.toLowerCase();
+    card.style.display = (!val || name.indexOf(val) !== -1) ? '' : 'none';
+  });
+  // 隐藏空的 BU 分组标题
+  document.querySelectorAll('.attend-bu-section').forEach(function(section) {
+    var cards = section.querySelectorAll('.attend-card');
+    var allHidden = true;
+    cards.forEach(function(c) { if (c.style.display !== 'none') allHidden = false; });
+    var title = section.querySelector('.attend-bu-title');
+    if (title) title.style.display = allHidden ? 'none' : '';
+  });
+}
+
 function renderAttendView(skipAutoSync) {
   var div = document.getElementById('orgAttendView');
   if (!div) return;
@@ -7660,14 +7681,8 @@ function renderAttendView(skipAutoSync) {
   buSet.sort((a,b) => { let oA=BU_ORDER.indexOf(a), oB=BU_ORDER.indexOf(b); if(oA===-1)oA=99; if(oB===-1)oB=99; return oA-oB; });
   const buFilter = document.getElementById('attendBUFilter');
   const buVal = buFilter ? buFilter.value : 'all';
-  const nameFilter = document.getElementById('attendNameSearch');
-  const nameVal = nameFilter ? nameFilter.value.trim().toLowerCase() : '';
   let filtered = empList;
   if (buVal !== 'all') filtered = empList.filter(e => e.bu === buVal);
-  if (nameVal) filtered = filtered.filter(e => e.name.toLowerCase().indexOf(nameVal) !== -1);
-
-  // 保存搜索值以便重新渲染时恢复
-  window._attendNameSearchVal = nameVal;
 
   let counts = {};
   let subCounts = {};
@@ -7714,7 +7729,7 @@ function renderAttendView(skipAutoSync) {
   html += '<span class="date-label">'+date+'</span>';
   html += '<input type="date" id="attendDateInput" value="'+date+'" onchange="renderAttendView()">';
   html += '<div class="topbar-right">';
-  html += '<input type="text" id="attendNameSearch" placeholder="搜索姓名..." value="'+esc(window._attendNameSearchVal||'')+'" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs);width:120px">';
+  html += '<input type="text" id="attendNameSearch" placeholder="搜索姓名..." oninput="applyAttendNameFilter()" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs);width:120px">';
   html += '<select id="attendBUFilter" onchange="renderAttendView()" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs)">';
   html += '<option value="all">全部BU</option>';
   buSet.forEach(bu => html += '<option value="'+esc(bu)+'"'+(buVal===bu?' selected':'')+'>'+esc(bu)+'</option>');
@@ -8079,16 +8094,11 @@ function renderAttendView(skipAutoSync) {
   html += '<div style="padding:40px;text-align:center;color:var(--text-muted)">加载中...</div>';
   html += '</div>';
 
-  var wasFocused = document.activeElement && document.activeElement.id === 'attendNameSearch';
   div.innerHTML = html;
-  // 搜索框防抖：避免每次按键都重渲染
-  var searchInput = document.getElementById('attendNameSearch');
-  if (searchInput) {
-    searchInput.addEventListener('input', function() {
-      clearTimeout(window._attendSearchTimer);
-      window._attendSearchTimer = setTimeout(function(){ renderAttendView(); }, 250);
-    });
-    if (wasFocused) { searchInput.focus(); searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length); }
+  // 恢复搜索值并应用过滤
+  if (window._attendNameSearchVal) {
+    var searchInput2 = document.getElementById('attendNameSearch');
+    if (searchInput2) { searchInput2.value = window._attendNameSearchVal; applyAttendNameFilter(); }
   }
   if (attendSubView === 'data') setTimeout(function(){ renderAttendDataView(); }, 0);
   if (attendSubView === 'analytics') setTimeout(function(){ renderAttendAnalytics(); }, 0);
@@ -8400,6 +8410,25 @@ function statusBadge(text) {
   return '<span class="sb '+ (cls[text]||'') +'">'+esc(text)+'</span>';
 }
 
+function applyAttendDataKeywordFilter() {
+  var input = document.getElementById('attendDataSearch');
+  var val = input ? input.value.trim().toLowerCase() : '';
+  attendDataFilter.keyword = val;
+  var rows = document.querySelectorAll('.attend-data-table tbody tr');
+  var visibleCount = 0;
+  rows.forEach(function(row) {
+    var nameCell = row.querySelector('.td-name');
+    var buCell = row.querySelector('.td-meta');
+    var name = nameCell ? nameCell.textContent.toLowerCase() : '';
+    var bu = buCell ? buCell.textContent.toLowerCase() : '';
+    var match = !val || name.indexOf(val) !== -1 || bu.indexOf(val) !== -1;
+    row.style.display = match ? '' : 'none';
+    if (match) visibleCount++;
+  });
+  var countEl = document.querySelector('.attend-record-count');
+  if (countEl) countEl.textContent = visibleCount + ' 条';
+}
+
 function renderAttendDataView() {
   var div = document.getElementById('orgAttendData');
   if (!div) return;
@@ -8472,10 +8501,7 @@ function renderAttendDataView() {
       var deptD = emp.department || emp.bu || '';
       if (attendDataFilter.bu !== 'all' && emp.bu !== attendDataFilter.bu) return;
       if (attendDataFilter.dept !== 'all' && deptD !== attendDataFilter.dept) return;
-      if (attendDataFilter.keyword) {
-        var kw = attendDataFilter.keyword.toLowerCase();
-        if (emp.name.toLowerCase().indexOf(kw) < 0 && (emp.bu||'').toLowerCase().indexOf(kw) < 0) return;
-      }
+      // 关键字筛选移至 DOM 层面（applyAttendDataKeywordFilter），避免重建输入框
       var r = dayData[empId];
       var ciR = r.cir || '', coR = r.cor || '';
       if (attendDataFilter.status !== 'all') {
@@ -8568,7 +8594,7 @@ function renderAttendDataView() {
 
   // 右侧操作组
   html += '<div class="attend-toolbar-right">';
-  html += '<input type="text" id="attendDataSearch" placeholder="搜索姓名/BU..." value="'+esc(attendDataFilter.keyword)+'" oninput="attendDataFilter.keyword=this.value;renderAttendDataView()">';
+  html += '<input type="text" id="attendDataSearch" placeholder="搜索姓名/BU..." value="'+esc(attendDataFilter.keyword)+'" oninput="applyAttendDataKeywordFilter()">';
   html += '<span class="attend-record-count">'+rows.length+' 条'+(attendDataView==='detail' && abnCount > 0 ? ' <span style="color:var(--danger-text)">'+abnCount+' 异常</span>' : '')+'</span>';
   if (attendDataView === 'detail') {
     html += '<button class="btn btn-outline btn-sm" onclick="importAttendCSV()" style="font-size:11px">导入打卡CSV</button>';
@@ -8632,6 +8658,11 @@ function renderAttendDataView() {
   }
 
   div.innerHTML = html;
+
+  // 恢复搜索值并应用表格行过滤
+  if (attendDataFilter.keyword && attendDataView === 'detail') {
+    applyAttendDataKeywordFilter();
+  }
 
   } catch(e) {
     div.innerHTML = '<div style="padding:20px;color:#c00;background:#fff0f0;border:1px solid #e0c0c0;border-radius:8px;margin:16px"><strong>渲染错误</strong><pre style="font-size:10px;margin-top:8px;white-space:pre-wrap">'+esc(e.message)+'\n'+esc(e.stack||'')+'</pre></div>';
