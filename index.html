@@ -7569,7 +7569,7 @@ function generateAttendStatusFromRecords(records, empList) {
   var skipped = 0;
 
   Object.keys(records).forEach(function(date) {
-    if (!attData[date]) attData[date] = {};
+    attData[date] = {};
     Object.keys(records[date]).forEach(function(empId) {
       var rec = records[date][empId];
       var ci = rec.cir || '';
