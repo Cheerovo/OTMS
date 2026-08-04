@@ -8190,6 +8190,15 @@ function importAttendCSV() {
       var nameToEmp = {};
       empList.forEach(function(e) { nameToEmp[e.name] = e; });
 
+      // 名字别名映射：繁体/英文 → 花名册标准名
+      var NAME_ALIASES = {
+        '賴淑賢': '赖淑贤',
+        'yvonne lai': '赖淑贤',
+        'Yvonne Lai': '赖淑贤',
+        'YVONNE LAI': '赖淑贤'
+      };
+      function normalizeName(n) { var s = (n||'').trim(); return NAME_ALIASES[s] || s; }
+
       var records = loadAttendanceRecords();
       var matched = 0, unmatchedNames = {};
       var parseErrors = 0;
@@ -8197,7 +8206,7 @@ function importAttendCSV() {
 
       for (var i = 1; i < lines.length; i++) {
         var parts = lines[i].split(',').map(function(s) { return s.trim(); });
-        var name = parts[colMap['姓名']] || '';
+        var name = normalizeName(parts[colMap['姓名']] || '');
         var date = parts[colMap['日期']] || '';
         if (!name || !date) { parseErrors++; continue; }
         if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { parseErrors++; continue; }
