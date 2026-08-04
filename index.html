@@ -9016,7 +9016,7 @@ function renderAttendAnalytics() {
   html += '<select onchange="analyticsFilter.year=this.value;analyticsFilter.month=\'\';analyticsFilter.day=\'\';saveAnalyticsFilter();renderAttendAnalytics()"><option value="">全年</option>';
   years.forEach(function(y) { html += '<option value="'+y+'"'+(filter.year===y?' selected':'')+'>'+y+' 年</option>'; });
   html += '</select>';
-  html += '<select onchange="analyticsFilter.month=this.value;analyticsFilter.day=\'\';saveAnalyticsFilter();renderAttendAnalytics()"><option value="">全月</option>';
+  html += '<select onchange="analyticsFilter.month=this.value;analyticsFilter.day=\'\';saveAnalyticsFilter();renderAttendAnalytics()"><option value="">全年</option>';
   months.forEach(function(m) { html += '<option value="'+m+'"'+(filter.month===m?' selected':'')+'>'+m.slice(5).replace(/^0/,'')+' 月</option>'; });
   html += '</select>';
   // Day — native date picker
