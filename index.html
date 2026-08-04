@@ -8497,7 +8497,12 @@ function renderAttendDataView() {
     var dayData = records[date];
     Object.keys(dayData).forEach(function(empId) {
       var emp = empMap[empId];
-      if (!emp) return;
+      // 离职 / 未匹配员工：用 ID 推导显示名，不跳过记录
+      if (!emp) {
+        var fallbackName = empId;
+        if (empId.indexOf('name_') === 0) fallbackName = empId.slice(5);
+        emp = { id: empId, name: fallbackName, bu: '离职/未匹配', department: '' };
+      }
       var deptD = emp.department || emp.bu || '';
       if (attendDataFilter.bu !== 'all' && emp.bu !== attendDataFilter.bu) return;
       if (attendDataFilter.dept !== 'all' && deptD !== attendDataFilter.dept) return;
