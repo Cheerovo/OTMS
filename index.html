@@ -14047,7 +14047,7 @@ function computeMonthlyOverview() {
     if (normalCount < 0) normalCount = 0;
     var normalRate = totalRecs > 0 ? Math.round(normalCount * 1000 / totalRecs) / 10 : 0;
 
-    monthSets.push(allSet);
+    monthSets.push(csvSet);
 
     result.push({
       month: month.slice(5).replace(/^0/, '') + '月',
