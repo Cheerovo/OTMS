@@ -1239,6 +1239,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .analytics-empty { text-align:center; padding:32px 20px; color:var(--text-muted); }
 .analytics-empty svg { display:block; margin:0 auto 12px; opacity:.35; }
 .analytics-empty p { font-size:12px; }
+.mo-headcount-row { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.mo-hc-card { flex:1; min-width:70px; text-align:center; padding:8px 6px; background:var(--bg); border-radius:8px; }
+.mo-hc-month { font-size:10px; color:var(--text-muted); margin-bottom:2px; }
+.mo-hc-num { font-size:16px; font-weight:700; color:var(--text); }
 .analytics-summary-row { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
 .analytics-summary-item {
   display:flex; align-items:center; gap:6px; padding:6px 10px;
@@ -9252,7 +9256,7 @@ function renderAttendAnalytics() {
 
   // 月度考勤总览（仅在全量视图显示）
   if (!filter.month && !filter.day && !filter.empId && filter.atype === 'all' && !filter.leaveSub && !filter.lateSub && !filter.outSub) {
-    html += '<div class="analytics-chart-grid"><div class="analytics-chart-box full"><div class="analytics-chart-title">月度考勤总览</div><div class="analytics-chart-wrap"><canvas id="chartMonthlyDash" style="max-height:300px"></canvas></div></div></div>';
+    html += '<div class="analytics-chart-grid"><div class="analytics-chart-box full"><div class="analytics-chart-title">月度考勤总览</div><div class="analytics-chart-wrap"><div class="mo-headcount-row" id="moHeadcountRow"></div><canvas id="chartMonthlyDash" style="max-height:300px"></canvas></div></div></div>';
   }
 
   // ---- Charts ----
@@ -10011,6 +10015,13 @@ function renderAnalyticsCharts(stats) {
   var ctxDash = document.getElementById('chartMonthlyDash');
   if (ctxDash) {
     var dashData = computeMonthlyOverview();
+    // 填充人数卡片
+    var hcRow = document.getElementById('moHeadcountRow');
+    if (hcRow) {
+      hcRow.innerHTML = dashData.map(function(d){
+        return '<div class="mo-hc-card"><div class="mo-hc-month">'+d.month+'</div><div class="mo-hc-num">'+d.active+'<span style="font-size:10px;font-weight:400;color:var(--text-muted)">人</span></div></div>';
+      }).join('');
+    }
     var dashLabels = dashData.map(function(d){return d.month;});
     var dashHeadcounts = dashData.map(function(d){return d.active;});
     var dashRates = dashData.map(function(d){return d.rate;});
