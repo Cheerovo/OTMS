@@ -1050,11 +1050,18 @@ async function main() {
       const merged = {};
       if (prev && prev.statusByDate) Object.assign(merged, prev.statusByDate);
       Object.assign(merged, newSBD);
-      // 保护已有OA数据不被打卡记录覆盖（OA请假/外勤/出差优先级高于打卡记录）
+      // 保护已有OA数据不被打卡记录覆盖
+      // 仅当打卡数据显示缺卡/旷工时保留OA（人确实没来），正常打卡则覆盖（销假回来）
       if (prev && prev.statusByDate) {
         Object.keys(prev.statusByDate).forEach(function(d) {
           var prevIsOA = prev.statusByDate[d].m === '请假' || prev.statusByDate[d].m === '外勤' || prev.statusByDate[d].m === '出差';
-          if (prevIsOA && newSBD[d] && newSBD[d].m !== '请假' && newSBD[d].m !== '外勤' && newSBD[d].m !== '出差') {
+          if (!prevIsOA) return;
+          if (!newSBD[d]) return; // 当天无打卡数据，merged已保留prev值
+          var newIsOA = newSBD[d].m === '请假' || newSBD[d].m === '外勤' || newSBD[d].m === '出差';
+          if (newIsOA) return; // 新数据也是OA，让它覆盖
+          // 打卡数据显示缺卡/旷工 → 保留OA（人没来，请假有效）
+          // 打卡数据显示在岗/正常 → 覆盖OA（人来了，销假）
+          if (newSBD[d].s === '缺卡' || newSBD[d].m === '旷工') {
             merged[d] = prev.statusByDate[d];
           }
         });
