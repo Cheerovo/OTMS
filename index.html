@@ -3362,7 +3362,6 @@ body.tn-resizing * { pointer-events:none; }
         <button class="btn btn-primary btn-sm" id="btnNewOrg" onclick="openEmployeeModal()">+ 新增员工</button>
         <button class="btn btn-outline btn-sm" id="btnBatchImport" onclick="openBatchImportModal()">📥 批量导入</button>
         <button class="btn btn-outline btn-sm" id="btnExport" onclick="exportEmployeeTable()">📤 导出</button>
-        <button class="btn btn-outline btn-sm" id="btnSync" onclick="window.forceSyncAll()" title="同步数据到云端，实现多设备数据一致">☁️ 同步</button>
         <button class="btn btn-outline btn-sm" id="btnDeptMgmt" onclick="openDeptManageModal()" style="display:none">管理部门</button>
       </div>
     </div>
@@ -11908,8 +11907,7 @@ function showSyncPanel(){
     html += '<div style="font-size:11px;padding:2px 0;">'+gid+dirty+': v'+ver+'</div>';
   });
   html += '<div style="margin-top:8px;display:flex;gap:6px;">'
-    + '<button onclick="window.forceSyncAll();document.getElementById(\'syncDetailPanel\').remove()" style="flex:1;padding:5px;font-size:11px;border:1px solid var(--border,#ddd);border-radius:4px;background:var(--primary,#3498db);color:#fff;cursor:pointer;">立即同步</button>'
-    + '<button onclick="document.getElementById(\'syncDetailPanel\').remove()" style="padding:5px 10px;font-size:11px;border:1px solid var(--border,#ddd);border-radius:4px;background:var(--bg,#f5f5f5);cursor:pointer;">关闭</button>'
+    + '<button onclick="document.getElementById(\'syncDetailPanel\').remove()" style="flex:1;padding:5px;font-size:11px;border:1px solid var(--border,#ddd);border-radius:4px;background:var(--bg,#f5f5f5);cursor:pointer;">关闭</button>'
     + '</div>';
   document.getElementById('syncPanelContent').innerHTML = html;
   // 点击外部关闭
