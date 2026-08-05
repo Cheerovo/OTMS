@@ -10649,8 +10649,9 @@ async function syncFromDingTalkSilent(date, attData, empList) {
 }
 
 async function syncFromDingTalk() {
-  const date = document.getElementById('attendDateInput') ? document.getElementById('attendDateInput').value : getTodayStr();
-  var step = '';
+  console.log('[钉钉同步] 按钮被点击，开始同步...');
+  var date, step = '';
+  try { date = document.getElementById('attendDateInput') ? document.getElementById('attendDateInput').value : getTodayStr(); } catch(e) { console.error(e); alert('获取日期失败: '+e.message); return; }
   try {
     const btn = document.querySelector('button[onclick="syncFromDingTalk()"]');
     if (btn) { btn.textContent = '⏳ 同步中...'; btn.disabled = true; }
@@ -10711,6 +10712,7 @@ async function syncFromDingTalk() {
     alert('同步失败：' + err.message + '\n\n步骤: ' + step + '\n详细错误请查看控制台(F12)');
   }
 }
+window.syncFromDingTalk = syncFromDingTalk;
 
 // ===== Org Tree Chart (from HR Policy System) =====
 function renderOrgChart() {
