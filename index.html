@@ -12710,7 +12710,12 @@ async function autoBackupSystemData(silent){
 
     // 上传到 Supabase Storage（按用户隔离目录，避免多设备互相删除）
     var userName = (typeof currentUser === 'string' && currentUser) ? currentUser : 'system';
-    var userPrefix = 'backups/' + encodeURIComponent(userName) + '/';
+    var userHash = userName;
+    if(/[^\x00-\x7F]/.test(userName)){
+      var h = 0; for(var i = 0; i < userName.length; i++){ h = ((h << 5) - h + userName.charCodeAt(i)) | 0; }
+      userHash = 'u' + (h >>> 0).toString(36);
+    }
+    var userPrefix = 'backups/' + userHash + '/';
     var path = userPrefix + 'backup_'+ts+'.json';
     var size = await _backupUpload(path, currentJson);
 
