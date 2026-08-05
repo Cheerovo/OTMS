@@ -2458,6 +2458,10 @@ body.tn-resizing * { pointer-events:none; }
 <body>
 <noscript><div style="position:fixed;inset:0;z-index:9999;background:#fff;display:flex;align-items:center;justify-content:center;font:14px/1.5 PingFang SC,sans-serif;color:#b91c1c;text-align:center;padding:20px">此系统需要启用 JavaScript 才能运行。<br>请在浏览器设置中允许 JavaScript 后刷新页面。</div></noscript>
 
+<!-- Sync Status Indicator -->
+<div id="syncStatusDot" style="background:#95a5a6;" onclick="showSyncPanel()" title="点击查看同步状态"></div>
+<span id="syncStatusLabel">待同步</span>
+
 <!-- Login Overlay -->
 <div id="loginOverlay" class="login-overlay" style="display:none;" onclick="if(event.target===this)cancelLogin()">
   <div class="login-box">
@@ -3358,6 +3362,7 @@ body.tn-resizing * { pointer-events:none; }
         <button class="btn btn-primary btn-sm" id="btnNewOrg" onclick="openEmployeeModal()">+ 新增员工</button>
         <button class="btn btn-outline btn-sm" id="btnBatchImport" onclick="openBatchImportModal()">📥 批量导入</button>
         <button class="btn btn-outline btn-sm" id="btnExport" onclick="exportEmployeeTable()">📤 导出</button>
+        <button class="btn btn-outline btn-sm" id="btnSync" onclick="window.forceSyncAll()" title="同步数据到云端，实现多设备数据一致">☁️ 同步</button>
         <button class="btn btn-outline btn-sm" id="btnDeptMgmt" onclick="openDeptManageModal()" style="display:none">管理部门</button>
       </div>
     </div>
@@ -11456,6 +11461,17 @@ function renderOrgAttachments() {
 }
 
 
+// ===== Sync Log =====
+window._syncLog = [];
+function _syncLogEvent(level, msg, detail){
+  var entry = {time: new Date().toISOString(), level: level, msg: msg, detail: detail||''};
+  window._syncLog.unshift(entry);
+  if(window._syncLog.length > 50) window._syncLog.pop();
+  if(level==='error') console.error('[同步]', msg, detail||'');
+  else if(level==='warn') console.warn('[同步]', msg, detail||'');
+  else console.log('[同步]', msg, detail||'');
+}
+
 // ===== Init =====
 // ===== Remote Data Sync (Supabase) — 按资源组拆分，独立 CAS =====
 const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','attendance_records','attendance_leaves','attendance_unmatched','otms_tn_split_ratio','otms_trainee_cleared_v3','okr_users'];
@@ -11632,20 +11648,40 @@ function mergeEvalData(localEval, cloudEval){
 // ===== 自动上传（按组 CAS）=====
 var _pendingUpload = false;
 function scheduleAutoUpload(){
-  if(_isImporting) { console.log('[同步] 跳过（正在导入数据）'); return; }
-  if(_autoUploadBusy){ _pendingUpload = true; console.log('[同步] 排队等待（上传中）'); return; }
+  if(_isImporting) { return; }
+  if(_autoUploadBusy){ _pendingUpload = true; return; }
   clearTimeout(_autoUploadTimer);
-  console.log('[同步] 已调度上传，1.5s后执行, 待上传组:', Object.keys(_dirtyGroups).join(','));
+  var dirtyGroupList = Object.keys(_dirtyGroups);
+  _syncLogEvent('info', '调度上传, 组: '+dirtyGroupList.join(','), '');
   _autoUploadTimer = setTimeout(async function(){
     _autoUploadBusy = true;
     _pendingUpload = false;
-    try{
-      var groups = Object.keys(_dirtyGroups);
-      // 上传成功后清除 dirty 标记，失败则保留供下次重试
-      await Promise.all(groups.map(function(gid){ return uploadGroup(gid, 0); }));
-      _dirtyKeys = {};
-      _dirtyGroups = {};
-    }catch(e){ console.error('自动同步异常:', e.message, e); }
+    var groups = Object.keys(_dirtyGroups);
+    _syncLogEvent('info', '开始上传 '+groups.length+' 组', '');
+    var results = await Promise.allSettled(groups.map(function(gid){ return uploadGroup(gid, 0); }));
+    var ok = 0, fail = 0;
+    results.forEach(function(r, i){
+      if(r.status === 'fulfilled'){
+        delete _dirtyGroups[groups[i]];
+        ok++;
+      } else {
+        fail++;
+        _syncLogEvent('warn', groups[i]+' 上传失败, 保留dirty', r.reason?r.reason.message:'');
+      }
+    });
+    // 清除无 dirty group 对应的 dirty keys
+    SYNC_GROUP_LIST.forEach(function(gid){
+      if(!_dirtyGroups[gid]){
+        SYNC_GROUPS[gid].keys.forEach(function(k){ delete _dirtyKeys[k]; });
+      }
+    });
+    if(fail === 0){
+      _syncLogEvent('info', '上传完成 ('+ok+'组)', '');
+      updateSyncIndicator('synced');
+    } else {
+      _syncLogEvent('warn', '上传部分完成 成功:'+ok+' 失败:'+fail, '');
+      updateSyncIndicator('error');
+    }
     _autoUploadBusy = false;
     // 上传期间有新的本地编辑 → 立即触发下一轮上传
     if(_pendingUpload){ _pendingUpload = false; scheduleAutoUpload(); }
@@ -11653,10 +11689,15 @@ function scheduleAutoUpload(){
 }
 
 async function uploadGroup(gid, retryCount){
-  if(retryCount >= 3){ console.log('⚠️ '+gid+' 同步重试已达上限，放弃本次上传'); return; }
+  if(retryCount >= 5){
+    _syncLogEvent('error', gid+' 重试达上限, 放弃上传, 保留dirty标记', '');
+    updateSyncIndicator('error');
+    throw new Error(gid+' 重试上限');
+  }
   var verKey = getGroupVerKey(gid);
   var groupId = SYNC_GROUPS[gid].id;
   var localVer = parseInt(localStorage.getItem(verKey)) || 0;
+  updateSyncIndicator('syncing');
 
   // 1. 拉取该组的云端版本
   var cloudVer = 0;
@@ -11666,15 +11707,19 @@ async function uploadGroup(gid, retryCount){
       .select('version, data')
       .eq('id', groupId)
       .maybeSingle();
-    console.log('[上传]', gid, '本地版本:', localVer, '云端版本:', cloudRow?cloudRow.version:'无');
-    // 2. 云端更新 → 合并到本地（用 {} 标记删除的 key 不会被恢复）
+    _syncLogEvent('info', gid+' 本地方版本:'+localVer+' 云端:'+(cloudRow?cloudRow.version:'无'), '');
+    // 2. 云端更新 → 合并到本地
     if(cloudRow && cloudRow.version > localVer && cloudRow.data){
-      console.log('[上传]', gid, '云端版本更新 → 合并数据');
+      _syncLogEvent('info', gid+' 云端更新→合并', '');
       importGroupData(gid, cloudRow.data, false);
       localVer = cloudRow.version;
     }
     cloudVer = cloudRow ? cloudRow.version : 0;
-  }catch(e){ console.log('上传前检查云端版本失败('+gid+'):', e.message); }
+  }catch(e){
+    _syncLogEvent('error', gid+' 检查云端版本失败，放弃本次上传', e.message);
+    updateSyncIndicator('error');
+    throw new Error(gid+' 云端检查失败: '+e.message);
+  }
 
   // 3. CAS 上传
   var data = collectGroupData(gid);
@@ -11685,9 +11730,13 @@ async function uploadGroup(gid, retryCount){
       .upsert({ id: groupId, data: data, version: newVer, updated_at: new Date().toISOString() });
     if(!error){
       localStorage.setItem(verKey, newVer);
-      console.log('[上传]', gid, '✅ upsert 成功, 新版本:', newVer);
+      try{ localStorage.setItem(_getGroupHashKey(gid), _hashGroupData(gid)); }catch(e){}
+      _syncLogEvent('info', gid+' upsert成功 v'+newVer, '');
+      updateSyncIndicator('synced');
     } else {
-      console.error('[上传]', gid, '❌ upsert 失败:', error.message);
+      _syncLogEvent('error', gid+' upsert失败', error.message);
+      updateSyncIndicator('error');
+      throw new Error(gid+' upsert失败: '+error.message);
     }
   } else {
     const { data: updatedRow, error } = await supabaseClient
@@ -11697,12 +11746,18 @@ async function uploadGroup(gid, retryCount){
       .eq('version', localVer)
       .select('version')
       .maybeSingle();
-    if(error){ console.error('[上传] '+gid+' ❌ 数据库错误:', error.message); return; }
+    if(error){
+      _syncLogEvent('error', gid+' 数据库错误', error.message);
+      updateSyncIndicator('error');
+      throw new Error(gid+' 数据库错误: '+error.message);
+    }
     if(updatedRow && updatedRow.version === newVer){
       localStorage.setItem(verKey, newVer);
-      console.log('[上传]', gid, '✅ CAS 成功, 新版本:', newVer);
+      try{ localStorage.setItem(_getGroupHashKey(gid), _hashGroupData(gid)); }catch(e){}
+      _syncLogEvent('info', gid+' CAS成功 v'+newVer, '');
+      updateSyncIndicator('synced');
     } else {
-      console.log('[上传]', gid, '⚠️ CAS 冲突，重试 #'+(retryCount+1));
+      _syncLogEvent('warn', gid+' CAS冲突 重试#'+(retryCount+1), '');
       // 获取当前云端版本号用于重试
       var conflictVer = updatedRow ? updatedRow.version : 0;
       if(!conflictVer){
@@ -11712,7 +11767,9 @@ async function uploadGroup(gid, retryCount){
         }catch(e){}
       }
       if(conflictVer) localStorage.setItem(verKey, conflictVer);
-      setTimeout(function(){ uploadGroup(gid, retryCount + 1); }, 500);
+      // 安排重试（独立运行），同时 throw 以保留 dirty 标记
+      setTimeout(function(){ uploadGroup(gid, retryCount + 1).catch(function(e){ _syncLogEvent('error', gid+' CAS重试异常', e.message); }); }, 500);
+      throw new Error(gid+' CAS冲突, 已安排重试#'+(retryCount+1));
     }
   }
 }
@@ -11721,14 +11778,14 @@ async function uploadGroup(gid, retryCount){
 function flushUpload(){
   clearTimeout(_autoUploadTimer);
   var groups = Object.keys(_dirtyGroups);
-  _dirtyKeys = {};
-  _dirtyGroups = {};
   groups.forEach(function(gid){
     var groupId = SYNC_GROUPS[gid].id;
     var verKey = getGroupVerKey(gid);
     var localVer = parseInt(localStorage.getItem(verKey)) || 0;
     var data = collectGroupData(gid);
     var ver = Math.floor(Date.now() / 1000);
+    // 标记 flush 中，供下次启动检查
+    try{ localStorage.setItem('_sync_flush_pending', gid); }catch(e){}
     try {
       fetch(SUPABASE_URL + '/rest/v1/team_data?version=eq.' + localVer + '&id=eq.' + groupId, {
         method: 'PATCH',
@@ -11736,13 +11793,96 @@ function flushUpload(){
           'apikey': SUPABASE_ANON_KEY,
           'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
           'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
+          'Prefer': 'return=representation'
         },
         body: JSON.stringify({ data: data, version: ver, updated_at: new Date().toISOString() }),
         keepalive: true
-      });
+      }).then(function(resp){
+        if(resp.ok){
+          localStorage.setItem(verKey, ver);
+          localStorage.setItem(_getGroupHashKey(gid), _hashGroupData(gid));
+          localStorage.removeItem('_sync_flush_pending');
+        }
+      }).catch(function(){});
     } catch(e) {}
   });
+}
+
+// ===== Toast 通知 =====
+function _showToast(msg, type, actionLabel, actionFn){
+  type = type || 'info';
+  var bg = type==='error'?'#e74c3c':type==='warn'?'#f39c12':'#4caf50';
+  var toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;top:20px;right:20px;background:'+bg+';color:#fff;padding:10px 20px;border-radius:8px;z-index:99999;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,0.2);animation:fadeInOut 4s forwards;max-width:320px;display:flex;align-items:center;gap:10px;';
+  toast.innerHTML = '<span>'+msg+'</span>';
+  if(actionLabel && actionFn){
+    var btn = document.createElement('button');
+    btn.textContent = actionLabel;
+    btn.style.cssText = 'background:rgba(255,255,255,0.25);color:#fff;border:1px solid rgba(255,255,255,0.5);padding:3px 10px;border-radius:4px;font-size:11px;cursor:pointer;white-space:nowrap;';
+    btn.onclick = function(e){ e.stopPropagation(); actionFn(); toast.remove(); };
+    toast.appendChild(btn);
+  }
+  document.body.appendChild(toast);
+  setTimeout(function(){ toast.remove(); }, 5000);
+}
+
+// ===== 同步状态指示器 =====
+var _syncState = 'idle'; // idle | syncing | synced | error
+function updateSyncIndicator(state, detail){
+  if(state) _syncState = state;
+  var dot = document.getElementById('syncStatusDot');
+  if(!dot) return;
+  var label = document.getElementById('syncStatusLabel');
+  var colors = {idle:'#95a5a6', syncing:'#3498db', synced:'#27ae60', error:'#e74c3c'};
+  var texts = {idle:'待同步', syncing:'同步中...', synced:'已同步', error:'同步失败'};
+  dot.style.background = colors[_syncState] || colors.idle;
+  if(_syncState==='syncing'){ dot.classList.add('syncing'); }
+  else { dot.classList.remove('syncing'); }
+  if(label){ label.textContent = (detail||texts[_syncState]||''); }
+  if(_syncState==='synced'){
+    try{ localStorage.setItem('_sync_last_time', new Date().toISOString()); }catch(e){}
+  }
+}
+function showSyncPanel(){
+  var panel = document.getElementById('syncDetailPanel');
+  if(!panel){
+    panel = document.createElement('div');
+    panel.id = 'syncDetailPanel';
+    panel.style.cssText = 'position:fixed;bottom:40px;right:16px;background:var(--card-bg,#fff);border:1px solid var(--border,#ddd);border-radius:10px;padding:14px 16px;z-index:99998;font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,0.15);max-width:340px;min-width:260px;';
+    panel.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><b>同步状态</b><span style="cursor:pointer;font-size:16px;" onclick="document.getElementById(\'syncDetailPanel\').remove()">&times;</span></div>'
+      + '<div id="syncPanelContent">加载中...</div>';
+    document.body.appendChild(panel);
+  }
+  // 填充内容
+  var html = '<div style="font-size:11px;color:var(--text2,#666);margin-bottom:6px;">状态: <span style="color:'+({idle:'#95a5a6',syncing:'#3498db',synced:'#27ae60',error:'#e74c3c'}[_syncState])+'">'+({idle:'待同步',syncing:'同步中',synced:'已同步',error:'同步失败'}[_syncState])+'</span></div>';
+  var lastTime = '';
+  try{ lastTime = localStorage.getItem('_sync_last_time')||''; }catch(e){}
+  if(lastTime){
+    try{ var d = new Date(lastTime); lastTime = d.toLocaleString(); }catch(e){}
+    html += '<div style="font-size:11px;color:var(--text2,#666);margin-bottom:6px;">上次同步: '+lastTime+'</div>';
+  }
+  html += '<div style="font-size:11px;color:var(--text2,#666);margin-bottom:6px;">同步分组:</div>';
+  SYNC_GROUP_LIST.forEach(function(gid){
+    var verKey = getGroupVerKey(gid);
+    var ver = '--';
+    try{ ver = localStorage.getItem(verKey)||'--'; }catch(e){}
+    var dirty = _dirtyGroups[gid] ? ' ⚡' : '';
+    html += '<div style="font-size:11px;padding:2px 0;">'+gid+dirty+': v'+ver+'</div>';
+  });
+  html += '<div style="margin-top:8px;display:flex;gap:6px;">'
+    + '<button onclick="window.forceSyncAll();document.getElementById(\'syncDetailPanel\').remove()" style="flex:1;padding:5px;font-size:11px;border:1px solid var(--border,#ddd);border-radius:4px;background:var(--primary,#3498db);color:#fff;cursor:pointer;">立即同步</button>'
+    + '<button onclick="document.getElementById(\'syncDetailPanel\').remove()" style="padding:5px 10px;font-size:11px;border:1px solid var(--border,#ddd);border-radius:4px;background:var(--bg,#f5f5f5);cursor:pointer;">关闭</button>'
+    + '</div>';
+  document.getElementById('syncPanelContent').innerHTML = html;
+  // 点击外部关闭
+  setTimeout(function(){
+    var closeFn = function(e){
+      if(panel && !panel.contains(e.target) && e.target.id !== 'syncStatusDot'){
+        panel.remove(); document.removeEventListener('click', closeFn);
+      }
+    };
+    document.addEventListener('click', closeFn);
+  }, 100);
 }
 
 // ===== 自动下载：每 30 秒检查所有组的云端更新 =====
@@ -11753,7 +11893,8 @@ async function autoCheckRemote(){
       .from('team_data')
       .select('id, version')
       .in('id', [1,2,3,4,5,6]);
-    if(error || !rows || !rows.length) return;
+    if(error){ _syncLogEvent('warn','轮询检查失败',error.message); return; }
+    if(!rows || !rows.length) return;
 
     var updatedGroups = [];
     rows.forEach(function(row){
@@ -11764,6 +11905,8 @@ async function autoCheckRemote(){
     });
     if(updatedGroups.length === 0) return;
 
+    _syncLogEvent('info','云端有'+updatedGroups.length+'组更新',updatedGroups.map(function(u){return u.gid;}).join(','));
+
     // 只下载有更新的组
     for(var i = 0; i < updatedGroups.length; i++){
       var ug = updatedGroups[i];
@@ -11773,10 +11916,16 @@ async function autoCheckRemote(){
         .eq('id', ug.id)
         .maybeSingle();
       if(!fullRow || !fullRow.data) continue;
-      // 跳过有本地未上传修改的组，让 uploadGroup 处理合并
-      if(_dirtyGroups[ug.gid]) continue;
+      // 跳过有本地未上传修改的组（内存 dirty 或 hash 不匹配），让 uploadGroup 处理合并
+      var curHash2 = _hashGroupData(ug.gid);
+      var storedHash2 = '';
+      try{ storedHash2 = localStorage.getItem(_getGroupHashKey(ug.gid))||''; }catch(e){}
+      var hasLocalChanges2 = _dirtyGroups[ug.gid] || (parseInt(localStorage.getItem(getGroupVerKey(ug.gid)))||0) > 0 && curHash2 !== storedHash2;
+      if(hasLocalChanges2){ _syncLogEvent('info',ug.gid+' 有本地修改,跳过下载',''); continue; }
       importGroupData(ug.gid, fullRow.data, true);
       localStorage.setItem(getGroupVerKey(ug.gid), fullRow.version);
+      try{ localStorage.setItem(_getGroupHashKey(ug.gid), _hashGroupData(ug.gid)); }catch(e){}
+      updateSyncIndicator('synced');
       // eval 组更新后刷新内存缓存和 UI，无需刷新页面
       if(ug.gid === 'eval' && typeof loadEvalData === 'function'){
         try {
@@ -11786,14 +11935,26 @@ async function autoCheckRemote(){
           if(typeof renderEvalScorePanel === 'function' && typeof evalSelectedTrainee !== 'undefined' && evalSelectedTrainee) renderEvalScorePanel(evalSelectedTrainee);
         }catch(e){}
       }
+      // org 组更新后刷新员工数据
+      if(ug.gid === 'org' && typeof refreshGlobals === 'function'){
+        try { refreshGlobals(); if(typeof renderEmployeeTable === 'function') renderEmployeeTable(); }catch(e){}
+      }
     }
-    // 非侵入式提示
-    var toast = document.createElement('div');
-    toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#4caf50;color:#fff;padding:10px 20px;border-radius:8px;z-index:99999;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,0.2);animation:fadeInOut 4s forwards;';
-    toast.textContent = '☁️ 云端数据已更新（'+updatedGroups.length+'组），刷新页面查看最新内容';
-    document.body.appendChild(toast);
-    setTimeout(function(){ toast.remove(); }, 4000);
-  }catch(e){ /* silent */ }
+    // 获取当前活跃页签以便刷新
+    var activeSub = '';
+    try{ var ab = document.querySelector('.sidebar-sub.active'); if(ab) activeSub = ab.getAttribute('data-sub') || ''; }catch(e){}
+    _showToast('云端数据已更新('+updatedGroups.length+'组)', 'info', '刷新', function(){
+      if(typeof refreshGlobals === 'function') refreshGlobals();
+      if(activeSub === 'edit' && typeof renderEmployeeTable === 'function') renderEmployeeTable();
+      else if(activeSub === 'tree' && typeof renderOrgTree === 'function') renderOrgTree();
+      else if(activeSub === 'attend' && typeof renderAttendanceView === 'function') renderAttendanceView();
+      else if(activeSub === 'cards' && typeof renderOKR === 'function') renderOKR();
+      else if(activeSub === 'overview' && typeof renderTraineeOverview === 'function') renderTraineeOverview();
+      else if(activeSub === 'monthly' && typeof renderReports === 'function') renderReports();
+      else if(activeSub === 'yearly' && typeof renderReports === 'function') renderReports();
+      else { location.reload(); }
+    });
+  }catch(e){ _syncLogEvent('error','autoCheckRemote 异常',e.message); }
 }
 
 // ===== localStorage 劫持：记录 dirtyKeys + 仅 bump 对应组的 version =====
@@ -11804,7 +11965,7 @@ async function autoCheckRemote(){
     if(!_isImporting && DATA_KEYS.indexOf(key) !== -1){
       _dirtyKeys[key] = true;
       var gid = getGroupForKey(key);
-      console.log('[同步] 检测到数据变更:', key, '→ 组:', gid || '(无)');
+      _syncLogEvent('info', '数据变更: '+key+' → '+gid, '');
       if(gid){
         _dirtyGroups[gid] = true;
       }
@@ -11815,32 +11976,166 @@ async function autoCheckRemote(){
 
 setInterval(autoCheckRemote, 30000);
 
-// ===== 推送本地未同步数据到云端（修复旧版 property-assignment 数据未上传）=====
+// ===== 页面重新可见时触发同步 =====
+var _lastVisibilityCheck = 0;
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden && Date.now() - _lastVisibilityCheck > 10000){
+    _lastVisibilityCheck = Date.now();
+    _syncLogEvent('info', '页面可见,触发同步检查', '');
+    updateSyncIndicator('syncing');
+    autoCheckRemote().then(function(){
+      // 刷新当前页签的 UI 数据
+      if(typeof refreshGlobals === 'function') refreshGlobals();
+      var activeTab = '';
+      try{ activeTab = document.querySelector('.sidebar-group.active .sidebar-sub.active')?.getAttribute('data-sub') || ''; }catch(e){}
+      if(activeTab === 'edit' && typeof renderEmployeeTable === 'function') renderEmployeeTable();
+      else if(activeTab === 'tree' && typeof renderOrgTree === 'function') renderOrgTree();
+      else if(activeTab === 'attend' && typeof renderAttendanceView === 'function') renderAttendanceView();
+    }).catch(function(e){});
+  }
+});
+
+// ===== 启动时推送本地未同步数据 =====
+function _hashGroupData(gid){
+  var data = collectGroupData(gid);
+  var s = JSON.stringify(data);
+  var h = 0;
+  for(var i = 0; i < s.length; i++){ h = ((h << 5) - h + s.charCodeAt(i)) | 0; }
+  return String(h);
+}
+function _getGroupHashKey(gid){ return '_sync_hash_' + gid; }
+
 async function pushUnsynchronizedGroups(){
-  console.log('[启动同步] 检查未同步的本地数据...');
+  _syncLogEvent('info', '启动时检查未同步数据', '');
+  // 检查上次 flushUpload 是否可能失败（页面关闭时 CAS 冲突等）
+  var flushPending = '';
+  try{ flushPending = localStorage.getItem('_sync_flush_pending') || ''; }catch(e){}
+  if(flushPending){
+    _syncLogEvent('warn', '检测到未完成的 flushUpload, 强制重新上传', '');
+    localStorage.removeItem('_sync_flush_pending');
+  }
   for(var gi = 0; gi < SYNC_GROUP_LIST.length; gi++){
     var gid = SYNC_GROUP_LIST[gi];
     var verKey = getGroupVerKey(gid);
     var localVer = parseInt(localStorage.getItem(verKey)) || 0;
     var hasData = SYNC_GROUPS[gid].keys.some(function(k){ return localStorage.getItem(k) !== null; });
     if(!hasData) continue;
-    console.log('[启动同步]', gid, '本地版本:', localVer, '有数据:', hasData);
-    if(localVer === 0){
-      console.log('[启动同步]', gid, '🔼 发现未同步数据，上传中...');
+    var curHash = _hashGroupData(gid);
+    var storedHash = '';
+    try{ storedHash = localStorage.getItem(_getGroupHashKey(gid)) || ''; }catch(e){}
+    // flushPending 时强制上传，覆盖 CAS 失败导致的哈希不匹配
+    if(localVer === 0 || curHash !== storedHash || !!flushPending){
+      _syncLogEvent('info', gid+' 本地有变更(localVer='+localVer+' hashMatch='+(curHash===storedHash)+' flushPending='+!!flushPending+'), 上传中', '');
       await uploadGroup(gid, 0);
     }
   }
-  console.log('[启动同步] 完成');
+  _syncLogEvent('info', '启动检查完成', '');
 }
 // 手动触发全量同步（浏览器控制台调用: forceSyncAll()）
 window.forceSyncAll = async function(){
-  console.log('[手动同步] 开始全量上传...');
+  _syncLogEvent('info', '手动全量上传开始', '');
+  _showToast('正在同步数据...', 'info');
+  updateSyncIndicator('syncing');
+  var ok = 0, fail = 0;
   for(var gi = 0; gi < SYNC_GROUP_LIST.length; gi++){
     var gid = SYNC_GROUP_LIST[gi];
-    console.log('[手动同步] 上传组:', gid);
-    await uploadGroup(gid, 0);
+    try{
+      await uploadGroup(gid, 0);
+      ok++;
+    }catch(e){
+      fail++;
+      _syncLogEvent('error', gid+' 手动上传失败', e.message);
+    }
   }
-  console.log('[手动同步] 完成');
+  _syncLogEvent('info', '手动上传完成 成功:'+ok+' 失败:'+fail, '');
+  if(fail===0){
+    _showToast('全部同步完成 ('+ok+'组)', 'info');
+    updateSyncIndicator('synced');
+  } else {
+    _showToast('同步完成: '+ok+'成功, '+fail+'失败', 'warn');
+    updateSyncIndicator('error');
+  }
+};
+
+// ===== 诊断工具：检查哪些数据在本地但未同步到云端 =====
+window.checkSyncStatus = function(){
+  var report = [];
+  report.push('══════════════════════════════════');
+  report.push('  数据同步状态诊断');
+  report.push('══════════════════════════════════');
+  report.push('');
+
+  var totalUnsynced = 0;
+  var flushPending = '';
+  try{ flushPending = localStorage.getItem('_sync_flush_pending') || ''; }catch(e){}
+  if(flushPending){
+    report.push('⚠️  检测到未完成的 flushUpload (组: '+flushPending+')');
+    report.push('   上次页面关闭时上传可能失败，建议手动同步');
+    report.push('');
+  }
+
+  SYNC_GROUP_LIST.forEach(function(gid){
+    var verKey = getGroupVerKey(gid);
+    var localVer = parseInt(localStorage.getItem(verKey)) || 0;
+    var hasData = SYNC_GROUPS[gid].keys.some(function(k){ return localStorage.getItem(k) !== null; });
+    if(!hasData) return;
+
+    var curHash = _hashGroupData(gid);
+    var storedHash = '';
+    try{ storedHash = localStorage.getItem(_getGroupHashKey(gid)) || ''; }catch(e){}
+    var hashMatch = curHash === storedHash;
+    var isDirty = !!_dirtyGroups[gid];
+    var neverSynced = localVer === 0;
+
+    var status = neverSynced ? '❌ 从未同步' :
+                 !hashMatch ? '⚠️  有变更未上传' :
+                 isDirty ? '⚡ 内存中有待处理' :
+                 '✅ 已同步';
+
+    if(neverSynced || !hashMatch || isDirty) totalUnsynced++;
+
+    report.push(status + '  [' + gid + ']');
+    report.push('  本地版本: v' + localVer + (storedHash ? '  哈希: ' + storedHash.substring(0,8)+'...' : '  哈希: 无'));
+    report.push('  当前哈希: ' + curHash.substring(0,8)+'...' + (hashMatch ? ' (匹配)' : ' (不匹配)'));
+    report.push('  包含数据: ' + SYNC_GROUPS[gid].keys.filter(function(k){ return localStorage.getItem(k) !== null; }).join(', '));
+    report.push('');
+  });
+
+  if(totalUnsynced === 0){
+    report.push('✅ 所有数据已同步到云端');
+  } else {
+    report.push('⚠️  ' + totalUnsynced + ' 个组有未同步数据');
+    report.push('');
+    report.push('修复方式: 在控制台执行 forceSyncAll()');
+    report.push('或在页面工具栏点击"☁️ 同步"按钮');
+  }
+  report.push('══════════════════════════════════');
+
+  var output = report.join('\n');
+  console.log(output);
+  return output;
+};
+
+// 简化版：只显示未同步的组
+window.listUnsynced = function(){
+  var unsynced = [];
+  SYNC_GROUP_LIST.forEach(function(gid){
+    var localVer = parseInt(localStorage.getItem(getGroupVerKey(gid))) || 0;
+    var hasData = SYNC_GROUPS[gid].keys.some(function(k){ return localStorage.getItem(k) !== null; });
+    if(!hasData) return;
+    var curHash = _hashGroupData(gid);
+    var storedHash = '';
+    try{ storedHash = localStorage.getItem(_getGroupHashKey(gid)) || ''; }catch(e){}
+    if(localVer === 0 || curHash !== storedHash){
+      unsynced.push({group: gid, neverSynced: localVer === 0, keys: SYNC_GROUPS[gid].keys.filter(function(k){ return localStorage.getItem(k) !== null; })});
+    }
+  });
+  if(unsynced.length === 0){
+    console.log('✅ 所有数据已同步');
+    return [];
+  }
+  console.table(unsynced);
+  return unsynced;
 };
 
 // ===== 数据迁移：旧单行格式 → 新多行格式 =====
@@ -11905,7 +12200,7 @@ async function syncFromRemote(opts){
       } else if(oldRow && oldRow.data){
         hasNew = true;
       }
-      if(!hasNew) { console.log('云端暂无数据，使用本地数据'); return false; }
+      if(!hasNew) { _syncLogEvent('info', '云端暂无数据', ''); return false; }
     }
 
     // 检查所有组的版本，有更新的就下载
@@ -11920,26 +12215,37 @@ async function syncFromRemote(opts){
           .maybeSingle();
         if(!row || !row.data) continue;
         var localVer = parseInt(localStorage.getItem(getGroupVerKey(gid))) || 0;
-        console.log('[下载]', gid, '本地版本:', localVer, '云端版本:', row.version);
+        _syncLogEvent('info', gid+' 本地方v'+localVer+' 云端v'+row.version, '');
         if(row.version <= localVer) continue;
-        console.log('[下载]', gid, '✅ 发现更新 → 导入');
-        importGroupData(gid, row.data, true);
+        // 检查本地是否有未上传的变更
+        var curHash = _hashGroupData(gid);
+        var storedHash = '';
+        try{ storedHash = localStorage.getItem(_getGroupHashKey(gid))||''; }catch(e){}
+        var hasLocalChanges = (localVer > 0 && curHash !== storedHash);
+        if(hasLocalChanges){
+          _syncLogEvent('warn', gid+' 本地有未上传变更，跳过覆盖-改为合并', '');
+          importGroupData(gid, row.data, false); // merge mode: local优先
+        } else {
+          _syncLogEvent('info', gid+' 发现更新→导入', '');
+          importGroupData(gid, row.data, true);
+        }
         localStorage.setItem(getGroupVerKey(gid), row.version);
+        try{ localStorage.setItem(_getGroupHashKey(gid), _hashGroupData(gid)); }catch(e){}
         updatedAny = true;
-      }catch(e){}
+      }catch(e){ _syncLogEvent('warn', gid+' 下载失败', e.message); }
     }
     if(updatedAny){
-      console.log('已从云端同步最新数据');
+      _syncLogEvent('info', '从云端同步完成', '');
       if(opts.noReload){
         // 首次加载：不刷新页面，调用方重新初始化内存数据后直接渲染
         return true;
       }
       // 运行时自动检查更新 → 需要刷新页面
-      alert('数据已更新，即将刷新页面。');
-      location.reload();
+      _showToast('数据已更新，即将刷新页面', 'info');
+      setTimeout(function(){ location.reload(); }, 1500);
     }
   }catch(e){
-    console.log('Supabase 同步失败，使用本地数据:', e.message);
+    _syncLogEvent('error', 'syncFromRemote 失败', e.message);
   }
   return false;
 }
@@ -11988,6 +12294,16 @@ async function exportAllData(){
 var _autoSyncStyle = document.createElement('style');
 _autoSyncStyle.textContent = '@keyframes fadeInOut{0%{opacity:0;transform:translateY(-10px)}15%{opacity:1;transform:translateY(0)}75%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-10px)}}';
 document.head.appendChild(_autoSyncStyle);
+
+// 同步状态指示器样式
+var _syncIndicatorStyle = document.createElement('style');
+_syncIndicatorStyle.textContent = ''
+  + '#syncStatusDot{position:fixed;bottom:16px;right:16px;width:12px;height:12px;border-radius:50%;z-index:99997;cursor:pointer;transition:background 0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.2);}'
+  + '#syncStatusDot:hover{transform:scale(1.3);}'
+  + '#syncStatusDot.syncing{animation:syncPulse 1s infinite;}'
+  + '#syncStatusLabel{position:fixed;bottom:14px;right:34px;font-size:10px;color:var(--text2,#999);z-index:99997;pointer-events:none;}'
+  + '@keyframes syncPulse{0%,100%{opacity:1}50%{opacity:0.3}}';
+document.head.appendChild(_syncIndicatorStyle);
 
 // ===== Sidebar Navigation =====
 var SIDEBAR_ICONS = {

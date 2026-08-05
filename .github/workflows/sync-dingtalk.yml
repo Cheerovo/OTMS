@@ -1,0 +1,56 @@
+name: 钉钉考勤同步
+
+on:
+  schedule:
+    # 北京时间 8:00 和 18:00（工作日上传 dingtalk_data.json）
+    - cron: '0 0,10 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      force_full:
+        description: '强制全量同步'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 写入钉钉配置
+        run: |
+          cat > dingtalk_config.json << 'CONF'
+          {
+            "appKey": "${{ secrets.DINGTALK_APP_KEY }}",
+            "appSecret": "${{ secrets.DINGTALK_APP_SECRET }}",
+            "deptId": 1
+          }
+          CONF
+
+      - name: 配置 Git 认证
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Cheerovo/OTMS.git"
+
+      - name: 运行钉钉同步
+        run: node sync_dingtalk.js
+        timeout-minutes: 10
+
+      - name: 提交缓存文件
+        if: success()
+        run: |
+          git add dingtalk_data.json dingtalk_group_cache.json
+          git diff --staged --quiet || git commit -m "钉钉考勤数据自动同步 $(TZ='Asia/Shanghai' date +%Y-%m-%d)"
+          git push
