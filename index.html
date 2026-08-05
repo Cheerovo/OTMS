@@ -320,10 +320,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .nd-ding-log.show { display:block; }
 
 /* Filter row */
-.filter-row { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center; padding:12px 16px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-card); }
-.filter-row select, .filter-row input { padding:8px 14px; border:none; border-radius:var(--radius-xs); font-size:11px; background:var(--bg-base); color:var(--text); box-shadow:inset 0 1px 3px rgba(30,25,18,0.04); transition:var(--transition); }
-.filter-row select:focus, .filter-row input:focus { outline:none; box-shadow:0 0 0 3px rgba(201,79,102,0.12); background:var(--card); }
-.filter-row input { width:200px; }
+/* Toolbar — filters + actions separated */
+.toolbar { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+.toolbar-filters { display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding:10px 16px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-card); }
+.toolbar-filters select, .toolbar-filters input { padding:8px 14px; border:none; border-radius:var(--radius-xs); font-size:11px; background:var(--bg-base); color:var(--text); box-shadow:inset 0 1px 3px rgba(30,25,18,0.04); transition:var(--transition); }
+.toolbar-filters select:focus, .toolbar-filters input:focus { outline:none; box-shadow:0 0 0 3px rgba(201,79,102,0.12); background:var(--card); }
+.toolbar-filters input { width:160px; }
+.toolbar-actions { display:flex; gap:8px; align-items:center; }
+.result-count { margin-left:auto; font-size:11px; color:var(--text-muted); white-space:nowrap; padding:4px 12px; background:var(--bg-base); border-radius:12px; }
 .filter-chips { display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; align-items:center; min-height:0; }
 .filter-chips:empty { margin-bottom:0; }
 .filter-chip { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:14px; font-size:10px; background:var(--accent-wash); color:var(--accent-dim); font-weight:400; cursor:default; }
@@ -875,7 +879,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
   :root { --sidebar-w:56px; }
   .main { padding:16px 20px; }
   .stats { grid-template-columns:repeat(2,1fr); }
-  .filter-row { flex-direction:column; }
+  .toolbar-filters { flex-direction:column; }
   .modal { width:95%; max-height:85vh; overflow-y:auto; }
   .form-row { grid-template-columns:1fr; }
   .tl-date { min-width:80px; font-size:8px; }
@@ -997,10 +1001,22 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .emp-stat-card .value { font-size:22px; font-weight:400; letter-spacing:-.5px; color:var(--accent); line-height:1.3; }
 .emp-stat-card .value-small { font-size:14px; color:var(--text-dim); }
 .emp-stat-card .sub { font-size:10px; color:var(--text-dim); margin-top:3px; }
-.emp-table-wrap { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden; }
+.emp-table-wrap { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:auto; max-height:calc(100vh - 280px); }
 .emp-table { width:100%; border-collapse:collapse; font-size:11px; }
-.emp-table thead th { background:var(--bg-surface-alt); padding:10px 14px; text-align:left; font-size:10px; color:var(--text-muted); font-weight:400; border-bottom:1px solid var(--border-subtle); cursor:pointer; user-select:none; transition:background .15s; white-space:nowrap; }
+.emp-table thead th { background:var(--bg-surface-alt); padding:10px 14px; text-align:left; font-size:10px; color:var(--text-muted); font-weight:400; border-bottom:1px solid var(--border-subtle); cursor:pointer; user-select:none; transition:background .15s; white-space:nowrap; position:sticky; top:0; z-index:10; }
 .emp-table thead th:hover { background:var(--bg-surface-hover); color:var(--text-dim); }
+.emp-table tbody tr.emp-row:nth-child(even) { background:rgba(245,243,240,0.5); }
+.emp-table tbody tr.emp-row:hover { background:var(--bg-row-hover); }
+.emp-table tbody tr.emp-row:hover td:first-child { box-shadow:inset 3px 0 0 var(--accent); }
+/* BU group header */
+.emp-group-header { cursor:pointer; user-select:none; }
+.emp-group-header td { padding:10px 14px !important; background:var(--bg-surface-alt) !important; border-bottom:1px solid var(--border-light); font-size:12px; font-weight:500; color:var(--text); }
+.emp-group-header:hover td { background:var(--bg-surface-hover) !important; }
+.emp-group-header .group-caret { display:inline-block; font-size:10px; margin-right:6px; transition:transform .2s; color:var(--text-muted); }
+.emp-group-header.collapsed .group-caret { transform:rotate(-90deg); }
+.emp-group-header .group-bu-name { margin-right:8px; }
+.emp-group-header .group-count { font-size:10px; color:var(--text-muted); font-weight:400; }
+.emp-row.collapsed { display:none; }
 .emp-table thead th.sorted { color:var(--accent); }
 .emp-table thead th .sort-arrow { font-size:9px; margin-left:3px; color:var(--text-muted); }
 .emp-table thead th.sorted .sort-arrow { color:var(--accent); }
@@ -1350,6 +1366,48 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline:none
 .dept-row .count { font-size:9px; color:var(--text-dim); margin-left:8px; }
 .dept-add { display:flex; gap:8px; margin-top:10px; }
 .dept-add input { flex:1; padding:9px 12px; border:none; box-shadow:inset 0 0 0 1px var(--border-light); border-radius:var(--radius-xs); font-size:11px; background:var(--bg-base); }
+
+/* V2 department management */
+.dept-add-bar { display:flex; gap:8px; margin-bottom:16px; align-items:center; }
+.dept-add-bar input { flex:1; padding:9px 12px; border:none; box-shadow:inset 0 0 0 1px var(--border-light); border-radius:var(--radius-xs); font-size:11px; background:var(--bg-base); }
+.dept-add-bar select { padding:9px 12px; border:none; box-shadow:inset 0 0 0 1px var(--border-light); border-radius:var(--radius-xs); font-size:11px; background:var(--bg-base); color:var(--text); }
+.dept-list-v2 { display:flex; flex-direction:column; gap:6px; max-height:400px; overflow-y:auto; }
+.dept-bu-group { border:1px solid var(--border-subtle); border-radius:var(--radius-xs); overflow:hidden; }
+.dept-bu-group.collapsed .dept-bu-body { display:none; }
+.dept-bu-group.collapsed .dept-bu-caret { transform:rotate(0deg); }
+.dept-bu-header { display:flex; align-items:center; gap:8px; padding:10px 14px; background:var(--bg-surface-alt); cursor:pointer; user-select:none; font-size:12px; font-weight:500; transition:background .15s; }
+.dept-bu-header:hover { background:var(--bg-surface-hover); }
+.dept-bu-caret { font-size:10px; transition:transform .2s; transform:rotate(90deg); color:var(--text-muted); }
+.dept-bu-name { color:var(--text); }
+.dept-bu-count { margin-left:auto; font-size:10px; color:var(--text-muted); font-weight:400; }
+.dept-bu-body { display:flex; flex-direction:column; }
+.dept-row-v2 { display:flex; align-items:center; padding:9px 14px 9px 28px; border-top:1px solid var(--border-subtle); transition:background .12s; }
+.dept-row-v2:hover { background:var(--bg-row-hover); }
+.dept-row-v2.editing { background:var(--accent-wash); padding:8px 10px 8px 14px; }
+.dept-row-view { display:flex; align-items:center; width:100%; gap:8px; }
+.dept-row-name { flex:1; font-size:12px; color:var(--text); }
+.dept-row-count { font-size:10px; color:var(--text-muted); min-width:30px; text-align:right; }
+.dept-row-actions { display:flex; gap:4px; flex-shrink:0; }
+.dept-row-edit { display:flex; gap:6px; align-items:center; width:100%; }
+.dept-row-edit input { flex:1; padding:8px 10px; border:1px solid var(--accent-light); border-radius:6px; font-size:12px; background:var(--card); font-family:inherit; }
+.dept-row-edit select { padding:8px 10px; border:1px solid var(--accent-light); border-radius:6px; font-size:11px; background:var(--card); font-family:inherit; color:var(--text); }
+
+/* Department employee preview */
+.dept-emp-preview { padding:4px 0 8px 28px; font-size:10px; color:var(--text-dim); border-top:1px dashed var(--border-subtle); line-height:1.6; }
+.dept-row-view { cursor:pointer; }
+.dept-row-view.expanded .dept-row-name { color:var(--accent); }
+.dept-row-view::after { content:'▸'; font-size:8px; margin-left:6px; color:var(--text-muted); transition:transform .2s; display:inline-block; }
+.dept-row-view.expanded::after { transform:rotate(90deg); }
+
+/* Continuous add mode hint */
+.emp-batch-hint { display:inline-block; padding:3px 10px; border-radius:12px; background:var(--accent-wash); color:var(--accent); font-size:10px; margin-left:8px; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+/* Quick add department panel in employee form */
+.quick-add-panel { display:flex; gap:6px; align-items:center; padding:8px 10px; margin-top:4px; background:var(--bg-surface); border-radius:var(--radius-xs); border:1px solid var(--border-subtle); flex-wrap:wrap; }
+.quick-add-panel input { flex:1; min-width:100px; padding:7px 10px; border:1px solid var(--border-light); border-radius:6px; font-size:11px; background:var(--card); font-family:inherit; }
+.quick-add-panel select { padding:7px 10px; border:1px solid var(--border-light); border-radius:6px; font-size:11px; background:var(--card); font-family:inherit; color:var(--text); }
+.quick-add-panel .btn { white-space:nowrap; }
 
 /* Tree icon (reused from okr-icon) */
 .okr-icon { width:34px; height:34px; border-radius:var(--radius-xs); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
@@ -3278,36 +3336,42 @@ body.tn-resizing * { pointer-events:none; }
   <div id="orgAttendView" style="display:none;"></div>
   <div id="orgHRManualView" style="display:none;"><iframe src="hr-manual.html" style="width:100%;height:calc(100vh - 200px);border:none;border-radius:12px;background:var(--card)" title="HR Manual"></iframe></div>
   <div id="orgEditView" style="display:none;">
-    <div class="filter-row">
-      <input id="empSearchInput" placeholder="搜索姓名..." oninput="renderEmployeeTable()" style="width:130px">
-      <select id="empBUFilter" onchange="renderEmployeeTable()">
-        <option value="all">全部BU</option>
-      </select>
-      <select id="empBUDeptFilter" onchange="renderEmployeeTable()">
-        <option value="all">全部BU/部门</option>
-      </select>
-      <select id="empReportsToFilter" onchange="renderEmployeeTable()">
-        <option value="all">全部汇报人</option>
-      </select>
-      <select id="empRankFilter" onchange="renderEmployeeTable()">
-        <option value="all">全部职级</option>
-      </select>
-      <button class="btn btn-outline btn-sm" onclick="clearEmpFilters()" title="清除所有筛选">✕ 清除</button>
-      <button class="btn btn-primary btn-sm" id="btnNewOrg" onclick="openEmployeeModal()">+ 新增员工</button>
-      <button class="btn btn-outline btn-sm" id="btnBatchImport" onclick="openBatchImportModal()">📥 批量导入</button>
-      <button class="btn btn-outline btn-sm" id="btnExport" onclick="exportEmployeeTable()">📤 导出</button>
-      <button class="btn btn-outline btn-sm" id="btnDeptMgmt" onclick="openDeptManageModal()" style="display:none">管理部门</button>
+    <div class="toolbar">
+      <div class="toolbar-filters">
+        <input id="empSearchInput" placeholder="搜索姓名/拼音..." oninput="renderEmployeeTable()">
+        <select id="empBUFilter" onchange="renderEmployeeTable()">
+          <option value="all">全部BU</option>
+        </select>
+        <select id="empBUDeptFilter" onchange="renderEmployeeTable()">
+          <option value="all">全部BU/部门</option>
+        </select>
+        <select id="empReportsToFilter" onchange="renderEmployeeTable()">
+          <option value="all">全部汇报人</option>
+        </select>
+        <select id="empRankFilter" onchange="renderEmployeeTable()">
+          <option value="all">全部职级</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="clearEmpFilters()" title="清除所有筛选">✕ 清除</button>
+        <span class="result-count" id="empResultCount"></span>
+      </div>
+      <div class="toolbar-actions">
+        <button class="btn btn-primary btn-sm" id="btnNewOrg" onclick="openEmployeeModal()">+ 新增员工</button>
+        <button class="btn btn-outline btn-sm" id="btnBatchImport" onclick="openBatchImportModal()">📥 批量导入</button>
+        <button class="btn btn-outline btn-sm" id="btnExport" onclick="exportEmployeeTable()">📤 导出</button>
+        <button class="btn btn-outline btn-sm" id="btnDeptMgmt" onclick="openDeptManageModal()" style="display:none">管理部门</button>
+      </div>
     </div>
     <div class="emp-table-wrap">
       <table class="emp-table">
         <thead>
           <tr>
-            <th onclick="sortEmployees('buDept')" style="width:20%">BU/部门 <span class="sort-arrow">↕</span></th>
-            <th onclick="sortEmployees('name')" style="width:10%">姓名 <span class="sort-arrow">↕</span></th>
-            <th onclick="sortEmployees('reportsTo')" style="width:12%">汇报人 <span class="sort-arrow">↕</span></th>
-            <th onclick="sortEmployees('position')" style="width:20%">职位 <span class="sort-arrow">↕</span></th>
-            <th onclick="sortEmployees('rank')" style="width:8%">职级 <span class="sort-arrow">↕</span></th>
-            <th style="width:10%">操作</th>
+            <th onclick="sortEmployees('buDept')" style="width:18%">BU/部门 <span class="sort-arrow">↕</span></th>
+            <th onclick="sortEmployees('employeeNumber')" style="width:8%">工号 <span class="sort-arrow">↕</span></th>
+            <th onclick="sortEmployees('name')" style="width:9%">姓名 <span class="sort-arrow">↕</span></th>
+            <th onclick="sortEmployees('reportsTo')" style="width:11%">汇报人 <span class="sort-arrow">↕</span></th>
+            <th onclick="sortEmployees('position')" style="width:18%">职位 <span class="sort-arrow">↕</span></th>
+            <th onclick="sortEmployees('rank')" style="width:7%">职级 <span class="sort-arrow">↕</span></th>
+            <th style="width:9%">操作</th>
           </tr>
         </thead>
         <tbody id="empTableBody"></tbody>
@@ -6689,6 +6753,10 @@ function loadEmployees(){ try{ return JSON.parse(localStorage.okr_employees)||[]
 function saveEmployees(d){ try{ localStorage.setItem('okr_employees',JSON.stringify(d)); }catch(e){} }
 function loadDepts(){ try{ return JSON.parse(localStorage.okr_depts)||[] }catch(e){return[]} }
 function saveDepts(d){ try{ localStorage.setItem('okr_depts',JSON.stringify(d)); }catch(e){} }
+// 获取部门名称列表（兼容新旧格式）
+function getDeptNames(list){ list = list || deptList; return list.map(function(d){ return typeof d === 'string' ? d : d.name; }); }
+// 根据部门名查找其 BU
+function getDeptBU(name){ var d = deptList.find(function(x){ return (typeof x === 'string' ? x : x.name) === name; }); return d ? (typeof d === 'string' ? '' : d.bu) : ''; }
 
 let empList = loadEmployees();
 let deptList = loadDepts();
@@ -6717,17 +6785,27 @@ function migrateOldOrgData(){
   }
   walk(oldOrgs, oldOrgs[0]?oldOrgs[0].name:'');
   empList = employees;
-  deptList = [...new Set(depts)];
+  deptList = [...new Set(depts)].map(function(d){
+    var bu = "";
+    for (var k in DEPT_ORDER) { if (DEPT_ORDER[k].indexOf(d) >= 0) { bu = k; break; } }
+    return {name: d, bu: bu || "其他"};
+  });
   saveEmployees(empList);
   saveDepts(deptList);
 }
-migrateOldOrgData();
 
 // --- Default data (versioned — bump DATA_VER to force refresh) ---
-const DATA_VER = 'v7';
+const DATA_VER = 'v8';
 const storedVer = localStorage.okr_data_version;
 if(!deptList.length || storedVer !== DATA_VER){
-  deptList = ['董事会','人力资源BU','客户服务部','社保部','天津事业部','北京事业部','深圳事业部','园区商办BU','AB区商办&H20','C区商办','园区公寓BU','自营公寓','公寓维修部','餐厅','悦樘管理公寓','园区物业BU','物业管理部','物业维修部','物业保洁部','物业安保部','职能后台','财务部（1）','财务部（2）','账务部（1）','账务部（2）','法务部','总裁办','香港办'];
+  deptList = [
+    {name:'董事会',bu:'董事会'},
+    {name:'人力资源BU',bu:'人力资源BU'},{name:'客户服务部',bu:'人力资源BU'},{name:'社保部',bu:'人力资源BU'},{name:'天津事业部',bu:'人力资源BU'},{name:'北京事业部',bu:'人力资源BU'},{name:'深圳事业部',bu:'人力资源BU'},
+    {name:'园区商办BU',bu:'园区商办BU'},{name:'AB区商办&H20',bu:'园区商办BU'},{name:'C区商办',bu:'园区商办BU'},
+    {name:'园区公寓BU',bu:'园区公寓BU'},{name:'自营公寓',bu:'园区公寓BU'},{name:'公寓维修部',bu:'园区公寓BU'},{name:'餐厅',bu:'园区公寓BU'},{name:'悦樘管理公寓',bu:'园区公寓BU'},
+    {name:'园区物业BU',bu:'园区物业BU'},{name:'物业管理部',bu:'园区物业BU'},{name:'物业维修部',bu:'园区物业BU'},{name:'物业保洁部',bu:'园区物业BU'},{name:'物业安保部',bu:'园区物业BU'},
+    {name:'职能后台',bu:'职能后台'},{name:'财务部（1）',bu:'职能后台'},{name:'财务部（2）',bu:'职能后台'},{name:'账务部（1）',bu:'职能后台'},{name:'账务部（2）',bu:'职能后台'},{name:'法务部',bu:'职能后台'},{name:'总裁办',bu:'职能后台'},{name:'香港办',bu:'职能后台'}
+  ];
   saveDepts(deptList);
 }
 if(!empList.length || storedVer !== DATA_VER){
@@ -6869,6 +6947,21 @@ const DEPT_ORDER = {
 };
 const RANK_ORDER = ['VII','VI','V','IV','III','II','I','管培','外包','外部'];
 
+// 迁移旧格式 deptList (string[] → {name, bu}[])
+(function migrateDeptListFormat(){
+  if (!deptList.length || typeof deptList[0] !== 'string') return;
+  deptList = deptList.map(function(d){
+    var bu = '';
+    for (var k in DEPT_ORDER) { if (DEPT_ORDER[k].indexOf(d) >= 0) { bu = k; break; } }
+    if (!bu) { for (var k in DEPT_ORDER) { if (DEPT_ORDER[k].some(function(x){ return d.indexOf(x) >= 0 || x.indexOf(d) >= 0; })) { bu = k; break; } } }
+    return {name: d, bu: bu || '其他'};
+  });
+  saveDepts(deptList);
+})();
+
+// 迁移旧版组织架构数据（需在 DEPT_ORDER 之后执行）
+migrateOldOrgData();
+
 function sortEmployees(field){
   if(empSortField===field){ empSortDir*=-1; }
   else{ empSortField=field; empSortDir=1; }
@@ -6917,11 +7010,12 @@ function exportEmployeeTable(){
 
   // Build CSV with UTF-8 BOM
   var rankDisplay = {'I':'Ⅰ','II':'Ⅱ','III':'Ⅲ','IV':'Ⅳ','V':'Ⅴ','VI':'Ⅵ','VII':'Ⅶ','外部':'外部','外包':'外包','管培':'管培'};
-  var header = ['姓名','BU','部门','汇报人','职位','职级','入职日期','手机号','钉钉UserID'];
+  var header = ['工号','姓名','BU','部门','汇报人','职位','职级','入职日期','手机号','钉钉UserID'];
   var rows = [header.join(',')];
   filtered.forEach(function(e){
     var rank = e.rank ? (['外部','外包','管培'].indexOf(e.rank) !== -1 ? rankDisplay[e.rank] : (rankDisplay[e.rank] || e.rank) + '级') : '';
     rows.push([
+      csvCell(e.employeeNumber||''),
       csvCell(e.name),
       csvCell(e.bu),
       csvCell(e.department),
@@ -6958,6 +7052,25 @@ function csvCell(val){
 const RANK_LABELS = {'I':'Ⅰ','II':'Ⅱ','III':'Ⅲ','IV':'Ⅳ','V':'Ⅴ','VI':'Ⅵ','VII':'Ⅶ','外部':'外部','外包':'外包','管培':'管培'};
 const RANK_CSS = {'I':'rank-I','II':'rank-II','III':'rank-III','IV':'rank-IV','V':'rank-V','VI':'rank-VI','VII':'rank-VII','外部':'rank-ext','外包':'rank-out','管培':'rank-trainee'};
 
+// 常用姓名汉字拼音首字母映射
+var PINYIN_MAP = {'张':'z','李':'l','王':'w','刘':'l','陈':'c','杨':'y','黄':'h','赵':'z','周':'z','吴':'w','徐':'x','孙':'s','马':'m','朱':'z','胡':'h','郭':'g','何':'h','高':'g','林':'l','罗':'l','郑':'z','梁':'l','谢':'x','宋':'s','唐':'t','韩':'h','曹':'c','许':'x','邓':'d','萧':'x','冯':'f','曾':'z','程':'c','蔡':'c','彭':'p','潘':'p','袁':'y','于':'y','董':'d','余':'y','苏':'s','叶':'y','吕':'l','魏':'w','蒋':'j','田':'t','杜':'d','丁':'d','沈':'s','姜':'j','范':'f','江':'j','傅':'f','钟':'z','卢':'l','汪':'w','戴':'d','崔':'c','任':'r','陆':'l','廖':'l','姚':'y','方':'f','金':'j','邱':'q','夏':'x','谭':'t','韦':'w','贾':'j','邹':'z','石':'s','熊':'x','孟':'m','秦':'q','阎':'y','薛':'x','侯':'h','雷':'l','白':'b','龙':'l','段':'d','郝':'h','孔':'k','邵':'s','史':'s','毛':'m','常':'c','万':'w','顾':'g','赖':'l','武':'w','康':'k','贺':'h','严':'y','尹':'y','钱':'q','施':'s','牛':'n','洪':'h','龚':'g','汤':'t','陶':'t','黎':'l','温':'w','莫':'m','易':'y','樊':'f','乔':'q','文':'w','安':'a','殷':'y','颜':'y','庄':'z','章':'z','鲁':'l','倪':'n','庞':'p','邢':'x','俞':'y','翟':'z','蓝':'l','聂':'n','齐':'q','向':'x','申':'s','葛':'g','岳':'y','鲍':'b','伍':'w','覃':'q','骆':'l','关':'g','焦':'j','柳':'l','欧':'o','祝':'z','纪':'j','尚':'s','毕':'b','耿':'g','芦':'l','左':'z','季':'j','管':'g','符':'f','辛':'x','苗':'m','詹':'z','曲':'q','欧阳':'o','毅':'y','漾':'y','碧':'b','丹':'d','昌':'c','豪':'h','祥':'x','双':'h','卓':'z','梓':'z','荣':'r','靖':'x','娴':'x','崴':'w','芳':'f','辉':'h','凯':'k','楠':'n','坤':'k','韬':'t','倩':'q','知':'z','峰':'f','艳':'y','升':'s','俊':'j','尧':'y','宾':'b','坠':'z','有':'b','保':'b','忠':'z','沛':'p','连':'l','奎':'k','福':'f','贵':'g','成':'c','全':'q','良':'l','德':'d','建':'j','新':'x','志':'z','振':'z','海':'h','涛':'t','波':'b','清':'q','松':'s','树':'s','根':'g','富':'f','强':'q','刚':'g','勇':'y','猛':'m','超':'c','越':'y','敏':'m','锐':'r','利':'l','锋':'f','恒':'h','久':'j','远':'y','长':'c','宏':'h','达':'d','通':'t','正':'z','义':'y','仁':'r','信':'x','诚':'c'};
+function toPinyin(name){if(!name)return'';var r='';for(var i=0;i<name.length;i++){var c=name[i];if((c>='a'&&c<='z')||(c>='A'&&c<='Z')||(c>='0'&&c<='9')){r+=c.toLowerCase()}else if(c>='\u4e00'&&c<='\u9fff'){r+=PINYIN_MAP[c]||''}}return r}
+
+// 智能职级推荐
+function recommendRank(pos){if(!pos)return'';if(pos.indexOf('总经理')>=0||pos.indexOf('执行董事')>=0||pos.indexOf('CFO')>=0)return'V';if(pos.indexOf('副总经理')>=0)return'IV';if(pos.indexOf('经理')>=0||pos.indexOf('店长')>=0||pos.indexOf('主厨')>=0)return'III';if(pos.indexOf('主管')>=0||pos.indexOf('队长')>=0)return'II';if(pos.indexOf('高级')>=0)return'II';if(pos.indexOf('专员')>=0||pos.indexOf('管家')>=0||pos.indexOf('会计')>=0||pos.indexOf('工程师')>=0||pos.indexOf('万能工')>=0)return'I';if(pos.indexOf('助理')>=0||pos.indexOf('保洁')>=0||pos.indexOf('保安')>=0||pos.indexOf('服务员')>=0||pos.indexOf('销售')>=0)return'I';return''}
+
+// 智能汇报人推荐
+function autoRecommendReportsTo(bu,dept){
+  if(!bu||!dept)return;
+  var candidates=loadEmployees().filter(function(e){return e.bu===bu&&e.department===dept&&e.name;});
+  if(!candidates.length){candidates=loadEmployees().filter(function(e){return e.bu===bu;});}
+  if(!candidates.length)return;
+  var rankOrder={'VII':7,'VI':6,'V':5,'IV':4,'III':3,'II':2,'I':1};
+  candidates.sort(function(a,b){return(rankOrder[b.rank]||0)-(rankOrder[a.rank]||0);});
+  var rptEl=document.getElementById('empReportsTo');
+  if(rptEl&&!rptEl.value){rptEl.value=candidates[0].name;rptEl.placeholder='已自动推荐: '+candidates[0].name;rptEl.style.borderColor='var(--success-text)';setTimeout(function(){if(rptEl)rptEl.style.borderColor='';},2000);}
+}
+
 function renderEmployeeTable(){
   empList = loadEmployees();
   deptList = loadDepts();
@@ -6967,7 +7080,7 @@ function renderEmployeeTable(){
   const btnBatch=document.getElementById('btnBatchImport');
   if(btnAdd)btnAdd.style.display=isAdmin?'':'none';
   if(btnDept)btnDept.style.display=isAdmin?'':'none';
-  if(!deptList.length){deptList=['总经办'];saveDepts(deptList);}
+  if(!deptList.length){deptList=[{name:'总经办',bu:'职能后台'}];saveDepts(deptList);}
   const q=(document.getElementById('empSearchInput').value||'').trim().toLowerCase();
   const buFilter=document.getElementById('empBUFilter').value;
   const buDeptFilter=document.getElementById('empBUDeptFilter').value;
@@ -7003,7 +7116,7 @@ function renderEmployeeTable(){
 
   // Filter
   let filtered=empList.map(e=>({...e,buDept:e.bu&&e.bu!==e.department?e.bu+'-'+e.department:e.department||e.bu||''}));
-  if(q) filtered=filtered.filter(e=>e.name.toLowerCase().includes(q)||(e.bu||'').toLowerCase().includes(q)||(e.position||'').toLowerCase().includes(q)||(e.department||'').toLowerCase().includes(q)||(e.reportsTo||'').toLowerCase().includes(q));
+  if(q) filtered=filtered.filter(function(e){var ql=q.toLowerCase();return e.name.toLowerCase().includes(ql)||(e.bu||'').toLowerCase().includes(ql)||(e.position||'').toLowerCase().includes(ql)||(e.department||'').toLowerCase().includes(ql)||(e.reportsTo||'').toLowerCase().includes(ql)||toPinyin(e.name).includes(ql)||(e.employeeNumber||'').toLowerCase().includes(ql);});
   if(buFilter!=='all') filtered=filtered.filter(e=>e.bu===buFilter);
   if(buDeptFilter!=='all') filtered=filtered.filter(e=>e.buDept===buDeptFilter);
   if(rptFilter!=='all') filtered=filtered.filter(e=>e.reportsTo===rptFilter);
@@ -7038,33 +7151,63 @@ function renderEmployeeTable(){
     });
   }
 
-  // Table
-  const tbody=document.getElementById('empTableBody');
-  const empty=document.getElementById('empEmpty');
-  if(!filtered.length){
-    tbody.innerHTML='';
-    empty.style.display='';
-  }else{
-    empty.style.display='none';
-    // Update sort header
-    const ths=document.querySelectorAll('.emp-table th');
-    ths.forEach(th=>{th.classList.remove('sorted');});
-    const fields=['buDept','name','reportsTo','position','rank'];
-    const idx=fields.indexOf(empSortField);
-    if(idx>=0&&ths[idx]){ths[idx].classList.add('sorted');ths[idx].querySelector('.sort-arrow').textContent=empSortDir===1?'▲':'▼';}
-
-    tbody.innerHTML=filtered.map(e=>`<tr>
-      <td>${esc(e.buDept||'-')}</td>
-      <td>${esc(e.name)}${e.jian?' <span class="badge-icon badge-jian" style="font-size:8px;padding:1px 5px">兼任</span>':''}</td>
-      <td>${esc(e.reportsTo||'-')}</td>
-      <td>${esc(e.position||'-')}</td>
-      <td>${e.rank?`<span class="rank-badge ${RANK_CSS[e.rank]||''}">${['外部','外包','管培'].includes(e.rank)?RANK_LABELS[e.rank]:(RANK_LABELS[e.rank]||e.rank)+'级'}</span>`:'-'}</td>
-      <td><div class="emp-actions">
-        ${isAdmin?`<button onclick="openEmployeeModal('${e.id}')">编辑</button>
-        <button class="del" onclick="deleteEmployee('${e.id}')">删除</button>`:'<span style="font-size:8px;color:var(--text2)">-</span>'}
-      </div></td>
-    </tr>`).join('');
+  // Update result count
+  var countEl = document.getElementById('empResultCount');
+  if (countEl) {
+    var totalAll = empList.length;
+    countEl.textContent = '共 ' + filtered.length + ' 人' + (filtered.length !== totalAll ? ' / 总计 ' + totalAll + ' 人' : '');
   }
+
+  // Table
+  var tbody = document.getElementById('empTableBody');
+  var empty = document.getElementById('empEmpty');
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+  } else {
+    empty.style.display = 'none';
+    // Update sort header
+    var ths = document.querySelectorAll('.emp-table th');
+    ths.forEach(function(th){ th.classList.remove('sorted'); });
+    var fields = ['buDept', 'employeeNumber', 'name', 'reportsTo', 'position', 'rank'];
+    var idx = fields.indexOf(empSortField);
+    if (idx >= 0 && ths[idx]) { ths[idx].classList.add('sorted'); ths[idx].querySelector('.sort-arrow').textContent = empSortDir === 1 ? '▲' : '▼'; }
+
+    // Group by BU and render with collapsible headers
+    var buOrder = BU_ORDER.filter(function(b){ return filtered.some(function(e){ return e.bu === b; }); });
+    filtered.forEach(function(e){ if (buOrder.indexOf(e.bu) < 0) buOrder.push(e.bu); });
+
+    var html = '';
+    buOrder.forEach(function(bu){
+      var buEmps = filtered.filter(function(e){ return e.bu === bu; });
+      if (!buEmps.length) return;
+      html += '<tr class="emp-group-header" data-bu="' + esc(bu) + '" onclick="toggleBUGroup(this)">';
+      html += '<td colspan="7"><span class="group-caret">▾</span><span class="group-bu-name">' + esc(bu) + '</span><span class="group-count">' + buEmps.length + '人</span></td>';
+      html += '</tr>';
+      buEmps.forEach(function(e){
+        html += '<tr class="emp-row" data-bu="' + esc(bu) + '">';
+        html += '<td>' + esc(e.buDept || '-') + '</td>';
+        html += '<td><span style="font-size:10px;color:var(--text-muted)">' + esc(e.employeeNumber || '-') + '</span></td>';
+        html += '<td>' + esc(e.name) + (e.jian ? ' <span class="badge-icon badge-jian" style="font-size:8px;padding:1px 5px">兼任</span>' : '') + '</td>';
+        html += '<td>' + esc(e.reportsTo || '-') + '</td>';
+        html += '<td>' + esc(e.position || '-') + '</td>';
+        html += '<td>' + (e.rank ? '<span class="rank-badge ' + (RANK_CSS[e.rank] || '') + '">' + (['外部','外包','管培'].includes(e.rank) ? RANK_LABELS[e.rank] : (RANK_LABELS[e.rank] || e.rank) + '级') + '</span>' : '-') + '</td>';
+        html += '<td><div class="emp-actions">' +
+          (isAdmin ? '<button onclick="openEmployeeModal(\'' + e.id + '\')">编辑</button><button class="del" onclick="deleteEmployee(\'' + e.id + '\')">删除</button>' : '<span style="font-size:8px;color:var(--text2)">-</span>') +
+          '</div></td>';
+        html += '</tr>';
+      });
+    });
+    tbody.innerHTML = html;
+  }
+}
+
+// Toggle BU group collapse
+function toggleBUGroup(header) {
+  header.classList.toggle('collapsed');
+  var bu = header.getAttribute('data-bu');
+  var rows = document.querySelectorAll('.emp-row[data-bu="' + bu + '"]');
+  rows.forEach(function(r){ r.classList.toggle('collapsed'); });
 }
 
 // --- Employee CRUD ---
@@ -7081,23 +7224,25 @@ function autoSetupUser(name) {
 }
 function openEmployeeModal(id){
   let e=id?empList.find(x=>x.id===id):null;
+  // 每次新打开表单时重置连续添加模式
+  if (!id) window._empBatchMode = false;
   var allEmps = loadEmployees();
 
-  // 从现有数据提取常用选项
+  // BU 列表（排序）
   var BU_LIST = ['人力资源BU','园区商办BU','园区公寓BU','园区物业BU','职能后台','董事会'];
-  var buSet = new Set(BU_LIST);
-  allEmps.forEach(function(emp){ if(emp.bu) buSet.add(emp.bu); });
-  var buOptions = Array.from(buSet).map(function(b){ return '<option value="'+esc(b)+'">'+esc(b)+'</option>'; }).join('');
+  var buSetOrder = [];
+  BU_LIST.forEach(function(b){ if(buSetOrder.indexOf(b)<0) buSetOrder.push(b); });
+  allEmps.forEach(function(emp){ if(emp.bu && buSetOrder.indexOf(emp.bu)<0) buSetOrder.push(emp.bu); });
 
-  // 汇报人列表：按职级排序
+  // 汇报人列表：按职级排序，带职级标注
   var rankOrder = {'VII':7,'VI':6,'V':5,'IV':4,'III':3,'II':2,'I':1};
-  var reportsToList = allEmps.map(function(emp){ return {name:emp.name, rank:rankOrder[emp.rank]||0}; });
+  var reportsToList = allEmps.map(function(emp){ return {name:emp.name, rank:rankOrder[emp.rank]||0, rankLabel:emp.rank||''}; });
   var seenNames = new Set();
   reportsToList = reportsToList.filter(function(x){ if(seenNames.has(x.name)) return false; seenNames.add(x.name); return true; });
   reportsToList.sort(function(a,b){ return b.rank - a.rank; });
-  var reportsToOptions = reportsToList.map(function(x){ return '<option value="'+esc(x.name)+'">'+esc(x.name)+'</option>'; }).join('');
+  var reportsToOptions = reportsToList.map(function(x){ return '<option value="'+esc(x.name)+'">'+esc(x.name)+(x.rankLabel?' ('+x.rankLabel+'级)':'')+'</option>'; }).join('');
 
-  // 职位列表：从现有员工提取常见职位
+  // 职位列表
   var posCount = {};
   allEmps.forEach(function(emp){ if(emp.position){ var p = emp.position.replace(/\([^)]*\)/g,'').trim(); posCount[p] = (posCount[p]||0)+1; } });
   var posSorted = Object.keys(posCount).sort(function(a,b){ return (posCount[b]||0) - (posCount[a]||0); }).slice(0,20);
@@ -7111,7 +7256,7 @@ function openEmployeeModal(id){
   allEmps.forEach(function(emp){ if(emp.location) locSet.add(emp.location); });
   var locationOptions = Array.from(locSet).map(function(l){ return '<option value="'+esc(l)+'">'+esc(l)+'</option>'; }).join('');
 
-  // 部门列表（按BU分组）
+  // 部门列表按 BU 分组
   var deptByBU = {};
   allEmps.forEach(function(emp){
     var bu = emp.bu || '其他';
@@ -7120,23 +7265,25 @@ function openEmployeeModal(id){
     if (!deptByBU[bu]) deptByBU[bu] = new Set();
     deptByBU[bu].add(dept);
   });
-  (loadDepts()||[]).forEach(function(d){
-    if (!deptByBU['通用']) deptByBU['通用'] = new Set();
-    deptByBU['通用'].add(d);
+  // 从 deptList 补充已定义的部门
+  deptList.forEach(function(d){
+    var dn = typeof d === 'string' ? d : d.name;
+    var db = typeof d === 'string' ? '' : (d.bu || '其他');
+    if (!deptByBU[db]) deptByBU[db] = new Set();
+    deptByBU[db].add(dn);
   });
-  var deptOptions = '';
+  // 构建按 BU 排序的部门选项（用于 JS 动态级联）
+  var ALL_DEPT_DATA = {};
   Object.keys(deptByBU).forEach(function(bu){
-    deptOptions += '<optgroup label="'+esc(bu)+'">';
-    var depts = Array.from(deptByBU[bu]).sort();
-    depts.forEach(function(d){
-      deptOptions += '<option value="'+esc(d)+'" '+(e&&e.department===d?'selected':'')+'>'+esc(d)+'</option>';
-    });
-    deptOptions += '</optgroup>';
+    ALL_DEPT_DATA[bu] = Array.from(deptByBU[bu]).sort();
   });
 
   var isEdit = !!e;
   var empInitial = isEdit ? (e.name||'?')[0] : '新';
-  var buVal = esc(e?e.bu:'');
+  // 工号：编辑时显示已有值，新增时自动生成
+  var empNumber = e?(e.employeeNumber||''):generateEmployeeNumber('');
+  // 默认 BU
+  var selBU = e?e.bu:(window._lastEmpBU||'');
 
   var html='';
   html+='<div class="modal-header"><h2>'+(isEdit?'编辑员工':'新增员工')+'</h2><button class="btn-icon" onclick="closeModal()">✕</button></div>';
@@ -7155,6 +7302,7 @@ function openEmployeeModal(id){
   html+='<div class="emp-section-label">基本信息</div>';
   html+='<div class="emp-form-grid">';
   html+='<div class="form-group"><label>员工姓名<span class="emp-form-required">*</span></label><input id="empName" value="'+esc(e?e.name:'')+'" placeholder="例如：张三" autofocus></div>';
+  html+='<div class="form-group"><label>工号</label><div style="display:flex;gap:6px"><input id="empNumber" value="'+esc(empNumber)+'" placeholder="自动生成或手动输入" style="flex:1"><button class="btn btn-outline btn-sm" onclick="document.getElementById(\'empNumber\').value=generateEmployeeNumber(document.getElementById(\'empBU\').value)" title="根据BU自动生成工号" style="flex-shrink:0" type="button">自动</button></div></div>';
   html+='<div class="form-group"><label>手机号</label><input id="empPhone" value="'+esc(e?e.phone:'')+'" placeholder="选填"></div>';
   html+='</div></div>';
 
@@ -7162,8 +7310,23 @@ function openEmployeeModal(id){
   html+='<div class="emp-form-section">';
   html+='<div class="emp-section-label">组织信息</div>';
   html+='<div class="emp-form-grid">';
-  html+='<div class="form-group"><label>BU<span class="emp-form-required">*</span></label><input id="empBU" list="buList" value="'+buVal+'" placeholder="选择或输入BU" onchange="onBUChange()"><datalist id="buList">'+buOptions+'</datalist></div>';
-  html+='<div class="form-group"><label>部门<span class="emp-form-required">*</span></label><div style="display:flex;gap:6px"><select id="empDept" style="flex:1"><option value="">-- 请选择 --</option>'+deptOptions+'</select><button class="btn btn-outline btn-sm" onclick="quickAddDept()" title="快速添加部门" style="flex-shrink:0">+</button></div></div>';
+  // BU 改为 select 下拉
+  html+='<div class="form-group"><label>BU<span class="emp-form-required">*</span></label><select id="empBU" onchange="onBUChange()"><option value="">-- 请选择BU --</option>';
+  buSetOrder.forEach(function(b){
+    html+='<option value="'+esc(b)+'" '+(selBU===b?'selected':'')+'>'+esc(b)+'</option>';
+  });
+  html+='</select></div>';
+  // 部门级联
+  html+='<div class="form-group"><label>部门<span class="emp-form-required">*</span></label><div style="display:flex;gap:6px"><select id="empDept" style="flex:1"><option value="">-- 请先选择BU --</option></select><button class="btn btn-outline btn-sm" onclick="toggleQuickAddDept()" title="快速添加部门" style="flex-shrink:0" type="button">+</button></div>';
+  // 快速添加部门面板（默认隐藏）
+  html+='<div id="quickAddDeptPanel" class="quick-add-panel" style="display:none">';
+  html+='<input id="quickDeptName" placeholder="新部门名称" style="flex:1">';
+  html+='<select id="quickDeptBU"><option value="">归属BU</option>';
+  buSetOrder.forEach(function(b){ html+='<option value="'+esc(b)+'" '+(selBU===b?'selected':'')+'>'+esc(b)+'</option>'; });
+  html+='</select>';
+  html+='<button class="btn btn-primary btn-xs" onclick="confirmQuickAddDept()" type="button">确认</button>';
+  html+='<button class="btn btn-outline btn-xs" onclick="toggleQuickAddDept()" type="button">取消</button>';
+  html+='</div></div>';
   html+='<div class="form-group"><label>汇报人</label><input id="empReportsTo" list="reportsToList" value="'+esc(e?e.reportsTo:'')+'" placeholder="搜索并选择汇报人"><datalist id="reportsToList">'+reportsToOptions+'</datalist></div>';
   html+='<div class="form-group"><label>职位</label><input id="empPosition" list="positionList" value="'+esc(e?e.position:'')+'" placeholder="选择或输入职位"><datalist id="positionList">'+positionOptions+'</datalist></div>';
   html+='</div></div>';
@@ -7186,28 +7349,61 @@ function openEmployeeModal(id){
   html+='<button class="btn btn-outline" onclick="closeModal()">取消</button>';
   html+='<button class="btn btn-primary" id="empSave">'+(isEdit?'保存变更':'添加员工')+'</button></div>';
 
-  // 设置 modal 为宽版
   var modalEl = document.getElementById('modal');
   modalEl.innerHTML=html;
   modalEl.classList.add('emp-modal');
   document.getElementById('modalOverlay').classList.add('show');
 
-  // BU变化时联动部门
+  // 存储部门数据供级联使用
+  window._ALL_DEPT_DATA = ALL_DEPT_DATA;
+
+  // 初始化部门下拉
+  if (selBU) { refreshDeptOptions(selBU, e?e.department:''); }
+
+  // BU变化时级联更新部门
   window.onBUChange = function(){
-    var selBU = document.getElementById('empBU').value.trim();
-    var deptSel = document.getElementById('empDept');
-    for (var i=0; i<deptSel.options.length; i++){
-      var opt = deptSel.options[i];
-      if (opt.parentNode && opt.parentNode.label === selBU){
-        deptSel.value = opt.value;
-        return;
-      }
-    }
+    var bu = document.getElementById('empBU').value;
+    refreshDeptOptions(bu, '');
+    // 同步更新快速添加面板的BU
+    var qdbu = document.getElementById('quickDeptBU');
+    if (qdbu && bu) qdbu.value = bu;
+    // 更新工号预览
+    var numEl = document.getElementById('empNumber');
+    if (numEl && !numEl.value) numEl.value = generateEmployeeNumber(bu);
   };
 
+  // 部门选择时反查BU + 智能推荐汇报人
+  var deptSel = document.getElementById('empDept');
+  if (deptSel) {
+    deptSel.addEventListener('change', function(){
+      var dept = this.value;
+      if (!dept) return;
+      var buEl = document.getElementById('empBU');
+      var bu = buEl ? buEl.value : '';
+      if (!bu) {
+        var foundBU = getDeptBU(dept);
+        if (foundBU) { bu = foundBU; buEl.value = foundBU; refreshDeptOptions(foundBU, dept); }
+      }
+      // 智能推荐汇报人
+      if (bu && dept) autoRecommendReportsTo(bu, dept);
+    });
+  }
+
+  // 职位变化时智能推荐职级
+  var posEl = document.getElementById('empPosition');
+  if (posEl && !e) {
+    posEl.addEventListener('change', function(){
+      var rankEl = document.getElementById('empRank');
+      if (!rankEl || rankEl.value) return;
+      var rec = recommendRank(this.value);
+      if (rec) { rankEl.value = rec; rankEl.style.borderColor = 'var(--success-text)'; setTimeout(function(){ rankEl.style.borderColor = ''; }, 1500); }
+    });
+  }
+
+  // 保存按钮
   document.getElementById('empSave').onclick=function(){
     let nm=document.getElementById('empName').value.trim();
-    let bu=document.getElementById('empBU').value.trim();
+    let bu=document.getElementById('empBU').value;
     let dept=document.getElementById('empDept').value;
     if(!nm){alert('请输入员工姓名');return;}
     if(!bu){alert('请选择BU');return;}
@@ -7217,18 +7413,136 @@ function openEmployeeModal(id){
       e.position=document.getElementById('empPosition').value.trim(); e.rank=document.getElementById('empRank').value; e.location=document.getElementById('empLocation').value.trim();
       e.hireDate=document.getElementById('empHireDate').value; e.phone=document.getElementById('empPhone').value.trim(); e.dingId=document.getElementById('empDingId').value.trim();
       e.jian=!!document.getElementById('empJianren').checked;
+      e.employeeNumber=document.getElementById('empNumber').value.trim();
     }else{
-      var newEmp = {id:'emp'+Date.now(),name:nm,bu:bu,department:dept,reportsTo:document.getElementById('empReportsTo').value.trim(),position:document.getElementById('empPosition').value.trim(),rank:document.getElementById('empRank').value,location:document.getElementById('empLocation').value.trim(),hireDate:document.getElementById('empHireDate').value,phone:document.getElementById('empPhone').value.trim(),dingId:document.getElementById('empDingId').value.trim(),jian:!!document.getElementById('empJianren').checked};
+      var newEmp = {id:'emp'+Date.now(),name:nm,bu:bu,department:dept,reportsTo:document.getElementById('empReportsTo').value.trim(),position:document.getElementById('empPosition').value.trim(),rank:document.getElementById('empRank').value,location:document.getElementById('empLocation').value.trim(),hireDate:document.getElementById('empHireDate').value,phone:document.getElementById('empPhone').value.trim(),dingId:document.getElementById('empDingId').value.trim(),jian:!!document.getElementById('empJianren').checked,employeeNumber:document.getElementById('empNumber').value.trim()};
       empList.push(newEmp);
       autoSetupUser(nm);
     }
+    // 记住上次选择的上下文
+    window._lastEmpBU = bu;
+    window._lastEmpDept = dept;
+    window._lastEmpRpt = document.getElementById('empReportsTo').value.trim();
+    window._lastEmpLoc = document.getElementById('empLocation').value.trim();
     saveEmployees(empList);
-    closeModal();
+    if (!e && !window._empBatchMode) {
+      // 首次添加：进入连续添加模式
+      window._empBatchMode = true;
+      showToast('已添加 '+nm+' | 继续添加下一位，点击「完成」退出','info');
+      // 只清空姓名、手机号、工号
+      document.getElementById('empName').value = '';
+      document.getElementById('empName').focus();
+      document.getElementById('empPhone').value = '';
+      document.getElementById('empNumber').value = generateEmployeeNumber(bu);
+      document.getElementById('empHireDate').value = '';
+      // 修改按钮文字
+      document.getElementById('empSave').textContent = '继续添加';
+      // 修改标题
+      var h3 = document.querySelector('.emp-form-top-text h3');
+      if (h3) h3.textContent = '连续添加模式';
+      var sub = document.querySelector('.emp-form-top-text .emp-sub');
+      if (sub) sub.textContent = 'BU/部门/汇报人已保留，只清空姓名和手机号';
+      // 取消按钮改为「完成」
+      var cancelBtns = document.querySelectorAll('.modal-footer.emp-footer .btn-outline');
+      cancelBtns.forEach(function(b){ b.textContent = '完成'; });
+    } else {
+      window._empBatchMode = false;
+      closeModal();
+    }
     renderEmployeeTable();
   };
-  document.getElementById('modalOverlay').onclick=function(ev){if(ev.target===this)closeModal();};
+  document.getElementById('modalOverlay').onclick=function(ev){if(ev.target===this){window._empBatchMode=false;closeModal();}};
+  // ESC 关闭
+  document.addEventListener('keydown', function escCloseEmp(ev){ if(ev.key==='Escape'){ window._empBatchMode=false; closeModal(); document.removeEventListener('keydown',escCloseEmp); } });
 }
 
+// 根据BU刷新部门下拉选项
+function refreshDeptOptions(bu, selectedDept){
+  var sel = document.getElementById('empDept');
+  if (!sel) return;
+  var data = window._ALL_DEPT_DATA || {};
+  var depts = [];
+  if (bu && data[bu]) { depts = data[bu]; }
+  var html = '<option value="">-- 请选择 --</option>';
+  if (depts.length) {
+    depts.forEach(function(d){
+      html += '<option value="'+esc(d)+'" '+(d===selectedDept?'selected':'')+'>'+esc(d)+'</option>';
+    });
+  } else if (bu) {
+    html += '<option value="" disabled>该BU下暂无部门，请添加</option>';
+  } else {
+    html += '<option value="" disabled>请先选择BU</option>';
+  }
+  sel.innerHTML = html;
+  // 如果选中了部门，智能推荐汇报人
+  if (selectedDept && bu) {
+    setTimeout(function(){ autoRecommendReportsTo(bu, selectedDept); }, 100);
+  }
+}
+
+// 工号自动生成
+function generateEmployeeNumber(bu){
+  if (!bu) return '';
+  var prefix = '';
+  if (bu.indexOf('人力资源')>=0) prefix = 'HR';
+  else if (bu.indexOf('商办')>=0) prefix = 'SB';
+  else if (bu.indexOf('公寓')>=0) prefix = 'GY';
+  else if (bu.indexOf('物业')>=0) prefix = 'WY';
+  else if (bu.indexOf('职能')>=0) prefix = 'ZN';
+  else if (bu.indexOf('董事会')>=0) prefix = 'DSH';
+  else prefix = 'EMP';
+  // 找到该前缀下的最大序号
+  var maxNum = 0;
+  empList.forEach(function(e){
+    if (e.employeeNumber && e.employeeNumber.indexOf(prefix)===0) {
+      var n = parseInt(e.employeeNumber.replace(prefix,'').replace(/^0+/,''));
+      if (!isNaN(n) && n > maxNum) maxNum = n;
+    }
+  });
+  if (!maxNum) {
+    // 如果没有该前缀的员工，用该BU现有员工数作为起始
+    var cnt = empList.filter(function(e){ return e.bu === bu; }).length;
+    maxNum = cnt;
+  }
+  return prefix + String(maxNum + 1).padStart(3,'0');
+}
+
+// 快速添加部门面板
+function toggleQuickAddDept(){
+  var panel = document.getElementById('quickAddDeptPanel');
+  if (!panel) return;
+  var isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'flex';
+  if (!isOpen) {
+    // 打开时预填当前BU
+    var bu = document.getElementById('empBU').value;
+    var qdbu = document.getElementById('quickDeptBU');
+    var qdname = document.getElementById('quickDeptName');
+    if (qdbu && bu) qdbu.value = bu;
+    if (qdname) { qdname.value = ''; qdname.focus(); }
+  }
+}
+
+function confirmQuickAddDept(){
+  var nm = document.getElementById('quickDeptName').value.trim();
+  var bu = document.getElementById('quickDeptBU').value;
+  if (!nm) { alert('请输入部门名称'); return; }
+  if (!bu) { alert('请选择归属BU'); return; }
+  // 检查重复
+  var existNames = getDeptNames();
+  if (existNames.indexOf(nm) >= 0) { alert('该部门已存在'); return; }
+  deptList.push({name: nm, bu: bu});
+  deptList.sort(function(a,b){ return a.name.localeCompare(b.name,'zh'); });
+  saveDepts(deptList);
+  // 刷新部门数据
+  if (!window._ALL_DEPT_DATA[bu]) window._ALL_DEPT_DATA[bu] = [];
+  window._ALL_DEPT_DATA[bu].push(nm);
+  window._ALL_DEPT_DATA[bu].sort();
+  // 选上新部门
+  refreshDeptOptions(bu, nm);
+  document.getElementById('empBU').value = bu;
+  toggleQuickAddDept();
+}
 
 function deleteEmployee(id){
   let e=empList.find(x=>x.id===id); if(!e)return;
@@ -7240,76 +7554,167 @@ function deleteEmployee(id){
   });
 }
 
-// --- Department Management ---
+// --- Department Management (V2) ---
 function openDeptManageModal(){
   deptList=loadDepts();
   empList=loadEmployees();
-  let html=`<div class="modal-header"><h2>管理部门</h2><button class="btn-icon" onclick="closeModal()">✕</button></div>`;
-  html+=`<div class="modal-body"><div class="dept-list">`;
-  if(!deptList.length){
-    html+=`<div style="text-align:center;padding:20px;color:var(--text2)">暂无部门</div>`;
-  }else{
-    deptList.forEach(d=>{
-      let cnt=empList.filter(e=>e.department===d).length;
-      html+=`<div class="dept-row"><span>${esc(d)}<span class="count">${cnt}人</span></span><span style="display:flex;gap:4px;flex-shrink:0"><button class="btn btn-outline btn-xs" onclick="editDept('${esc(d).replace(/'/g,"\\'")}')">编辑</button><button class="btn btn-outline btn-xs" onclick="deleteDept('${esc(d).replace(/'/g,"\\'")}',${cnt})" style="${cnt>0?'opacity:.4':''}">删除</button></span></div>`;
+  // 按BU分组
+  var buGroups = {};
+  deptList.forEach(function(d){
+    var dn = typeof d === 'string' ? d : d.name;
+    var db = typeof d === 'string' ? '' : (d.bu || '其他');
+    if (!buGroups[db]) buGroups[db] = [];
+    buGroups[db].push(dn);
+  });
+  // BU排序
+  var buOrder = ['董事会','人力资源BU','园区商办BU','园区公寓BU','园区物业BU','职能后台'];
+  var sortedBUs = Object.keys(buGroups).sort(function(a,b){
+    var ia = buOrder.indexOf(a), ib = buOrder.indexOf(b);
+    if (ia===-1) ia=99; if (ib===-1) ib=99;
+    return ia-ib;
+  });
+
+  var html = '<div class="modal-header"><h2>管理部门</h2><button class="btn-icon" onclick="closeModal()">✕</button></div>';
+  html += '<div class="modal-body">';
+
+  // 添加部门表单
+  html += '<div class="dept-add-bar">';
+  html += '<input id="newDeptName" placeholder="新部门名称" style="flex:1">';
+  html += '<select id="newDeptBU"><option value="">归属BU</option>';
+  buOrder.forEach(function(b){ html += '<option value="'+esc(b)+'">'+esc(b)+'</option>'; });
+  html += '</select>';
+  html += '<button class="btn btn-primary btn-sm" onclick="addDept()">添加</button>';
+  html += '</div>';
+
+  if (!deptList.length) {
+    html += '<div style="text-align:center;padding:20px;color:var(--text2)">暂无部门，请在上方添加</div>';
+  } else {
+    html += '<div class="dept-list-v2">';
+    sortedBUs.forEach(function(bu){
+      var depts = buGroups[bu].sort();
+      var buTotal = 0;
+      depts.forEach(function(d){ buTotal += empList.filter(function(e){ return e.department === d; }).length; });
+      html += '<div class="dept-bu-group">';
+      html += '<div class="dept-bu-header" onclick="this.parentElement.classList.toggle(\'collapsed\')">';
+      html += '<span class="dept-bu-caret">▶</span>';
+      html += '<span class="dept-bu-name">'+esc(bu||'其他')+'</span>';
+      html += '<span class="dept-bu-count">'+depts.length+'个部门 · '+buTotal+'人</span>';
+      html += '</div>';
+      html += '<div class="dept-bu-body">';
+      depts.forEach(function(d){
+        var cnt = empList.filter(function(e){ return e.department === d; }).length;
+        html += '<div class="dept-row-v2" id="deptRow_'+esc(d).replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_')+'">';
+        var deptEmps = empList.filter(function(e){ return e.department === d; });
+        var deptEmpNames = deptEmps.slice(0,15).map(function(e){ return esc(e.name); }).join('、');
+        if (deptEmps.length > 15) deptEmpNames += '...等'+deptEmps.length+'人';
+        html += '<div class="dept-row-view" onclick="var bd=this.nextElementSibling;if(bd){var isHid=bd.style.display===\'none\';bd.style.display=isHid?\'block\':\'none\';this.classList.toggle(\'expanded\',isHid);}" style="cursor:pointer" title="点击查看员工名单">';
+        html += '<span class="dept-row-name">'+esc(d)+'</span>';
+        html += '<span class="dept-row-count">'+cnt+'人</span>';
+        html += '</div>'; // dept-row-view
+        html += '<div class="dept-emp-preview" style="display:none;padding:4px 0 8px 0;font-size:10px;color:var(--text-dim);border-top:1px dashed var(--border-subtle);margin-top:4px">'+deptEmpNames+'</div>';
+        html += '<div class="dept-row-actions">';
+        html += '<button class="btn btn-outline btn-xs" onclick="startEditDept(\''+esc(d).replace(/'/g,"\\'")+'\',\''+esc(bu).replace(/'/g,"\\'")+'\')">编辑</button>';
+        html += '<button class="btn btn-outline btn-xs" onclick="deleteDeptV2(\''+esc(d).replace(/'/g,"\\'")+'\','+cnt+')" style="'+(cnt>0?'opacity:.4':'')+'">删除</button>';
+        html += '</div></div></div>';
+      });
+      html += '</div></div>';
     });
+    html += '</div>';
   }
-  html+=`</div><div class="dept-add"><input id="newDeptName" placeholder="新部门名称"><button class="btn btn-primary btn-sm" onclick="addDept()">添加</button></div></div>`;
-  html+=`<div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">关闭</button></div>`;
+
+  html += '</div>'; // modal-body
+  html += '<div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">关闭</button></div>';
+
   document.getElementById('modal').innerHTML=html;
+  document.getElementById('modal').classList.add('wide');
   document.getElementById('modalOverlay').classList.add('show');
   document.getElementById('modalOverlay').onclick=function(ev){if(ev.target===this)closeModal();};
 }
 
 function addDept(){
-  let nm=document.getElementById('newDeptName').value.trim();
+  var nm = document.getElementById('newDeptName').value.trim();
+  var bu = document.getElementById('newDeptBU').value;
   if(!nm){alert('请输入部门名称');return;}
-  if(deptList.includes(nm)){alert('该部门已存在');return;}
-  deptList.push(nm);
-  deptList.sort();
+  if(!bu){alert('请选择归属BU');return;}
+  var existNames = getDeptNames();
+  if(existNames.indexOf(nm)>=0){alert('该部门已存在');return;}
+  deptList.push({name:nm, bu:bu});
+  deptList.sort(function(a,b){ return a.name.localeCompare(b.name,'zh'); });
   saveDepts(deptList);
   openDeptManageModal();
 }
 
-function deleteDept(name,count){
+function deleteDeptV2(name, count){
   if(count>0){alert('该部门下有'+count+'名员工，无法删除。请先将员工转移至其他部门。');return;}
   dangerConfirm('确定删除部门「'+esc(name)+'」吗？',function(){
-    deptList=deptList.filter(d=>d!==name);
+    deptList = deptList.filter(function(d){
+      var dn = typeof d === 'string' ? d : d.name;
+      return dn !== name;
+    });
     saveDepts(deptList);
     openDeptManageModal();
     showToast('已删除','success');
   });
 }
 
-function editDept(oldName){
-  var newName = prompt('编辑部门名称：', oldName);
-  if(!newName || !newName.trim() || newName.trim()===oldName) return;
-  newName = newName.trim();
-  if(deptList.includes(newName)){ alert('该部门已存在'); return; }
-  // Rename in deptList
-  deptList = deptList.map(function(d){ return d===oldName ? newName : d; });
-  deptList.sort();
+// 行内编辑部门
+function startEditDept(oldName, oldBU){
+  var rowId = 'deptRow_'+oldName.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_');
+  var row = document.getElementById(rowId);
+  if (!row) return;
+  row.classList.add('editing');
+  var buOrder = ['董事会','人力资源BU','园区商办BU','园区公寓BU','园区物业BU','职能后台'];
+  var buOpts = buOrder.map(function(b){ return '<option value="'+esc(b)+'" '+(b===oldBU?'selected':'')+'>'+esc(b)+'</option>'; }).join('');
+  row.innerHTML = '<div class="dept-row-edit">'+
+    '<input id="editDeptName_'+rowId+'" value="'+esc(oldName)+'" style="flex:1">'+
+    '<select id="editDeptBU_'+rowId+'" style="width:140px"><option value="">归属BU</option>'+buOpts+'</select>'+
+    '<button class="btn btn-primary btn-xs" onclick="saveEditDept(\''+esc(oldName).replace(/'/g,"\\'")+'\',\''+rowId+'\')">保存</button>'+
+    '<button class="btn btn-outline btn-xs" onclick="openDeptManageModal()">取消</button>'+
+    '</div>';
+}
+
+function saveEditDept(oldName, rowId){
+  var newName = document.getElementById('editDeptName_'+rowId).value.trim();
+  var newBU = document.getElementById('editDeptBU_'+rowId).value;
+  if (!newName) { alert('请输入部门名称'); return; }
+  if (!newBU) { alert('请选择归属BU'); return; }
+  if (newName !== oldName) {
+    var existNames = getDeptNames();
+    if (existNames.indexOf(newName) >= 0) { alert('该部门已存在'); return; }
+  }
+  // 更新 deptList
+  deptList = deptList.map(function(d){
+    var dn = typeof d === 'string' ? d : d.name;
+    if (dn === oldName) return {name: newName, bu: newBU};
+    return d;
+  });
+  deptList.sort(function(a,b){ return a.name.localeCompare(b.name,'zh'); });
   saveDepts(deptList);
-  // Update all employees in this department
-  empList = loadEmployees();
-  empList.forEach(function(e){ if(e.department===oldName) e.department = newName; });
-  saveEmployees(empList);
+  // 更新员工表中的部门名
+  if (newName !== oldName) {
+    empList = loadEmployees();
+    empList.forEach(function(e){ if(e.department===oldName) e.department = newName; });
+    saveEmployees(empList);
+  }
   openDeptManageModal();
   showToast('已更新','success');
 }
 
-function quickAddDept(){
-  let nm=prompt('输入新部门名称：');
-  if(!nm||!nm.trim())return;
-  nm=nm.trim();
-  if(deptList.includes(nm)){alert('该部门已存在');return;}
-  deptList.push(nm);
-  deptList.sort();
-  saveDepts(deptList);
-  // Refresh the dropdown in the employee modal
-  let sel=document.getElementById('empDept');
-  if(sel){sel.innerHTML=deptList.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('');sel.value=nm;}
+// 兼容旧版调用（deleteDept）
+function deleteDept(name, count){
+  deleteDeptV2(name, count);
 }
+
+// 兼容旧版调用（editDept - 保留用于可能的旧引用）
+function editDept(oldName){
+  startEditDept(oldName, getDeptBU(oldName));
+}
+
+// quickAddDept 已在 openEmployeeModal 中以内联面板方式实现
+function quickAddDept(){
+  toggleQuickAddDept();
+}
+
 
 // --- Batch Import ---
 function openBatchImportModal(){
@@ -7405,7 +7810,8 @@ function confirmBatchImport(){
   const data=window._batchPreviewData;
   if(!data||!data.length){alert('没有可导入的数据');return;}
   const newDepts=[...new Set(data.map(r=>r.department).filter(Boolean))];
-  newDepts.forEach(d=>{if(!deptList.includes(d))deptList.push(d);});
+  var existNames = getDeptNames();
+  newDepts.forEach(d=>{if(existNames.indexOf(d)<0)deptList.push({name:d,bu:''});});
   saveDepts(deptList);
   const now=Date.now();
   const toAdd=data.map((r,i)=>({
