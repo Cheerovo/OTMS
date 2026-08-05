@@ -561,6 +561,76 @@ async function main() {
     }
   } catch(e) {}
 
+  // 缓存命中时，补充查询新员工考勤组
+  if (groupCacheLoaded) {
+    var newUsers = allUsers.filter(function(u) { return !userGroupMap[u.userid]; });
+    if (newUsers.length > 0) {
+      console.log('  补充查询新员工考勤组: ' + newUsers.length + ' 人...');
+      for (var ni = 0; ni < newUsers.length; ni++) {
+        var nu = newUsers[ni];
+        try {
+          var nres = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/attendance/getusergroup', { access_token: token }, { userid: nu.userid });
+          if (nres.errcode === 0 && nres.result) userGroupMap[nu.userid] = nres.result;
+        } catch(_) {}
+        await sleep(150);
+      }
+      // 补充新员工的考勤组详情和班次
+      var newGroupIds = new Set();
+      for (var ni2 = 0; ni2 < newUsers.length; ni2++) {
+        var grp = userGroupMap[newUsers[ni2].userid];
+        if (grp && grp.group_id && !groupCache.has(grp.group_id)) newGroupIds.add(grp.group_id);
+      }
+      for (const gid of newGroupIds) {
+        try {
+          var opUid = newUsers[0].userid;
+          for (const [uid, ug] of Object.entries(userGroupMap)) {
+            if (ug.group_id === gid) { opUid = uid; break; }
+          }
+          var gres = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/attendance/group/query', { access_token: token }, { group_id: gid, op_user_id: opUid });
+          if (gres.errcode === 0 && gres.result) groupCache.set(gid, gres.result);
+        } catch(_) {}
+        await sleep(300);
+      }
+      // 补充新班次
+      var newShiftIds = new Set();
+      for (const [gid, cfg] of groupCache) {
+        (cfg.shift_ids || []).forEach(function(sid) {
+          if (!classTimeMap[sid]) newShiftIds.add(sid);
+        });
+      }
+      for (const sid of newShiftIds) {
+        try {
+          var sres = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/attendance/shift/query', { access_token: token }, { shift_id: sid, op_user_id: newUsers[0].userid });
+          if (sres.errcode === 0 && sres.result) {
+            var sections = sres.result.sections || [];
+            var allTimes = [];
+            sections.forEach(function(sec) {
+              (sec.punches || []).forEach(function(p) {
+                var timeStr = (p.check_time || '').slice(11, 16);
+                if (timeStr) allTimes.push(timeStr);
+              });
+            });
+            if (allTimes.length >= 2) classTimeMap[sid] = allTimes[0] + '-' + allTimes[allTimes.length - 1];
+          }
+        } catch(_) {}
+        await sleep(100);
+      }
+      // 更新缓存
+      try {
+        var gcSave = {
+          ts: Date.now(),
+          userGroupMap: userGroupMap,
+          workDaysByUser: workDaysByUser,
+          userSchedule: userSchedule,
+          classTimeMap: classTimeMap,
+          shiftNameMap: shiftNameMap || {},
+          groupCache: Array.from(groupCache.entries())
+        };
+        fs.writeFileSync(GROUP_CACHE_FILE, JSON.stringify(gcSave));
+      } catch(e) {}
+    }
+  }
+
   if (!groupCacheLoaded) {
   for (let i = 0; i < allUsers.length; i++) {
     const u = allUsers[i];

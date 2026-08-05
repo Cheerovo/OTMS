@@ -2,8 +2,9 @@ name: 钉钉考勤同步
 
 on:
   schedule:
-    # 北京时间 10:00 和 20:00（每天上传 dingtalk_data.json）
-    - cron: '0 2,12 * * *'
+    # 工作日北京时间 10:00 + 20:00，周末 11:00 一次
+    - cron: '0 2,12 * * 1-5'
+    - cron: '0 3 * * 6,0'
   workflow_dispatch:
     inputs:
       force_full:
