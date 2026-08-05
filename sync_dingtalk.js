@@ -702,10 +702,10 @@ async function main() {
     } catch(e) {}
   } // if (!groupCacheLoaded)
 
-  // 考勤只能拉最近7天（API硬限制）
+  // 考勤仅拉取当天（节省API额度，定时任务每天跑一次覆盖当天即可）
   const today = new Date();
   const dates = [];
-  for (let i = 6; i >= 0; i--) {
+  for (let i = 0; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     dates.push(toLocalDate(d.getTime()));
@@ -766,7 +766,7 @@ async function main() {
   var sbdCount = Object.keys(userScheduleByDate).length;
   console.log('  ✅ 每日排班: ' + sbdCount + '人');
 
-  // OA审批拉最近7天（与考勤打卡范围一致，覆盖打卡数据即可，节省API额度）
+  // OA审批：保持7天范围以捕获跨天请假/出差（仅4个API调用，不费额度）
   const leaveDateFrom = new Date(today);
   leaveDateFrom.setDate(leaveDateFrom.getDate() - 7);
   const leaveDateFromStr = toLocalDate(leaveDateFrom.getTime());

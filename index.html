@@ -3786,17 +3786,22 @@ function defaultUsers(){return{
   '王力':{pw:'123123',role:'user',name:'王力'}
 };}
 function loadUsers(){
-  // 清除可能从旧数据同步残留的 okr_users，防止密码被覆盖
-  try{ localStorage.removeItem('okr_users'); }catch(e){}
+  // 读取已保存的用户（保留修改过的密码），与默认用户合并
+  var stored = {};
   try{
-    var stored = JSON.parse(localStorage.okr_users);
+    var raw = localStorage.getItem('okr_users');
+    if(raw){ stored = JSON.parse(raw); }
     if(!stored || typeof stored !== 'object' || Array.isArray(stored)) stored = {};
-  }catch(e){var stored = {};}
+  }catch(e){ stored = {}; }
   var base = defaultUsers();
-  // Merge stored users into base (preserve custom passwords)
+  // Merge: base 提供默认账户，stored 覆盖（保留修改过的密码/角色）
   Object.keys(stored).forEach(function(k){
     if(!base[k]){ base[k] = stored[k]; }
-    else { for(var key in stored[k]){ base[k][key] = stored[k][key]; } }
+    else {
+      // 保留 stored 中的密码（用户可能已修改），其他字段也合并
+      if(stored[k].pw) base[k].pw = stored[k].pw;
+      if(stored[k].role) base[k].role = stored[k].role;
+    }
   });
   // Remove duplicate accounts: if a key matches another user's display name, merge & delete the duplicate
   Object.keys(base).forEach(function(k){
@@ -6799,10 +6804,10 @@ function migrateOldOrgData(){
   saveDepts(deptList);
 }
 
-// --- Default data (versioned — bump DATA_VER to force refresh) ---
+// --- Default data (仅首次初始化，绝不覆盖已有数据) ---
 const DATA_VER = 'v8';
-const storedVer = localStorage.okr_data_version;
-if(!deptList.length || storedVer !== DATA_VER){
+var _needsVerUpdate = false;
+if(!deptList.length){
   deptList = [
     {name:'董事会',bu:'董事会'},
     {name:'人力资源BU',bu:'人力资源BU'},{name:'客户服务部',bu:'人力资源BU'},{name:'社保部',bu:'人力资源BU'},{name:'天津事业部',bu:'人力资源BU'},{name:'北京事业部',bu:'人力资源BU'},{name:'深圳事业部',bu:'人力资源BU'},
@@ -6812,8 +6817,9 @@ if(!deptList.length || storedVer !== DATA_VER){
     {name:'职能后台',bu:'职能后台'},{name:'财务部（1）',bu:'职能后台'},{name:'财务部（2）',bu:'职能后台'},{name:'账务部（1）',bu:'职能后台'},{name:'账务部（2）',bu:'职能后台'},{name:'法务部',bu:'职能后台'},{name:'总裁办',bu:'职能后台'},{name:'香港办',bu:'职能后台'}
   ];
   saveDepts(deptList);
+  _needsVerUpdate = true;
 }
-if(!empList.length || storedVer !== DATA_VER){
+if(!empList.length){
   empList = [
     // 董事会
     {id:'e1',name:'张毅',bu:'董事会',department:'董事会',reportsTo:'',position:'执行董事/CFO',rank:'VII',hireDate:'',phone:''},
@@ -6935,6 +6941,10 @@ if(!empList.length || storedVer !== DATA_VER){
     {id:'e111',name:'季文菊',bu:'职能后台',department:'香港办',reportsTo:'王倩',position:'管家保洁',rank:'I',hireDate:'',phone:''}
   ];
   saveEmployees(empList);
+  _needsVerUpdate = true;
+}
+// 仅在没有已有数据时才标记版本（已有数据说明是从云端同步来的，不需要初始化）
+if(_needsVerUpdate || !localStorage.okr_data_version){
   localStorage.setItem('okr_data_version', String(DATA_VER));
 }
 
@@ -10640,28 +10650,37 @@ async function syncFromDingTalkSilent(date, attData, empList) {
 
 async function syncFromDingTalk() {
   const date = document.getElementById('attendDateInput') ? document.getElementById('attendDateInput').value : getTodayStr();
+  var step = '';
   try {
     const btn = document.querySelector('button[onclick="syncFromDingTalk()"]');
     if (btn) { btn.textContent = '⏳ 同步中...'; btn.disabled = true; }
 
     // Load dingtalk data
+    step = 'fetch dingtalk_data.json';
     const resp = await fetch('dingtalk_data.json?t=' + Date.now());
     if (!resp.ok) throw new Error('dingtalk_data.json 不存在，请先运行 node sync_dingtalk.js');
+    step = 'parse JSON';
     const dd = await resp.json();
     const ddMap = {};
     const wdMap = {};
     const schedMap2 = {};
+    step = 'process dingtalk users';
     (dd.users || []).forEach(function(u) { ddMap[u.name] = u; if (u.workDays) wdMap[u.name] = u.workDays; if (u.scheduleByDate) schedMap2[u.name] = u.scheduleByDate; if (u.schedule) schedMap2[u.name+'_flat'] = u.schedule; });
+    step = 'save workdays';
     localStorage.setItem('attendance_workdays', JSON.stringify(wdMap));
+    step = 'save schedules';
     localStorage.setItem('attendance_schedules', JSON.stringify(schedMap2));
 
+    step = 'load employees';
     const empList = loadEmployees();
+    step = 'load attendance';
     const attData = loadAttendance();
     var synced = 0;
     var skipped = 0;
     var dateCount = 0;
 
     // 只更新钉钉数据中实际有状态的记录，不删除、不覆盖已有数据
+    step = 'match attendance records';
     var allDates = new Set();
     (dd.users || []).forEach(function(u) { Object.keys(u.statusByDate||{}).forEach(function(d){ allDates.add(d); }); });
     allDates.forEach(function(d) {
@@ -10669,23 +10688,27 @@ async function syncFromDingTalk() {
       if (!attData[d]) attData[d] = {};
       empList.forEach(function(e) {
         var ddUser = ddMap[e.name];
-        if (!ddUser) return; // 不在钉钉数据中，保留现有记录
+        if (!ddUser) return;
         var raw = (ddUser.statusByDate && ddUser.statusByDate[d]);
-        if (!raw) return; // 该日期无钉钉数据，保留现有记录
+        if (!raw) return;
         if (typeof raw === 'string') raw = {m:'在岗', s: raw};
         attData[d][e.id] = raw;
         synced++;
       });
     });
 
+    step = 'save attendance';
     saveAttendance(attData);
+    step = 'render view';
     renderAttendView(true);
     if (btn) { btn.textContent = '🔄 同步钉钉'; btn.disabled = false; }
+    console.log('[钉钉同步] 成功: '+dateCount+'日期, '+synced+'人次');
     alert('同步完成！\n已同步 ' + dateCount + ' 个日期，共匹配 ' + synced + ' 人次' + (skipped > 0 ? '\n' + skipped + ' 人次不在钉钉数据中' : '') + '\n\n数据来源: dingtalk_data.json (' + (dd.updated || '').slice(0,10) + ')');
   } catch (err) {
     var btn = document.querySelector('button[onclick="syncFromDingTalk()"]');
     if (btn) { btn.textContent = '🔄 同步钉钉'; btn.disabled = false; }
-    alert('同步失败：' + err.message);
+    console.error('[钉钉同步] 失败步骤: '+step, err);
+    alert('同步失败：' + err.message + '\n\n步骤: ' + step + '\n详细错误请查看控制台(F12)');
   }
 }
 
@@ -11474,14 +11497,14 @@ function _syncLogEvent(level, msg, detail){
 
 // ===== Init =====
 // ===== Remote Data Sync (Supabase) — 按资源组拆分，独立 CAS =====
-const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','attendance_records','attendance_leaves','attendance_unmatched','otms_tn_split_ratio','otms_trainee_cleared_v3','okr_users'];
+const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','attendance_records','attendance_leaves','attendance_unmatched','otms_tn_split_ratio','otms_trainee_cleared_v3'];
 
 // 资源分组：每组独立 Supabase 行 + 独立 version + 独立 CAS
 const SYNC_GROUPS = {
   eval:       {id: 1, keys: ['otms_trainee_eval_v1']},
   trainee:    {id: 2, keys: ['otms_trainee_data_v1', 'otms_trainee_cleared_v3', 'otms_tn_split_ratio']},
   okr:        {id: 3, keys: ['okr_data', 'okr_version', 'okr_data_version', 'okr_prefs']},
-  org:        {id: 4, keys: ['okr_employees', 'okr_depts', 'okr_permissions', 'nudge_log', 'org_attachments', 'okr_users']},
+  org:        {id: 4, keys: ['okr_employees', 'okr_depts', 'okr_permissions', 'nudge_log', 'org_attachments']},
   report:     {id: 5, keys: ['rpt_data', 'rpt_version', 'rpt_group_subs', 'meeting_data', 'kpi_data']},
   attendance: {id: 6, keys: ['okr_attendance', 'attendance_workdays', 'attendance_schedules', 'attendance_records', 'attendance_leaves', 'attendance_unmatched']}
 };
@@ -11697,7 +11720,8 @@ async function uploadGroup(gid, retryCount){
   var verKey = getGroupVerKey(gid);
   var groupId = SYNC_GROUPS[gid].id;
   var localVer = parseInt(localStorage.getItem(verKey)) || 0;
-  updateSyncIndicator('syncing');
+  // 只有独立重试（retryCount>0）才更新指示器，批量调用者自行管理
+  if(retryCount > 0) updateSyncIndicator('syncing');
 
   // 1. 拉取该组的云端版本
   var cloudVer = 0;
@@ -11724,6 +11748,7 @@ async function uploadGroup(gid, retryCount){
   // 3. CAS 上传
   var data = collectGroupData(gid);
   var newVer = Math.floor(Date.now() / 1000);
+if(newVer <= cloudVer) newVer = cloudVer + 1; // 安全兜底：时钟回拨或同秒冲突时严格递增
   if(cloudVer === 0){
     const { error } = await supabaseClient
       .from('team_data')
@@ -11732,7 +11757,7 @@ async function uploadGroup(gid, retryCount){
       localStorage.setItem(verKey, newVer);
       try{ localStorage.setItem(_getGroupHashKey(gid), _hashGroupData(gid)); }catch(e){}
       _syncLogEvent('info', gid+' upsert成功 v'+newVer, '');
-      updateSyncIndicator('synced');
+      if(retryCount > 0) updateSyncIndicator('synced');
     } else {
       _syncLogEvent('error', gid+' upsert失败', error.message);
       updateSyncIndicator('error');
@@ -11755,21 +11780,32 @@ async function uploadGroup(gid, retryCount){
       localStorage.setItem(verKey, newVer);
       try{ localStorage.setItem(_getGroupHashKey(gid), _hashGroupData(gid)); }catch(e){}
       _syncLogEvent('info', gid+' CAS成功 v'+newVer, '');
-      updateSyncIndicator('synced');
+      if(retryCount > 0) updateSyncIndicator('synced');
     } else {
-      _syncLogEvent('warn', gid+' CAS冲突 重试#'+(retryCount+1), '');
-      // 获取当前云端版本号用于重试
+      // CAS 冲突：先获取获胜方数据并合并到本地，再重试（防止覆盖对方编辑）
+      _syncLogEvent('warn', gid+' CAS冲突, 获取获胜方数据合并后重试', '');
       var conflictVer = updatedRow ? updatedRow.version : 0;
-      if(!conflictVer){
-        try{
-          const { data: cv } = await supabaseClient.from('team_data').select('version').eq('id', groupId).maybeSingle();
-          if(cv) conflictVer = cv.version;
-        }catch(e){}
+      var winnerData = null;
+      try{
+        const { data: conflictRow } = await supabaseClient
+          .from('team_data')
+          .select('version, data')
+          .eq('id', groupId)
+          .maybeSingle();
+        if(conflictRow){
+          conflictVer = conflictRow.version;
+          winnerData = conflictRow.data;
+        }
+      }catch(e){ _syncLogEvent('warn', gid+' 获取冲突数据失败', e.message); }
+      // 合并获胜方数据到本地（merge 模式：已存在的 key 本地优先，新增的 key 加入本地）
+      if(winnerData && conflictVer > 0){
+        try{ importGroupData(gid, winnerData, false); }catch(e){ _syncLogEvent('warn', gid+' 合并异常', e.message); }
       }
-      if(conflictVer) localStorage.setItem(verKey, conflictVer);
-      // 安排重试（独立运行），同时 throw 以保留 dirty 标记
-      setTimeout(function(){ uploadGroup(gid, retryCount + 1).catch(function(e){ _syncLogEvent('error', gid+' CAS重试异常', e.message); }); }, 500);
-      throw new Error(gid+' CAS冲突, 已安排重试#'+(retryCount+1));
+      if(conflictVer > 0){ localStorage.setItem(verKey, conflictVer); }
+      // 安排重试（合并后的数据包含了双方修改），指数退避: 500ms→1s→2s→4s→8s
+      var backoff = Math.min(500 * Math.pow(2, retryCount), 8000);
+      setTimeout(function(){ uploadGroup(gid, retryCount + 1).catch(function(e){ _syncLogEvent('error', gid+' CAS重试异常', e.message); }); }, backoff);
+      throw new Error(gid+' CAS冲突, 已合并重试#'+(retryCount+1));
     }
   }
 }
@@ -11959,17 +11995,31 @@ async function autoCheckRemote(){
 
 // ===== localStorage 劫持：记录 dirtyKeys + 仅 bump 对应组的 version =====
 (function(){
-  var _orig = localStorage.setItem.bind(localStorage);
+  var _origSet = localStorage.setItem.bind(localStorage);
   localStorage.setItem = function(key, value){
-    _orig(key, value);
+    _origSet(key, value);
     if(!_isImporting && DATA_KEYS.indexOf(key) !== -1){
       _dirtyKeys[key] = true;
       var gid = getGroupForKey(key);
-      _syncLogEvent('info', '数据变更: '+key+' → '+gid, '');
       if(gid){
         _dirtyGroups[gid] = true;
+        _syncLogEvent('info', '数据变更: '+key+' → '+gid, '');
+        scheduleAutoUpload();
       }
-      scheduleAutoUpload();
+    }
+  };
+  var _origRemove = localStorage.removeItem.bind(localStorage);
+  localStorage.removeItem = function(key){
+    _origRemove(key);
+    if(!_isImporting && DATA_KEYS.indexOf(key) !== -1){
+      // 删除操作也标记 dirty，确保同步到云端后其他设备也会删除该 key
+      _dirtyKeys[key] = true;
+      var gid = getGroupForKey(key);
+      if(gid){
+        _dirtyGroups[gid] = true;
+        _syncLogEvent('info', '数据删除: '+key+' → '+gid, '');
+        scheduleAutoUpload();
+      }
     }
   };
 })();
@@ -12007,6 +12057,10 @@ function _getGroupHashKey(gid){ return '_sync_hash_' + gid; }
 
 async function pushUnsynchronizedGroups(){
   _syncLogEvent('info', '启动时检查未同步数据', '');
+  updateSyncIndicator('syncing');
+  // 抢占 autoUpload 锁，避免 scheduleAutoUpload 的 1.5s 定时器在启动期间触发重复上传
+  _autoUploadBusy = true;
+  clearTimeout(_autoUploadTimer);
   // 检查上次 flushUpload 是否可能失败（页面关闭时 CAS 冲突等）
   var flushPending = '';
   try{ flushPending = localStorage.getItem('_sync_flush_pending') || ''; }catch(e){}
@@ -12014,6 +12068,8 @@ async function pushUnsynchronizedGroups(){
     _syncLogEvent('warn', '检测到未完成的 flushUpload, 强制重新上传', '');
     localStorage.removeItem('_sync_flush_pending');
   }
+  // 收集需要上传的组（先收集再并行上传，速度快 5-6 倍）
+  var pendingGroups = [];
   for(var gi = 0; gi < SYNC_GROUP_LIST.length; gi++){
     var gid = SYNC_GROUP_LIST[gi];
     var verKey = getGroupVerKey(gid);
@@ -12023,12 +12079,33 @@ async function pushUnsynchronizedGroups(){
     var curHash = _hashGroupData(gid);
     var storedHash = '';
     try{ storedHash = localStorage.getItem(_getGroupHashKey(gid)) || ''; }catch(e){}
-    // flushPending 时强制上传，覆盖 CAS 失败导致的哈希不匹配
-    if(localVer === 0 || curHash !== storedHash || !!flushPending){
-      _syncLogEvent('info', gid+' 本地有变更(localVer='+localVer+' hashMatch='+(curHash===storedHash)+' flushPending='+!!flushPending+'), 上传中', '');
-      await uploadGroup(gid, 0);
+    if(localVer === 0 || curHash !== storedHash){
+      _syncLogEvent('info', gid+' 本地有变更(localVer='+localVer+' hashMatch='+(curHash===storedHash)+'), 加入上传队列', '');
+      pendingGroups.push(gid);
     }
   }
+  // 并行上传所有待同步组
+  if(pendingGroups.length > 0){
+    _syncLogEvent('info', '并行上传 '+pendingGroups.length+' 组', '');
+    var results = await Promise.allSettled(pendingGroups.map(function(gid){ return uploadGroup(gid, 0); }));
+    var ok = 0, fail = 0;
+    results.forEach(function(r, i){
+      if(r.status === 'fulfilled'){
+        delete _dirtyGroups[pendingGroups[i]];
+        SYNC_GROUPS[pendingGroups[i]].keys.forEach(function(k){ delete _dirtyKeys[k]; });
+        ok++;
+      } else {
+        fail++;
+        _syncLogEvent('warn', pendingGroups[i]+' 启动上传异常(已自动重试)', r.reason?r.reason.message:'');
+      }
+    });
+    _syncLogEvent('info', '并行上传完成 成功:'+ok+' 失败:'+fail, '');
+    if(fail === 0){ updateSyncIndicator('synced'); }
+  } else {
+    updateSyncIndicator('synced');
+  }
+  _autoUploadBusy = false;
+  if(_pendingUpload){ _pendingUpload = false; scheduleAutoUpload(); }
   _syncLogEvent('info', '启动检查完成', '');
 }
 // 手动触发全量同步（浏览器控制台调用: forceSyncAll()）
@@ -12136,6 +12213,26 @@ window.listUnsynced = function(){
   }
   console.table(unsynced);
   return unsynced;
+};
+
+// 诊断工具：查看 localStorage 各 key 的空间占用
+window.lsSize = function(){
+  var total = 0;
+  var items = [];
+  for(var i = 0; i < localStorage.length; i++){
+    var key = localStorage.key(i);
+    var val = localStorage.getItem(key) || '';
+    var bytes = new Blob([val]).size;
+    total += bytes;
+    var kb = (bytes / 1024).toFixed(1);
+    var label = bytes > 1024*1024 ? (bytes/1024/1024).toFixed(2)+'MB' : kb+'KB';
+    items.push({key: key, size: label, bytes: bytes});
+  }
+  items.sort(function(a,b){ return b.bytes - a.bytes; });
+  console.log('localStorage 总占用: ' + (total/1024/1024).toFixed(2) + 'MB (' + (total/1024).toFixed(1) + 'KB)');
+  console.log('限额: 5-10MB, 已用: ' + (total/1024/1024*100/5).toFixed(0) + '% (按5MB)');
+  console.table(items.slice(0, 15));
+  return {total: total, totalMB: (total/1024/1024).toFixed(2), items: items};
 };
 
 // ===== 数据迁移：旧单行格式 → 新多行格式 =====
@@ -12521,6 +12618,8 @@ async function initApp(){
     var homeTab = lastTab || (currentUser ? getPref('homeTab','workspace') : 'workspace');
     switchTab(homeTab);
     updateBellBadge();
+    // 清理旧备份系统残留（迁移：otms_system_backup → otms_system_backup_meta）
+    try{ localStorage.removeItem('otms_system_backup'); }catch(e){}
     // 页面加载后自动备份全部系统数据（延迟 2 秒确保数据全部就绪）
     setTimeout(function(){ autoBackupSystemData(); }, 2000);
   })();
@@ -12528,17 +12627,46 @@ async function initApp(){
 }
 // initApp() moved to end of script — must run after all var declarations (e.g. TN_REF_TASKS at L12296)
 
-// ===== 全系统数据备份与恢复 =====
-var BACKUP_KEY = 'otms_system_backup';
-var MAX_BACKUPS = 2;
-var BACKUP_EXCLUDE_PREFIXES = ['_okr_cleared', '_oplog_cleared', 'bk_collapse', 'okr_sync_version'];
+// ===== 全系统数据备份与恢复（备份存 Supabase Storage，localStorage 只存元数据指针） =====
+var BACKUP_KEY = 'otms_system_backup_meta';
+var BACKUP_MAX = 5;
+var BACKUP_EXCLUDE_PREFIXES = ['_okr_cleared', '_oplog_cleared', 'bk_collapse', 'okr_sync_v_', '_sync_hash_', '_sync_flush_pending', '_sync_last_time', 'task_file_', 'okr_notify_seen_'];
 
-function getBackupData(){
+function getBackupMeta(){
   try{ return JSON.parse(localStorage.getItem(BACKUP_KEY)) || {backups:[]}; }catch(e){ return {backups:[]}; }
 }
 
-function saveBackupData(data){
-  try{ localStorage.setItem(BACKUP_KEY, JSON.stringify(data)); }catch(e){ console.error('[备份] 存储失败:',e.message); }
+function saveBackupMeta(meta){
+  try{ localStorage.setItem(BACKUP_KEY, JSON.stringify(meta)); }catch(e){ console.error('[备份] 元数据写入失败:',e.message); }
+}
+
+async function _backupUpload(path, jsonStr){
+  var blob = new Blob([jsonStr], {type:'application/json'});
+  var { error } = await supabaseClient.storage
+    .from('org_files')
+    .upload(path, blob, { upsert: true, contentType: 'application/json' });
+  if(error) throw new Error(error.message);
+  return blob.size;
+}
+
+async function _backupDownload(path){
+  var { data, error } = await supabaseClient.storage.from('org_files').download(path);
+  if(error) throw error;
+  return JSON.parse(await data.text());
+}
+
+async function _backupCleanInFolder(folder, keepPaths){
+  try{
+    // folder 格式: 'backups/username/'，只清理当前用户的备份
+    var { data: files, error } = await supabaseClient.storage.from('org_files').list(folder, {limit: 20});
+    if(error || !files) return;
+    for(var i = 0; i < files.length; i++){
+      var full = folder + files[i].name;
+      if(keepPaths.indexOf(full) === -1){
+        await supabaseClient.storage.from('org_files').remove([full]).catch(function(){});
+      }
+    }
+  }catch(e){}
 }
 
 function collectAllSystemData(){
@@ -12559,33 +12687,45 @@ function collectAllSystemData(){
   return data;
 }
 
-function autoBackupSystemData(silent){
+async function autoBackupSystemData(silent){
   try{
     var currentData = collectAllSystemData();
+    var itemCount = Object.keys(currentData).length;
+    if(itemCount === 0) return;
+
     var currentJson = JSON.stringify(currentData);
-    var backupInfo = getBackupData();
-    var backups = backupInfo.backups || [];
+    var meta = getBackupMeta();
+    var backups = meta.backups || [];
 
-    // 跳过空数据
-    if(Object.keys(currentData).length === 0){ return; }
-
-    // 数据无变化则跳过
-    if(backups.length > 0 && JSON.stringify(backups[0].data) === currentJson){
+    // 与最新备份的 data 长度比较，完全相同则跳过（省 API 调用）
+    if(backups.length > 0 && backups[0].dataSize === currentJson.length){
       return;
     }
 
     var now = new Date();
-    var backup = {
-      timestamp: now.getTime(),
-      date: now.getFullYear()+'-'+('0'+(now.getMonth()+1)).slice(-2)+'-'+('0'+now.getDate()).slice(-2)+' '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2)+':'+('0'+now.getSeconds()).slice(-2),
-      data: currentData
-    };
+    var ts = now.getTime();
+    var dateStr = now.getFullYear()+'-'+('0'+(now.getMonth()+1)).slice(-2)+'-'+('0'+now.getDate()).slice(-2)+' '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2)+':'+('0'+now.getSeconds()).slice(-2);
 
-    backups.unshift(backup);
-    if(backups.length > MAX_BACKUPS) backups = backups.slice(0, MAX_BACKUPS);
-    backupInfo.backups = backups;
-    saveBackupData(backupInfo);
-    if(!silent) console.log('[备份] 系统数据已自动备份 ('+backup.date+', '+Object.keys(currentData).length+' 项)');
+    // 上传到 Supabase Storage（按用户隔离目录，避免多设备互相删除）
+    var userName = (typeof currentUser === 'string' && currentUser) ? currentUser : 'system';
+    var userPrefix = 'backups/' + encodeURIComponent(userName) + '/';
+    var path = userPrefix + 'backup_'+ts+'.json';
+    var size = await _backupUpload(path, currentJson);
+
+    // localStorage 只存元数据（通常 <200 bytes）
+    backups.unshift({ timestamp: ts, date: dateStr, itemCount: itemCount, dataSize: currentJson.length, size: size, path: path });
+
+    // 只清理当前用户的旧备份
+    var keepPaths = [];
+    if(backups.length > BACKUP_MAX){
+      backups = backups.slice(0, BACKUP_MAX);
+    }
+    keepPaths = backups.map(function(b){ return b.path; });
+    meta.backups = backups;
+    saveBackupMeta(meta);
+    _backupCleanInFolder(userPrefix, keepPaths); // 后台清理当前用户目录，不影响其他设备
+
+    if(!silent) console.log('[备份] 已上传云端 ('+dateStr+', '+itemCount+'项, '+(size/1024).toFixed(1)+'KB)');
   }catch(e){
     console.error('[备份] 自动备份失败:',e.message);
   }
@@ -12593,24 +12733,24 @@ function autoBackupSystemData(silent){
 
 function openRestoreModal(){
   if(!currentUser||!canAccessAdminSettings(currentUser)){ showToast('仅管理员可访问备份管理','error'); return; }
-  var backupInfo = getBackupData();
-  var backups = backupInfo.backups || [];
+  var meta = getBackupMeta();
+  var backups = meta.backups || [];
 
   var html = '<div style="padding:12px 8px">';
   html += '<h3 style="font-size:16px;font-weight:700;margin-bottom:6px;color:#3B3835;padding-right:28px">系统数据备份管理</h3>';
-  html += '<p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">系统每次打开页面时自动备份全部数据，保留最近 '+MAX_BACKUPS+' 份备份。恢复将覆盖当前数据，请谨慎操作。</p>';
+  html += '<p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">备份上传至云端存储，不占用本地空间。保留最近 '+BACKUP_MAX+' 份。</p>';
 
   if(backups.length === 0){
-    html += '<div style="text-align:center;color:var(--text-muted);padding:32px;background:var(--bg-surface);border-radius:8px">暂无自动备份记录<br><span style="font-size:10px">刷新页面后将自动生成首次备份</span></div>';
+    html += '<div style="text-align:center;color:var(--text-muted);padding:32px;background:var(--bg-surface);border-radius:8px">暂无备份记录<br><span style="font-size:10px">刷新页面后将自动生成首次备份</span></div>';
   } else {
     html += '<div style="max-height:360px;overflow-y:auto">';
     backups.forEach(function(bk, idx){
-      var keyCount = Object.keys(bk.data).length;
-      var sizeKB = Math.round(JSON.stringify(bk.data).length / 1024 * 10) / 10;
+      var sizeKB = Math.round((bk.size||0)/1024 * 10) / 10;
+      var sizeStr = sizeKB > 999 ? (sizeKB/1024).toFixed(1)+'MB' : sizeKB+'KB';
       html += '<div style="display:flex;align-items:center;gap:12px;padding:12px;margin-bottom:8px;background:var(--bg-surface);border-radius:8px;border:1px solid var(--border-subtle)">';
       html += '<div style="flex:1;min-width:0">';
       html += '<div style="font-size:13px;font-weight:500;color:var(--text)">备份 #'+(idx+1)+(idx===0?' <span style="font-size:9px;color:var(--accent);font-weight:400">最新</span>':'')+'</div>';
-      html += '<div style="font-size:11px;color:var(--text-muted)">'+bk.date+' · '+keyCount+' 个数据项 · '+sizeKB+' KB</div>';
+      html += '<div style="font-size:11px;color:var(--text-muted)">'+bk.date+' · '+bk.itemCount+' 项 · '+sizeStr+'</div>';
       html += '</div>';
       html += '<button onclick="restoreFromBackup('+idx+')" style="padding:7px 16px;border:none;border-radius:6px;font-size:11px;cursor:pointer;background:var(--danger);color:#fff;white-space:nowrap;transition:var(--transition)">恢复此版本</button>';
       html += '</div>';
@@ -12629,18 +12769,28 @@ function openRestoreModal(){
   openModal(html);
 }
 
-function restoreFromBackup(index){
-  var backupInfo = getBackupData();
-  var backup = backupInfo.backups[index];
-  if(!backup){ showToast('备份数据不存在','error'); return; }
+async function restoreFromBackup(index){
+  var meta = getBackupMeta();
+  var bk = meta.backups[index];
+  if(!bk){ showToast('备份数据不存在','error'); return; }
+
+  // 从云端下载备份数据
+  showToast('正在下载备份...', 'info');
+  var backupData;
+  try{
+    backupData = await _backupDownload(bk.path);
+  }catch(e){
+    showToast('备份下载失败: '+e.message, 'error');
+    return;
+  }
 
   var html = '<div style="padding:12px 8px">';
   html += '<h3 style="font-size:16px;font-weight:700;margin-bottom:12px;color:#3B3835">确认恢复数据</h3>';
   html += '<div style="background:var(--danger-bg);border:1px solid var(--danger);border-radius:8px;padding:12px;margin-bottom:16px">';
   html += '<p style="font-size:12px;color:var(--danger-text);margin:0"><strong>警告：</strong>此操作将用备份版本的数据覆盖当前所有系统数据，包括 OKR、KPI、报表、例会、管培生任务、评分、考勤等全部数据。此操作不可撤销。</p>';
   html += '</div>';
-  html += '<p style="font-size:12px;color:var(--text-dim);margin-bottom:4px">备份时间：<strong>'+backup.date+'</strong></p>';
-  html += '<p style="font-size:12px;color:var(--text-dim);margin-bottom:16px">包含 '+Object.keys(backup.data).length+' 个数据项</p>';
+  html += '<p style="font-size:12px;color:var(--text-dim);margin-bottom:4px">备份时间：<strong>'+bk.date+'</strong></p>';
+  html += '<p style="font-size:12px;color:var(--text-dim);margin-bottom:16px">包含 '+Object.keys(backupData).length+' 个数据项</p>';
   html += '<div style="display:flex;gap:8px">';
   html += '<button onclick="closeModal()" style="flex:1;padding:10px;border:none;border-radius:8px;font-size:12px;cursor:pointer;background:var(--bg-surface);color:var(--text-dim)">取消</button>';
   html += '<button id="confirmRestoreBtn" style="flex:1;padding:10px;border:none;border-radius:8px;font-size:12px;cursor:pointer;background:var(--danger);color:#fff">确认恢复</button>';
@@ -12649,16 +12799,15 @@ function restoreFromBackup(index){
 
   openModal(html);
 
-  document.getElementById('confirmRestoreBtn').onclick = function(){
+  document.getElementById('confirmRestoreBtn').onclick = async function(){
     try{
-      // 恢复前再自动备份一次当前状态（安全兜底）
-      autoBackupSystemData(true);
+      // 恢复前先备份当前状态
+      await autoBackupSystemData(true);
 
-      var bd = backup.data;
-      var keys = Object.keys(bd);
+      var keys = Object.keys(backupData);
       for(var i = 0; i < keys.length; i++){
         var k = keys[i];
-        var v = bd[k];
+        var v = backupData[k];
         localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
       }
       closeModal();
@@ -12723,7 +12872,7 @@ function handleImportFile(event){
         }
 
         // 导入前备份当前状态
-        autoBackupSystemData(true);
+        autoBackupSystemData(true); // fire-and-forget，让备份上传到云端
 
         var keys = Object.keys(data);
         if(keys.length === 0){
@@ -12756,7 +12905,7 @@ function handleImportFile(event){
 }
 
 // 页面关闭前自动备份
-window.addEventListener('beforeunload', function(){ autoBackupSystemData(true); flushUpload(); });
+window.addEventListener('beforeunload', function(){ flushUpload(); });
 
 // ===== Global Search =====
 function highlightMatch(text,query){
