@@ -51,6 +51,6 @@ jobs:
       - name: 提交缓存文件
         if: success()
         run: |
-          git add dingtalk_data.json dingtalk_group_cache.json
+          git add dingtalk_data.json
           git diff --staged --quiet || git commit -m "钉钉考勤数据自动同步 $(TZ='Asia/Shanghai' date +%Y-%m-%d)"
           git push
