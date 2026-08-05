@@ -10698,6 +10698,19 @@ async function syncFromDingTalk() {
     });
 
     step = 'save attendance';
+    // DEBUG: 检查王力同步情况
+    var wlEmp = empList.find(function(e){return e.name==='王力';});
+    var wlDD = ddMap['王力'];
+    console.log('[钉钉同步] 王力调试: empList中找到=' + (!!wlEmp) + ' id=' + (wlEmp?wlEmp.id:'N/A') + ' ddMap中找到=' + (!!wlDD) + ' statusByDate日期数=' + (wlDD&&wlDD.statusByDate?Object.keys(wlDD.statusByDate).length:0));
+    if(wlDD && wlDD.statusByDate){
+      var wlAug = Object.keys(wlDD.statusByDate).filter(function(d){return d>='2026-08';}).sort();
+      console.log('[钉钉同步] 王力8月日期('+wlAug.length+'天):', wlAug.slice(0,5).join(',') + (wlAug.length>5?'...':''));
+      if(wlAug.length>0) console.log('[钉钉同步] 王力8/6数据:', JSON.stringify(wlDD.statusByDate[wlAug[0]]));
+    }
+    if(wlEmp && attData){
+      var wlAugAtt = Object.keys(attData).filter(function(d){return d>='2026-08' && attData[d][wlEmp.id];}).sort();
+      console.log('[钉钉同步] 王力attData中8月日期('+wlAugAtt.length+'天):', wlAugAtt.slice(0,3).join(','));
+    }
     saveAttendance(attData);
     step = 'render view';
     renderAttendView(true);
