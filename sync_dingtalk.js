@@ -545,7 +545,7 @@ async function main() {
     if (fs.existsSync(GROUP_CACHE_FILE)) {
       var gcData = JSON.parse(fs.readFileSync(GROUP_CACHE_FILE, 'utf8'));
       var gcAge = Date.now() - gcData.ts;
-      if (gcAge < 24 * 60 * 60 * 1000 && gcData.userGroupMap && gcData.classTimeMap) {
+      if (gcAge < 168 * 60 * 60 * 1000 && gcData.userGroupMap && gcData.classTimeMap) {
         userGroupMap = gcData.userGroupMap;
         workDaysByUser = gcData.workDaysByUser || {};
         userSchedule = gcData.userSchedule || {};
@@ -714,48 +714,54 @@ async function main() {
     dates.push(toLocalDate(d.getTime()));
   }
 
-  // 按日期查询排班（TURN类型每天排班不同，FIXED固定）
+  // 按日期查询排班：仅TURN（排班制）用户需API查询，FIXED直接复用缓存班制
   console.log('  查询每日排班...');
   var userScheduleByDate = {}; // userId → { "2026-07-01": "09:00-18:00", ... }
-  var allUids = allUsers.map(function(u){ return u.userid; });
-  for (var di = 0; di < dates.length; di++) {
-    var workDate = dates[di];
-    // 分页查询（每页最多50人）
-    for (var offset = 0; offset < allUids.length; offset += 50) {
-      try {
-        var batchUids = allUids.slice(offset, offset + 50);
-        var schedRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/attendance/schedule/listbyday', { access_token: token }, { work_date: workDate, userids: batchUids, offset: 0, size: 50 });
-        if (schedRes.errcode === 0 && schedRes.result) {
-          var schedList = schedRes.result.schedule_list || schedRes.result.schedules || [];
-          schedList.forEach(function(item){
-            var uid = item.userid || item.user_id;
-            if (!uid) return;
-            if (!userScheduleByDate[uid]) userScheduleByDate[uid] = {};
-            var shiftId = item.shift_id || item.class_id || 0;
-            if (shiftId && classTimeMap[shiftId]) {
-              var label = shiftNameMap[shiftId] || '';
-              if (label && label !== 'A') {
-                userScheduleByDate[uid][workDate] = label + ' ' + classTimeMap[shiftId];
-              } else {
-                userScheduleByDate[uid][workDate] = classTimeMap[shiftId];
+  // 收集TURN类型用户ID
+  var turnUids = [];
+  for (const [userId, grp] of Object.entries(userGroupMap)) {
+    var cfg = groupCache.get(grp.group_id);
+    if (cfg && cfg.type === 'TURN') turnUids.push(userId);
+  }
+  console.log('    TURN用户: ' + turnUids.length + ' 人, FIXED/NONE: ' + (allUsers.length - turnUids.length) + ' 人');
+  if (turnUids.length > 0) {
+    for (var di = 0; di < dates.length; di++) {
+      var workDate = dates[di];
+      for (var offset = 0; offset < turnUids.length; offset += 50) {
+        try {
+          var batchUids = turnUids.slice(offset, offset + 50);
+          var schedRes = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/attendance/schedule/listbyday', { access_token: token }, { work_date: workDate, userids: batchUids, offset: 0, size: 50 });
+          if (schedRes.errcode === 0 && schedRes.result) {
+            var schedList = schedRes.result.schedule_list || schedRes.result.schedules || [];
+            schedList.forEach(function(item){
+              var uid = item.userid || item.user_id;
+              if (!uid) return;
+              if (!userScheduleByDate[uid]) userScheduleByDate[uid] = {};
+              var shiftId = item.shift_id || item.class_id || 0;
+              if (shiftId && classTimeMap[shiftId]) {
+                var label = shiftNameMap[shiftId] || '';
+                if (label && label !== 'A') {
+                  userScheduleByDate[uid][workDate] = label + ' ' + classTimeMap[shiftId];
+                } else {
+                  userScheduleByDate[uid][workDate] = classTimeMap[shiftId];
+                }
               }
-            }
-          });
-        }
-      } catch(_) {}
-      await sleep(80);
+            });
+          }
+        } catch(_) {}
+        await sleep(80);
+      }
     }
   }
-  // 对没有查到排班的FIXED用户，用固定班制填充所有工作日
+  // FIXED用户直接用缓存班制填充所有工作日（无需API）
   for (const [userId, grp] of Object.entries(userGroupMap)) {
-    if (userScheduleByDate[userId]) continue; // 已经通过API查到了排班
+    if (userScheduleByDate[userId]) continue; // TURN用户已通过API查到
     var sched = userSchedule[userId];
     if (!sched) continue;
     var cfg = groupCache.get(grp.group_id);
     if (!cfg || cfg.type !== 'FIXED') continue;
     var wdList = workDaysByUser[userId];
     if (!wdList || wdList.length === 0) {
-      // 全周上班的FIXED
       wdList = [0,1,2,3,4,5,6];
     }
     userScheduleByDate[userId] = {};
@@ -769,9 +775,9 @@ async function main() {
   var sbdCount = Object.keys(userScheduleByDate).length;
   console.log('  ✅ 每日排班: ' + sbdCount + '人');
 
-  // OA审批：保持7天范围以捕获跨天请假/出差（仅4个API调用，不费额度）
+  // OA审批：3天窗口（已有OA数据会被保护，无需大范围回溯）
   const leaveDateFrom = new Date(today);
-  leaveDateFrom.setDate(leaveDateFrom.getDate() - 7);
+  leaveDateFrom.setDate(leaveDateFrom.getDate() - 3);
   const leaveDateFromStr = toLocalDate(leaveDateFrom.getTime());
   const leaveDateToStr = dates[dates.length - 1];
 
