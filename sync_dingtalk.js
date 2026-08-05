@@ -1031,6 +1031,15 @@ async function main() {
     users: allUsers.map(u => {
       const prev = existingMap[u.name];
       const newSBD = statusMap[u.name] || {};
+      // 8月前数据保护：打卡记录不覆盖已导入的历史在岗状态，OA审批（请假/外勤/出差）仍可覆盖
+      if (prev && prev.statusByDate) {
+        Object.keys(newSBD).forEach(function(d) {
+          if (d < '2026-08-01' && prev.statusByDate[d]) {
+            var isOA = newSBD[d].m === '请假' || newSBD[d].m === '外勤' || newSBD[d].m === '出差';
+            if (!isOA) delete newSBD[d];
+          }
+        });
+      }
       // 合并历史数据：旧数据打底，新数据覆盖
       const merged = {};
       if (prev && prev.statusByDate) Object.assign(merged, prev.statusByDate);
