@@ -769,11 +769,9 @@ async function main() {
   var sbdCount = Object.keys(userScheduleByDate).length;
   console.log('  ✅ 每日排班: ' + sbdCount + '人');
 
-  // OA审批：保持7天范围以捕获跨天请假/出差（仅4个API调用，不费额度）
-  const leaveDateFrom = new Date(today);
-  leaveDateFrom.setDate(leaveDateFrom.getDate() - 7);
-  const leaveDateFromStr = toLocalDate(leaveDateFrom.getTime());
-  const leaveDateToStr = dates[dates.length - 1];
+  // TEMP: 一次性拉取8月OA审批（补王力病假）
+  const leaveDateFromStr = '2026-08-01';
+  const leaveDateToStr = '2026-08-31';
 
   console.log('[5] 获取考勤记录...');
   const userIds = allUsers.map(u => u.userid);
