@@ -1044,6 +1044,15 @@ async function main() {
       const merged = {};
       if (prev && prev.statusByDate) Object.assign(merged, prev.statusByDate);
       Object.assign(merged, newSBD);
+      // 保护已有OA数据不被打卡记录覆盖（OA请假/外勤/出差优先级高于打卡记录）
+      if (prev && prev.statusByDate) {
+        Object.keys(prev.statusByDate).forEach(function(d) {
+          var prevIsOA = prev.statusByDate[d].m === '请假' || prev.statusByDate[d].m === '外勤' || prev.statusByDate[d].m === '出差';
+          if (prevIsOA && newSBD[d] && newSBD[d].m !== '请假' && newSBD[d].m !== '外勤' && newSBD[d].m !== '出差') {
+            merged[d] = prev.statusByDate[d];
+          }
+        });
+      }
       const wd = workDaysByUser[u.userid];
       const scheduleFlat = userSchedule[u.userid] || null;
       const scheduleByDate = userScheduleByDate[u.userid] || null;
