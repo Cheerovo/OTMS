@@ -6,12 +6,13 @@ const CONFIG_FILE = path.join(__dirname, 'dingtalk_config.json');
 const DATA_FILE = path.join(__dirname, 'dingtalk_data.json');
 const GROUP_CACHE_FILE = path.join(__dirname, 'dingtalk_group_cache.json');
 
-// 本地日期格式化（避免 toISOString 的 UTC 偏移问题）
+// 北京时间格式化（固定 UTC+8，不依赖服务器时区）
 function toLocalDate(ts) {
   // ts: 毫秒(>10000000000) 或 秒(<=10000000000)
   var ms = ts > 10000000000 ? ts : ts * 1000;
-  var d = new Date(ms);
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  // 强制按北京时间计算日期，避免 GitHub Actions UTC 时区导致日期偏移
+  var d = new Date(ms + 8 * 3600000);
+  return d.getUTCFullYear() + '-' + String(d.getUTCMonth()+1).padStart(2,'0') + '-' + String(d.getUTCDate()).padStart(2,'0');
 }
 
 function loadConfig() {
@@ -703,7 +704,9 @@ async function main() {
   } // if (!groupCacheLoaded)
 
   // 考勤拉取当天+前一天（补漏前一天缺卡/迟到数据）
-  const today = new Date();
+  // 固定使用北京时间确定"今天"，避免 GitHub Actions UTC 时区偏差
+  var bjNow = new Date(Date.now() + 8 * 3600000);
+  var today = new Date(Date.UTC(bjNow.getUTCFullYear(), bjNow.getUTCMonth(), bjNow.getUTCDate()));
   const dates = [];
   for (let i = 1; i >= 0; i--) {
     const d = new Date(today);
