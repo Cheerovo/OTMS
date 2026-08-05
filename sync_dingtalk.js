@@ -702,10 +702,10 @@ async function main() {
     } catch(e) {}
   } // if (!groupCacheLoaded)
 
-  // 考勤仅拉取当天（节省API额度，定时任务每天跑一次覆盖当天即可）
+  // 考勤拉取当天+前一天（补漏前一天缺卡/迟到数据）
   const today = new Date();
   const dates = [];
-  for (let i = 0; i >= 0; i--) {
+  for (let i = 1; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     dates.push(toLocalDate(d.getTime()));
