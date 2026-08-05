@@ -818,18 +818,6 @@ async function main() {
     if (!recordsByUserDate[key]) recordsByUserDate[key] = [];
     recordsByUserDate[key].push(r);
   });
-  // DEBUG: 统计 OnDuty/OffDuty 记录数
-  var debugOnCount = 0, debugOffCount = 0, debugByDate = {};
-  attendance.forEach(function(r){
-    if(r.checkType === 'OnDuty') debugOnCount++;
-    else if(r.checkType === 'OffDuty') debugOffCount++;
-    var rd = (typeof r.workDate === 'number') ? toLocalDate(r.workDate) : String(r.workDate||'').slice(0,10);
-    if(!debugByDate[rd]) debugByDate[rd] = {on:0, off:0};
-    if(r.checkType === 'OnDuty') debugByDate[rd].on++;
-    else if(r.checkType === 'OffDuty') debugByDate[rd].off++;
-  });
-  console.log('  📊 打卡记录统计: OnDuty='+debugOnCount+' OffDuty='+debugOffCount);
-  Object.keys(debugByDate).sort().forEach(function(d){ console.log('    '+d+': OnDuty='+debugByDate[d].on+' OffDuty='+debugByDate[d].off); });
   // 从早晚打卡推导主状态 + 补全缺少的打卡
   for (const [name, dateMap] of Object.entries(statusMap)) {
     for (const [date, entry] of Object.entries(dateMap)) {
