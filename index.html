@@ -6758,7 +6758,7 @@ document.addEventListener('keydown',function(e){
 
 // ===== Org Management =====
 // --- Employee data layer ---
-function loadEmployees(){ try{ var arr = JSON.parse(localStorage.okr_employees)||[]; var seen={}; var dedup=[]; arr.forEach(function(e){ if(e&&e.name){ var key=e.name+'|'+(e.department||''); if(!seen[key]){ seen[key]=true; dedup.push(e); } } }); if(dedup.length!==arr.length) saveEmployees(dedup); return dedup; }catch(e){return[]} }
+function loadEmployees(){ try{ var arr = JSON.parse(localStorage.okr_employees)||[]; var seen={}; var dedup=[]; arr.forEach(function(e){ if(e&&e.name){ var key=e.name+'|'+(e.department||''); if(!seen[key]){ seen[key]=true; dedup.push(e); } } }); return dedup; }catch(e){return[]} }
 function saveEmployees(d){ try{ localStorage.setItem('okr_employees',JSON.stringify(d)); }catch(e){} }
 function loadDepts(){ try{ return JSON.parse(localStorage.okr_depts)||[] }catch(e){return[]} }
 function saveDepts(d){ try{ localStorage.setItem('okr_depts',JSON.stringify(d)); }catch(e){} }
