@@ -9075,7 +9075,7 @@ function renderAttendAutoSyncView() {
       var r = dayData[empId];
       rows.push({
         date: date, name: emp.name, dept: emp.department || '', bu: emp.bu || '', position: emp.position || '',
-        ci: r.ci || '', cir: r.cir || '', co: r.co || '', cor: r.cor || '', sc: r.sc || ''
+        ci: r.ci || '', cir: r.cir || '', co: r.co || '', cor: r.cor || '', sc: r.sc || '', ap: r.ap || ''
       });
     });
   });
@@ -9142,7 +9142,7 @@ function renderAttendAutoSyncView() {
   html += '<th>姓名</th><th>BU</th><th>部门</th><th class="th-date">日期</th>';
   html += '<th class="th-time">上班打卡</th><th class="th-result">上班结果</th>';
   html += '<th class="th-time">下班打卡</th><th class="th-result">下班结果</th>';
-  html += '<th>排班</th>';
+  html += '<th>排班</th><th class="th-note">审批备注</th>';
   html += '</tr></thead><tbody>';
 
   var prevName = '';
@@ -9162,6 +9162,7 @@ function renderAttendAutoSyncView() {
     html += '<td class="td-time">'+(r.co ? '<code>'+esc(r.co)+'</code>' : '-')+'</td>';
     html += '<td class="td-result">'+statusBadge(r.cor)+'</td>';
     html += '<td>'+(r.sc ? '<span style="font-size:10px;color:var(--text-muted)">'+esc(r.sc)+'</span>' : '-')+'</td>';
+    html += '<td class="td-note">'+(r.ap ? '<span style="font-size:10px;color:#f59e0b">'+esc(r.ap)+'</span>' : '-')+'</td>';
     html += '</tr>';
   });
 
@@ -9194,7 +9195,7 @@ function exportAutoRecordsCSV() {
       var r = dayData[empId];
       allRows.push({
         name: emp.name, bu: emp.bu || '', dept: emp.department || '', date: date,
-        ci: r.ci || '', cir: r.cir || '', co: r.co || '', cor: r.cor || '', sc: r.sc || ''
+        ci: r.ci || '', cir: r.cir || '', co: r.co || '', cor: r.cor || '', sc: r.sc || '', ap: r.ap || ''
       });
     });
   });
@@ -9204,7 +9205,7 @@ function exportAutoRecordsCSV() {
     return 0;
   });
 
-  var rows = [['姓名','BU','部门','日期','上班打卡','上班结果','下班打卡','下班结果','排班'].join(',')];
+  var rows = [['姓名','BU','部门','日期','上班打卡','上班结果','下班打卡','下班结果','排班','审批备注'].join(',')];
   var prevName = '';
   allRows.forEach(function(r) {
     // 同一人之间插入空行分隔
@@ -9214,7 +9215,7 @@ function exportAutoRecordsCSV() {
     prevName = r.name;
     rows.push([
       csvCell(r.name), csvCell(r.bu), csvCell(r.dept), r.date,
-      csvCell(r.ci), csvCell(r.cir), csvCell(r.co), csvCell(r.cor), csvCell(r.sc)
+      csvCell(r.ci), csvCell(r.cir), csvCell(r.co), csvCell(r.cor), csvCell(r.sc), csvCell(r.ap)
     ].join(','));
   });
 

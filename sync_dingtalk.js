@@ -1156,6 +1156,13 @@ async function main() {
       if (prev && prev.attendanceRecords) Object.assign(mergedRecords, prev.attendanceRecords);
       var newRecords = attendanceRecordsMap[u.name] || {};
       Object.assign(mergedRecords, newRecords);
+      // 从 statusByDate 同步 OA 审批备注到打卡明细
+      for (const [date, status] of Object.entries(merged)) {
+        if (status.m === '请假' || status.m === '外勤' || status.m === '出差' || status.m === '加班') {
+          if (!mergedRecords[date]) mergedRecords[date] = {};
+          mergedRecords[date].ap = status.s;
+        }
+      }
       // 保护已有OA数据不被打卡记录覆盖
       // 仅当打卡数据显示缺卡/旷工时保留OA（人确实没来），正常打卡则覆盖（销假回来）
       if (prev && prev.statusByDate) {
