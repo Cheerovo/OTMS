@@ -2,9 +2,8 @@ name: 钉钉考勤同步
 
 on:
   schedule:
-    # 工作日北京时间 10:00 + 20:00，周末 11:00 一次
-    - cron: '0 2,12 * * 1-5'
-    - cron: '0 3 * * 6,0'
+    - cron: '0 2,12 * * 1-5'  # 工作日北京时间 10:00 + 20:00
+    - cron: '0 3 * * 6,0'     # 周末北京时间 11:00
   workflow_dispatch:
     inputs:
       force_full:
