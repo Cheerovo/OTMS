@@ -862,6 +862,8 @@ async function main() {
   const statusMap = {};
   // 按 userId+date 分组考勤记录，用于匹配排班
   const recordsByUserDate = {}; // userId_date → [{checkType, userCheckTime, ...}]
+  // 按用户名+日期记录打卡明细（时间+结果+排班）
+  const attendanceRecordsMap = {}; // name → date → {ci, cir, co, cor, sc}
   attendance.forEach(r => {
     const userId = r.userId;
     const name = r.userName || (nameMap[userId]?.name) || userId;
@@ -891,6 +893,24 @@ async function main() {
     var key = userId + '_' + date;
     if (!recordsByUserDate[key]) recordsByUserDate[key] = [];
     recordsByUserDate[key].push(r);
+
+    // 提取打卡明细（时间+结果）
+    var timeStr = '';
+    if (r.userCheckTime) {
+      var ts = r.userCheckTime > 10000000000 ? r.userCheckTime : r.userCheckTime * 1000;
+      var td = new Date(ts + 8 * 3600000);
+      timeStr = String(td.getUTCHours()).padStart(2,'0') + ':' + String(td.getUTCMinutes()).padStart(2,'0');
+    }
+    if (!attendanceRecordsMap[name]) attendanceRecordsMap[name] = {};
+    var recEntry = attendanceRecordsMap[name][date] || {};
+    if (r.checkType === 'OnDuty') {
+      recEntry.ci = timeStr;
+      recEntry.cir = ON_DUTY_MAP[r.timeResult] || '正常';
+    } else if (r.checkType === 'OffDuty') {
+      recEntry.co = timeStr;
+      recEntry.cor = OFF_DUTY_MAP[r.timeResult] || '正常';
+    }
+    attendanceRecordsMap[name][date] = recEntry;
   });
   // 从早晚打卡推导主状态 + 补全缺少的打卡
   for (const [name, dateMap] of Object.entries(statusMap)) {
@@ -1089,6 +1109,19 @@ async function main() {
   const overtimePersonCount = Object.keys(overtimeMap).filter(uid => nameMap[uid]).length;
   console.log('  ✅ 加班覆盖 ' + overtimeOverlayCount + ' 个日期（' + overtimePersonCount + ' 人）');
 
+  // 为打卡明细补充排班信息
+  var recScheduleCount = 0;
+  for (const [userId, schedMap] of Object.entries(userScheduleByDate)) {
+    var name = (nameMap[userId] && nameMap[userId].name) || userId;
+    if (!attendanceRecordsMap[name]) continue;
+    for (const [date, sched] of Object.entries(schedMap)) {
+      if (attendanceRecordsMap[name][date]) {
+        attendanceRecordsMap[name][date].sc = sched;
+        recScheduleCount++;
+      }
+    }
+  }
+  console.log('  ✅ 打卡明细排班补充: ' + recScheduleCount + ' 条');
 
   const todayStr = toLocalDate(today.getTime());
 
@@ -1118,6 +1151,11 @@ async function main() {
       const merged = {};
       if (prev && prev.statusByDate) Object.assign(merged, prev.statusByDate);
       Object.assign(merged, newSBD);
+      // 合并打卡明细：旧数据打底，新数据覆盖
+      const mergedRecords = {};
+      if (prev && prev.attendanceRecords) Object.assign(mergedRecords, prev.attendanceRecords);
+      var newRecords = attendanceRecordsMap[u.name] || {};
+      Object.assign(mergedRecords, newRecords);
       // 保护已有OA数据不被打卡记录覆盖
       // 仅当打卡数据显示缺卡/旷工时保留OA（人确实没来），正常打卡则覆盖（销假回来）
       if (prev && prev.statusByDate) {
@@ -1160,6 +1198,7 @@ async function main() {
         mobile: u.mobile || '',
         deptName: u.dept_name_list || '',
         statusByDate: merged,
+        attendanceRecords: Object.keys(mergedRecords).length > 0 ? mergedRecords : undefined,
         todayStatus: newSBD[todayStr] || DEFAULT_STATUS,
         workDays: wd || null,  // null=未获取到考勤组配置（全勤，不过滤休息日）
         schedule: scheduleFlat,           // 所有可能班次（排班制无法确定当日班次时的兜底）
