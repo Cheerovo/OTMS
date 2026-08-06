@@ -12852,8 +12852,7 @@ async function syncFromRemote(opts){
         try{ storedHash = localStorage.getItem(_getGroupHashKey(gid))||''; }catch(e){}
         var hasLocalChanges = (localVer > 0 && curHash !== storedHash);
         _syncLogEvent('info', gid+' 本地方v'+localVer+' 云端v'+row.version+(hasLocalChanges?' 有本地修改':''), '');
-        // 非只读会话：云端版本未更新 且 本地无修改 → 跳过
-        if(!window._readonlySession && row.version <= localVer && !hasLocalChanges) continue;
+        // 始终从云端下载（版本号可能因外部修改而不可信）
         if(window._readonlySession){
           // 只读会话：无条件用云端数据覆盖本地
           _syncLogEvent('info', gid+' 只读会话→云端覆盖本地', '');
