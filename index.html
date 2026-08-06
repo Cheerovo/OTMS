@@ -7504,6 +7504,10 @@ function openEmployeeModal(id){
       e.employeeNumber=document.getElementById('empNumber').value.trim();
     }else{
       var newEmp = {id:'emp'+Date.now(),name:nm,bu:bu,department:dept,reportsTo:document.getElementById('empReportsTo').value.trim(),position:document.getElementById('empPosition').value.trim(),rank:document.getElementById('empRank').value,location:document.getElementById('empLocation').value.trim(),hireDate:document.getElementById('empHireDate').value,phone:document.getElementById('empPhone').value.trim(),dingId:document.getElementById('empDingId').value.trim(),jian:!!document.getElementById('empJianren').checked,employeeNumber:document.getElementById('empNumber').value.trim()};
+      if (empList.some(function(x){return x.name===nm;})) {
+        showToast('姓名「'+nm+'」已存在，请勿重复添加','warning');
+        return;
+      }
       empList.push(newEmp);
       autoSetupUser(nm);
     }
@@ -7915,11 +7919,15 @@ function confirmBatchImport(){
     location:'',
     dingId:''
   }));
-  empList=[...empList,...toAdd];
+  var existNames = {};
+  empList.forEach(function(e){ existNames[e.name] = true; });
+  var filtered = toAdd.filter(function(e){ return !existNames[e.name]; });
+  var skipped = toAdd.length - filtered.length;
+  empList=[...empList,...filtered];
   saveEmployees(empList);
   closeModal();
   renderEmployeeTable();
-  alert('成功导入 '+toAdd.length+' 名员工');
+  alert('成功导入 '+filtered.length+' 名员工'+(skipped>0?'，跳过 '+skipped+' 个重名':''));
 }
 
 function downloadEmpTemplate(){
@@ -12028,13 +12036,11 @@ function importGroupData(gid, data, overwrite){
         if (!localData) {
           localStorage.setItem(k, JSON.stringify(cloudData));
         } else if (k === 'okr_employees' && Array.isArray(localData) && Array.isArray(cloudData)) {
-          // 数组合并：本地同ID覆盖云端，云端新增保留
+          // 数组合并：本地同ID覆盖云端，云端新增保留（跳过TBH占位符）
           var merged = [];
-          var cloudById = {};
-          cloudData.forEach(function(e) { if (e && e.id) cloudById[e.id] = e; });
           var localIds = {};
           localData.forEach(function(e) { if (e && e.id) { localIds[e.id] = true; merged.push(e); } });
-          cloudData.forEach(function(e) { if (e && e.id && !localIds[e.id]) merged.push(e); });
+          cloudData.forEach(function(e) { if (e && e.id && !localIds[e.id] && !/^TBH/i.test(e.name||'')) merged.push(e); });
           localStorage.setItem(k, JSON.stringify(merged));
         } else if (k === 'okr_depts' && Array.isArray(localData) && Array.isArray(cloudData)) {
           var mergedDepts = [];
