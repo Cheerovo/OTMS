@@ -11948,6 +11948,12 @@ function _syncLogEvent(level, msg, detail){
 // ===== Remote Data Sync (Supabase) — 按资源组拆分，独立 CAS =====
 const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','attendance_records','attendance_leaves','attendance_unmatched','otms_tn_split_ratio','otms_trainee_cleared_v3'];
 
+// 提前检测全新会话（必须在拦截器IIFE之前），防止无痕等新会话上传数据
+(function(){
+  var hasAny = DATA_KEYS.some(function(k){ return localStorage.getItem(k) !== null; });
+  if(!hasAny){ window._readonlySession = true; console.log('[同步] 全新会话，仅下载不上传'); }
+})();
+
 // 资源分组：每组独立 Supabase 行 + 独立 version + 独立 CAS
 const SYNC_GROUPS = {
   eval:       {id: 1, keys: ['otms_trainee_eval_v1']},
@@ -13080,12 +13086,6 @@ function _escAttr(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').repl
 var _initPromise = null;
 async function initApp(){
   window._startupGrace = Date.now(); // 启动保护：5秒内禁止自动上传
-  // 检测是否为全新会话（localStorage无任何数据），全新会话禁止上传，仅下载
-  var hasAnyLocalData = DATA_KEYS.some(function(k){ return localStorage.getItem(k) !== null; });
-  if(!hasAnyLocalData){
-    window._readonlySession = true;
-    console.log('[同步] 全新会话，仅下载不同步上传');
-  }
   // 如果已有正在运行的 init，等它完成后再跑一次
   if(_initPromise){
     try{ await _initPromise; }catch(e){}
