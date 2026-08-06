@@ -7063,6 +7063,80 @@ function csvCell(val){
   return s;
 }
 
+function exportMonthlyAttendance() {
+  var month = attendDataFilter.month;
+  if (!month || month === 'all') { showToast('请先选择具体月份', 'warning'); return; }
+
+  var attData = loadAttendance();
+  var empList = loadEmployees();
+  var empMap = {};
+  empList.forEach(function(e) { empMap[e.id] = e; });
+
+  // 收集该月所有有数据的日期
+  var days = [];
+  var daySet = {};
+  Object.keys(attData).forEach(function(d) {
+    if (d.slice(0, 7) === month && !daySet[d]) {
+      daySet[d] = true;
+      days.push(d);
+    }
+  });
+  days.sort();
+
+  if (days.length === 0) { showToast('该月无考勤数据', 'warning'); return; }
+
+  // 收集该月有数据的员工
+  var empInMonth = {};
+  days.forEach(function(d) {
+    var dayData = attData[d] || {};
+    Object.keys(dayData).forEach(function(eid) {
+      if (!empInMonth[eid]) empInMonth[eid] = true;
+    });
+  });
+
+  // 构建表头
+  var header = ['姓名', 'BU', '部门'];
+  days.forEach(function(d) {
+    var dayNum = parseInt(d.slice(8), 10);
+    header.push(dayNum + '日');
+  });
+  var rows = [header.join(',')];
+
+  // 按员工遍历
+  var empIds = Object.keys(empInMonth).sort(function(a, b) {
+    var ea = empMap[a] || {}, eb = empMap[b] || {};
+    var buA = BU_ORDER.indexOf(ea.bu || ''), buB = BU_ORDER.indexOf(eb.bu || '');
+    if (buA === -1) buA = 99; if (buB === -1) buB = 99;
+    if (buA !== buB) return buA - buB;
+    return (ea.name || a).localeCompare(eb.name || b, 'zh');
+  });
+
+  empIds.forEach(function(eid) {
+    var emp = empMap[eid] || { name: eid, bu: '', department: '' };
+    var row = [csvCell(emp.name), csvCell(emp.bu || ''), csvCell(emp.department || '')];
+    days.forEach(function(d) {
+      var s = (attData[d] && attData[d][eid]) || null;
+      if (!s) { row.push(''); return; }
+      if (s.m === '在岗' && s.s === '正常') { row.push('在岗'); }
+      else if (s.m === s.s) { row.push(s.m); }
+      else { row.push(s.m + '-' + s.s); }
+    });
+    rows.push(row.join(','));
+  });
+
+  var bom = '\uFEFF';
+  var blob = new Blob([bom + rows.join('\n')], {type: 'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '考勤报表_' + month + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('已导出 ' + empIds.length + ' 人 × ' + days.length + ' 天考勤数据', 'success');
+}
+
 const RANK_LABELS = {'I':'Ⅰ','II':'Ⅱ','III':'Ⅲ','IV':'Ⅳ','V':'Ⅴ','VI':'Ⅵ','VII':'Ⅶ','外部':'外部','外包':'外包','管培':'管培'};
 const RANK_CSS = {'I':'rank-I','II':'rank-II','III':'rank-III','IV':'rank-IV','V':'rank-V','VI':'rank-VI','VII':'rank-VII','外部':'rank-ext','外包':'rank-out','管培':'rank-trainee'};
 
@@ -9023,6 +9097,7 @@ function renderAttendDataView() {
   html += '<span class="attend-record-count">'+rows.length+' 条'+(attendDataView==='detail' && abnCount > 0 ? ' <span style="color:var(--danger-text)">'+abnCount+' 异常</span>' : '')+'</span>';
   if (attendDataView === 'detail') {
     html += '<button class="btn btn-outline btn-sm" onclick="importAttendCSV()" style="font-size:11px">导入打卡CSV</button>';
+    html += '<button class="btn btn-outline btn-sm" onclick="exportMonthlyAttendance()" style="font-size:11px">下载月考勤</button>';
   } else {
     html += '<button class="btn btn-outline btn-sm" onclick="importLeavesCSV()" style="font-size:11px">导入假期CSV</button>';
   }
