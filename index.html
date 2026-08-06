@@ -12188,7 +12188,7 @@ function scheduleAutoUpload(){
     _autoUploadBusy = false;
     // 上传期间有新的本地编辑 → 立即触发下一轮上传
     if(_pendingUpload){ _pendingUpload = false; scheduleAutoUpload(); }
-  }, 1500);
+  }, 500);
 }
 
 async function uploadGroup(gid, retryCount){
@@ -13389,7 +13389,14 @@ function handleImportFile(event){
 }
 
 // 页面关闭前自动备份
-window.addEventListener('beforeunload', function(){ flushUpload(); });
+window.addEventListener('beforeunload', function(e){
+  if(window.location.protocol === 'file:') return; // 本地文件不上传，无需拦截
+  var dirtyGroups = Object.keys(_dirtyGroups||{});
+  if(dirtyGroups.length > 0){
+    flushUpload();
+    // 浏览器会在上传完成前关闭页面，但 keepalive fetch 会尽力完成
+  }
+});
 
 // ===== Global Search =====
 function highlightMatch(text,query){
