@@ -8932,7 +8932,7 @@ function applyAttendDataKeywordFilter() {
 }
 
 // ===== 考勤数据自动拉取视图（来自钉钉同步的 attendanceRecords） =====
-var autosyncFilter = { year: '', month: '', day: '', bu: 'all', keyword: '' };
+var autosyncFilter = { year: '', month: '', day: '', bu: 'all', dept: 'all', position: 'all', keyword: '' };
 
 function loadAutoRecords() {
   try { return JSON.parse(localStorage.getItem('attendance_records_auto')||'{}'); } catch(e) { return {}; }
@@ -8977,12 +8977,20 @@ function renderAttendAutoSyncView() {
   });
   months.sort();
 
-  // BU列表
+  // BU/部门/职位列表
   var buList = [], buSet2 = {};
-  empList.forEach(function(e) { if (e.bu && !buSet2[e.bu]) { buSet2[e.bu]=true; buList.push(e.bu); } });
-  buList.sort();
+  var deptList = [], deptSet2 = {};
+  var posList = [], posSet2 = {};
+  empList.forEach(function(e) {
+    if (e.bu && !buSet2[e.bu]) { buSet2[e.bu]=true; buList.push(e.bu); }
+    var d = e.department || e.bu || '';
+    if (d && !deptSet2[d]) { deptSet2[d]=true; deptList.push(d); }
+    if (e.position && !posSet2[e.position]) { posSet2[e.position]=true; posList.push(e.position); }
+  });
+  buList.sort(); deptList.sort(); posList.sort();
 
   // 构建 rows（记录列表）
+  var keyword = (autosyncFilter.keyword || '').toLowerCase();
   var rows = [];
   dateKeys.forEach(function(date) {
     if (autosyncFilter.year && date.slice(0,4) !== autosyncFilter.year) return;
@@ -8992,20 +9000,32 @@ function renderAttendAutoSyncView() {
     Object.keys(dayData).forEach(function(empId) {
       var emp = empMap[empId];
       if (!emp) {
-        // 尝试通过姓名匹配
-        emp = { id: empId, name: empId, bu: '', department: '' };
+        emp = { id: empId, name: empId, bu: '', department: '', position: '' };
       }
       if (autosyncFilter.bu !== 'all' && (emp.bu || '') !== autosyncFilter.bu) return;
+      if (autosyncFilter.dept !== 'all') {
+        var empDept = emp.department || emp.bu || '';
+        if (empDept !== autosyncFilter.dept) return;
+      }
+      if (autosyncFilter.position !== 'all' && (emp.position || '') !== autosyncFilter.position) return;
+      if (keyword) {
+        var matchName = (emp.name || '').toLowerCase().indexOf(keyword) !== -1;
+        var matchBu = (emp.bu || '').toLowerCase().indexOf(keyword) !== -1;
+        var matchDept = ((emp.department || '') + (emp.bu || '')).toLowerCase().indexOf(keyword) !== -1;
+        if (!matchName && !matchBu && !matchDept) return;
+      }
       var r = dayData[empId];
       rows.push({
-        date: date, name: emp.name, dept: emp.department || '', bu: emp.bu || '',
+        date: date, name: emp.name, dept: emp.department || '', bu: emp.bu || '', position: emp.position || '',
         ci: r.ci || '', cir: r.cir || '', co: r.co || '', cor: r.cor || '', sc: r.sc || ''
       });
     });
   });
+  // 按姓名→日期排序（同一人的记录在一起）
   rows.sort(function(a, b) {
+    if (a.name !== b.name) return a.name.localeCompare(b.name, 'zh');
     if (a.date !== b.date) return a.date < b.date ? -1 : 1;
-    return a.name.localeCompare(b.name, 'zh');
+    return 0;
   });
 
   var html = '';
@@ -9025,12 +9045,21 @@ function renderAttendAutoSyncView() {
   html += '<option value="all"'+(autosyncFilter.bu==='all'?' selected':'')+'>全部BU</option>';
   buList.forEach(function(bu) { html += '<option value="'+esc(bu)+'"'+(autosyncFilter.bu===bu?' selected':'')+'>'+esc(bu)+'</option>'; });
   html += '</select>';
-  var hasFilter = autosyncFilter.day || autosyncFilter.bu !== 'all';
+  html += '<select onchange="autosyncFilter.dept=this.value;renderAttendAutoSyncView()">';
+  html += '<option value="all"'+(autosyncFilter.dept==='all'?' selected':'')+'>全部部门</option>';
+  deptList.forEach(function(d) { html += '<option value="'+esc(d)+'"'+(autosyncFilter.dept===d?' selected':'')+'>'+esc(d)+'</option>'; });
+  html += '</select>';
+  html += '<select onchange="autosyncFilter.position=this.value;renderAttendAutoSyncView()">';
+  html += '<option value="all"'+(autosyncFilter.position==='all'?' selected':'')+'>全部职位</option>';
+  posList.forEach(function(p) { html += '<option value="'+esc(p)+'"'+(autosyncFilter.position===p?' selected':'')+'>'+esc(p)+'</option>'; });
+  html += '</select>';
+  var hasFilter = autosyncFilter.day || autosyncFilter.bu !== 'all' || autosyncFilter.dept !== 'all' || autosyncFilter.position !== 'all' || autosyncFilter.keyword;
   if (hasFilter) {
-    html += '<button class="btn btn-outline btn-sm" onclick="autosyncFilter={year:autosyncFilter.year,month:autosyncFilter.month,day:\'\',bu:\'all\',keyword:\'\'};renderAttendAutoSyncView()" style="font-size:10px">清除筛选</button>';
+    html += '<button class="btn btn-outline btn-sm" onclick="autosyncFilter={year:autosyncFilter.year,month:autosyncFilter.month,day:\'\',bu:\'all\',dept:\'all\',position:\'all\',keyword:\'\'};renderAttendAutoSyncView()" style="font-size:10px">清除筛选</button>';
   }
   html += '</div>';
   html += '<div class="attend-toolbar-right">';
+  html += '<input type="text" id="autosyncSearch" placeholder="搜索姓名..." value="'+esc(autosyncFilter.keyword||'')+'" oninput="autosyncFilter.keyword=this.value;renderAttendAutoSyncView()" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs);width:120px">';
   html += '<span class="attend-record-count">'+rows.length+' 条</span>';
   html += '<button class="btn btn-outline btn-sm" onclick="exportAutoRecordsCSV()" style="font-size:11px">下载CSV</button>';
   html += '</div>';
@@ -9052,22 +9081,23 @@ function renderAttendAutoSyncView() {
   html += '<div style="overflow-x:auto;max-height:calc(100vh - 280px)">';
   html += '<table class="attend-data-table">';
   html += '<thead><tr>';
-  html += '<th>姓名</th><th>BU</th><th class="th-date">日期</th>';
+  html += '<th>姓名</th><th>BU</th><th>部门</th><th class="th-date">日期</th>';
   html += '<th class="th-time">上班打卡</th><th class="th-result">上班结果</th>';
   html += '<th class="th-time">下班打卡</th><th class="th-result">下班结果</th>';
   html += '<th>排班</th>';
   html += '</tr></thead><tbody>';
 
-  var prevDate = '';
+  var prevName = '';
   rows.forEach(function(r, idx) {
-    var isNewDay = r.date !== prevDate;
-    prevDate = r.date;
+    var isNewPerson = r.name !== prevName;
+    prevName = r.name;
     var rowClass = (idx % 2 === 1) ? ' odd' : '';
-    if (isNewDay && idx > 0) rowClass += ' day-split';
+    if (isNewPerson && idx > 0) rowClass += ' day-split';
 
     html += '<tr class="'+rowClass+'">';
     html += '<td class="td-name">'+esc(r.name)+'</td>';
     html += '<td class="td-meta">'+esc(r.bu)+'</td>';
+    html += '<td class="td-meta">'+esc(r.dept)+'</td>';
     html += '<td class="td-date">'+r.date.slice(5)+' <span class="td-weekday">'+getWeekday(r.date)+'</span></td>';
     html += '<td class="td-time">'+(r.ci ? '<code>'+esc(r.ci)+'</code>' : '-')+'</td>';
     html += '<td class="td-result">'+statusBadge(r.cir)+'</td>';
@@ -9082,7 +9112,7 @@ function renderAttendAutoSyncView() {
   div.innerHTML = html;
 }
 
-// 导出自动拉取数据为CSV
+// 导出自动拉取数据为CSV（按人分组，每人名下按日期排列）
 function exportAutoRecordsCSV() {
   var records = loadAutoRecords();
   var allDates = Object.keys(records).sort();
@@ -9092,18 +9122,37 @@ function exportAutoRecordsCSV() {
   var empMap = {};
   empList.forEach(function(e) { empMap[e.id] = e; });
 
-  var rows = [['姓名','BU','部门','日期','上班打卡','上班结果','下班打卡','下班结果','排班'].join(',')];
-
+  // 收集所有记录，按姓名→日期排序
+  var allRows = [];
   allDates.forEach(function(date) {
     var dayData = records[date] || {};
     Object.keys(dayData).forEach(function(empId) {
       var emp = empMap[empId] || { name: empId, bu: '', department: '' };
       var r = dayData[empId];
-      rows.push([
-        csvCell(emp.name), csvCell(emp.bu||''), csvCell(emp.department||''), date,
-        csvCell(r.ci||''), csvCell(r.cir||''), csvCell(r.co||''), csvCell(r.cor||''), csvCell(r.sc||'')
-      ].join(','));
+      allRows.push({
+        name: emp.name, bu: emp.bu || '', dept: emp.department || '', date: date,
+        ci: r.ci || '', cir: r.cir || '', co: r.co || '', cor: r.cor || '', sc: r.sc || ''
+      });
     });
+  });
+  allRows.sort(function(a, b) {
+    if (a.name !== b.name) return a.name.localeCompare(b.name, 'zh');
+    if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+    return 0;
+  });
+
+  var rows = [['姓名','BU','部门','日期','上班打卡','上班结果','下班打卡','下班结果','排班'].join(',')];
+  var prevName = '';
+  allRows.forEach(function(r) {
+    // 同一人之间插入空行分隔
+    if (prevName && r.name !== prevName) {
+      rows.push('');  // 空行分隔不同人
+    }
+    prevName = r.name;
+    rows.push([
+      csvCell(r.name), csvCell(r.bu), csvCell(r.dept), r.date,
+      csvCell(r.ci), csvCell(r.cir), csvCell(r.co), csvCell(r.cor), csvCell(r.sc)
+    ].join(','));
   });
 
   var bom = '\uFEFF';
@@ -9116,7 +9165,7 @@ function exportAutoRecordsCSV() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('已导出 ' + (rows.length - 1) + ' 条打卡记录', 'success');
+  showToast('已导出 ' + allRows.length + ' 条打卡记录，按姓名分组', 'success');
 }
 
 function renderAttendDataView() {
