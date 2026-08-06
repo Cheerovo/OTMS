@@ -8934,6 +8934,25 @@ function applyAttendDataKeywordFilter() {
 // ===== 考勤数据自动拉取视图（来自钉钉同步的 attendanceRecords） =====
 var autosyncFilter = { year: '', month: '', day: '', bu: 'all', dept: 'all', position: 'all', keyword: '' };
 
+function applyAutosyncKeywordFilter() {
+  var input = document.getElementById('autosyncSearch');
+  var val = input ? input.value.trim().toLowerCase() : '';
+  autosyncFilter.keyword = val;
+  var rows = document.querySelectorAll('#orgAttendAutoSync .attend-data-table tbody tr');
+  var visibleCount = 0;
+  rows.forEach(function(row) {
+    var nameCell = row.querySelector('.td-name');
+    var buCell = row.querySelector('.td-meta');
+    var name = nameCell ? nameCell.textContent.toLowerCase() : '';
+    var bu = buCell ? buCell.textContent.toLowerCase() : '';
+    var match = !val || name.indexOf(val) !== -1 || bu.indexOf(val) !== -1;
+    row.style.display = match ? '' : 'none';
+    if (match) visibleCount++;
+  });
+  var countEl = document.querySelector('#orgAttendAutoSync .attend-record-count');
+  if (countEl) countEl.textContent = visibleCount + ' 条';
+}
+
 function loadAutoRecords() {
   try { return JSON.parse(localStorage.getItem('attendance_records_auto')||'{}'); } catch(e) { return {}; }
 }
@@ -9059,7 +9078,7 @@ function renderAttendAutoSyncView() {
   }
   html += '</div>';
   html += '<div class="attend-toolbar-right">';
-  html += '<input type="text" id="autosyncSearch" placeholder="搜索姓名..." value="'+esc(autosyncFilter.keyword||'')+'" oninput="autosyncFilter.keyword=this.value;renderAttendAutoSyncView()" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs);width:120px">';
+  html += '<input type="text" id="autosyncSearch" placeholder="搜索姓名..." value="'+esc(autosyncFilter.keyword||'')+'" oninput="applyAutosyncKeywordFilter()" style="padding:6px 10px;border:none;border-radius:8px;font-size:11px;background:var(--card);color:var(--text);box-shadow:var(--shadow-xs);width:120px">';
   html += '<span class="attend-record-count">'+rows.length+' 条</span>';
   html += '<button class="btn btn-outline btn-sm" onclick="exportAutoRecordsCSV()" style="font-size:11px">下载CSV</button>';
   html += '</div>';
@@ -9110,6 +9129,11 @@ function renderAttendAutoSyncView() {
   html += '</tbody></table></div>';
 
   div.innerHTML = html;
+
+  // 如果有搜索关键词，应用DOM级别过滤更新计数
+  if (autosyncFilter.keyword) {
+    applyAutosyncKeywordFilter();
+  }
 }
 
 // 导出自动拉取数据为CSV（按人分组，每人名下按日期排列）
