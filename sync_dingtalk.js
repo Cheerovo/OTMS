@@ -1156,11 +1156,12 @@ async function main() {
       if (prev && prev.attendanceRecords) Object.assign(mergedRecords, prev.attendanceRecords);
       var newRecords = attendanceRecordsMap[u.name] || {};
       Object.assign(mergedRecords, newRecords);
-      // 从 statusByDate 同步 OA 审批备注到打卡明细
+      // 从 statusByDate 同步 OA 审批备注到打卡明细（仅已有打卡数据的日期）
       for (const [date, status] of Object.entries(merged)) {
         if (status.m === '请假' || status.m === '外勤' || status.m === '出差' || status.m === '加班') {
-          if (!mergedRecords[date]) mergedRecords[date] = {};
-          mergedRecords[date].ap = status.s;
+          if (mergedRecords[date]) {
+            mergedRecords[date].ap = status.s;
+          }
         }
       }
       // 保护已有OA数据不被打卡记录覆盖

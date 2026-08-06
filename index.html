@@ -9051,6 +9051,7 @@ function renderAttendAutoSyncView() {
   var keyword = (autosyncFilter.keyword || '').toLowerCase();
   var rows = [];
   dateKeys.forEach(function(date) {
+    if (date < '2026-08-01') return;  // 自动拉取仅显示8月1日之后
     if (autosyncFilter.year && date.slice(0,4) !== autosyncFilter.year) return;
     if (autosyncFilter.month && date.slice(0,7) !== autosyncFilter.month) return;
     if (autosyncFilter.day && date !== autosyncFilter.day) return;
@@ -9189,6 +9190,7 @@ function exportAutoRecordsCSV() {
   // 收集所有记录，按姓名→日期排序
   var allRows = [];
   allDates.forEach(function(date) {
+    if (date < '2026-08-01') return;  // 自动拉取仅显示8月1日之后
     var dayData = records[date] || {};
     Object.keys(dayData).forEach(function(empId) {
       var emp = empMap[empId] || { name: empId, bu: '', department: '' };
