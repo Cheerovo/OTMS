@@ -1134,12 +1134,21 @@ async function main() {
           }
         });
       }
-      // 休息日强制改为休息（仅当有明确工作日配置时才处理，避免误判排班制用户）
+      // FIXED用户：按工作日配置标记休息日
       const wd = workDaysByUser[u.userid];
       if (wd && wd.length > 0 && wd.length < 7) {
         Object.keys(merged).forEach(function(d) {
           var dayNum = new Date(d + 'T00:00:00+08:00').getDay();
           if (!wd.includes(dayNum)) {
+            merged[d] = {m:'休息', s:'休息', ci:'休息', co:'休息'};
+          }
+        });
+      }
+      // 排班制用户：有排班=上班，无排班=休息（仅判断本次同步的日期，历史数据不动）
+      var sbd = userScheduleByDate[u.userid];
+      if ((!wd || wd.length === 0 || wd.length === 7) && sbd) {
+        dates.forEach(function(d) {
+          if (merged[d] && !sbd[d]) {
             merged[d] = {m:'休息', s:'休息', ci:'休息', co:'休息'};
           }
         });
