@@ -5,30 +5,25 @@ on:
     branches: ["main"]
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Deploy to gh-pages
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # 基于当前提交创建干净的 gh-pages 内容
-          mkdir -p /tmp/gh-pages-deploy
-          cp index.html /tmp/gh-pages-deploy/
-          cp dingtalk_data.json /tmp/gh-pages-deploy/ 2>/dev/null || true
-          cp hr-manual.html /tmp/gh-pages-deploy/ 2>/dev/null || true
-          touch /tmp/gh-pages-deploy/.nojekyll
-
-          # 强制推送到 gh-pages 分支
-          cd /tmp/gh-pages-deploy
-          git init
-          git checkout -b gh-pages
-          git add -A
-          git commit -m "deploy: $(TZ='Asia/Shanghai' date +%Y-%m-%dT%H:%M:%S)" || exit 0
-          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
+      - uses: actions/configure-pages@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - id: deployment
+        uses: actions/deploy-pages@v4
