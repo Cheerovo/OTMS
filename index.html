@@ -12150,6 +12150,7 @@ function mergeEvalData(localEval, cloudEval){
 // ===== 自动上传（按组 CAS）=====
 var _pendingUpload = false;
 function scheduleAutoUpload(){
+  if(window.location.protocol === 'file:') return; // 本地文件不允许上传，防止覆盖线上数据
   if(_isImporting) { return; }
   if(_autoUploadBusy){ _pendingUpload = true; return; }
   clearTimeout(_autoUploadTimer);
@@ -12473,10 +12474,11 @@ async function autoCheckRemote(){
 
 // ===== localStorage 劫持：记录 dirtyKeys + 仅 bump 对应组的 version =====
 (function(){
+  var _isLocal = window.location.protocol === 'file:';
   var _origSet = localStorage.setItem.bind(localStorage);
   localStorage.setItem = function(key, value){
     _origSet(key, value);
-    if(!_isImporting && DATA_KEYS.indexOf(key) !== -1){
+    if(!_isLocal && !_isImporting && DATA_KEYS.indexOf(key) !== -1){
       _dirtyKeys[key] = true;
       var gid = getGroupForKey(key);
       if(gid){
@@ -12489,8 +12491,7 @@ async function autoCheckRemote(){
   var _origRemove = localStorage.removeItem.bind(localStorage);
   localStorage.removeItem = function(key){
     _origRemove(key);
-    if(!_isImporting && DATA_KEYS.indexOf(key) !== -1){
-      // 删除操作也标记 dirty，确保同步到云端后其他设备也会删除该 key
+    if(!_isLocal && !_isImporting && DATA_KEYS.indexOf(key) !== -1){
       _dirtyKeys[key] = true;
       var gid = getGroupForKey(key);
       if(gid){
