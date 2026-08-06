@@ -8953,6 +8953,34 @@ function applyAutosyncKeywordFilter() {
   if (countEl) countEl.textContent = visibleCount + ' 条';
 }
 
+// 轻量同步：仅拉取 attendanceRecords 到 localStorage
+var _autoRecordsSyncing = false;
+async function syncAutoRecordsSilent() {
+  if (_autoRecordsSyncing) return false;
+  _autoRecordsSyncing = true;
+  try {
+    var resp = await fetch('dingtalk_data.json?t=' + Date.now());
+    if (!resp.ok) { _autoRecordsSyncing = false; return false; }
+    var dd = await resp.json();
+    var empList = loadEmployees();
+    var autoRecords = {};
+    (dd.users || []).forEach(function(u) {
+      if (!u.attendanceRecords) return;
+      empList.forEach(function(e) {
+        if (e.name !== u.name) return;
+        Object.keys(u.attendanceRecords).forEach(function(d) {
+          if (!autoRecords[d]) autoRecords[d] = {};
+          autoRecords[d][e.id] = u.attendanceRecords[d];
+        });
+      });
+    });
+    localStorage.setItem('attendance_records_auto', JSON.stringify(autoRecords));
+    window._ddUpdated = dd.updated || '';
+    _autoRecordsSyncing = false;
+    return Object.keys(autoRecords).length > 0;
+  } catch(e) { _autoRecordsSyncing = false; console.error('自动同步打卡明细失败:', e); return false; }
+}
+
 function loadAutoRecords() {
   try { return JSON.parse(localStorage.getItem('attendance_records_auto')||'{}'); } catch(e) { return {}; }
 }
@@ -8970,10 +8998,21 @@ function renderAttendAutoSyncView() {
   if (dateKeys.length === 0) {
     div.innerHTML = '<div style="padding:80px 40px;text-align:center">' +
       '<div style="font-size:48px;margin-bottom:16px;opacity:0.3">📡</div>' +
-      '<p style="font-size:14px;font-weight:500;color:var(--text-dim);margin:0 0 6px">暂无钉钉打卡明细数据</p>' +
-      '<p style="font-size:11px;color:var(--text-muted);margin:0 0 24px">请先运行 node sync_dingtalk.js 拉取打卡数据，或在「在岗状态」页点击「同步钉钉」</p>' +
-      '<button class="btn btn-primary btn-sm" onclick="syncFromDingTalk()">同步钉钉</button>' +
+      '<p style="font-size:14px;font-weight:500;color:var(--text-dim);margin:0 0 6px">正在从钉钉同步打卡明细...</p>' +
+      '<p style="font-size:11px;color:var(--text-muted);margin:0 0 24px">首次加载，请稍候</p>' +
       '</div>';
+    // 自动尝试同步后再渲染
+    syncAutoRecordsSilent().then(function(ok) {
+      if (ok) renderAttendAutoSyncView();
+      else {
+        div.innerHTML = '<div style="padding:80px 40px;text-align:center">' +
+          '<div style="font-size:48px;margin-bottom:16px;opacity:0.3">📡</div>' +
+          '<p style="font-size:14px;font-weight:500;color:var(--text-dim);margin:0 0 6px">暂无钉钉打卡明细数据</p>' +
+          '<p style="font-size:11px;color:var(--text-muted);margin:0 0 24px">请先运行 node sync_dingtalk.js 拉取打卡数据，或在「在岗状态」页点击「同步钉钉」</p>' +
+          '<button class="btn btn-primary btn-sm" onclick="syncFromDingTalk()">同步钉钉</button>' +
+          '</div>';
+      }
+    });
     return;
   }
 
