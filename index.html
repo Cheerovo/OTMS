@@ -12808,15 +12808,18 @@ async function syncFromRemote(opts){
         if(!row || !row.data) continue;
         var localVer = parseInt(localStorage.getItem(getGroupVerKey(gid))) || 0;
         _syncLogEvent('info', gid+' 本地方v'+localVer+' 云端v'+row.version, '');
-        if(row.version <= localVer) continue;
-        // 检查本地是否有未上传的变更
+        if(!window._readonlySession && row.version <= localVer) continue;
         var curHash = _hashGroupData(gid);
         var storedHash = '';
         try{ storedHash = localStorage.getItem(_getGroupHashKey(gid))||''; }catch(e){}
         var hasLocalChanges = (localVer > 0 && curHash !== storedHash);
-        if(hasLocalChanges){
+        if(window._readonlySession){
+          // 只读会话：无条件用云端数据覆盖本地
+          _syncLogEvent('info', gid+' 只读会话→云端覆盖本地', '');
+          importGroupData(gid, row.data, true);
+        } else if(hasLocalChanges){
           _syncLogEvent('warn', gid+' 本地有未上传变更，跳过覆盖-改为合并', '');
-          importGroupData(gid, row.data, false); // merge mode: local优先
+          importGroupData(gid, row.data, false);
         } else {
           _syncLogEvent('info', gid+' 发现更新→导入', '');
           importGroupData(gid, row.data, true);
