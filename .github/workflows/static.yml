@@ -5,26 +5,29 @@ on:
     branches: ["main"]
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  contents: write
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          fetch-depth: 0
+
+      - name: Deploy to gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 创建空的 gh-pages 分支（覆盖旧的）
+          git checkout --orphan gh-pages
+          git rm -rf --quiet . 2>/dev/null || true
+
+          # 从 main 分支复制 web 文件
+          git checkout main -- index.html dingtalk_data.json hr-manual.html .nojekyll
+
+          # 提交并强制推送
+          git add -A
+          git commit -m "deploy: $(date -u +%Y-%m-%dT%H:%M:%SZ)" || exit 0
+          git push -f origin gh-pages
