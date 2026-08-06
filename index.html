@@ -11948,16 +11948,32 @@ function _syncLogEvent(level, msg, detail){
 // ===== Remote Data Sync (Supabase) — 按资源组拆分，独立 CAS =====
 const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','attendance_records','attendance_leaves','attendance_unmatched','otms_tn_split_ratio','otms_trainee_cleared_v3'];
 
-// 提前检测：新标签/窗口默认为只读，仅用户主动编辑后解除（必须在拦截器IIFE之前）
+// 提前检测：新设备/空数据默认为只读，已有本地数据的设备允许上传（必须在拦截器IIFE之前）
 (function(){
   if(!sessionStorage.getItem('_otms_init')){
     sessionStorage.setItem('_otms_init','1');
-    window._readonlySession = true;
-    sessionStorage.setItem('_otms_readonly','1');
-    console.log('[同步] 新标签会话，仅下载不上传（编辑数据后自动解除）');
+    // 检查 localStorage 是否已有同步数据（任何组有 version 或有数据即视为已有设备）
+    var _hasLocalData = false;
+    for(var _i = 0; _i < SYNC_GROUP_LIST.length; _i++){
+      var _gid = SYNC_GROUP_LIST[_i];
+      var _ver = parseInt(localStorage.getItem(getGroupVerKey(_gid))) || 0;
+      if(_ver > 0) { _hasLocalData = true; break; }
+      if(SYNC_GROUPS[_gid].keys.some(function(k){ return localStorage.getItem(k) !== null; })){
+        _hasLocalData = true; break;
+      }
+    }
+    if(!_hasLocalData){
+      window._readonlySession = true;
+      sessionStorage.setItem('_otms_readonly','1');
+      console.log('[同步] 新设备/空数据，先下载云端数据（下载完成后自动解除只读）');
+    } else {
+      window._readonlySession = false;
+      sessionStorage.setItem('_otms_readonly','0');
+      console.log('[同步] 已有本地数据，允许上传');
+    }
   } else {
     window._readonlySession = sessionStorage.getItem('_otms_readonly')==='1';
-    if(window._readonlySession) console.log('[同步] 只读标签会话，仅下载不上传');
+    if(window._readonlySession) console.log('[同步] 只读会话，仅下载不上传');
   }
 })();
 
@@ -12104,6 +12120,20 @@ function importGroupData(gid, data, overwrite){
         localStorage.setItem(k, JSON.stringify(fallback));
       }
     } else {
+      // !overwrite 模式下对 object 类型做本地优先合并（CAS 冲突时保护本地编辑不被云端覆盖）
+      if(!overwrite){
+        try {
+          var _localVal = JSON.parse(localStorage.getItem(k) || 'null');
+          var _cloudVal = data[k];
+          if(_localVal && typeof _localVal === 'object' && !Array.isArray(_localVal) &&
+             _cloudVal && typeof _cloudVal === 'object' && !Array.isArray(_cloudVal)){
+            var _mergedObj = JSON.parse(JSON.stringify(_cloudVal));
+            for(var _lk in _localVal){ if(_localVal.hasOwnProperty(_lk)) _mergedObj[_lk] = _localVal[_lk]; }
+            localStorage.setItem(k, JSON.stringify(_mergedObj));
+            return;
+          }
+        } catch(e) { /* fall through to overwrite */ }
+      }
       var val = data[k];
       // overwrite 模式下也过滤删除墓碑，防止旧设备数据覆盖本地删除
       if (k === 'okr_employees' && Array.isArray(val)) {
@@ -12164,7 +12194,7 @@ function mergeEvalData(localEval, cloudEval){
 var _pendingUpload = false;
 function scheduleAutoUpload(){
   if(window._readonlySession) return; // 全新会话（无痕等）不上传，仅下载
-  if(window._startupGrace && Date.now() - window._startupGrace < 5000) return; // 启动5秒内不上传
+  if(window._isSyncing) { _pendingUpload = true; return; } // 正在同步时暂缓上传，同步完成后触发
   if(window.location.protocol === 'file:') return; // 本地文件不允许上传
   if(_isImporting) { return; }
   if(_autoUploadBusy){ _pendingUpload = true; return; }
@@ -12451,10 +12481,17 @@ async function autoCheckRemote(){
       var storedHash2 = '';
       try{ storedHash2 = localStorage.getItem(_getGroupHashKey(ug.gid))||''; }catch(e){}
       var hasLocalChanges2 = _dirtyGroups[ug.gid] || (parseInt(localStorage.getItem(getGroupVerKey(ug.gid)))||0) > 0 && curHash2 !== storedHash2;
-      if(hasLocalChanges2){ _syncLogEvent('info',ug.gid+' 有本地修改,跳过下载',''); continue; }
-      importGroupData(ug.gid, fullRow.data, true);
-      localStorage.setItem(getGroupVerKey(ug.gid), fullRow.version);
-      try{ localStorage.setItem(_getGroupHashKey(ug.gid), _hashGroupData(ug.gid)); }catch(e){}
+      if(hasLocalChanges2){
+        // 合并模式：有本地修改时仍下载云端更新，本地优先保留（不丢失本地编辑）
+        _syncLogEvent('info',ug.gid+' 有本地修改,合并云端更新','');
+        importGroupData(ug.gid, fullRow.data, false);
+        localStorage.setItem(getGroupVerKey(ug.gid), fullRow.version);
+        // 不更新 hash：合并后数据仍标记为待上传，让 uploadGroup 处理
+      } else {
+        importGroupData(ug.gid, fullRow.data, true);
+        localStorage.setItem(getGroupVerKey(ug.gid), fullRow.version);
+        try{ localStorage.setItem(_getGroupHashKey(ug.gid), _hashGroupData(ug.gid)); }catch(e){}
+      }
       updateSyncIndicator('synced');
       // eval 组更新后刷新内存缓存和 UI，无需刷新页面
       if(ug.gid === 'eval' && typeof loadEvalData === 'function'){
@@ -12760,6 +12797,7 @@ async function migrateToMultiRow(oldRow){
 async function syncFromRemote(opts){
   opts = opts || {};
   var updatedAny = false;
+  window._isSyncing = true;
   try{
     // 先查新格式是否存在
     const { data: newRows, error: err1 } = await supabaseClient
@@ -12792,11 +12830,12 @@ async function syncFromRemote(opts){
       } else if(oldRow && oldRow.data){
         hasNew = true;
       }
-      if(!hasNew) { _syncLogEvent('info', '云端暂无数据', ''); return false; }
+      if(!hasNew) { _syncLogEvent('info', '云端暂无数据', ''); }
     }
 
-    // 检查所有组的版本，有更新的就下载
-    for(var gi = 0; gi < SYNC_GROUP_LIST.length; gi++){
+    if(hasNew){
+      // 检查所有组的版本，有更新的就下载
+      for(var gi = 0; gi < SYNC_GROUP_LIST.length; gi++){
       var gid = SYNC_GROUP_LIST[gi];
       var groupId = SYNC_GROUPS[gid].id;
       try{
@@ -12807,25 +12846,32 @@ async function syncFromRemote(opts){
           .maybeSingle();
         if(!row || !row.data) continue;
         var localVer = parseInt(localStorage.getItem(getGroupVerKey(gid))) || 0;
-        _syncLogEvent('info', gid+' 本地方v'+localVer+' 云端v'+row.version, '');
-        if(!window._readonlySession && row.version <= localVer) continue;
+        // 提前计算 hash，判断是否有本地未上传的修改
         var curHash = _hashGroupData(gid);
         var storedHash = '';
         try{ storedHash = localStorage.getItem(_getGroupHashKey(gid))||''; }catch(e){}
         var hasLocalChanges = (localVer > 0 && curHash !== storedHash);
+        _syncLogEvent('info', gid+' 本地方v'+localVer+' 云端v'+row.version+(hasLocalChanges?' 有本地修改':''), '');
+        // 非只读会话：云端版本未更新 且 本地无修改 → 跳过
+        if(!window._readonlySession && row.version <= localVer && !hasLocalChanges) continue;
         if(window._readonlySession){
           // 只读会话：无条件用云端数据覆盖本地
           _syncLogEvent('info', gid+' 只读会话→云端覆盖本地', '');
           importGroupData(gid, row.data, true);
         } else if(hasLocalChanges){
-          _syncLogEvent('warn', gid+' 本地有未上传变更，跳过覆盖-改为合并', '');
+          // 有本地修改：云端可能更新也可能未更新，都用合并模式保留本地编辑
+          _syncLogEvent('warn', gid+' 本地有未上传变更→合并云端更新（本地优先）', '');
           importGroupData(gid, row.data, false);
         } else {
           _syncLogEvent('info', gid+' 发现更新→导入', '');
           importGroupData(gid, row.data, true);
         }
+        // 更新版本号（我们知道这个云端版本了）
         localStorage.setItem(getGroupVerKey(gid), row.version);
-        try{ localStorage.setItem(_getGroupHashKey(gid), _hashGroupData(gid)); }catch(e){}
+        // 只有覆盖模式才更新 hash；合并模式保留 hash 差异，让 pushUnsynchronizedGroups 感知未上传数据
+        if(window._readonlySession || !hasLocalChanges){
+          try{ localStorage.setItem(_getGroupHashKey(gid), _hashGroupData(gid)); }catch(e){}
+        }
         updatedAny = true;
       }catch(e){ _syncLogEvent('warn', gid+' 下载失败', e.message); }
     }
@@ -12833,16 +12879,21 @@ async function syncFromRemote(opts){
       _syncLogEvent('info', '从云端同步完成', '');
       if(opts.noReload){
         // 首次加载：不刷新页面，调用方重新初始化内存数据后直接渲染
-        return true;
+      } else {
+        // 运行时自动检查更新 → 需要刷新页面
+        _showToast('数据已更新，即将刷新页面', 'info');
+        setTimeout(function(){ location.reload(); }, 1500);
       }
-      // 运行时自动检查更新 → 需要刷新页面
-      _showToast('数据已更新，即将刷新页面', 'info');
-      setTimeout(function(){ location.reload(); }, 1500);
     }
+    } // end if(hasNew)
   }catch(e){
     _syncLogEvent('error', 'syncFromRemote 失败', e.message);
   }
-  return false;
+  window._isSyncing = false;
+  if(Object.keys(_dirtyGroups).length > 0){
+    scheduleAutoUpload();
+  }
+  return updatedAny;
 }
 
 // ===== 手动导出全部数据 =====
@@ -13095,7 +13146,6 @@ function _escAttr(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').repl
 
 var _initPromise = null;
 async function initApp(){
-  window._startupGrace = Date.now(); // 启动保护：5秒内禁止自动上传
   // 如果已有正在运行的 init，等它完成后再跑一次
   if(_initPromise){
     try{ await _initPromise; }catch(e){}
@@ -13103,16 +13153,22 @@ async function initApp(){
   _initPromise = (async function(){
     renderSidebar();
     restoreOkrFilters();
-    // 推送本地未同步数据到云端（修复旧版数据未上传问题）— 全新会话跳过
-    if(!window._readonlySession) { await pushUnsynchronizedGroups(); }
-    else { console.log('[同步] 全新会话跳过上传检查'); }
-    // 等待云端数据下载完成，无痕模式/新设备首次打开也能拿到数据
+    // Step 1: 先从云端下载数据（合并本地未上传的修改）
     var synced = await syncFromRemote({noReload: true});
+    // Step 2: 下载成功后，新设备解除只读模式
+    if(synced && window._readonlySession){
+      window._readonlySession = false;
+      sessionStorage.setItem('_otms_readonly','0');
+      console.log('[同步] 已从云端加载数据，解除只读模式');
+    }
     if(synced){
       // 云端有数据 → 刷新内存变量，避免空数据渲染
       refreshGlobals();
       console.log('已从云端加载数据，直接渲染无需刷新');
     }
+    // Step 3: 推送本地未同步数据（合并后仍与云端不同的部分）
+    if(!window._readonlySession) { await pushUnsynchronizedGroups(); }
+    else { console.log('[同步] 全新会话跳过上传检查'); }
     // 恢复上次停留的标签页，默认进入工作台
     var lastTab = safeSessionGet('okr_last_tab');
     var homeTab = lastTab || (currentUser ? getPref('homeTab','workspace') : 'workspace');
