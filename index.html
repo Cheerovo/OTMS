@@ -12150,8 +12150,9 @@ function mergeEvalData(localEval, cloudEval){
 // ===== 自动上传（按组 CAS）=====
 var _pendingUpload = false;
 function scheduleAutoUpload(){
-  if(window._startupGrace && Date.now() - window._startupGrace < 5000) return; // 启动5秒内不上传，防止sync→dirty循环
-  if(window.location.protocol === 'file:') return; // 本地文件不允许上传，防止覆盖线上数据
+  if(window._readonlySession) return; // 全新会话（无痕等）不上传，仅下载
+  if(window._startupGrace && Date.now() - window._startupGrace < 5000) return; // 启动5秒内不上传
+  if(window.location.protocol === 'file:') return; // 本地文件不允许上传
   if(_isImporting) { return; }
   if(_autoUploadBusy){ _pendingUpload = true; return; }
   clearTimeout(_autoUploadTimer);
@@ -12476,10 +12477,11 @@ async function autoCheckRemote(){
 // ===== localStorage 劫持：记录 dirtyKeys + 仅 bump 对应组的 version =====
 (function(){
   var _isLocal = window.location.protocol === 'file:';
+  if(window._readonlySession){ console.log('[同步] 全新会话，数据修改仅保存本地不上传'); }
   var _origSet = localStorage.setItem.bind(localStorage);
   localStorage.setItem = function(key, value){
     _origSet(key, value);
-    if(!_isLocal && !_isImporting && DATA_KEYS.indexOf(key) !== -1){
+    if(!_isLocal && !window._readonlySession && !_isImporting && DATA_KEYS.indexOf(key) !== -1){
       _dirtyKeys[key] = true;
       var gid = getGroupForKey(key);
       if(gid){
@@ -12492,7 +12494,7 @@ async function autoCheckRemote(){
   var _origRemove = localStorage.removeItem.bind(localStorage);
   localStorage.removeItem = function(key){
     _origRemove(key);
-    if(!_isLocal && !_isImporting && DATA_KEYS.indexOf(key) !== -1){
+    if(!_isLocal && !window._readonlySession && !_isImporting && DATA_KEYS.indexOf(key) !== -1){
       _dirtyKeys[key] = true;
       var gid = getGroupForKey(key);
       if(gid){
@@ -13078,6 +13080,12 @@ function _escAttr(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').repl
 var _initPromise = null;
 async function initApp(){
   window._startupGrace = Date.now(); // 启动保护：5秒内禁止自动上传
+  // 检测是否为全新会话（localStorage无任何数据），全新会话禁止上传，仅下载
+  var hasAnyLocalData = DATA_KEYS.some(function(k){ return localStorage.getItem(k) !== null; });
+  if(!hasAnyLocalData){
+    window._readonlySession = true;
+    console.log('[同步] 全新会话，仅下载不同步上传');
+  }
   // 如果已有正在运行的 init，等它完成后再跑一次
   if(_initPromise){
     try{ await _initPromise; }catch(e){}
@@ -13085,8 +13093,9 @@ async function initApp(){
   _initPromise = (async function(){
     renderSidebar();
     restoreOkrFilters();
-    // 推送本地未同步数据到云端（修复旧版数据未上传问题）
-    await pushUnsynchronizedGroups();
+    // 推送本地未同步数据到云端（修复旧版数据未上传问题）— 全新会话跳过
+    if(!window._readonlySession) { await pushUnsynchronizedGroups(); }
+    else { console.log('[同步] 全新会话跳过上传检查'); }
     // 等待云端数据下载完成，无痕模式/新设备首次打开也能拿到数据
     var synced = await syncFromRemote({noReload: true});
     if(synced){
@@ -13101,8 +13110,8 @@ async function initApp(){
     updateBellBadge();
     // 清理旧备份系统残留（迁移：otms_system_backup → otms_system_backup_meta）
     try{ localStorage.removeItem('otms_system_backup'); }catch(e){}
-    // 页面加载后自动备份全部系统数据（延迟 2 秒确保数据全部就绪）
-    setTimeout(function(){ autoBackupSystemData(); }, 2000);
+    // 页面加载后自动备份全部系统数据（延迟 2 秒确保数据全部就绪）— 全新会话跳过
+    if(!window._readonlySession) { setTimeout(function(){ autoBackupSystemData(); }, 2000); }
   })();
   try{ await _initPromise; }catch(e){}
 }
