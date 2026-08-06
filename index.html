@@ -6758,7 +6758,7 @@ document.addEventListener('keydown',function(e){
 
 // ===== Org Management =====
 // --- Employee data layer ---
-function loadEmployees(){ try{ return JSON.parse(localStorage.okr_employees)||[] }catch(e){return[]} }
+function loadEmployees(){ try{ var arr = JSON.parse(localStorage.okr_employees)||[]; var seen={}; var dedup=[]; arr.forEach(function(e){ if(e&&e.name&&!seen[e.name]){ seen[e.name]=true; dedup.push(e); } }); if(dedup.length!==arr.length) saveEmployees(dedup); return dedup; }catch(e){return[]} }
 function saveEmployees(d){ try{ localStorage.setItem('okr_employees',JSON.stringify(d)); }catch(e){} }
 function loadDepts(){ try{ return JSON.parse(localStorage.okr_depts)||[] }catch(e){return[]} }
 function saveDepts(d){ try{ localStorage.setItem('okr_depts',JSON.stringify(d)); }catch(e){} }
@@ -12036,11 +12036,11 @@ function importGroupData(gid, data, overwrite){
         if (!localData) {
           localStorage.setItem(k, JSON.stringify(cloudData));
         } else if (k === 'okr_employees' && Array.isArray(localData) && Array.isArray(cloudData)) {
-          // 数组合并：本地同ID覆盖云端，云端新增保留（跳过TBH占位符）
+          // 数组合并：本地保留（按ID+姓名双重去重），云端仅补缺
           var merged = [];
-          var localIds = {};
-          localData.forEach(function(e) { if (e && e.id) { localIds[e.id] = true; merged.push(e); } });
-          cloudData.forEach(function(e) { if (e && e.id && !localIds[e.id] && !/^TBH/i.test(e.name||'')) merged.push(e); });
+          var localIds = {}, localNames = {};
+          localData.forEach(function(e) { if (e && e.id) { localIds[e.id] = true; if (e.name) localNames[e.name] = true; merged.push(e); } });
+          cloudData.forEach(function(e) { if (e && e.id && !localIds[e.id] && !localNames[e.name] && !/^TBH/i.test(e.name||'')) merged.push(e); });
           localStorage.setItem(k, JSON.stringify(merged));
         } else if (k === 'okr_depts' && Array.isArray(localData) && Array.isArray(cloudData)) {
           var mergedDepts = [];
