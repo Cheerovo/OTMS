@@ -6758,7 +6758,7 @@ document.addEventListener('keydown',function(e){
 
 // ===== Org Management =====
 // --- Employee data layer ---
-function loadEmployees(){ try{ var arr = JSON.parse(localStorage.okr_employees)||[]; var seen={}; var dedup=[]; arr.forEach(function(e){ if(e&&e.name&&!seen[e.name]){ seen[e.name]=true; dedup.push(e); } }); if(dedup.length!==arr.length) saveEmployees(dedup); return dedup; }catch(e){return[]} }
+function loadEmployees(){ try{ var arr = JSON.parse(localStorage.okr_employees)||[]; var seen={}; var dedup=[]; arr.forEach(function(e){ if(e&&e.name){ var key=e.name+'|'+(e.department||''); if(!seen[key]){ seen[key]=true; dedup.push(e); } } }); if(dedup.length!==arr.length) saveEmployees(dedup); return dedup; }catch(e){return[]} }
 function saveEmployees(d){ try{ localStorage.setItem('okr_employees',JSON.stringify(d)); }catch(e){} }
 function loadDepts(){ try{ return JSON.parse(localStorage.okr_depts)||[] }catch(e){return[]} }
 function saveDepts(d){ try{ localStorage.setItem('okr_depts',JSON.stringify(d)); }catch(e){} }
@@ -7504,8 +7504,8 @@ function openEmployeeModal(id){
       e.employeeNumber=document.getElementById('empNumber').value.trim();
     }else{
       var newEmp = {id:'emp'+Date.now(),name:nm,bu:bu,department:dept,reportsTo:document.getElementById('empReportsTo').value.trim(),position:document.getElementById('empPosition').value.trim(),rank:document.getElementById('empRank').value,location:document.getElementById('empLocation').value.trim(),hireDate:document.getElementById('empHireDate').value,phone:document.getElementById('empPhone').value.trim(),dingId:document.getElementById('empDingId').value.trim(),jian:!!document.getElementById('empJianren').checked,employeeNumber:document.getElementById('empNumber').value.trim()};
-      if (empList.some(function(x){return x.name===nm;})) {
-        showToast('姓名「'+nm+'」已存在，请勿重复添加','warning');
+      if (empList.some(function(x){return x.name===nm && (x.department||'')===dept;})) {
+        showToast('姓名「'+nm+'」在「'+dept+'」已存在，请勿重复添加','warning');
         return;
       }
       empList.push(newEmp);
@@ -7639,6 +7639,15 @@ function confirmQuickAddDept(){
 function deleteEmployee(id){
   let e=empList.find(x=>x.id===id); if(!e)return;
   dangerConfirm('确定删除员工「'+esc(e.name)+'」吗？此操作不可撤销。',function(){
+    // 记录删除墓碑，防止云端合并时复活
+    try {
+      var tombstone = JSON.parse(localStorage._deleted_emp_names||'[]');
+      tombstone.push({n: e.name, d: e.department||'', t: Date.now()});
+      // 只保留最近90天的墓碑
+      var cutoff = Date.now() - 90*86400000;
+      tombstone = tombstone.filter(function(x){ return x.t > cutoff; });
+      localStorage._deleted_emp_names = JSON.stringify(tombstone);
+    } catch(_) {}
     empList=empList.filter(x=>x.id!==id);
     saveEmployees(empList);
     renderEmployeeTable();
@@ -7920,8 +7929,8 @@ function confirmBatchImport(){
     dingId:''
   }));
   var existNames = {};
-  empList.forEach(function(e){ existNames[e.name] = true; });
-  var filtered = toAdd.filter(function(e){ return !existNames[e.name]; });
+  empList.forEach(function(e){ existNames[e.name+'|'+(e.department||'')] = true; });
+  var filtered = toAdd.filter(function(e){ return !existNames[e.name+'|'+(e.department||'')]; });
   var skipped = toAdd.length - filtered.length;
   empList=[...empList,...filtered];
   saveEmployees(empList);
@@ -12036,11 +12045,23 @@ function importGroupData(gid, data, overwrite){
         if (!localData) {
           localStorage.setItem(k, JSON.stringify(cloudData));
         } else if (k === 'okr_employees' && Array.isArray(localData) && Array.isArray(cloudData)) {
-          // 数组合并：本地保留（按ID+姓名双重去重），云端仅补缺
+          // 数组合并：本地保留，云端补缺（ID/姓名+部门去重，跳过删除墓碑）
           var merged = [];
-          var localIds = {}, localNames = {};
-          localData.forEach(function(e) { if (e && e.id) { localIds[e.id] = true; if (e.name) localNames[e.name] = true; merged.push(e); } });
-          cloudData.forEach(function(e) { if (e && e.id && !localIds[e.id] && !localNames[e.name] && !/^TBH/i.test(e.name||'')) merged.push(e); });
+          var localIds = {}, localKeys = {};
+          localData.forEach(function(e) { if (e && e.id) { localIds[e.id] = true; if (e.name) localKeys[e.name+'|'+(e.department||'')] = true; merged.push(e); } });
+          var tombstone = [];
+          try { tombstone = JSON.parse(localStorage._deleted_emp_names||'[]'); } catch(_) {}
+          var deletedKeys = {};
+          tombstone.forEach(function(t){ if (t.n) deletedKeys[t.n+'|'+(t.d||'')] = true; });
+          cloudData.forEach(function(e) {
+            if (!e || !e.id) return;
+            if (localIds[e.id]) return;
+            var ck = e.name+'|'+(e.department||'');
+            if (localKeys[ck]) return;
+            if (deletedKeys[ck]) return;
+            if (/^TBH/i.test(e.name||'')) return;
+            merged.push(e);
+          });
           localStorage.setItem(k, JSON.stringify(merged));
         } else if (k === 'okr_depts' && Array.isArray(localData) && Array.isArray(cloudData)) {
           var mergedDepts = [];
@@ -12058,9 +12079,29 @@ function importGroupData(gid, data, overwrite){
         } else {
           localStorage.setItem(k, JSON.stringify(cloudData));
         }
-      } catch(e) { localStorage.setItem(k, JSON.stringify(data[k])); }
+      } catch(e) {
+        var fallback = data[k];
+        if (k === 'okr_employees' && Array.isArray(fallback)) {
+          try {
+            var t = JSON.parse(localStorage._deleted_emp_names||'[]');
+            var dk = {}; t.forEach(function(x){ if (x.n) dk[x.n+'|'+(x.d||'')] = true; });
+            fallback = fallback.filter(function(e){ return !dk[e.name+'|'+(e.department||'')] && !/^TBH/i.test(e.name||''); });
+          } catch(_) {}
+        }
+        localStorage.setItem(k, JSON.stringify(fallback));
+      }
     } else {
-      localStorage.setItem(k, typeof data[k]==='string' ? data[k] : JSON.stringify(data[k]));
+      var val = data[k];
+      // overwrite 模式下也过滤删除墓碑，防止旧设备数据覆盖本地删除
+      if (k === 'okr_employees' && Array.isArray(val)) {
+        try {
+          var tombstone = JSON.parse(localStorage._deleted_emp_names||'[]');
+          var delKeys = {};
+          tombstone.forEach(function(t){ if (t.n) delKeys[t.n+'|'+(t.d||'')] = true; });
+          val = val.filter(function(e){ return !delKeys[e.name+'|'+(e.department||'')] && !/^TBH/i.test(e.name||''); });
+        } catch(_) {}
+      }
+      localStorage.setItem(k, typeof val==='string' ? val : JSON.stringify(val));
     }
   });
   _isImporting = false;
