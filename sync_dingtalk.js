@@ -1134,7 +1134,19 @@ async function main() {
           }
         });
       }
+      // 休息日缺卡 → 改为休息（周末不打卡是正常的）
       const wd = workDaysByUser[u.userid];
+      if (wd && wd.length > 0 && wd.length < 7) {
+        Object.keys(merged).forEach(function(d) {
+          var st = merged[d];
+          if ((st.s === '缺卡' || st.m === '旷工') && st.m !== '请假' && st.m !== '外勤' && st.m !== '出差') {
+            var dayNum = new Date(d + 'T00:00:00+08:00').getDay();
+            if (!wd.includes(dayNum)) {
+              merged[d] = {m:'休息', s:'休息', ci:'休息', co:'休息'};
+            }
+          }
+        });
+      }
       const scheduleFlat = userSchedule[u.userid] || null;
       const scheduleByDate = userScheduleByDate[u.userid] || null;
       return {
