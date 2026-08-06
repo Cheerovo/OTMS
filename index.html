@@ -6759,9 +6759,9 @@ document.addEventListener('keydown',function(e){
 // ===== Org Management =====
 // --- Employee data layer ---
 function loadEmployees(){ try{ var arr = JSON.parse(localStorage.okr_employees)||[]; var seen={}; var dedup=[]; arr.forEach(function(e){ if(e&&e.name){ var key=e.name+'|'+(e.department||''); if(!seen[key]){ seen[key]=true; dedup.push(e); } } }); return dedup; }catch(e){return[]} }
-function saveEmployees(d){ try{ localStorage.setItem('okr_employees',JSON.stringify(d)); }catch(e){} }
+function saveEmployees(d){ try{ localStorage.setItem('okr_employees',JSON.stringify(d)); }catch(e){} if(window._readonlySession){ window._readonlySession=false; sessionStorage.setItem('_otms_readonly','0'); console.log('[同步] 用户主动编辑，解除只读模式，允许上传'); } }
 function loadDepts(){ try{ return JSON.parse(localStorage.okr_depts)||[] }catch(e){return[]} }
-function saveDepts(d){ try{ localStorage.setItem('okr_depts',JSON.stringify(d)); }catch(e){} }
+function saveDepts(d){ try{ localStorage.setItem('okr_depts',JSON.stringify(d)); }catch(e){} if(window._readonlySession){ window._readonlySession=false; sessionStorage.setItem('_otms_readonly','0'); console.log('[同步] 用户主动编辑部门，解除只读模式，允许上传'); } }
 // 获取部门名称列表（兼容新旧格式）
 function getDeptNames(list){ list = list || deptList; return list.map(function(d){ return typeof d === 'string' ? d : d.name; }); }
 // 根据部门名查找其 BU
@@ -11948,10 +11948,17 @@ function _syncLogEvent(level, msg, detail){
 // ===== Remote Data Sync (Supabase) — 按资源组拆分，独立 CAS =====
 const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version','rpt_group_subs','meeting_data','okr_employees','okr_depts','okr_permissions','nudge_log','okr_attendance','org_attachments','okr_data_version','otms_trainee_data_v1','otms_trainee_eval_v1','okr_prefs','attendance_workdays','attendance_schedules','attendance_records','attendance_leaves','attendance_unmatched','otms_tn_split_ratio','otms_trainee_cleared_v3'];
 
-// 提前检测全新会话（必须在拦截器IIFE之前），防止无痕等新会话上传数据
+// 提前检测：新标签/窗口默认为只读，仅用户主动编辑后解除（必须在拦截器IIFE之前）
 (function(){
-  var hasAny = DATA_KEYS.some(function(k){ return localStorage.getItem(k) !== null; });
-  if(!hasAny){ window._readonlySession = true; console.log('[同步] 全新会话，仅下载不上传'); }
+  if(!sessionStorage.getItem('_otms_init')){
+    sessionStorage.setItem('_otms_init','1');
+    window._readonlySession = true;
+    sessionStorage.setItem('_otms_readonly','1');
+    console.log('[同步] 新标签会话，仅下载不上传（编辑数据后自动解除）');
+  } else {
+    window._readonlySession = sessionStorage.getItem('_otms_readonly')==='1';
+    if(window._readonlySession) console.log('[同步] 只读标签会话，仅下载不上传');
+  }
 })();
 
 // 资源分组：每组独立 Supabase 行 + 独立 version + 独立 CAS
