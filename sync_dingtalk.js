@@ -187,10 +187,8 @@ async function getLeaveApprovals(token, dateFrom, dateTo) {
             const detailList = ext.detailList || [];
             for (const d of detailList) {
               const workDate = toLocalDate(d.workDate);
-              if (workDate >= dateFrom && workDate <= dateTo) {
-                if (!leaveMap[userId]) leaveMap[userId] = {};
-                leaveMap[userId][workDate] = {m:'请假', s: leaveTag};
-              }
+              if (!leaveMap[userId]) leaveMap[userId] = {};
+              leaveMap[userId][workDate] = {m:'请假', s: leaveTag};
             }
           } catch(_) { /* skip parse errors */ }
           await sleep(200);
@@ -260,7 +258,7 @@ async function getOutApprovals(token, dateFrom, dateTo) {
           }
         }
 
-        if (dateFound && dateFound >= dateFrom && dateFound <= dateTo) {
+        if (dateFound) {
           if (!outMap[userId]) outMap[userId] = {};
           outMap[userId][dateFound] = {m:'外勤', s:'外出'};
         }
@@ -404,7 +402,7 @@ async function getBusinessTravelApprovals(token, dateFrom, dateTo) {
 
         for (var di = 0; di < dates.length; di++) {
           var dateFound = dates[di];
-          if (dateFound >= dateFrom && dateFound <= dateTo) {
+          if (dateFound) {
             if (!result[userId]) result[userId] = {};
             result[userId][dateFound] = {m:'外勤', s:'出差'};
           }
@@ -457,7 +455,7 @@ async function getOvertimeApprovals(token, dateFrom, dateTo) {
 
         for (var di = 0; di < dates.length; di++) {
           var dateFound = dates[di];
-          if (dateFound >= dateFrom && dateFound <= dateTo) {
+          if (dateFound) {
             if (!result[userId]) result[userId] = {};
             result[userId][dateFound] = {m:'加班', s:'加班'};
           }
