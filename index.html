@@ -12486,7 +12486,10 @@ async function autoCheckRemote(){
         _syncLogEvent('info',ug.gid+' 有本地修改,合并云端更新','');
         importGroupData(ug.gid, fullRow.data, false);
         localStorage.setItem(getGroupVerKey(ug.gid), fullRow.version);
-        // 不更新 hash：合并后数据仍标记为待上传，让 uploadGroup 处理
+        // 不更新 hash：合并后数据仍标记为待上传
+        // 标记 dirty 并触发上传，确保合并后的数据推送到云端
+        _dirtyGroups[ug.gid] = true;
+        scheduleAutoUpload();
       } else {
         importGroupData(ug.gid, fullRow.data, true);
         localStorage.setItem(getGroupVerKey(ug.gid), fullRow.version);
