@@ -7963,11 +7963,14 @@ function switchAttendSubView(sub, tab) {
   if(tab) tab.classList.add('active');
   var status = document.getElementById('orgAttendStatus');
   var data = document.getElementById('orgAttendData');
+  var autosync = document.getElementById('orgAttendAutoSync');
   var analytics = document.getElementById('orgAttendAnalytics');
   if (status) status.style.display = sub === 'status' ? '' : 'none';
   if (data) data.style.display = sub === 'data' ? '' : 'none';
+  if (autosync) autosync.style.display = sub === 'autosync' ? '' : 'none';
   if (analytics) analytics.style.display = sub === 'analytics' ? '' : 'none';
   if (sub === 'data') renderAttendDataView();
+  if (sub === 'autosync') renderAttendAutoSyncView();
   if (sub === 'analytics') { restoreAnalyticsFilter(); renderAttendAnalytics(); }
 }
 
@@ -8212,7 +8215,8 @@ function renderAttendView(skipAutoSync) {
   html += '<div class="oc-sub-tabs" style="margin-bottom:16px">';
   html += '<button class="oc-sub-tab attend-sub-tab'+(attendSubView==='analytics'?' active':'')+'" onclick="switchAttendSubView(\'analytics\',this)">考勤总览</button>';
   html += '<button class="oc-sub-tab attend-sub-tab'+(attendSubView==='status'?' active':'')+'" onclick="switchAttendSubView(\'status\',this)">在岗状态</button>';
-  html += '<button class="oc-sub-tab attend-sub-tab'+(attendSubView==='data'?' active':'')+'" onclick="switchAttendSubView(\'data\',this)">考勤数据</button>';
+  html += '<button class="oc-sub-tab attend-sub-tab'+(attendSubView==='data'?' active':'')+'" onclick="switchAttendSubView(\'data\',this)">考勤数据导入</button>';
+  html += '<button class="oc-sub-tab attend-sub-tab'+(attendSubView==='autosync'?' active':'')+'" onclick="switchAttendSubView(\'autosync\',this)">考勤数据自动拉取</button>';
   html += '</div>';
 
   // Status view (current attend view)
@@ -8584,6 +8588,9 @@ function renderAttendView(skipAutoSync) {
   html += '<div id="orgAttendData" style="display:'+(attendSubView==='data'?'':'none')+'">';
   html += '<div style="padding:40px;text-align:center;color:var(--text-muted)">加载中...</div>';
   html += '</div>';
+  html += '<div id="orgAttendAutoSync" style="display:'+(attendSubView==='autosync'?'':'none')+'">';
+  html += '<div style="padding:40px;text-align:center;color:var(--text-muted)">加载中...</div>';
+  html += '</div>';
   html += '<div id="orgAttendAnalytics" style="display:'+(attendSubView==='analytics'?'':'none')+'">';
   html += '<div style="padding:40px;text-align:center;color:var(--text-muted)">加载中...</div>';
   html += '</div>';
@@ -8595,6 +8602,7 @@ function renderAttendView(skipAutoSync) {
     if (searchInput2) { searchInput2.value = window._attendNameSearchVal; applyAttendNameFilter(); }
   }
   if (attendSubView === 'data') setTimeout(function(){ renderAttendDataView(); }, 0);
+  if (attendSubView === 'autosync') setTimeout(function(){ renderAttendAutoSyncView(); }, 0);
   if (attendSubView === 'analytics') setTimeout(function(){ renderAttendAnalytics(); }, 0);
   } catch(e) {
     div.innerHTML = '<div style="padding:20px;color:#c00;background:#fff0f0;border:1px solid #c00;border-radius:8px;margin:16px;"><strong>渲染错误:</strong> ' + (e.message || e) + '<br><pre style="font-size:10px;margin-top:8px;white-space:pre-wrap;">' + (e.stack || '') + '</pre></div>';
@@ -8921,6 +8929,150 @@ function applyAttendDataKeywordFilter() {
   });
   var countEl = document.querySelector('.attend-record-count');
   if (countEl) countEl.textContent = visibleCount + ' 条';
+}
+
+// ===== 考勤数据自动拉取视图（来自钉钉同步的 okr_attendance） =====
+var autosyncFilter = { year: '', month: '' };
+
+function renderAttendAutoSyncView() {
+  var div = document.getElementById('orgAttendAutoSync');
+  if (!div) return;
+
+  var attData = loadAttendance();
+  var empList = loadEmployees();
+  var empMap = {};
+  empList.forEach(function(e) { empMap[e.id] = e; });
+
+  // 收集所有有数据的日期
+  var allDates = Object.keys(attData).sort();
+  if (allDates.length === 0) {
+    div.innerHTML = '<div style="padding:80px 40px;text-align:center">' +
+      '<div style="font-size:48px;margin-bottom:16px;opacity:0.3">📡</div>' +
+      '<p style="font-size:14px;font-weight:500;color:var(--text-dim);margin:0 0 6px">暂无钉钉同步数据</p>' +
+      '<p style="font-size:11px;color:var(--text-muted);margin:0 0 24px">请先在「在岗状态」页点击「同步钉钉」拉取数据</p>' +
+      '<button class="btn btn-primary btn-sm" onclick="syncFromDingTalk()">同步钉钉</button>' +
+      '</div>';
+    return;
+  }
+
+  // 年份列表
+  var years = [], yearSet = {};
+  allDates.forEach(function(d) { var y = d.slice(0,4); if (!yearSet[y]) { yearSet[y]=true; years.push(y); } });
+  years.sort();
+
+  // 初始化 filter
+  if (!autosyncFilter.year) {
+    autosyncFilter.year = years[years.length - 1];
+    var lastDate = allDates[allDates.length - 1];
+    autosyncFilter.month = lastDate.slice(0, 7);
+  }
+
+  // 月份列表
+  var months = [], monthSet = {};
+  allDates.forEach(function(d) {
+    if (d.slice(0,4) !== autosyncFilter.year) return;
+    var m = d.slice(0,7); if (!monthSet[m]) { monthSet[m]=true; months.push(m); }
+  });
+  months.sort();
+
+  // 筛选当月日期
+  var monthDays = [];
+  allDates.forEach(function(d) {
+    if (d.slice(0,7) === autosyncFilter.month) monthDays.push(d);
+  });
+
+  // 收集当月有数据的员工
+  var empInMonth = {};
+  monthDays.forEach(function(d) {
+    var dayData = attData[d] || {};
+    Object.keys(dayData).forEach(function(eid) { empInMonth[eid] = true; });
+  });
+
+  // BU列表
+  var buList = [], buSet = {};
+  empList.forEach(function(e) { if (e.bu && !buSet[e.bu]) { buSet[e.bu]=true; buList.push(e.bu); } });
+  buList.sort();
+
+  // 按BU+姓名排序员工
+  var empIds = Object.keys(empInMonth).sort(function(a, b) {
+    var ea = empMap[a] || {}, eb = empMap[b] || {};
+    var buA = BU_ORDER.indexOf(ea.bu || ''), buB = BU_ORDER.indexOf(eb.bu || '');
+    if (buA === -1) buA = 99; if (buB === -1) buB = 99;
+    if (buA !== buB) return buA - buB;
+    return (ea.name || a).localeCompare(eb.name || b, 'zh');
+  });
+
+  var html = '';
+
+  // 工具栏
+  html += '<div class="attend-toolbar">';
+  html += '<div class="attend-toolbar-left">';
+  html += '<select onchange="autosyncFilter.year=this.value;autosyncFilter.month=\'\';renderAttendAutoSyncView()">';
+  years.forEach(function(y) { html += '<option value="'+y+'"'+(autosyncFilter.year===y?' selected':'')+'>'+y+' 年</option>'; });
+  html += '</select>';
+  html += '<select onchange="autosyncFilter.month=this.value;renderAttendAutoSyncView()">';
+  months.forEach(function(m) { html += '<option value="'+m+'"'+(autosyncFilter.month===m?' selected':'')+'>'+m.slice(5).replace(/^0/,'')+' 月</option>'; });
+  html += '</select>';
+  html += '</div>';
+  html += '<div class="attend-toolbar-right">';
+  html += '<span class="attend-record-count">'+empIds.length+' 人 × '+monthDays.length+' 天</span>';
+  html += '<button class="btn btn-outline btn-sm" onclick="exportMonthlyAttendance()" style="font-size:11px">下载CSV</button>';
+  html += '</div>';
+  html += '</div>';
+
+  // 数据来源提示
+  html += '<div style="font-size:10px;color:var(--text-muted);margin-bottom:12px;display:flex;align-items:center;gap:4px">' +
+    '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success)"></span>' +
+    '数据来源：钉钉API自动同步（dingtalk_data.json），更新于 '+(window._ddUpdated || '—') +
+    '</div>';
+
+  if (monthDays.length === 0) {
+    html += '<div style="padding:40px;text-align:center;color:var(--text-muted)">该月无数据</div>';
+    div.innerHTML = html;
+    return;
+  }
+
+  // 矩阵表格
+  html += '<div style="overflow-x:auto;max-height:calc(100vh - 280px)">';
+  html += '<table class="attend-data-table" style="min-width:'+(monthDays.length*52+180)+'px">';
+  html += '<thead><tr>';
+  html += '<th style="position:sticky;left:0;background:var(--bg);z-index:2;min-width:60px">姓名</th>';
+  html += '<th style="position:sticky;left:60px;background:var(--bg);z-index:2;min-width:80px">BU</th>';
+  monthDays.forEach(function(d) {
+    var dayNum = parseInt(d.slice(8), 10);
+    var wd = getWeekday(d);
+    var isWeekend = wd === '周六' || wd === '周日';
+    html += '<th style="text-align:center;min-width:48px;'+(isWeekend?'color:var(--text-muted)':'')+'">'+dayNum+'<br><span style="font-size:9px">'+wd+'</span></th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  empIds.forEach(function(eid, idx) {
+    var emp = empMap[eid] || { name: eid, bu: '', department: '' };
+    var rowClass = idx % 2 === 1 ? ' odd' : '';
+    html += '<tr class="'+rowClass+'">';
+    html += '<td class="td-name" style="position:sticky;left:0;background:var(--bg);z-index:1">'+esc(emp.name)+'</td>';
+    html += '<td class="td-meta" style="position:sticky;left:60px;background:var(--bg);z-index:1">'+esc(emp.bu||'')+'</td>';
+    monthDays.forEach(function(d) {
+      var s = (attData[d] && attData[d][eid]) || null;
+      var cell = '';
+      var cls = '';
+      if (!s) { cell = ''; }
+      else if (s.m === '在岗' && s.s === '正常') { cell = '在岗'; cls = 'sb-ok'; }
+      else if (s.m === '请假') { cell = s.s; cls = 'sb-leave'; }
+      else if (s.m === '外勤') { cell = s.s; cls = 'sb-out'; }
+      else if (s.m === '出差') { cell = '出差'; cls = 'sb-out'; }
+      else if (s.m === '加班') { cell = '加班'; cls = 'sb-ok'; }
+      else if (s.m === '旷工') { cell = '旷工'; cls = 'sb-miss'; }
+      else if (s.m === '休息') { cell = '休息'; cls = ''; }
+      else { cell = s.m + (s.s && s.s !== s.m ? '-'+s.s : ''); }
+      html += '<td style="text-align:center;font-size:11px;padding:2px 4px">'+(cls?'<span class="sb '+cls+'">'+esc(cell)+'</span>':esc(cell))+'</td>';
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+
+  div.innerHTML = html;
 }
 
 function renderAttendDataView() {
@@ -10722,6 +10874,7 @@ async function syncFromDingTalkSilent(date, attData, empList) {
       });
     });
     saveAttendance(attData);
+    window._ddUpdated = dd.updated || '';
     renderAttendView(true);
   } catch(e) { console.error('同步失败:', e); }
 }
@@ -10791,6 +10944,7 @@ async function syncFromDingTalk() {
       console.log('[钉钉同步] 王力attData中8月日期('+wlAugAtt.length+'天):', wlAugAtt.slice(0,3).join(','));
     }
     saveAttendance(attData);
+    window._ddUpdated = dd.updated || '';
     step = 'render view';
     renderAttendView(true);
     if (btn) { btn.textContent = '🔄 同步钉钉'; btn.disabled = false; }
