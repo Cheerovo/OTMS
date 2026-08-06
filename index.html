@@ -12150,6 +12150,7 @@ function mergeEvalData(localEval, cloudEval){
 // ===== 自动上传（按组 CAS）=====
 var _pendingUpload = false;
 function scheduleAutoUpload(){
+  if(window._startupGrace && Date.now() - window._startupGrace < 5000) return; // 启动5秒内不上传，防止sync→dirty循环
   if(window.location.protocol === 'file:') return; // 本地文件不允许上传，防止覆盖线上数据
   if(_isImporting) { return; }
   if(_autoUploadBusy){ _pendingUpload = true; return; }
@@ -13076,6 +13077,7 @@ function _escAttr(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').repl
 
 var _initPromise = null;
 async function initApp(){
+  window._startupGrace = Date.now(); // 启动保护：5秒内禁止自动上传
   // 如果已有正在运行的 init，等它完成后再跑一次
   if(_initPromise){
     try{ await _initPromise; }catch(e){}
