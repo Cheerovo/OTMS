@@ -1232,7 +1232,7 @@ async function main() {
   // Auto push to GitHub
   try {
     const { execSync } = require('child_process');
-    execSync('git add dingtalk_data.json', { cwd: __dirname, stdio: 'pipe', timeout: 10000 });
+    execSync('git add dingtalk_data.json dingtalk_group_cache.json', { cwd: __dirname, stdio: 'pipe', timeout: 10000 });
     execSync('git commit -m "钉钉考勤数据同步 ' + new Date().toISOString().slice(0,10) + '"', { cwd: __dirname, stdio: 'pipe', timeout: 10000 });
     execSync('git push', { cwd: __dirname, stdio: 'pipe', timeout: 30000 });
     console.log(''); console.log('🚀 已推送到 GitHub Pages');
