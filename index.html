@@ -6759,7 +6759,7 @@ document.addEventListener('keydown',function(e){
 // ===== Org Management =====
 // --- Employee data layer ---
 function loadEmployees(){ try{ var arr = JSON.parse(localStorage.okr_employees)||[]; var seen={}; var dedup=[]; arr.forEach(function(e){ if(e&&e.name){ var key=e.name+'|'+(e.department||''); if(!seen[key]){ seen[key]=true; dedup.push(e); } } }); return dedup; }catch(e){return[]} }
-function saveEmployees(d){ if(window._readonlySession){ window._readonlySession=false; sessionStorage.setItem('_otms_readonly','0'); console.log('[同步] 用户主动编辑，解除只读模式，允许上传'); } try{ localStorage.setItem('okr_employees',JSON.stringify(d)); localStorage.setItem('_roster_backup',JSON.stringify(d)); localStorage.setItem('_roster_backup_ts',Date.now()); }catch(e){} _empJustSaved = true; setTimeout(function(){ _empJustSaved = false; }, 3000); }
+function saveEmployees(d){ if(window._readonlySession){ window._readonlySession=false; sessionStorage.setItem('_otms_readonly','0'); console.log('[同步] 用户主动编辑，解除只读模式，允许上传'); } try{ localStorage.setItem('okr_employees',JSON.stringify(d)); localStorage.setItem('_roster_backup',JSON.stringify(d)); localStorage.setItem('_roster_backup_ts',Date.now()); }catch(e){} _empJustSaved = true; setTimeout(function(){ _empJustSaved = false; }, 3000); try{ showToast('已保存 ✓','success'); }catch(e){} }
 function loadDepts(){ try{ return JSON.parse(localStorage.okr_depts)||[] }catch(e){return[]} }
 function saveDepts(d){ if(window._readonlySession){ window._readonlySession=false; sessionStorage.setItem('_otms_readonly','0'); console.log('[同步] 用户主动编辑部门，解除只读模式，允许上传'); } try{ localStorage.setItem('okr_depts',JSON.stringify(d)); }catch(e){} }
 // 花名册备份恢复：数据丢失时从备份还原
