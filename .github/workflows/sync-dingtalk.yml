@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   sync:
@@ -54,3 +55,10 @@ jobs:
           git add dingtalk_data.json
           git diff --staged --quiet || git commit -m "钉钉考勤数据自动同步 $(TZ='Asia/Shanghai' date +%Y-%m-%d)"
           git push
+
+      - name: 触发 Pages 部署
+        if: success()
+        run: |
+          gh workflow run static.yml --repo Cheerovo/OTMS
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
