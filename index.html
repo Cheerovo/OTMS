@@ -7499,6 +7499,9 @@ function openEmployeeModal(id){
     if(!bu){alert('请选择BU');return;}
     if(!dept){alert('请选择部门');return;}
     if(e){
+      // 重新查找当前的 empList 引用，防止后台同步替换数组导致编辑丢失
+      var _fresh = empList.find(function(x){ return x.id === e.id; });
+      if(_fresh){ e = _fresh; } else { empList.push(e); _fresh = e; }
       e.name=nm; e.bu=bu; e.department=dept; e.reportsTo=document.getElementById('empReportsTo').value.trim();
       e.position=document.getElementById('empPosition').value.trim(); e.rank=document.getElementById('empRank').value; e.location=document.getElementById('empLocation').value.trim();
       e.hireDate=document.getElementById('empHireDate').value; e.phone=document.getElementById('empPhone').value.trim(); e.dingId=document.getElementById('empDingId').value.trim();
@@ -11960,9 +11963,6 @@ const DATA_KEYS = ['okr_data','okr_version','kpi_data','rpt_data','rpt_version',
       var _gid = SYNC_GROUP_LIST[_i];
       var _ver = parseInt(localStorage.getItem(getGroupVerKey(_gid))) || 0;
       if(_ver > 0) { _hasLocalData = true; break; }
-      if(SYNC_GROUPS[_gid].keys.some(function(k){ return localStorage.getItem(k) !== null; })){
-        _hasLocalData = true; break;
-      }
     }
     if(!_hasLocalData){
       window._readonlySession = true;
@@ -12052,6 +12052,7 @@ function normalizeAttendanceCiCo(att){
 // 按组导入数据。overwrite=true（syncFromRemote）时非 eval 数据云端覆盖本地
 function importGroupData(gid, data, overwrite){
   _isImporting = true;
+  try {
   SYNC_GROUPS[gid].keys.forEach(function(k){
     if(!(k in data)) return;
     if(k === 'otms_trainee_eval_v1'){
@@ -12149,7 +12150,7 @@ function importGroupData(gid, data, overwrite){
       localStorage.setItem(k, typeof val==='string' ? val : JSON.stringify(val));
     }
   });
-  _isImporting = false;
+  } finally { _isImporting = false; }
 }
 
 function mergeEvalData(localEval, cloudEval){
@@ -12284,7 +12285,7 @@ if(newVer <= cloudVer) newVer = cloudVer + 1; // 安全兜底：时钟回拨或�
       localStorage.setItem(verKey, newVer);
       try{ localStorage.setItem(_getGroupHashKey(gid), _hashGroupData(gid)); }catch(e){}
       _syncLogEvent('info', gid+' upsert成功 v'+newVer, '');
-      if(retryCount > 0) updateSyncIndicator('synced');
+      if(retryCount > 0){ updateSyncIndicator('synced'); delete _dirtyGroups[gid]; SYNC_GROUPS[gid].keys.forEach(function(k){ delete _dirtyKeys[k]; }); }
     } else {
       _syncLogEvent('error', gid+' upsert失败', error.message);
       updateSyncIndicator('error');
@@ -12307,7 +12308,7 @@ if(newVer <= cloudVer) newVer = cloudVer + 1; // 安全兜底：时钟回拨或�
       localStorage.setItem(verKey, newVer);
       try{ localStorage.setItem(_getGroupHashKey(gid), _hashGroupData(gid)); }catch(e){}
       _syncLogEvent('info', gid+' CAS成功 v'+newVer, '');
-      if(retryCount > 0) updateSyncIndicator('synced');
+      if(retryCount > 0){ updateSyncIndicator('synced'); delete _dirtyGroups[gid]; SYNC_GROUPS[gid].keys.forEach(function(k){ delete _dirtyKeys[k]; }); }
     } else {
       // CAS 冲突：先获取获胜方数据并合并到本地，再重试（防止覆盖对方编辑）
       _syncLogEvent('warn', gid+' CAS冲突, 获取获胜方数据合并后重试', '');
@@ -12361,12 +12362,13 @@ function flushUpload(){
         body: JSON.stringify({ data: data, version: ver, updated_at: new Date().toISOString() }),
         keepalive: true
       }).then(function(resp){
-        if(resp.ok){
-          localStorage.setItem(verKey, ver);
-          localStorage.setItem(_getGroupHashKey(gid), _hashGroupData(gid));
-          localStorage.removeItem('_sync_flush_pending');
-        }
-      }).catch(function(){});
+        return resp.json().then(function(rows){
+          if(resp.ok && Array.isArray(rows) && rows.length > 0){
+            localStorage.setItem(verKey, ver);
+            localStorage.setItem(_getGroupHashKey(gid), _hashGroupData(gid));
+            localStorage.removeItem('_sync_flush_pending');
+          }
+      })}).catch(function(){});
     } catch(e) {}
   });
 }
