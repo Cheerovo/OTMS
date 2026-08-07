@@ -6759,9 +6759,9 @@ document.addEventListener('keydown',function(e){
 // ===== Org Management =====
 // --- Employee data layer ---
 function loadEmployees(){ try{ var arr = JSON.parse(localStorage.okr_employees)||[]; var seen={}; var dedup=[]; arr.forEach(function(e){ if(e&&e.name){ var key=e.name+'|'+(e.department||''); if(!seen[key]){ seen[key]=true; dedup.push(e); } } }); return dedup; }catch(e){return[]} }
-function saveEmployees(d){ try{ localStorage.setItem('okr_employees',JSON.stringify(d)); }catch(e){} if(window._readonlySession){ window._readonlySession=false; sessionStorage.setItem('_otms_readonly','0'); console.log('[同步] 用户主动编辑，解除只读模式，允许上传'); } }
+function saveEmployees(d){ if(window._readonlySession){ window._readonlySession=false; sessionStorage.setItem('_otms_readonly','0'); console.log('[同步] 用户主动编辑，解除只读模式，允许上传'); } try{ localStorage.setItem('okr_employees',JSON.stringify(d)); }catch(e){} }
 function loadDepts(){ try{ return JSON.parse(localStorage.okr_depts)||[] }catch(e){return[]} }
-function saveDepts(d){ try{ localStorage.setItem('okr_depts',JSON.stringify(d)); }catch(e){} if(window._readonlySession){ window._readonlySession=false; sessionStorage.setItem('_otms_readonly','0'); console.log('[同步] 用户主动编辑部门，解除只读模式，允许上传'); } }
+function saveDepts(d){ if(window._readonlySession){ window._readonlySession=false; sessionStorage.setItem('_otms_readonly','0'); console.log('[同步] 用户主动编辑部门，解除只读模式，允许上传'); } try{ localStorage.setItem('okr_depts',JSON.stringify(d)); }catch(e){} }
 // 获取部门名称列表（兼容新旧格式）
 function getDeptNames(list){ list = list || deptList; return list.map(function(d){ return typeof d === 'string' ? d : d.name; }); }
 // 根据部门名查找其 BU
@@ -12801,6 +12801,8 @@ async function syncFromRemote(opts){
   opts = opts || {};
   var updatedAny = false;
   window._isSyncing = true;
+  // 快照 readonlySession，防止用户编辑中途修改标志位导致混合 overwrite/merge 行为
+  var _isReadonlySnap = window._readonlySession;
   try{
     // 先查新格式是否存在
     const { data: newRows, error: err1 } = await supabaseClient
@@ -12856,7 +12858,7 @@ async function syncFromRemote(opts){
         var hasLocalChanges = (localVer > 0 && curHash !== storedHash);
         _syncLogEvent('info', gid+' 本地方v'+localVer+' 云端v'+row.version+(hasLocalChanges?' 有本地修改':''), '');
         // 始终从云端下载（版本号可能因外部修改而不可信）
-        if(window._readonlySession){
+        if(_isReadonlySnap){
           // 只读会话：无条件用云端数据覆盖本地
           _syncLogEvent('info', gid+' 只读会话→云端覆盖本地', '');
           importGroupData(gid, row.data, true);
@@ -12871,7 +12873,7 @@ async function syncFromRemote(opts){
         // 更新版本号（我们知道这个云端版本了）
         localStorage.setItem(getGroupVerKey(gid), row.version);
         // 只有覆盖模式才更新 hash；合并模式保留 hash 差异，让 pushUnsynchronizedGroups 感知未上传数据
-        if(window._readonlySession || !hasLocalChanges){
+        if(_isReadonlySnap || !hasLocalChanges){
           try{ localStorage.setItem(_getGroupHashKey(gid), _hashGroupData(gid)); }catch(e){}
         }
         updatedAny = true;
