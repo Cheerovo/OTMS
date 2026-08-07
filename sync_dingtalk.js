@@ -543,7 +543,7 @@ async function main() {
     if (fs.existsSync(GROUP_CACHE_FILE)) {
       var gcData = JSON.parse(fs.readFileSync(GROUP_CACHE_FILE, 'utf8'));
       var gcAge = Date.now() - gcData.ts;
-      if (gcAge < 168 * 60 * 60 * 1000 && gcData.userGroupMap && gcData.classTimeMap) {
+      if (gcAge < 720 * 60 * 60 * 1000 && gcData.userGroupMap && gcData.classTimeMap) {
         userGroupMap = gcData.userGroupMap;
         workDaysByUser = gcData.workDaysByUser || {};
         userSchedule = gcData.userSchedule || {};
