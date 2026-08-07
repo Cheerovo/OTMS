@@ -5,6 +5,7 @@ const path = require('path');
 const CONFIG_FILE = path.join(__dirname, 'dingtalk_config.json');
 const DATA_FILE = path.join(__dirname, 'dingtalk_data.json');
 const GROUP_CACHE_FILE = path.join(__dirname, 'dingtalk_group_cache.json');
+const ROSTER_FILE = path.join(__dirname, 'dingtalk_roster_config.json');
 
 // 北京时间格式化（固定 UTC+8，不依赖服务器时区）
 function toLocalDate(ts) {
@@ -523,6 +524,22 @@ async function main() {
   allUsers = dedupUsers(allUsers);
   console.log('  ✅ 共 ' + allUsers.length + ' 名员工（去重后）');
 
+  // 加载花名册配置：跳过 API 查询，直接使用预设的考勤组配置
+  var rosterConfig = { users: {} };
+  var rosterUserIds = new Set();
+  if (fs.existsSync(ROSTER_FILE)) {
+    try { rosterConfig = JSON.parse(fs.readFileSync(ROSTER_FILE, 'utf8')); } catch(_) {}
+  }
+  var rosterCount = 0;
+  for (const [userId, cfg] of Object.entries(rosterConfig.users || {})) {
+    userGroupMap[userId] = { group_id: 'roster', name: '花名册' };
+    if (cfg.workDays) workDaysByUser[userId] = cfg.workDays;
+    if (cfg.schedule) userSchedule[userId] = cfg.schedule;
+    rosterUserIds.add(userId);
+    rosterCount++;
+  }
+  if (rosterCount > 0) console.log('  📋 花名册配置: ' + rosterCount + ' 人（跳过 API 查询）');
+
   if (allUsers.length === 0) {
     console.log('没有员工数据，请检查部门ID设置。');
     return;
@@ -630,19 +647,22 @@ async function main() {
   }
 
   if (!groupCacheLoaded) {
-  for (let i = 0; i < allUsers.length; i++) {
-    const u = allUsers[i];
+  // 花名册用户跳过 API 查询（已预设考勤组配置）
+  var apiUsers = allUsers.filter(function(u) { return !rosterUserIds.has(u.userid); });
+  console.log('  查询用户考勤组: ' + apiUsers.length + ' 人（跳过花名册 ' + rosterCount + ' 人）');
+  for (let i = 0; i < apiUsers.length; i++) {
+    const u = apiUsers[i];
     try {
       const res = await dingRequest('POST', 'oapi.dingtalk.com', '/topapi/attendance/getusergroup', { access_token: token }, { userid: u.userid });
       if (res.errcode === 0 && res.result) userGroupMap[u.userid] = res.result;
     } catch(_) {}
     if (i > 0 && i % 20 === 0) {
-      console.log('  查询用户考勤组: ' + i + '/' + allUsers.length + '...');
+      console.log('  查询用户考勤组: ' + i + '/' + apiUsers.length + '...');
       await sleep(500);
     }
     await sleep(150);
   }
-  const uniqueGroups = new Set(Object.values(userGroupMap).map(g => g.group_id).filter(Boolean));
+  const uniqueGroups = new Set(Object.values(userGroupMap).map(g => g.group_id).filter(function(gid) { return gid !== 'roster'; }));
   const usersWithGroup = Object.keys(userGroupMap).length;
   console.log('  ✅ ' + usersWithGroup + ' 人有所属考勤组, 共 ' + uniqueGroups.size + ' 个不同考勤组');
 
@@ -752,7 +772,7 @@ async function main() {
       userSchedule[userId] = parts.join(' · ');
     }
   }
-  console.log('  ✅ 工作日配置: FIXED=' + fixedCount + '人 TURN=' + turnCount + '人 NONE=' + noneCount + '人');
+  console.log('  ✅ 工作日配置: FIXED=' + fixedCount + '人 TURN=' + turnCount + '人 NONE=' + noneCount + '人 花名册=' + rosterCount + '人');
   var scheduleCount = Object.keys(userSchedule).length;
   console.log('  ✅ 班制时间: ' + scheduleCount + '人');
 
